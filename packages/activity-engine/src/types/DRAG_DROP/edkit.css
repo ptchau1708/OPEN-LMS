@@ -1,0 +1,66 @@
+/* Trình soạn GV (giao diện pro) — chỉ dùng token --p-*. Phạm vi .ae-ed-k để không đụng CSS của dạng khác. */
+.ae-ed-k { display: grid; gap: 16px; font: 400 14px/1.45 var(--f-pro); color: var(--p-ink); }
+.ae-ed-k .ae-ed-sec { background: var(--p-surface); border: 1px solid var(--p-line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 10px; }
+.ae-ed-k .ae-ed-sec__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.ae-ed-k .ae-ed-sec__title { margin: 0; font: 600 14px/1.3 var(--f-pro); color: var(--p-ink); }
+.ae-ed-k .ae-ed-sec__actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.ae-ed-k .ae-ed-hint { margin: 0; color: var(--p-muted); font-size: 13px; }
+.ae-ed-k .ae-ed-warn { margin: 0; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--p-danger); color: var(--p-danger); background: var(--p-surface); font-size: 13px; }
+
+.ae-ed-k .ae-ed-input,
+.ae-ed-k .ae-ed-select,
+.ae-ed-k .ae-ed-textarea {
+  min-width: 0; height: 34px; padding: 0 10px; box-sizing: border-box;
+  border: 1px solid var(--p-line); border-radius: 6px; background: var(--p-surface); color: var(--p-ink);
+  font: inherit;
+}
+.ae-ed-k .ae-ed-textarea { height: auto; min-height: 96px; padding: 8px 10px; resize: vertical; width: 100%; line-height: 1.6; }
+.ae-ed-k .ae-ed-input:focus, .ae-ed-k .ae-ed-select:focus, .ae-ed-k .ae-ed-textarea:focus { outline: 2px solid var(--p-accent); outline-offset: 0; border-color: var(--p-accent); }
+.ae-ed-k .ae-ed-input[type='number'] { width: 90px; }
+
+.ae-ed-k .ae-ed-btn {
+  height: 34px; min-width: 34px; padding: 0 10px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--p-line); background: var(--p-surface); color: var(--p-ink); font: 500 13px/1 var(--f-pro);
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap;
+}
+.ae-ed-k .ae-ed-btn:hover:not(:disabled) { border-color: var(--p-accent); }
+.ae-ed-k .ae-ed-btn:disabled { opacity: 0.4; cursor: default; }
+.ae-ed-k .ae-ed-btn--primary { background: var(--p-accent-soft); color: var(--p-accent); border-color: transparent; }
+.ae-ed-k .ae-ed-btn--ghost { border-color: transparent; background: transparent; padding: 0 6px; min-width: 26px; }
+.ae-ed-k .ae-ed-btn--danger { color: var(--p-danger); }
+.ae-ed-k .ae-ed-btn.is-on { background: var(--p-accent); color: var(--p-surface); border-color: var(--p-accent); }
+
+.ae-ed-k .ae-ed-rows { display: grid; gap: 6px; }
+.ae-ed-k .ae-ed-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 4px; border-radius: 8px; }
+.ae-ed-k .ae-ed-row:hover { background: var(--p-bg); }
+.ae-ed-k .ae-ed-row__move { display: inline-flex; }
+.ae-ed-k .ae-ed-row__num { width: 22px; text-align: center; color: var(--p-muted); font-weight: 600; }
+.ae-ed-k .ae-ed-row__text { flex: 1 1 160px; }
+.ae-ed-k .ae-ed-row__speak { flex: 0 1 150px; }
+.ae-ed-k .ae-ed-row__extra { display: inline-flex; align-items: center; gap: 6px; }
+.ae-ed-k .ae-ed-rows__foot { display: flex; gap: 6px; padding-top: 2px; }
+
+.ae-ed-k .ae-ed-img { display: inline-flex; align-items: center; gap: 4px; flex: 0 1 190px; min-width: 0; }
+.ae-ed-k .ae-ed-img .ae-ed-input { flex: 1; width: 100%; }
+.ae-ed-k .ae-ed-img__prev { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 6px; background: var(--p-bg); overflow: hidden; flex: none; color: var(--p-muted); }
+.ae-ed-k .ae-ed-img__prev img { width: 28px; height: 28px; object-fit: contain; }
+
+.ae-ed-k .ae-ed-fld { display: inline-flex; flex-direction: column; gap: 4px; }
+.ae-ed-k .ae-ed-fld--grow { flex: 1 1 200px; }
+.ae-ed-k .ae-ed-fld__lbl { font-size: 12px; font-weight: 600; color: var(--p-muted); }
+.ae-ed-k .ae-ed-inline { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.ae-ed-k .ae-ed-check { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+
+.ae-ed-k .ae-ed-quick { display: grid; gap: 4px; }
+.ae-ed-k .ae-ed-quick__row { display: flex; gap: 6px; }
+.ae-ed-k .ae-ed-quick__row .ae-ed-input { flex: 1; }
+
+.ae-ed-k .ae-ed-colors { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.ae-ed-k .ae-ed-swatch { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--p-surface); box-shadow: 0 0 0 1px var(--p-line); cursor: pointer; padding: 0; }
+.ae-ed-k .ae-ed-swatch.is-on { box-shadow: 0 0 0 2px var(--p-ink); }
+
+.ae-ed-k .ae-ed-seg { display: inline-flex; border: 1px solid var(--p-line); border-radius: 8px; overflow: hidden; }
+.ae-ed-k .ae-ed-seg .ae-ed-btn { border: 0; border-radius: 0; }
+
+.ae-ed-k .ae-ed-preview { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 10px; border-radius: 8px; background: var(--p-bg); color: var(--p-ink); font-size: 13px; }
+.ae-ed-k .ae-ed-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--p-line); background: var(--p-surface); }

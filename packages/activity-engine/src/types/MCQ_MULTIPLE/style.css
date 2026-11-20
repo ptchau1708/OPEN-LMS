@@ -1,0 +1,25 @@
+/* MCQ_MULTIPLE: dùng thẻ của MCQ (OptionGrid) + lời nhắc "chọn nhiều". Tiền tố ae-mcqm (ae-mm là của MATH_MANIPULATIVE). */
+.ae-mcqm { display: flex; flex-direction: column; gap: var(--ae-gap); }
+.ae-mcqm__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ae-mcqm__tip { gap: 10px; }
+.ae-mcqm__box {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  border: 3px solid var(--k-sub);
+  border-radius: 5px;
+}
+.ae-mcqm__box::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  top: 2%;
+  width: 30%;
+  height: 58%;
+  border: solid var(--k-sub);
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+.ae-activity--bigscreen .ae-mcqm__bar { justify-content: center; }

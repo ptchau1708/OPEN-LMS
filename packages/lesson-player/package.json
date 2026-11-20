@@ -1,0 +1,12 @@
+{
+  "name": "@openedu/lesson-player",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": { ".": "./src/index.ts", "./*": "./src/*" },
+  "scripts": { "typecheck": "tsc -p tsconfig.json" },
+  "dependencies": { "@openedu/contracts": "workspace:*", "@openedu/ui": "workspace:*", "@openedu/activity-engine": "workspace:*", "react": "18.3.1", "react-dom": "18.3.1" },
+  "devDependencies": { "typescript": "5.6.3", "@types/react": "18.3.12", "@types/react-dom": "18.3.1", "vite": "6.4.6", "vitest": "4.1.12" }
+}

@@ -1,0 +1,6 @@
+/* WORD_CLASSIFY dùng chung ZoneBoard (DRAG_DROP/style.css); chỉnh riêng cho thẻ chữ. */
+.ae-zb--word .ae-zb-tray { min-height: 84px; }
+.ae-zb--word .ae-zb-zone { min-height: 160px; }
+.ae-zb--word .ae-zb-zone__head { justify-content: center; text-align: center; }
+.ae-zb--word .ae-zb-zone__body { gap: 12px 10px; }
+.ae-zb--word .ae-zb-tok--word { border-bottom-width: 4px; }

@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Đếm táo</title>
+  <style>
+    :root {
+      --sky: #eaf4ff; --sky-2: #cfe7ff; --grass: #8fd16a; --grass-dark: #5fae3f;
+      --ink: #22304a; --sub: #5a6a86; --card: #ffffff; --line: #d6e1f0;
+      --ok: #22b573; --ok-dark: #178a55; --ok-soft: #dff7ea;
+      --try: #ff9f43; --try-soft: #fff1e0; --star: #ffc22e; --star-dark: #d99a00; --focus: #ffb703;
+      --ease: cubic-bezier(.2, .9, .3, 1.2);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: "Nunito", "Baloo 2", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, var(--sky-2) 0%, var(--sky) 62%, var(--grass) 62%, var(--grass-dark) 100%);
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .app { position: relative; display: flex; flex-direction: column; height: 100%; padding: 12px 12px max(12px, env(safe-area-inset-bottom)); }
+    .cloud { position: absolute; background: #fff; border-radius: 999px; opacity: .9; animation: drift 18s linear infinite alternate; }
+    .cloud::before, .cloud::after { content: ''; position: absolute; background: #fff; border-radius: 50%; }
+    .cloud.c1 { top: 8%; left: 6%; width: 120px; height: 34px; }
+    .cloud.c1::before { width: 54px; height: 54px; top: -26px; left: 18px; }
+    .cloud.c1::after { width: 40px; height: 40px; top: -16px; left: 62px; }
+    .cloud.c2 { top: 14%; right: 8%; width: 90px; height: 28px; animation-duration: 24s; }
+    .cloud.c2::before { width: 42px; height: 42px; top: -20px; left: 14px; }
+    .cloud.c2::after { width: 30px; height: 30px; top: -12px; left: 48px; }
+    @keyframes drift { from { transform: translateX(0); } to { transform: translateX(40px); } }
+
+    header { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; }
+    h1 { margin: 0; font-size: clamp(24px, 6vw, 40px); font-weight: 900; letter-spacing: .5px; }
+    h1 span { color: #e2453c; }
+    .rounds { display: flex; }
+    .rounds i { display: block; width: 18px; height: 18px; margin-left: 8px; border-radius: 50%; background: var(--card); border: 3px solid var(--line); transition: transform .3s var(--ease); }
+    .rounds i.done { background: var(--ok); border-color: var(--ok-dark); }
+    .rounds i.now { transform: scale(1.3); border-color: var(--star-dark); }
+
+    .ask {
+      position: relative; z-index: 1; display: flex; align-items: center; justify-content: center;
+      margin: 14px auto 0; padding: 12px 18px; max-width: 640px; width: 100%;
+      background: var(--card); border-radius: 24px; box-shadow: 0 6px 0 var(--line);
+      font-size: clamp(20px, 5vw, 32px); font-weight: 800; text-align: center;
+    }
+    .num {
+      display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+      width: 1.9em; height: 1.9em; margin: 0 .35em; border-radius: 50%;
+      background: var(--star); color: var(--ink); font-size: 1.5em; font-weight: 900; box-shadow: 0 4px 0 var(--star-dark);
+      animation: pop .5s var(--ease);
+    }
+    .speak {
+      flex: 0 0 auto; width: 56px; height: 56px; margin-left: 10px; border: 0; border-radius: 50%;
+      background: var(--sky); color: #2f7bf6; cursor: pointer; box-shadow: 0 4px 0 var(--line);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .speak[hidden] { display: none; }
+    .speak:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
+
+    .field { position: relative; z-index: 1; flex: 1 1 auto; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4vh; }
+    .baskets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-gap: clamp(8px, 3vw, 36px); width: 100%; max-width: 760px; }
+    .basket {
+      position: relative; min-height: 120px; padding: 6px 4px 10px; border: 4px solid transparent; border-radius: 28px;
+      background: rgba(255, 255, 255, .55); cursor: pointer; font: inherit; color: inherit;
+      transition: transform .15s, opacity .3s, border-color .2s, background-color .2s;
+      touch-action: manipulation;
+    }
+    .basket:focus-visible { outline: 5px solid var(--focus); outline-offset: 3px; }
+    .basket:active { transform: scale(.96); }
+    .basket svg { display: block; width: 100%; height: auto; max-height: 38vh; }
+    .basket.ok { border-color: var(--ok); background: var(--ok-soft); animation: hop .6s var(--ease); }
+    .basket.try { border-color: var(--try); background: var(--try-soft); animation: wiggle .45s ease-in-out; opacity: .6; }
+    .basket[disabled] { cursor: default; }
+    @keyframes hop { 0% { transform: translateY(0); } 40% { transform: translateY(-24px) scale(1.05); } 100% { transform: translateY(0); } }
+    @keyframes wiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-5deg); } 75% { transform: rotate(5deg); } }
+    @keyframes pop { 0% { transform: scale(.5); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
+
+    .say {
+      position: absolute; left: 50%; bottom: 46%; z-index: 3; padding: 12px 22px; border-radius: 999px;
+      background: var(--card); box-shadow: 0 6px 0 var(--line); font-size: clamp(20px, 5vw, 30px); font-weight: 900;
+      transform: translateX(-50%); white-space: nowrap; pointer-events: none; animation: pop .45s var(--ease);
+    }
+    .say.ok { color: var(--ok-dark); box-shadow: 0 6px 0 var(--ok); }
+    .say.try { color: #c76a12; box-shadow: 0 6px 0 var(--try); }
+    .say[hidden] { display: none; }
+
+    .end {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 5; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 24px; text-align: center; background: rgba(234, 244, 255, .94);
+    }
+    .end[hidden] { display: none; }
+    .end h2 { margin: 12px 0 4px; font-size: clamp(30px, 8vw, 54px); font-weight: 900; }
+    .end p { margin: 0 0 18px; color: var(--sub); font-size: 20px; font-weight: 700; }
+    .stars { display: flex; justify-content: center; }
+    .stars svg { width: clamp(40px, 12vw, 72px); height: auto; margin: 0 4px; animation: pop .5s var(--ease) both; }
+    .btn {
+      min-height: 64px; min-width: 200px; padding: 0 32px; border: 0; border-radius: 999px;
+      background: var(--ok); color: #fff; font: inherit; font-size: 24px; font-weight: 900; cursor: pointer;
+      box-shadow: 0 6px 0 var(--ok-dark); transition: transform .08s;
+    }
+    .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--ok-dark); }
+    .btn:focus-visible { outline: 5px solid var(--focus); outline-offset: 3px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="cloud c1" aria-hidden="true"></div>
+    <div class="cloud c2" aria-hidden="true"></div>
+    <header>
+      <h1>Đếm <span>táo</span></h1>
+      <div class="rounds" id="rounds" aria-label="Lượt chơi"></div>
+    </header>
+    <div class="ask" id="ask" aria-live="polite">
+      <span>Chạm vào giỏ có</span><span class="num" id="num">3</span><span>quả táo</span>
+      <button class="speak" id="speak" type="button" aria-label="Nghe đọc" hidden>
+        <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="field">
+      <div class="baskets" id="baskets"></div>
+    </div>
+    <div class="say" id="say" role="status" hidden></div>
+    <div class="end" id="end" hidden>
+      <div class="stars" id="stars"></div>
+      <h2 id="endTitle">Giỏi quá!</h2>
+      <p id="endText"></p>
+      <button class="btn" id="again" type="button">Chơi lại</button>
+    </div>
+  </div>
+
+  <script src="../../openedu-bridge.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var ROUNDS = 5;
+    var WORDS = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+    var bridge = window.OpenEdu || { ready: function () {}, progress: function () {}, complete: function () {} };
+
+    var el = function (id) { return document.getElementById(id); };
+    var basketsEl = el('baskets'), numEl = el('num'), sayEl = el('say'), roundsEl = el('rounds');
+    var round = 0, target = 0, firstTry = true, score = 0, locked = false, lastTarget = 0, sayTimer = 0;
+
+    /* ---------- âm thanh (Web Audio, không cần tệp) ---------- */
+    var ac = null;
+    function audio() {
+      if (!ac) { var C = window.AudioContext || window.webkitAudioContext; if (C) ac = new C(); }
+      if (ac && ac.state === 'suspended') ac.resume();
+      return ac;
+    }
+    function tone(f, start, dur, gain) {
+      var c = audio(); if (!c) return;
+      var o = c.createOscillator(), g = c.createGain(), t = c.currentTime + start;
+      o.type = 'triangle'; o.frequency.setValueAtTime(f, t);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain || 0.16, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.05);
+    }
+    var sound = {
+      ok: function () { tone(784, 0, 0.12); tone(1175, 0.1, 0.24); },
+      tryAgain: function () { tone(392, 0, 0.18, 0.1); tone(330, 0.14, 0.22, 0.08); },
+      win: function () { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, i * 0.11, 0.25, 0.13); }); }
+    };
+
+    /* ---------- đọc to (nếu máy có giọng tiếng Việt) ---------- */
+    var synth = window.speechSynthesis;
+    function viVoice() {
+      if (!synth) return null;
+      var vs = synth.getVoices();
+      for (var i = 0; i < vs.length; i++) if (vs[i].lang && vs[i].lang.toLowerCase().indexOf('vi') === 0) return vs[i];
+      return null;
+    }
+    function updateSpeak() { el('speak').hidden = !viVoice(); }
+    if (synth) { updateSpeak(); if (synth.addEventListener) synth.addEventListener('voiceschanged', updateSpeak); }
+    function say(text) {
+      var v = viVoice(); if (!v) return;
+      synth.cancel();
+      var u = new SpeechSynthesisUtterance(text); u.voice = v; u.lang = v.lang; u.rate = 0.9;
+      synth.speak(u);
+    }
+    function readAsk() { say('Em hãy chạm vào giỏ có ' + WORDS[target] + ' quả táo'); }
+    el('speak').addEventListener('click', readAsk);
+
+    /* ---------- vẽ giỏ táo bằng SVG ---------- */
+    function apple(x, y) {
+      return '<g transform="translate(' + x + ' ' + y + ')">' +
+        '<path d="M0 -11 C-4 -16 -15 -15 -15 -2 C-15 9 -7 15 0 12 C7 15 15 9 15 -2 C15 -15 4 -16 0 -11Z" fill="#e2453c" stroke="#b8302a" stroke-width="1.6"/>' +
+        '<path d="M0 -11 Q1 -17 4 -19" stroke="#7a4b2a" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
+        '<path d="M3 -16 Q10 -21 13 -15 Q7 -12 3 -16Z" fill="#5fae3f"/>' +
+        '<ellipse cx="-7" cy="-4" rx="3" ry="5" fill="#ffffff" opacity=".45"/></g>';
+    }
+    function basketSvg(n) {
+      var slots = [];
+      // xếp hàng dưới trước, mỗi hàng 3 quả, lệch nhẹ cho tự nhiên; tối đa 9 quả, không che nhau
+      var layout = [[24, 70], [60, 70], [96, 70], [24, 44], [60, 44], [96, 44], [24, 18], [60, 18], [96, 18]];
+      for (var i = 0; i < n; i++) {
+        var p = layout[i], row = Math.floor(i / 3);
+        slots.push(apple(p[0] + (row % 2 ? 4 : 0), p[1]));
+      }
+      return '<svg viewBox="0 -6 120 146" role="img" aria-label="Giỏ có ' + n + ' quả táo">' +
+        slots.join('') +
+        '<path d="M8 84 L112 84 L100 132 Q98 136 94 136 L26 136 Q22 136 20 132 Z" fill="#d99a52" stroke="#a8692c" stroke-width="2.4"/>' +
+        '<path d="M14 98 L106 98 M17 112 L103 112 M20 125 L100 125" stroke="#a8692c" stroke-width="2" opacity=".7"/>' +
+        '<path d="M36 84 L32 136 M60 84 L60 136 M84 84 L88 136" stroke="#a8692c" stroke-width="2" opacity=".6"/>' +
+        '<rect x="4" y="78" width="112" height="12" rx="6" fill="#e8b06a" stroke="#a8692c" stroke-width="2.4"/>' +
+        '</svg>';
+    }
+
+    /* ---------- lượt chơi ---------- */
+    function rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+    function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+    function drawRounds() {
+      var html = '';
+      for (var i = 0; i < ROUNDS; i++) html += '<i class="' + (i < round ? 'done' : i === round ? 'now' : '') + '"></i>';
+      roundsEl.innerHTML = html;
+    }
+
+    function newRound() {
+      locked = false; firstTry = true;
+      // lớp 1: số 1–9; tăng dần độ khó theo lượt
+      var hi = Math.min(9, 4 + round * 2);
+      do { target = rnd(1, hi); } while (target === lastTarget);
+      lastTarget = target;
+      var others = [];
+      while (others.length < 2) {
+        var d = target + (Math.random() < 0.5 ? -1 : 1) * rnd(1, 3);
+        if (d >= 1 && d <= 9 && d !== target && others.indexOf(d) < 0) others.push(d);
+      }
+      var counts = shuffle([target].concat(others));
+      numEl.textContent = String(target);
+      numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = '';
+      basketsEl.innerHTML = '';
+      counts.forEach(function (n) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'basket'; b.setAttribute('data-n', String(n));
+        b.innerHTML = basketSvg(n);
+        b.addEventListener('click', function () { pick(b, n); });
+        basketsEl.appendChild(b);
+      });
+      drawRounds();
+      readAsk();
+    }
+
+    function flash(text, kind) {
+      clearTimeout(sayTimer);
+      sayEl.textContent = text; sayEl.className = 'say ' + kind; sayEl.hidden = false;
+      sayTimer = setTimeout(function () { sayEl.hidden = true; }, 1300);
+    }
+
+    function pick(b, n) {
+      if (locked || b.disabled) return;
+      audio();
+      if (n === target) {
+        locked = true;
+        if (firstTry) score++;
+        b.classList.add('ok');
+        sound.ok();
+        flash(firstTry ? 'Đúng rồi! Giỏi quá!' : 'Đúng rồi!', 'ok');
+        say('Đúng rồi! ' + WORDS[n] + ' quả táo');
+        round++;
+        bridge.progress(round / ROUNDS);
+        setTimeout(function () { if (round >= ROUNDS) finish(); else newRound(); }, 1400);
+      } else {
+        firstTry = false;
+        b.classList.add('try'); b.disabled = true;
+        sound.tryAgain();
+        flash('Em đếm lại nhé!', 'try');
+        say('Giỏ này có ' + WORDS[n] + ' quả. Em đếm lại nhé');
+      }
+    }
+
+    function starSvg(on, i) {
+      return '<svg viewBox="0 0 24 24" style="animation-delay:' + (i * 0.12) + 's" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z" fill="' + (on ? '#ffc22e' : '#d6e1f0') + '" stroke="' + (on ? '#d99a00' : '#b9c7dc') + '" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+    }
+
+    function finish() {
+      drawRounds();
+      var html = '';
+      for (var i = 0; i < ROUNDS; i++) html += starSvg(i < score, i);
+      el('stars').innerHTML = html;
+      el('endTitle').textContent = score >= 4 ? 'Giỏi quá!' : score >= 2 ? 'Tốt lắm!' : 'Em đã cố gắng!';
+      el('endText').textContent = 'Em đếm đúng ngay lần đầu ' + score + '/' + ROUNDS + ' giỏ táo.';
+      el('end').hidden = false;
+      sound.win();
+      say(el('endTitle').textContent + ' Em đếm đúng ' + WORDS[score] + ' giỏ táo');
+      bridge.complete(score / ROUNDS, { rounds: ROUNDS, firstTryCorrect: score });
+      el('again').focus();
+    }
+
+    el('again').addEventListener('click', function () {
+      round = 0; score = 0; lastTarget = 0;
+      el('end').hidden = true;
+      newRound();
+    });
+
+    newRound();
+    bridge.ready();
+  })();
+  </script>
+</body>
+</html>

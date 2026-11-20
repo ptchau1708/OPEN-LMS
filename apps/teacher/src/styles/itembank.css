@@ -1,0 +1,78 @@
+/* Ngân hàng câu hỏi — Thêm nhanh + màn hình soát (Phase 7). Tiền tố tc-qb-. */
+.tc-qb { display: flex; flex-direction: column; gap: 12px; min-height: 100%; }
+.tc-qb-defaults { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tc-qb-tabs { padding: 0; overflow-x: auto; }
+.tc-qb-tabs button { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 1px; white-space: nowrap; }
+.tc-qb-tabhint { font-size: 11px; font-weight: 500; color: var(--tc-ok); }
+.tc-qb-tabhint.is-ai { color: var(--p-muted); }
+.tc-qb-pane { flex: 1 1 auto; min-height: 0; }
+.tc-qb-cols { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(220px, 1fr); gap: 20px; align-items: start; }
+.tc-qb-help { background: var(--tc-surface-2); border-radius: 10px; padding: 12px 14px; gap: 8px; }
+.tc-qb-help h3 { font-size: 14px; margin: 4px 0 0; }
+.tc-qb-help ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.tc-qb-help code, .tc-qb-needkey code { font-size: 12px; background: var(--p-surface); border: 1px solid var(--p-line); border-radius: 4px; padding: 0 4px; }
+.tc-qb-paste { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; min-height: 280px; }
+.tc-qb-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 150px; padding: 18px; border: 2px dashed var(--p-line); border-radius: 12px; text-align: center; cursor: pointer; background: var(--tc-surface-2); }
+.tc-qb-drop:hover, .tc-qb-drop:focus-within { border-color: var(--p-accent); }
+.tc-qb-drop input[type="file"] { max-width: 100%; font-size: 13px; }
+.tc-qb-scanfile { display: flex; align-items: center; gap: 10px; }
+.tc-qb-scanfile img { max-height: 120px; max-width: 160px; border-radius: 8px; border: 1px solid var(--p-line); object-fit: contain; background: #fff; }
+.tc-qb-needkey { flex-direction: column; align-items: flex-start; }
+.tc-qb-demo { background: #ede9fe; color: #5b21b6; border-color: transparent; font-weight: 600; }
+.tc-chip--danger { background: var(--tc-danger-soft); border-color: transparent; color: var(--p-danger); }
+
+/* lưới gõ nhanh */
+.tc-qb-grid td { padding: 4px; }
+.tc-qb-grid td:nth-child(2) { min-width: 240px; }
+.tc-qb-grid .tc-input { width: 100%; }
+.tc-qb-gridopt { display: flex; align-items: center; gap: 4px; min-width: 110px; border-radius: 8px; }
+.tc-qb-gridopt input[type="radio"] { accent-color: var(--tc-ok); flex: none; }
+.tc-qb-gridopt.is-correct .tc-input { border-color: var(--tc-ok); background: var(--tc-ok-soft); }
+
+/* màn hình soát */
+.tc-qb-review { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); gap: 16px; min-height: 100%; }
+.tc-qb-review__main { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.tc-qb-review__side { position: sticky; top: 0; align-self: start; max-height: calc(100vh - 170px); overflow: auto; }
+.tc-qb-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tc-qb-bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tc-qb-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.tc-qb-row { border: 1px solid var(--p-line); border-left: 4px solid var(--tc-ok); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; background: var(--p-surface); }
+.tc-qb-row.is-missing-answer { border-left-color: var(--tc-warn); }
+.tc-qb-row.is-review { border-left-color: var(--p-danger); }
+.tc-qb-row.is-saved { opacity: 0.7; border-left-color: var(--p-line); }
+.tc-qb-row.is-focus { box-shadow: 0 0 0 2px var(--p-accent-soft); border-color: var(--p-accent); }
+.tc-qb-row.is-error { background: var(--tc-danger-soft); }
+.tc-qb-row__head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tc-qb-row__head input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--p-accent); }
+.tc-qb-row__num { min-width: 20px; }
+.tc-qb-row__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tc-qb-row__notes { margin: 0; padding-left: 18px; font-size: 12.5px; color: var(--tc-warn); }
+.tc-qb-row__notes .is-error { color: var(--p-danger); font-weight: 600; }
+.tc-qb-row__saved { margin: 0; font-size: 13px; }
+.tc-qb-edit { display: flex; flex-direction: column; gap: 6px; }
+.tc-qb-prompt { min-height: 34px; }
+.tc-qb-opts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tc-qb-opt { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px; border-radius: 8px; border: 1px solid transparent; }
+.tc-qb-opt .tc-input { width: 150px; }
+.tc-qb-opt.is-correct { border-color: var(--tc-ok); background: var(--tc-ok-soft); }
+.tc-qb-opt__mark { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; font-size: 12.5px; cursor: pointer; }
+.tc-qb-opt__mark input { accent-color: var(--tc-ok); margin: 0; }
+.tc-qb-opt__tf { font-size: 13px; padding-right: 6px; }
+.tc-qb-answer { display: inline-flex; align-items: center; gap: 6px; }
+.tc-qb-answer .tc-input { width: 260px; }
+.tc-qb-answer--unit .tc-input { width: 90px; }
+.tc-qb-skills { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.tc-qb-skillsel { max-width: 230px; }
+.tc-qb-x { border: 0; background: transparent; color: var(--p-muted); cursor: pointer; font-size: 15px; line-height: 1; padding: 0 2px; }
+.tc-qb-x:hover { color: var(--p-danger); }
+.tc-qb-raw summary { cursor: pointer; font-size: 12px; color: var(--p-muted); }
+.tc-qb-raw pre { white-space: pre-wrap; font-size: 12px; background: var(--tc-surface-2); padding: 6px 8px; border-radius: 6px; margin: 4px 0 0; max-height: 160px; overflow: auto; }
+.tc-qb-footnote { margin-right: auto; }
+.tc-qb-progress { width: 140px; }
+.tc-bank__toast { margin-bottom: 10px; }
+
+@media (max-width: 900px) {
+  .tc-qb-cols, .tc-qb-review { grid-template-columns: 1fr; }
+  .tc-qb-review__side { position: static; max-height: none; }
+  .tc-qb-opt .tc-input, .tc-qb-answer .tc-input { width: 100%; }
+}

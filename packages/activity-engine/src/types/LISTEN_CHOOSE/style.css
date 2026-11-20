@@ -1,0 +1,70 @@
+/* LISTEN_CHOOSE: nút "Nghe" tròn rất to + thẻ lựa chọn (OptionGrid). */
+.ae-lc { display: flex; flex-direction: column; align-items: stretch; gap: calc(var(--ae-gap) * 1.5); }
+.ae-lc__listen { display: flex; flex-direction: column; align-items: center; gap: var(--ae-gap); }
+
+.ae-lc__btn {
+  --size: calc(132px * var(--k-scale));
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.ae-lc__face {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 50%;
+  background: var(--ae-accent);
+  color: var(--k-card);
+  box-shadow: 0 7px 0 var(--k-press), inset 0 -6px 0 var(--k-press);
+  transform: translateY(0);
+  transition: transform .18s var(--k-ease), box-shadow .18s ease;
+  animation: ae-e-breathe 2.4s ease-in-out infinite;
+}
+.ae-lc__icon { display: inline-flex; width: 46%; height: 46%; }
+.ae-lc__icon svg { width: 100%; height: 100%; }
+.ae-lc__label {
+  font-family: var(--f-kid-display);
+  font-size: calc(22px * var(--k-scale));
+  font-weight: 800;
+  line-height: 1;
+}
+@media (hover: hover) { .ae-lc__btn:hover .ae-lc__face { transform: translateY(-3px); box-shadow: 0 10px 0 var(--k-press), inset 0 -6px 0 var(--k-press); } }
+.ae-lc__btn:active .ae-lc__face { transform: translateY(6px); box-shadow: 0 1px 0 var(--k-press), inset 0 -3px 0 var(--k-press); animation: none; }
+.ae-lc__btn:focus-visible { outline: 5px solid var(--k-focus); outline-offset: 6px; }
+
+/* sóng âm khi đang đọc */
+.ae-lc__wave {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 6px solid var(--ae-accent);
+  opacity: 0;
+  pointer-events: none;
+}
+.ae-lc__btn.is-playing .ae-lc__wave { animation: ae-pulse 1.3s ease-out infinite; }
+.ae-lc__btn.is-playing .ae-lc__wave--2 { animation-delay: .65s; }
+.ae-lc__btn.is-playing .ae-lc__face { animation: none; transform: scale(1.04); }
+
+.ae-lc__novoice { max-width: 520px; font-size: var(--ae-fs-small); animation: ae-bounce-in .4s var(--k-ease) both; }
+
+/* TV: nút nghe bên trái, tranh bên phải */
+.ae-lc--bigscreen { flex-direction: row; align-items: center; gap: 4vmin; }
+.ae-lc--bigscreen .ae-lc__btn { --size: clamp(140px, 26vmin, 380px); }
+.ae-lc--bigscreen .ae-lc__label { font-size: clamp(24px, 4.4vmin, 64px); }
+.ae-lc--bigscreen .ae-lc__wave { border-width: clamp(6px, 1vmin, 14px); }
+.ae-lc--bigscreen .ae-lc__opts { flex: 1 1 auto; min-width: 0; }
+
+@media (min-width: 900px) {
+  .ae-lc--player .ae-lc__btn { --size: calc(150px * var(--k-scale)); }
+}

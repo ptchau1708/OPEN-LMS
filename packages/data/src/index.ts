@@ -1,0 +1,37 @@
+// @openedu/data — DataSource (demo + Supabase), hook React Query, kênh lớp học trực tiếp, nội dung mẫu.
+export { getDataSource, initDataSource, setDataSource, resetDemo, listChildren } from './getDataSource';
+export { isDemoMode, readEnv, setEnvOverrides, contentOrigin, relayWsUrl, relayHttpUrl } from './env';
+export { DemoDataSource, UNGRADED_TYPES, type DemoOptions } from './demo/DemoDataSource';
+export { SupabaseDataSource, usernameToEmail } from './supabase/SupabaseDataSource';
+export { SupabaseLiveChannel } from './supabase/SupabaseLiveChannel';
+export { RelayLiveChannel, registerRoomOnRelay, type RelayChannelOptions } from './live/RelayLiveChannel';
+export { applyLiveCommand, createInitialLiveState, mergeIncomingState, randomPin } from './live/reducer';
+export { isStatusful, type ChannelStatus, type StatusfulLiveChannel } from './live/types';
+export { MemoryStorage, PrefixedWebStorage, createDefaultStorage, STORAGE_PREFIX, type KVStorage } from './storage';
+export { computeWallet, streakDays, levelForXp, newlyUnlockable, nextUnlock, normalizeReward, dayKey } from './rewards';
+export { buildTodayTasks, assignmentAppliesTo, lessonProgressRatio, remediationTask, ARENA_TASK_ID, ARENA_TARGET_ID, ARENA_DAILY_PLAYS, MAX_REMEDIATION_TASKS } from './tasks';
+export * from './mastery';
+export { buildStudentProfile, buildParentSummary, buildTimeline, lessonSummaries, masteryBySubject, workTimeline, PENDING_MODULES, type ProfileInput, type ParentInput, type LessonLite } from './profile';
+export * from './assess';
+export * from './hint';
+export * from './engagement';
+export { compressWorkImage, imageUrlToDataUrl, WORK_IMAGE_MAX_SIDE } from './workImage';
+export { demoAiEnabled } from './demo/demoAi';
+export { homeSuggestions } from './suggestions';
+export { mergeProgress } from './progress';
+export { getOfflineController, setOfflineController, onOfflineControllerChange, type OfflineController } from './offline/registry';
+export type { SyncReport, DownloadEntry, AnyOutboxOp } from './offline/types';
+// Dùng trong mã tải lười (trang Tải về, nút Tải về) — tree-shaking giữ chúng ngoài gói tải đầu.
+export { DownloadManager, storageInfo, requestPersist, onWifi, MEDIA_CACHE } from './offline/downloads';
+export { createOfflineStore } from './offline/idbStore';
+export { foldVietnamese, matchesSearch } from './text';
+export * from './react';
+export * from './duel';
+export * from './school';
+export * from './exam';
+export * from './badges';
+export { reportClientError, installClientErrorHandlers, readClientErrors, isChunkLoadError, toClientError, type ClientApp, type ClientErrorEntry } from './clientErrors';
+export { importSampleContent, type ImportProgress, type ImportReport } from './seed/importer';
+export * from './connect';
+// Cầu nối VnEdu / Google Classroom (Excel, điền mẫu, mã bên ngoài) — gom trong một không gian tên để không trùng tên.
+export * as bridge from './export';

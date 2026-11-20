@@ -1,0 +1,113 @@
+/* SHORT_ANSWER: ô trả lời to + bàn phím số cho trẻ. */
+.ae-sa { display: flex; flex-direction: column; align-items: center; gap: calc(var(--ae-gap) * 1.5); }
+.ae-sa__main { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+
+.ae-sa__field {
+  --ae-state: var(--ae-accent);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 560px;
+  min-height: calc(76px * var(--k-scale));
+  padding: 8px 18px;
+  border: 4px solid var(--k-line);
+  border-radius: var(--ae-radius);
+  background: var(--k-card);
+  box-shadow: 0 5px 0 var(--k-press);
+  transition: border-color .15s ease, transform .2s var(--k-ease);
+}
+.ae-sa--numeric .ae-sa__field { max-width: 360px; justify-content: center; }
+.ae-sa__field.has-value { border-color: var(--ae-accent); }
+.ae-sa__input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  padding: 4px 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--k-ink);
+  font-family: var(--f-kid-display);
+  font-size: calc(32px * var(--k-scale));
+  font-weight: 800;
+  line-height: 1.2;
+  caret-color: var(--ae-accent);
+}
+.ae-sa--numeric .ae-sa__input { text-align: center; letter-spacing: .06em; font-size: calc(40px * var(--k-scale)); }
+.ae-sa__input::placeholder { color: var(--k-line); opacity: 1; font-weight: 700; }
+.ae-sa__input[readonly] { cursor: default; }
+.ae-sa__field:focus-within { box-shadow: 0 5px 0 var(--k-press), 0 0 0 5px var(--k-focus); }
+.ae-sa__unit {
+  flex: none;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: var(--k-bg);
+  color: var(--k-sub);
+  font-size: calc(22px * var(--k-scale));
+  font-weight: 800;
+}
+.ae-sa__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--ae-state);
+  color: var(--k-card);
+  animation: ae-e-pop .4s var(--k-ease) both;
+}
+.ae-sa__field.is-ok, .ae-sa__field.is-try { border-color: var(--ae-state); background: var(--ae-state-soft); box-shadow: 0 5px 0 var(--ae-state); }
+.ae-sa__field.is-ok { animation: ae-celebrate .7s var(--k-ease); }
+.ae-sa__field.is-try { animation: ae-e-wiggle .5s ease; }
+.ae-sa__fix { margin: 0; color: var(--k-sub); font-weight: 700; font-size: var(--ae-fs-small); }
+
+/* ---------- bàn phím số ---------- */
+.ae-pad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 340px;
+}
+.ae-pad .ae-pad__key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  min-height: calc(62px * var(--k-scale));
+  margin: 0;
+  padding: 0 6px;
+  border: 3px solid var(--k-line);
+  border-radius: var(--k-radius-sm);
+  background: var(--k-card);
+  color: var(--k-ink);
+  font-family: var(--f-kid-display);
+  font-size: calc(28px * var(--k-scale));
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 5px 0 var(--k-press);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform .1s ease, box-shadow .1s ease;
+}
+.ae-pad .ae-pad__key:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--k-press); }
+.ae-pad .ae-pad__key:focus-visible { outline: 4px solid var(--k-focus); outline-offset: 2px; }
+.ae-pad .ae-pad__key--del { background: var(--k-try-soft); border-color: var(--k-try); color: var(--k-ink); font-family: var(--f-kid); font-size: calc(18px * var(--k-scale)); }
+.ae-pad .ae-pad__key--sym { color: var(--k-sub); }
+
+/* TV: ô và bàn phím đứng cạnh nhau */
+.ae-sa--bigscreen.ae-sa--numeric { flex-direction: row; justify-content: center; align-items: center; gap: 5vmin; }
+.ae-sa--bigscreen .ae-sa__main { width: auto; flex: 0 1 50%; }
+.ae-sa--bigscreen .ae-sa__field { max-width: none; min-height: clamp(90px, 15vmin, 220px); border-width: clamp(4px, .6vmin, 8px); }
+.ae-sa--bigscreen .ae-sa__input { font-size: clamp(36px, 8vmin, 120px); }
+.ae-sa--bigscreen .ae-sa__unit { font-size: clamp(24px, 4vmin, 60px); }
+.ae-sa--bigscreen .ae-sa__fix { font-size: var(--ae-fs-small); }
+.ae-pad--bigscreen { max-width: min(46vmin, 520px); gap: 1.4vmin; }
+.ae-pad--bigscreen .ae-pad__key { min-height: clamp(62px, 10vmin, 140px); font-size: clamp(28px, 5vmin, 72px); }
+.ae-pad--bigscreen .ae-pad__key--del { font-size: clamp(18px, 2.8vmin, 40px); }

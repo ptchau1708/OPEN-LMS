@@ -1,0 +1,41 @@
+/* Học offline (docs/PHASE6_OFFLINE.md) — thanh mạng, chúc mừng đồng bộ, nút tải về, trang Bài đã tải về. */
+.ln-offline { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 10px; margin: 0 auto; padding: 6px 14px; padding-top: max(6px, env(safe-area-inset-top));
+  background: var(--k-ink); color: var(--k-on-color); font-family: var(--f-kid-display); font-weight: 700; font-size: calc(15px * var(--k-scale)); position: relative; z-index: 50; }
+.ln-offline.is-online { background: var(--k-ok); }
+.ln-offline__icon { display: inline-flex; width: 30px; height: 30px; border-radius: 50%; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.18); }
+.ln-offline__badge { display: inline-flex; align-items: center; min-height: 26px; padding: 0 10px; border-radius: 999px; background: var(--k-star); color: var(--k-ink); font-size: 14px; font-weight: 800; }
+.ln-offline .ln-offline__sync { min-height: 44px; }
+
+.ln-syncparty { position: fixed; inset: auto 0 calc(var(--k-tabbar-h) + 16px) 0; z-index: 1250; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
+.ln-syncparty__card { pointer-events: auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 16px; max-width: 560px; padding: 16px 18px; box-shadow: 0 6px 0 var(--k-press), var(--k-drop); animation: ln-toast 360ms var(--k-ease); }
+.ln-syncparty__body { display: flex; flex-direction: column; gap: 4px; flex: 1 1 220px; font-size: calc(17px * var(--k-scale)); }
+.ln-syncparty__head { font-family: var(--f-kid-display); font-size: calc(20px * var(--k-scale)); }
+.ln-syncparty__stars { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-kid-display); font-weight: 800; font-size: calc(22px * var(--k-scale)); color: var(--k-ink); }
+.ln-syncparty__stars .k-icon { color: var(--k-star); }
+
+.ln-dl { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 12px; }
+.ln-dl__done { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--k-ok-soft); color: var(--k-ink); font-weight: 700; }
+.ln-dl__done .k-icon { color: var(--k-ok); }
+.ln-dl__done--bulk { margin: 0 0 12px; font-size: 15px; }
+.ln-dl__note { font-size: 14px; color: var(--k-sub); text-align: center; }
+.ln-station .k-btn + .ln-dl, .ln-station .k-btn + .k-btn { margin-top: 12px; }
+.ln-dl__bulk { margin: 0 0 12px; }
+
+.ln-dlpage__mem, .ln-dlpage__queue { padding: 16px; margin-bottom: 16px; }
+.ln-dlpage__memrow { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; margin-bottom: 10px; font-size: 17px; }
+.ln-dlpage__opts { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+.ln-dlpage__toggle { display: inline-flex; align-items: center; gap: 10px; min-height: 56px; font-weight: 700; cursor: pointer; }
+.ln-dlpage__toggle input { width: 28px; height: 28px; accent-color: var(--k-info); }
+.ln-dlpage__ops { list-style: none; margin: 0 0 12px; padding: 0; }
+.ln-dlpage__ops li { display: flex; justify-content: space-between; gap: 8px; padding: 8px 0; border-bottom: 1px dashed var(--k-line); }
+.ln-dlpage__ops li.is-failed { color: var(--k-try); }
+.ln-dlpage__queue .ln-row > * { margin: 6px; }
+.ln-dlpage__list { list-style: none; margin: 0; padding: 0 0 calc(var(--k-tabbar-h) + 16px); display: grid; gap: 12px; }
+.ln-dlitem { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; }
+.ln-dlitem__main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 64px; background: none; border: 0; padding: 0; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.ln-dlitem__tile { flex: none; display: inline-flex; width: 52px; height: 52px; border-radius: 16px; align-items: center; justify-content: center; background: var(--subj); color: var(--k-on-color); }
+.ln-dlitem__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ln-dlitem__title { font-family: var(--f-kid-display); font-weight: 800; font-size: calc(18px * var(--k-scale)); overflow-wrap: anywhere; }
+.ln-dlitem__net { font-size: 14px; color: var(--k-try); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .ln-syncparty__card { animation: none; } }
+.k-reduced .ln-syncparty__card { animation: none; }

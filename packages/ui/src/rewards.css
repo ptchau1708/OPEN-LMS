@@ -1,0 +1,46 @@
+/* Phase 6 — huy hiệu, cây Vườn lớp (nhập trong trang dùng tới để không vào CSS tải đầu). */
+.k-plant { overflow: visible; display: block; }
+.k-plant--sway .k-plant__body { transform-origin: 50% 87%; transform-box: view-box; animation: k-plant-sway 4.2s ease-in-out infinite; }
+@keyframes k-plant-sway { 0%, 100% { transform: rotate(-2.2deg); } 50% { transform: rotate(2.2deg); } }
+.k-badge { display: block; overflow: visible; }
+@media (prefers-reduced-motion: reduce) { .k-plant--sway .k-plant__body { animation: none; } }
+.k-reduced .k-plant--sway .k-plant__body { animation: none; }
+
+/* ---------- Vườn lớp ---------- */
+.k-gd { position: relative; overflow: hidden; border-radius: 28px; padding: 18px 16px 0; background: linear-gradient(#bfe7ff, #e9f8ff 55%, #dff5d0 56%, #bfe8a6); border: 3px solid var(--k-ink); box-shadow: 0 6px 0 var(--k-press); }
+.k-gd__sky { position: absolute; top: 0; left: 0; right: 0; height: 55%; pointer-events: none; }
+.k-gd__sun { position: absolute; top: 14px; right: 22px; width: 54px; height: 54px; border-radius: 50%; background: #ffd23f; box-shadow: 0 0 0 10px rgba(255, 210, 63, .25), 0 0 0 22px rgba(255, 210, 63, .12); }
+.k-gd__cloud { position: absolute; width: 90px; height: 26px; border-radius: 20px; background: #fff; opacity: .9; }
+.k-gd__cloud::before { content: ''; position: absolute; left: 18px; top: -16px; width: 40px; height: 34px; border-radius: 50%; background: #fff; }
+.k-gd__cloud--a { top: 28px; left: 8%; animation: k-gd-drift 28s linear infinite alternate; }
+.k-gd__cloud--b { top: 62px; left: 48%; transform: scale(.7); animation: k-gd-drift 36s linear infinite alternate-reverse; }
+@keyframes k-gd-drift { from { transform: translateX(-20px); } to { transform: translateX(40px); } }
+.k-gd__main { position: relative; display: flex; flex-direction: column; align-items: center; }
+.k-gd__tree { position: relative; }
+.k-gd__sparkle { position: absolute; top: 4%; right: 6%; color: #ffc22e; font-size: 32px; animation: k-gd-twinkle 1.6s ease-in-out infinite; }
+@keyframes k-gd-twinkle { 50% { opacity: .3; transform: scale(.7); } }
+.k-gd__goal { width: 100%; max-width: 460px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; margin: 4px 0 10px; padding: 10px 14px; border-radius: 18px; background: rgba(255, 255, 255, .88); border: 2px solid var(--k-ink); font-weight: 700; }
+.k-gd__goal-label { flex: 1 1 100%; text-align: center; font-family: var(--f-kid-display); font-size: calc(18px * var(--k-scale)); }
+.k-gd__bar { flex: 1 1 180px; height: 18px; margin: 6px 10px 0 0; border-radius: 999px; background: #e3e9f2; border: 2px solid var(--k-ink); overflow: hidden; }
+.k-gd__bar > i { display: block; height: 100%; width: var(--gd-p); border-radius: 999px; background: linear-gradient(90deg, #7fd36b, #20a974); }
+.k-gd__goal-num { margin-top: 6px; white-space: nowrap; }
+.k-gd__goal-num b { font-size: 1.25em; color: var(--k-ok-dark); }
+.k-gd__plots { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: center; margin: 0 -6px; }
+.k-gd__plot { position: relative; display: flex; flex-direction: column; align-items: center; margin: 0 6px 6px; padding: 4px 6px 6px; border-radius: 18px; }
+.k-gd__plot.is-me { background: rgba(255, 255, 255, .7); box-shadow: 0 0 0 3px var(--k-star); }
+.is-teams .k-gd__plot { background: rgba(255, 255, 255, .55); box-shadow: inset 0 -6px 0 var(--tc, #a8743f); padding-bottom: 12px; }
+.is-teams .k-gd__plot.is-me { box-shadow: inset 0 -6px 0 var(--tc, #a8743f), 0 0 0 3px var(--k-star); }
+.k-gd__tag { margin-top: 2px; padding: 2px 10px; border-radius: 999px; background: var(--tc, #fff); color: #fff; font-weight: 800; font-size: calc(14px * var(--k-scale)); border: 2px solid var(--k-ink); white-space: nowrap; }
+.k-gd__tag--plain { background: #fff; color: var(--k-ink); font-weight: 700; border-width: 1px; font-size: 13px; }
+.k-gd__soil { height: 16px; margin: 0 -16px; background: repeating-linear-gradient(90deg, #a8743f 0 22px, #93622f 22px 44px); border-top: 3px solid var(--k-ink); }
+.k-gd--tv { border-radius: 36px; padding: 28px 28px 0; }
+.k-gd--tv .k-gd__goal { max-width: 900px; font-size: 30px; padding: 16px 28px; }
+.k-gd--tv .k-gd__goal-label { font-size: 40px; }
+.k-gd--tv .k-gd__bar { height: 30px; }
+.k-gd--tv .k-gd__tag { font-size: 24px; padding: 4px 16px; }
+.k-gd--tv .k-gd__sun { width: 90px; height: 90px; top: 26px; right: 40px; }
+.k-gd--tv .k-gd__soil { margin: 0 -28px; height: 24px; }
+@media (prefers-reduced-motion: reduce) { .k-gd__cloud, .k-gd__sparkle { animation: none !important; } }
+.k-reduced .k-gd__cloud, .k-reduced .k-gd__sparkle { animation: none !important; }
+.k-gd--tv .k-gd__tree .k-plant { height: 40vh; width: auto; }
+.k-gd--tv .k-gd__plot .k-plant { height: 13vh; width: auto; }

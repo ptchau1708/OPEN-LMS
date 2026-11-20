@@ -1,0 +1,17 @@
+{
+  "name": "@openedu/present",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "vite --host", "build": "tsc -p tsconfig.json && vite build && node ../../tools/make-headers.mjs", "preview": "vite preview --host", "typecheck": "tsc -p tsconfig.json" },
+  "dependencies": {
+    "@openedu/contracts": "workspace:*", "@openedu/ui": "workspace:*", "@openedu/activity-engine": "workspace:*",
+    "@openedu/lesson-player": "workspace:*", "@openedu/data": "workspace:*",
+    "@tanstack/react-query": "5.62.8", "react": "18.3.1", "react-dom": "18.3.1", "react-router": "7.18.5",
+    "qrcode-generator": "1.4.4", "fflate": "0.8.3", "zustand": "4.5.5"
+  },
+  "devDependencies": {
+    "typescript": "5.6.3", "@types/react": "18.3.12", "@types/react-dom": "18.3.1", "vite": "6.4.6",
+    "@vitejs/plugin-react": "4.3.4", "vite-plugin-pwa": "0.21.1"
+  }
+}

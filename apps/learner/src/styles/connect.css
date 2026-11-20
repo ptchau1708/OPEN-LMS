@@ -1,0 +1,6 @@
+/* /ket-noi — màn hình xin phép kết nối app ngoài */
+.ln-connect { min-height: 100vh; min-height: 100dvh; }
+.ln-connect__ask { max-width: 420px; margin: 4px 0 8px; font-size: calc(20px * var(--k-scale)); line-height: 1.45; }
+.ln-connect__origin { margin: 0 0 20px; color: var(--k-sub); font-size: 14px; word-break: break-all; }
+.ln-connect__actions { gap: 16px; }
+.ln-connect__switch { margin-top: 22px; padding: 10px 12px; min-height: 44px; border: 0; background: none; color: var(--k-sub); font: inherit; font-size: 15px; text-decoration: underline; cursor: pointer; }

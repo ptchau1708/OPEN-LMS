@@ -1,0 +1,4 @@
+/* POLL: dùng thẻ của MCQ (OptionGrid). Trên TV thẻ chỉ để xem, kết quả do lesson-player vẽ. */
+.ae-poll { display: flex; flex-direction: column; gap: var(--ae-gap); }
+.ae-poll--bigscreen .ae-opt { justify-content: center; text-align: center; }
+.ae-poll--bigscreen .ae-opt--media .ae-opt__img { height: clamp(80px, 18vmin, 260px); }

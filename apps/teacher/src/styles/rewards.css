@@ -1,0 +1,25 @@
+/* Phase 6 — Vườn lớp & Huy hiệu của cô (trang GV). */
+.tc-garden__grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+@media (max-width: 980px) { .tc-garden__grid { grid-template-columns: 1fr; } }
+.tc-garden__scene { min-height: 0; background: none; border-radius: 28px; }
+.tc-garden__scene::before { display: none; }
+.tc-garden__side { display: flex; flex-direction: column; gap: 16px; }
+.tc-garden__h { margin: 0 0 10px; font-size: 16px; }
+.tc-garden__plants { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.tc-garden__plant { display: flex; flex-direction: column; align-items: center; padding: 4px; border: 1px solid var(--p-line); border-radius: 10px; background: var(--p-surface); font: inherit; font-size: 12px; cursor: pointer; text-align: center; }
+.tc-garden__plant.is-on { border-color: var(--p-accent); box-shadow: 0 0 0 3px var(--p-accent-soft); }
+.tc-garden__pots { display: flex; flex-wrap: wrap; gap: 4px; }
+.tc-garden form > * + * { margin-top: 12px; }
+.tc-tbadge__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin: 10px 0 12px; }
+@media (max-width: 820px) { .tc-tbadge__grid { grid-template-columns: 1fr; } }
+.tc-tbadge__grid .tc-field + .tc-field { margin-top: 10px; }
+.tc-tbadge__glyphs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tc-tbadge__glyph { padding: 2px; border: 1px solid var(--p-line); border-radius: 12px; background: var(--p-surface); cursor: pointer; }
+.tc-tbadge__glyph.is-on { border-color: var(--p-accent); box-shadow: 0 0 0 3px var(--p-accent-soft); }
+.tc-tbadge__students { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; margin-top: 6px; max-height: 260px; overflow: auto; }
+.tc-tbadge__st { display: flex; align-items: center; gap: 6px; min-height: 34px; padding: 4px 8px; border: 1px solid var(--p-line); border-radius: 8px; cursor: pointer; }
+.tc-tbadge__st.is-on { border-color: var(--p-accent); background: var(--p-accent-soft); }
+.tc-tbadge__list { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.tc-tbadge__list li { display: flex; align-items: center; gap: 10px; }
+.tc-tbadge__list li > span:nth-child(2) { flex: 1; min-width: 0; }
+.k-gd--teacher .k-gd__plots.is-teams .k-gd__plot:not([style]) { background: rgba(255, 255, 255, .45); box-shadow: none; padding-bottom: 6px; }

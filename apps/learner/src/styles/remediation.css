@@ -1,0 +1,43 @@
+/* Ôn lại cho chắc — dịu, không đỏ. */
+.ln-rem { max-width: 620px; }
+.ln-rem-intro, .ln-rem-result { position: relative; display: flex; flex-direction: column; align-items: center; padding: 22px 18px; text-align: center; background: linear-gradient(180deg, var(--k-ok-soft) 0%, var(--k-card) 45%); }
+.ln-rem-intro > * + *, .ln-rem-result > * + * { margin-top: 12px; }
+.ln-rem-intro__art { position: absolute; top: 14px; right: 16px; transform: rotate(12deg); }
+.ln-rem-intro__title { margin: 4px 0 0; font-family: var(--f-kid-display); font-size: var(--k-fs-title); font-weight: 800; color: var(--k-ok-dark); line-height: 1.15; }
+.ln-rem-intro__text { margin: 0; max-width: 460px; font-size: var(--k-fs-body); font-weight: 700; line-height: 1.45; }
+.ln-rem-tip { display: flex; align-items: flex-start; max-width: 480px; padding: 12px 14px; border-radius: 16px; background: var(--k-star); background: linear-gradient(90deg, var(--k-star) 0, var(--k-star) 6px, var(--k-card) 6px); box-shadow: 0 0 0 2px var(--k-star); text-align: left; font-weight: 600; line-height: 1.4; }
+.ln-rem-tip .k-icon { flex: none; margin: 0 10px 0 4px; color: var(--k-star-dark); }
+.ln-rem-chips > * { margin: 0 4px; }
+.ln-rem-play .ln-rem-badge { background: var(--k-ok); }
+.ln-rem-play .ln-qdots i.is-on { background: var(--k-ok-dark); }
+.ln-rem-play { background: linear-gradient(180deg, var(--k-ok-soft) 0%, var(--k-bg) 60%); }
+.ln-rem-hint { display: block; margin-top: 4px; font-weight: 600; }
+.ln-rem-ring { position: relative; width: 150px; height: 150px; }
+.ln-rem-ring svg { display: block; }
+.ln-rem-ring__arc { transition: stroke-dasharray 900ms var(--k-ease); }
+.ln-rem-ring__n { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+.ln-rem-ring__n strong { font-family: var(--f-kid-display); font-size: 36px; font-weight: 800; }
+.ln-rem-ring__n span { color: var(--k-sub); font-size: var(--k-fs-small); font-weight: 700; }
+.ln-rem-stars { display: flex; justify-content: center; }
+.ln-rem-star { margin: 0 4px; color: var(--k-line); animation: k-pop 500ms var(--k-ease) both; }
+.ln-rem-star.is-on { color: var(--k-star); }
+.ln-rem-star:not(.is-on) { opacity: 0.25; filter: grayscale(1); }
+.ln-rem-star:nth-child(2) { transform: translateY(-10px); }
+.ln-rem-result .k-mbubble { text-align: left; }
+.ln-rem-next { display: flex; align-items: center; width: 100%; max-width: 480px; padding: 14px; border-radius: 18px; background: var(--k-card); box-shadow: 0 0 0 2px var(--k-ok-soft), 0 4px 0 var(--k-line); text-align: left; line-height: 1.4; }
+.ln-rem-next .k-icon { flex: none; margin-right: 12px; color: var(--k-ok-dark); }
+.ln-rem-next strong { display: block; font-family: var(--f-kid-display); font-weight: 800; color: var(--k-ok-dark); }
+.ln-rem-soft { margin: 0; max-width: 460px; padding: 12px 14px; border-radius: 16px; background: var(--k-try-soft); font-weight: 700; }
+.ln-rem-earn { display: flex; align-items: center; margin: 0; color: var(--k-sub); font-weight: 700; }
+.ln-rem-earn .k-stars, .ln-rem-earn > :first-child { margin-right: 8px; }
+
+/* Nút xin gợi ý từng bước (docs/PHASE7_AI_HINT.md) */
+.ln-hint-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 56px; min-width: 44px; margin: 4px 12px 4px 0; padding: 8px 18px; border: 3px solid var(--k-try); border-radius: 999px; background: #fff; color: var(--k-ink); font: inherit; font-family: var(--f-kid-display); font-size: 20px; font-weight: 700; line-height: 1.1; cursor: pointer; box-shadow: 0 4px 0 var(--k-try); transition: transform 0.12s var(--k-ease), box-shadow 0.12s var(--k-ease); touch-action: manipulation; }
+.ln-hint-btn svg { flex: 0 0 auto; color: var(--k-star-dark); }
+.ln-hint-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--k-try); }
+.ln-hint-btn:focus-visible { outline: 4px solid var(--k-ink); outline-offset: 3px; }
+.ln-hint-btn:disabled { opacity: 0.65; cursor: progress; }
+.ln-hint-thinking { animation: ln-hint-pulse 1.1s ease-in-out infinite; }
+@keyframes ln-hint-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ln-hint-thinking { animation: none; } .ln-hint-btn { transition: none; } }
+.k-reduced .ln-hint-thinking { animation: none; }

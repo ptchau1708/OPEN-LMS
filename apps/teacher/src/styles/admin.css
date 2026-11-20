@@ -1,0 +1,84 @@
+/* Phase 5 — báo cáo trường, quản trị, phiếu in (tiền tố ad-) */
+.ad-h2 { font-size: 15px; font-weight: 700; margin: 0; color: var(--p-ink); }
+.ad-sub { display: block; font-size: 12px; color: var(--p-muted); margin-top: 2px; }
+.ad-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ad-table th.ad-num { text-align: right; }
+.ad-actions { text-align: right; white-space: nowrap; }
+.ad-actions .tc-btn + .tc-btn { margin-left: 6px; }
+.ad-pad { padding: 12px 16px 0; }
+.ad-narrow { max-width: 720px; }
+.ad-formrow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.ad-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; letter-spacing: 0.04em; background: var(--tc-surface-2); border: 1px solid var(--p-line); border-radius: 6px; padding: 1px 6px; }
+
+.ad-kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.ad-kpi { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; background: var(--p-surface); border: 1px solid var(--p-line); border-radius: var(--tc-radius); box-shadow: var(--tc-shadow); min-width: 0; }
+.ad-kpi__label { font-size: 12px; font-weight: 600; color: var(--p-muted); }
+.ad-kpi__value { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--p-ink); line-height: 1.2; }
+.ad-kpi__sub { font-size: 12px; color: var(--p-muted); }
+@media (max-width: 1200px) { .ad-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .ad-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ad-formrow { grid-template-columns: 1fr; } }
+
+.ad-meter { display: inline-flex; align-items: center; gap: 8px; min-width: 120px; }
+.ad-meter__track { position: relative; flex: 1; height: 8px; border-radius: 999px; background: var(--tc-surface-2); box-shadow: inset 0 0 0 1px var(--p-line); overflow: hidden; min-width: 60px; }
+.ad-meter__track i { position: absolute; inset: 0 auto 0 0; border-radius: 999px; }
+.ad-meter__v { font-size: 12.5px; font-variant-numeric: tabular-nums; min-width: 34px; text-align: right; }
+
+/* Bản đồ khối */
+.ad-gm-scroll { overflow: auto; max-height: 70vh; }
+.ad-gm { border-collapse: separate; border-spacing: 0; font-size: 12.5px; }
+.ad-gm th, .ad-gm td { padding: 4px 6px; border-bottom: 1px solid var(--p-line); background: var(--p-surface); }
+.ad-gm thead th { position: sticky; top: 0; z-index: 2; font-weight: 600; text-align: center; white-space: nowrap; }
+.ad-gm thead th small, .ad-gm__skill small { display: block; font-weight: 400; color: var(--p-muted); font-size: 11px; }
+.ad-gm__corner { left: 0; z-index: 3 !important; text-align: left !important; }
+.ad-gm__skill { position: sticky; left: 0; z-index: 1; text-align: left; font-weight: 500; min-width: 200px; max-width: 260px; }
+.ad-gm td { text-align: center; min-width: 76px; }
+.ad-gm__cell { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 28px; border-radius: 6px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ad-gm__cell.tc-lv--chua-hoc { box-shadow: inset 0 0 0 1px var(--p-line); }
+.ad-gm__gap { display: block; font-size: 10.5px; color: var(--p-muted); }
+.ad-gm__legend { padding: 10px 16px; }
+.ad-gm__sw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; }
+
+/* Liên kết phụ huynh */
+.ad-links { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.ad-links li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ad-history summary { cursor: pointer; font-weight: 600; }
+.ad-histrow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 4px 0; font-size: 13px; }
+
+/* Tài khoản */
+.ad-split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 16px; align-items: start; }
+@media (max-width: 960px) { .ad-split { grid-template-columns: 1fr; } }
+.ad-paste { font-family: inherit; resize: vertical; min-height: 160px; }
+.ad-preview .tc-chips { max-height: 160px; overflow: auto; }
+
+/* Phiếu in: 2 cột × 4 hàng / A4 */
+.ad-slips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; }
+.ad-slip { border: 1.5px dashed var(--p-line); padding: 12px 14px; background: var(--p-surface); color: var(--p-ink); break-inside: avoid; page-break-inside: avoid; min-height: 62mm; display: flex; flex-direction: column; gap: 6px; }
+.ad-slip__head { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--p-muted); border-bottom: 1px solid var(--p-line); padding-bottom: 4px; }
+.ad-slip__head strong { color: var(--p-ink); }
+.ad-slip__body { display: flex; gap: 12px; align-items: flex-start; }
+.ad-slip__body svg { flex: none; background: #fff; border-radius: 4px; }
+.ad-slip__text { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; line-height: 1.4; min-width: 0; }
+.ad-slip__text p { margin: 0; }
+.ad-slip__lead { font-size: 13.5px; margin: 0; }
+.ad-slip__url { font-weight: 600; word-break: break-all; }
+.ad-slip__code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 22px; font-weight: 800; letter-spacing: 0.12em; }
+.ad-slip__fine { font-size: 11px; color: var(--p-muted); margin: 0; }
+.ad-slips--acc { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ad-slip--acc { min-height: 44mm; }
+.ad-slip__acc { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0; font-size: 13px; }
+.ad-slip__acc dt { color: var(--p-muted); }
+.ad-slip__acc dd { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 17px; font-weight: 700; letter-spacing: 0.04em; }
+@media (max-width: 720px) { .ad-slips, .ad-slips--acc { grid-template-columns: 1fr; } }
+@media print {
+  @page { size: A4; margin: 8mm; }
+  .ad-print { padding: 0 !important; }
+  .ad-slip { background: #fff !important; color: #000 !important; border-color: #888 !important; }
+  .ad-slip__head, .ad-slip__fine, .ad-slip__acc dt { color: #333 !important; }
+  .ad-slips { grid-template-columns: 1fr 1fr !important; }
+  .ad-slips--acc { grid-template-columns: 1fr 1fr 1fr !important; }
+}
+.ad-padb { padding-bottom: 16px; }
+
+/* Ứng dụng kết nối (ConnectApps) + hoạt động ở ứng dụng khác (hồ sơ HS) */
+.ad-snippet { margin: 0; padding: 12px 14px; max-height: 50vh; overflow: auto; background: var(--tc-surface-2); border: 1px solid var(--p-line); border-radius: 8px; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre; }
+.ad-snippet code { padding: 0; border: 0; background: none; font: inherit; }

@@ -1,0 +1,87 @@
+/*
+ * OPEN-EDU design tokens.
+ * Theme "kid": app học sinh, màn hình TV (sân chơi: thẻ to bo tròn, màu tươi theo môn, nút nổi khối).
+ * Theme "pro": app giáo viên (gọn, nhiều thông tin) — đặt class "theme-pro" lên <body>.
+ * Mọi màu trong component lấy từ biến ở đây. Không viết mã màu trực tiếp trong component.
+ */
+@import './fonts.css';
+:root {
+  /* màu theo môn */
+  --k-math: #2f7bf6;
+  --k-viet: #ff8a3d;
+  --k-eng: #8b5cf6;
+  --k-nat: #20a974;
+  --k-sci: #0ea5a4;
+  --k-art: #ff5d8f;
+  --k-music: #e8485f;
+  --k-other: #64748b;
+  --k-star: #ffc22e;
+  --k-star-dark: #d99a00;
+
+  /* nền & chữ (kid) */
+  --k-bg: #eaf4ff;
+  --k-bg-2: #f6f0ff;
+  --k-card: #ffffff;
+  --k-ink: #22304a;
+  --k-sub: #5a6a86;
+  --k-line: #d6e1f0;
+  --k-press: rgba(20, 35, 70, 0.12); /* viền dưới nút nổi khối */
+
+  /* trạng thái */
+  --k-ok: #22b573;
+  --k-ok-dark: #178a55;
+  --k-ok-soft: #dff7ea;
+  --k-try: #ff9f43; /* sai: cam dịu, không dùng đỏ gắt */
+  --k-try-soft: #fff1e0;
+  --k-info: #2f7bf6;
+  --k-focus: #ffb703;
+
+  /* chữ */
+  --f-kid: "Nunito", "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-kid-display: "Baloo 2", "Nunito", system-ui, sans-serif;
+  --f-pro: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  /* cỡ (kid) — lớp 1–2 nhân với --k-scale 1.15 */
+  --k-scale: 1;
+  --k-fs-body: calc(18px * var(--k-scale));
+  --k-fs-small: calc(15px * var(--k-scale));
+  --k-fs-title: calc(26px * var(--k-scale));
+  --k-fs-hero: calc(38px * var(--k-scale));
+
+  /* hình khối */
+  --k-radius: 20px;
+  --k-radius-sm: 14px;
+  --k-touch: 56px; /* kích thước chạm tối thiểu */
+  --k-gap: 12px;
+  --k-shadow: 0 4px 0 var(--k-press);
+  --k-ease: cubic-bezier(.2, .9, .3, 1.2);
+
+  /* pro (giáo viên) */
+  --p-bg: #f4f5fa;
+  --p-surface: #ffffff;
+  --p-ink: #171a2c;
+  --p-muted: #5b6180;
+  --p-line: #dde0ee;
+  --p-accent: #4f46e5;
+  --p-accent-soft: #ecebfe;
+  --p-danger: #c2410c;
+}
+
+/* Lớp 1–2 hoặc HS bật "Chữ to" */
+.k-big { --k-scale: 1.15; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --k-ease: linear; }
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+.k-reduced *, .k-reduced *::before, .k-reduced *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+
+/* Giao diện GV có chế độ tối; giao diện trẻ em giữ một bảng màu sáng cố định có chủ đích. */
+@media (prefers-color-scheme: dark) {
+  .theme-pro {
+    --p-bg: #0e1120; --p-surface: #151a2c; --p-ink: #e8eaf6; --p-muted: #9ca2c1; --p-line: #2a3050;
+    --p-accent: #8f89ff; --p-accent-soft: #24224d; --p-danger: #fb923c;
+    color-scheme: dark;
+  }
+}

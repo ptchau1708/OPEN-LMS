@@ -1,0 +1,25 @@
+.ln-join__body { display: flex; flex-direction: column; align-items: center; max-width: 440px; margin: 0 auto; }
+.ln-join__body > * + * { margin-top: 18px; }
+.ln-join__body .k-mbubble { width: 100%; }
+.ln-pin { display: flex; justify-content: center; }
+.ln-pin.is-shake { animation: ln-shake 420ms ease; }
+@keyframes ln-shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+.ln-pin__box { display: flex; align-items: center; justify-content: center; width: 50px; height: 64px; margin: 0 4px; border-radius: 14px; background: var(--k-card); box-shadow: inset 0 0 0 3px var(--k-line), 0 4px 0 var(--k-press); font-family: var(--f-kid-display); font-size: 34px; font-weight: 800; }
+.ln-pin__box.is-filled { box-shadow: inset 0 0 0 3px var(--k-info), 0 4px 0 var(--k-press); animation: k-pop 300ms var(--k-ease); }
+.ln-pin__box.is-next { box-shadow: inset 0 0 0 3px var(--k-focus), 0 4px 0 var(--k-press); }
+@media (max-width: 360px) { .ln-pin__box { width: 42px; height: 56px; margin: 0 3px; font-size: 28px; } }
+
+.ln-live { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 30; display: flex; flex-direction: column; background: var(--k-bg); }
+.ln-live__bar { display: flex; align-items: center; flex: none; padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); background: var(--k-card); box-shadow: 0 2px 0 var(--k-line); }
+.ln-live__title { flex: 1; min-width: 0; margin: 0 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--f-kid-display); font-weight: 700; color: var(--k-sub); }
+.ln-conn { display: inline-flex; align-items: center; flex: none; padding: 6px 12px; border-radius: 999px; background: var(--k-bg); font-weight: 800; font-size: var(--k-fs-small); }
+.ln-conn i { width: 12px; height: 12px; margin-right: 6px; border-radius: 50%; background: var(--k-sub); }
+.ln-conn.is-ok { background: var(--k-ok-soft); color: var(--k-ok-dark); }
+.ln-conn.is-ok i { background: var(--k-ok); }
+.ln-conn.is-wait i { background: var(--k-star); animation: ln-pulse 700ms ease-in-out infinite alternate; }
+.ln-conn.is-off { background: var(--k-try-soft); }
+.ln-conn.is-off i { background: var(--k-try); }
+/* transform tạo khối chứa cho LiveStudentView (position: fixed) → nằm gọn dưới thanh trên. */
+.ln-live__stage { position: relative; flex: 1; min-height: 0; -webkit-transform: translateZ(0); transform: translateZ(0); overflow: hidden; }
+.ln-live__wait { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; font-weight: 800; color: var(--k-sub); }
+@media (max-width: 420px) { .ln-live__title { display: none; } .ln-live__bar { justify-content: space-between; } }

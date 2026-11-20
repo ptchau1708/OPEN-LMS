@@ -1,0 +1,74 @@
+/**
+ * Kĩ năng TẠM cho các môn chưa nhập danh mục chính thức (Tiếng Việt, Tiếng Anh, TN&XH).
+ * Sinh từ trường `skill` (chữ tự do) của ngân hàng câu hỏi mẫu. `provisional: true` — CHỜ thay bằng
+ * yêu cầu cần đạt của CT GDPT 2018 môn tương ứng (khi thay, giữ bảng ánh xạ mã cũ → mã mới để không mất lịch sử).
+ * File THUẦN DỮ LIỆU (chỉ `import type`) để tools/gen-skills-sql.mjs nạp trực tiếp.
+ */
+import type { Grade } from './items';
+import type { Skill } from './skills';
+import type { SubjectId } from './subjects';
+
+/** [môn, lớp, mã, tên ngắn, mô tả (chữ gốc trong ngân hàng câu hỏi)] */
+type Row = [SubjectId, Grade, string, string, string];
+
+const ROWS: Row[] = [
+  ['tieng-viet', 1, 'TV1.TAM.NGHE-VAN-ANG', 'Nghe tiếng có vần ang', 'Nghe và nhận biết tiếng có vần ang'],
+  ['tieng-viet', 1, 'TV1.TAM.VAN-ANG-ANH', 'Phân biệt vần ang, anh', 'Phân biệt vần ang và vần anh'],
+  ['tieng-viet', 1, 'TV1.TAM.DOC-HIEU-CAU', 'Đọc hiểu câu ngắn', 'Đọc hiểu câu ngắn có vần ang, anh'],
+  ['tieng-viet', 1, 'TV1.TAM.DOC-TRON', 'Đọc trơn câu ngắn', 'Đọc trơn câu ngắn'],
+  ['tieng-viet', 1, 'TV1.TAM.NGHE-VIET', 'Nghe – viết vần ưng, anh', 'Nghe – viết đúng tiếng có vần ưng, anh'],
+  ['tieng-viet', 1, 'TV1.TAM.XEP-CAU', 'Sắp xếp từ thành câu', 'Sắp xếp từ thành câu'],
+  ['tieng-viet', 1, 'TV1.TAM.CHON-TU', 'Chọn từ phù hợp', 'Chọn từ phù hợp trong câu'],
+  ['tieng-viet', 1, 'TV1.TAM.DOC-TIENG', 'Đọc tiếng, nối với hình', 'Đọc tiếng, nối tiếng với hình'],
+  ['tieng-viet', 2, 'TV2.TAM.CHINH-TA-CH-TR', 'Chính tả ch/tr', 'Chính tả: phân biệt ch/tr'],
+  ['tieng-viet', 2, 'TV2.TAM.XEP-CAU', 'Sắp xếp từ thành câu', 'Sắp xếp từ thành câu'],
+  ['tieng-viet', 2, 'TV2.TAM.TU-SU-VAT-HOAT-DONG', 'Từ chỉ sự vật, hoạt động', 'Từ chỉ sự vật, từ chỉ hoạt động'],
+  ['tieng-viet', 2, 'TV2.TAM.DIEN-DOAN-VAN', 'Điền từ vào đoạn văn', 'Chọn từ ngữ phù hợp để hoàn thành đoạn văn'],
+  ['tieng-viet', 2, 'TV2.TAM.DOC-TROI-CHAY', 'Đọc trôi chảy đoạn văn', 'Đọc trôi chảy đoạn văn ngắn'],
+  ['tieng-viet', 3, 'TV3.TAM.TU-TRAI-NGHIA', 'Từ trái nghĩa', 'Từ có nghĩa trái ngược nhau'],
+  ['tieng-viet', 3, 'TV3.TAM.TU-DAC-DIEM', 'Từ chỉ đặc điểm', 'Từ chỉ đặc điểm'],
+  ['tieng-viet', 3, 'TV3.TAM.XEP-DOAN-VAN', 'Sắp xếp câu thành đoạn', 'Sắp xếp câu thành đoạn văn hợp lí'],
+  ['tieng-viet', 3, 'TV3.TAM.VIET-CAU-KE', 'Viết câu kể việc đã làm', 'Viết 3–4 câu kể lại một việc đã làm'],
+  ['tieng-viet', 3, 'TV3.TAM.VIET-HOA-DAU-CAU', 'Viết hoa, dấu câu', 'Viết hoa chữ đầu câu, dùng đúng dấu chấm'],
+  ['tieng-viet', 4, 'TV4.TAM.VIET-DOAN-TA', 'Viết đoạn văn miêu tả', 'Viết đoạn văn miêu tả con vật'],
+  ['tieng-viet', 4, 'TV4.TAM.TU-GOI-TA-SO-SANH', 'Dùng từ gợi tả, so sánh', 'Dùng từ ngữ gợi tả, hình ảnh so sánh khi viết'],
+  ['tieng-viet', 4, 'TV4.TAM.CHINH-TA-DOAN', 'Chính tả, dấu câu trong đoạn', 'Viết đúng chính tả, viết hoa và dấu câu trong đoạn văn'],
+  ['tieng-anh', 3, 'TA3.TAM.GREETINGS-WORLD', 'Lời chào các nước', 'Greetings around the world'],
+  ['tieng-anh', 3, 'TA3.TAM.LISTEN-GREETINGS', 'Nghe hiểu lời chào', 'Listen and recognise greetings'],
+  ['tieng-anh', 3, 'TA3.TAM.NICE-TO-MEET', 'Câu “Nice to meet you”', 'Make a sentence: Nice to meet you'],
+  ['tieng-anh', 3, 'TA3.TAM.GREETING-DIALOGUE', 'Hoàn thành hội thoại chào hỏi', 'Complete a short greeting dialogue'],
+  ['tieng-anh', 3, 'TA3.TAM.RECOGNISE-GREETINGS', 'Nhận biết lời chào', 'Recognise greetings'],
+  ['tieng-anh', 3, 'TA3.TAM.A-AN', 'Dùng a / an', 'a / an + noun'],
+  ['tieng-anh', 3, 'TA3.TAM.SCHOOL-THINGS', 'Đồ dùng học tập', 'School things'],
+  ['tieng-anh', 3, 'TA3.TAM.COLOURS', 'Màu sắc', 'Colours'],
+  ['tieng-anh', 3, 'TA3.TAM.NUMBERS', 'Số đếm 1–10', 'Numbers 1–10'],
+  ['tieng-anh', 3, 'TA3.TAM.VOCAB-GROUPS', 'Phân nhóm từ vựng', 'Vocabulary groups'],
+  ['tieng-anh', 3, 'TA3.TAM.READ-INTRO', 'Đọc to lời giới thiệu', 'Read aloud a self-introduction'],
+  ['tieng-anh', 3, 'TA3.TAM.ORDER-DIALOGUE', 'Sắp xếp hội thoại', 'Order a greeting dialogue'],
+  ['tieng-anh', 3, 'TA3.TAM.BE', 'Dùng am / is / are', 'be: am / is / are'],
+  ['tieng-anh', 3, 'TA3.TAM.FACE', 'Bộ phận trên khuôn mặt', 'Parts of the face'],
+  ['tnxh', 1, 'TNXH1.TAM.NOI-SONG-CON-VAT', 'Nơi sống của con vật', 'Nhận biết nơi sống của một số con vật'],
+  ['tnxh', 1, 'TNXH1.TAM.CON-VAT-DUOI-NUOC', 'Con vật sống dưới nước', 'Nhận biết con vật sống dưới nước'],
+  ['tnxh', 1, 'TNXH1.TAM.VE-CON-VAT', 'Vẽ con vật', 'Thể hiện hiểu biết về con vật qua tranh vẽ'],
+  ['tnxh', 1, 'TNXH1.TAM.ICH-LOI-CON-VAT', 'Ích lợi của con vật', 'Ích lợi của con vật'],
+  ['tnxh', 1, 'TNXH1.TAM.VE-SINH', 'Giữ vệ sinh cơ thể', 'Giữ vệ sinh cơ thể'],
+  ['tnxh', 1, 'TNXH1.TAM.RUA-TAY', 'Rửa tay đúng cách', 'Rửa tay đúng cách'],
+  ['tnxh', 1, 'TNXH1.TAM.CAY-CON-VAT', 'Cây và con vật', 'Phân biệt cây và con vật'],
+  ['tnxh', 1, 'TNXH1.TAM.TIENG-KEU', 'Tiếng kêu của con vật', 'Nhận biết con vật qua tiếng kêu'],
+  ['tnxh', 1, 'TNXH1.TAM.GIAC-QUAN', 'Các giác quan', 'Các giác quan'],
+  ['tnxh', 1, 'TNXH1.TAM.THUC-AN', 'Thức ăn của con vật', 'Thức ăn của một số con vật'],
+  ['tnxh', 2, 'TNXH2.TAM.MOI-TRUONG-SONG', 'Môi trường sống của động vật', 'Môi trường sống của động vật'],
+  ['tnxh', 3, 'TNXH3.TAM.PHAN-LOAI-RAC', 'Phân loại rác', 'Phân loại rác, giữ vệ sinh môi trường'],
+];
+
+export const PROVISIONAL_SKILLS: Skill[] = ROWS.map(([subject, grade, code, short, text]) => ({
+  code,
+  subject,
+  grade,
+  strand: 'TAM-THOI',
+  topic: 'Tạm thời (chờ danh mục chính thức)',
+  text,
+  short,
+  prereqs: [],
+  provisional: true,
+}));

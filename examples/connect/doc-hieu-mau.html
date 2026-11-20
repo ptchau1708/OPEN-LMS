@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đọc hiểu vui — trang mẫu kết nối OPEN-EDU</title>
+<style>
+  :root { --ink: #1f2933; --sub: #52606d; --teal: #0f766e; --soft: #e6f4f1; --line: #d9e2ec; --ok: #15803d; --no: #b91c1c; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 18px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: #f7faf9; }
+  header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; background: #fff; border-bottom: 1px solid var(--line); }
+  header h1 { margin: 0; font-size: 20px; }
+  main { max-width: 720px; margin: 0 auto; padding: 20px 16px 60px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; margin-bottom: 16px; }
+  .passage h2 { margin: 0 0 8px; font-size: 24px; }
+  .passage p { margin: 0 0 10px; font-size: 20px; }
+  fieldset { border: 0; margin: 0 0 14px; padding: 0; }
+  legend { font-weight: 700; margin-bottom: 6px; }
+  label.opt { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 12px; margin-bottom: 6px; border: 2px solid var(--line); border-radius: 12px; cursor: pointer; }
+  label.opt:has(input:checked) { border-color: var(--teal); background: var(--soft); }
+  label.opt.right { border-color: var(--ok); background: #ecfdf3; }
+  label.opt.wrong { border-color: var(--no); background: #fef2f2; }
+  input[type=radio] { width: 22px; height: 22px; accent-color: var(--teal); }
+  button.main { font: 700 18px/1 inherit; min-height: 52px; padding: 0 28px; border: 0; border-radius: 999px; background: var(--teal); color: #fff; cursor: pointer; }
+  button.main:disabled { opacity: .5; cursor: default; }
+  #result { font-weight: 700; font-size: 20px; }
+  #status { color: var(--sub); font-size: 16px; min-height: 1.6em; }
+  #hello { color: var(--sub); }
+  .dev { font-size: 14px; color: var(--sub); }
+  .dev code { background: #eef2f6; padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📖 Đọc hiểu vui</h1>
+  <div id="login"></div>
+</header>
+<main>
+  <p id="hello">Em đăng nhập bằng OPEN-EDU để kết quả được lưu vào hồ sơ học tập nhé.</p>
+
+  <section class="card passage">
+    <h2>Chú sẻ nhỏ và bông hoa bằng lăng</h2>
+    <p>Ở gần tổ chim sẻ có một cây bằng lăng. Mùa hoa này, bằng lăng nở hoa mà không vui vì bé Thơ, bạn của cây, phải nằm viện.</p>
+    <p>Sẻ non biết bằng lăng đã giữ lại một bông hoa cuối cùng để đợi bé Thơ. Sáng hôm ấy, bông hoa nở. Nhưng nó ở cao hơn cửa sổ nên bé Thơ không nhìn thấy.</p>
+    <p>Sẻ non rất yêu bằng lăng và bé Thơ. Nó chắp cánh, bay vù về phía cành bằng lăng mảnh mai rồi đáp xuống. Cành hoa chao qua, chao lại rồi nghiêng xuống, lọt vào khuôn cửa sổ. Bé Thơ cười tươi: “Ôi, đẹp quá!”</p>
+  </section>
+
+  <form id="quiz" class="card">
+    <fieldset>
+      <legend>Câu 1. Vì sao mùa hoa này bằng lăng không vui?</legend>
+      <label class="opt"><input type="radio" name="q1" value="0"> Vì cây ra ít hoa.</label>
+      <label class="opt"><input type="radio" name="q1" value="1"> Vì bé Thơ phải nằm viện.</label>
+      <label class="opt"><input type="radio" name="q1" value="2"> Vì chim sẻ bay đi mất.</label>
+    </fieldset>
+    <fieldset>
+      <legend>Câu 2. Bằng lăng giữ lại bông hoa cuối cùng để làm gì?</legend>
+      <label class="opt"><input type="radio" name="q2" value="0"> Để đợi bé Thơ.</label>
+      <label class="opt"><input type="radio" name="q2" value="1"> Để tặng sẻ non.</label>
+      <label class="opt"><input type="radio" name="q2" value="2"> Để trang trí cho cây.</label>
+    </fieldset>
+    <fieldset>
+      <legend>Câu 3. Sẻ non đã làm gì để giúp bé Thơ nhìn thấy bông hoa?</legend>
+      <label class="opt"><input type="radio" name="q3" value="0"> Ngắt bông hoa mang vào phòng.</label>
+      <label class="opt"><input type="radio" name="q3" value="1"> Gọi bé Thơ ra sân.</label>
+      <label class="opt"><input type="radio" name="q3" value="2"> Đáp xuống cành hoa cho hoa nghiêng vào cửa sổ.</label>
+    </fieldset>
+    <button class="main" type="submit" id="submit">Nộp bài</button>
+    <p id="result" role="status"></p>
+    <p id="status" role="status"></p>
+  </form>
+
+  <p class="dev">Trang mẫu cho người phát triển — xem <code>docs/KET_NOI_APP_NGOAI.md</code>. Thử trên máy: thêm <code>?learner=http://localhost:5173</code> vào địa chỉ để trỏ tới app học sinh OPEN-EDU của bạn.</p>
+</main>
+
+<script>
+  /* ====== 1. Cấu hình: ĐỔI HAI GIÁ TRỊ NÀY cho trường của bạn ====== */
+  var LEARNER_URL = 'http://localhost:5173';   // địa chỉ app học sinh OPEN-EDU
+  var APP_ID = 'doc-hieu-mau';                 // mã ứng dụng đăng kí ở Quản trị → Ứng dụng kết nối
+
+  // Chỉ để thử trên máy (localhost): cho đổi địa chỉ OPEN-EDU bằng ?learner=... KHÔNG làm thế ở trang thật.
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+    var m = /[?&]learner=([^&]+)/.exec(location.search);
+    if (m) LEARNER_URL = decodeURIComponent(m[1]);
+  }
+
+  /* ====== 2. Nạp SDK từ app học sinh OPEN-EDU ====== */
+  var ANSWERS = [1, 0, 2];
+  var startedAt = Date.now();
+  var statusEl = document.getElementById('status');
+  var helloEl = document.getElementById('hello');
+
+  var s = document.createElement('script');
+  s.src = LEARNER_URL.replace(/\/+$/, '') + '/openedu-connect.js';
+  s.onload = start;
+  s.onerror = function () { statusEl.textContent = 'Chưa nạp được OPEN-EDU (' + LEARNER_URL + '). Em vẫn làm bài được, nhưng kết quả chưa lưu.'; };
+  document.head.appendChild(s);
+
+  function start() {
+    OpenEdu.init({ learnerUrl: LEARNER_URL, appId: APP_ID });
+    OpenEdu.mountButton('#login');
+    OpenEdu.on('change', greet);
+    OpenEdu.on('expired', function () { statusEl.textContent = 'Phiên đăng nhập đã hết. Em bấm “Đăng nhập lại bằng OPEN-EDU” để gửi kết quả nhé.'; });
+    OpenEdu.on('saved', function () { statusEl.textContent = 'Đã lưu vào hồ sơ OPEN-EDU ✓'; });
+    greet(OpenEdu.getUser());
+    window.__lastMessage = null; // phục vụ kiểm thử tự động
+  }
+  function greet(user) {
+    window.__user = user;
+    helloEl.textContent = user
+      ? 'Chào ' + user.name + (user.className ? ' lớp ' + user.className : '') + '! Em đọc bài rồi trả lời 3 câu hỏi nhé.'
+      : 'Em đăng nhập bằng OPEN-EDU để kết quả được lưu vào hồ sơ học tập nhé.';
+  }
+
+  /* ====== 3. Chấm bài và ghi kết quả ====== */
+  document.getElementById('quiz').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var form = ev.target; var picked = []; var correct = 0; var i;
+    for (i = 0; i < ANSWERS.length; i++) {
+      var el = form.querySelector('input[name=q' + (i + 1) + ']:checked');
+      picked.push(el ? Number(el.value) : null);
+    }
+    if (picked.indexOf(null) >= 0) { statusEl.textContent = 'Em trả lời đủ 3 câu rồi hãy nộp nhé.'; return; }
+    for (i = 0; i < ANSWERS.length; i++) {
+      var opts = form.querySelectorAll('input[name=q' + (i + 1) + ']');
+      for (var j = 0; j < opts.length; j++) {
+        opts[j].disabled = true;
+        if (j === ANSWERS[i]) opts[j].parentNode.className = 'opt right';
+        else if (j === picked[i]) opts[j].parentNode.className = 'opt wrong';
+      }
+      if (picked[i] === ANSWERS[i]) correct++;
+    }
+    document.getElementById('submit').disabled = true;
+    document.getElementById('result').textContent = 'Em đúng ' + correct + '/' + ANSWERS.length + ' câu' + (correct === ANSWERS.length ? ' — giỏi quá! 🌟' : '.');
+
+    if (!window.OpenEdu || !OpenEdu.getUser()) { statusEl.textContent = 'Em chưa đăng nhập OPEN-EDU nên kết quả chưa được lưu.'; return; }
+    statusEl.textContent = 'Đang lưu…';
+    OpenEdu.record({
+      activityId: 'chu-se-nho',
+      title: 'Chú sẻ nhỏ và bông hoa bằng lăng',
+      kind: 'reading',
+      correct: correct,
+      total: ANSWERS.length,
+      score: Math.round((correct / ANSWERS.length) * 100) / 10,
+      maxScore: 10,
+      durationSec: Math.round((Date.now() - startedAt) / 1000),
+      detail: { answers: picked }
+    }).then(function (r) {
+      window.__lastRecord = r;
+      if (r.saved) statusEl.textContent = 'Đã lưu vào hồ sơ OPEN-EDU ✓';
+      else if (r.demo) statusEl.textContent = 'OPEN-EDU đang ở chế độ demo: không ghi dữ liệu.';
+      else statusEl.textContent = (r.reason === 'expired' ? 'Phiên đăng nhập đã hết. Em đăng nhập lại để gửi kết quả nhé.' : 'Chưa có mạng. Kết quả đã cất trong máy và sẽ tự gửi sau.');
+    }, function (e) {
+      window.__lastRecord = { error: e.message };
+      statusEl.textContent = 'Chưa lưu được: ' + e.message;
+    });
+  });
+</script>
+</body>
+</html>

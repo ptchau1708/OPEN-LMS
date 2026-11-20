@@ -1,0 +1,55 @@
+# CI: cài đặt → kiểm tra kiểu → kiểm thử → build cả 3 app → ngân sách dung lượng app học sinh → kiểm thử CSDL (pgTAP + ETL).
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+permissions: { contents: read }
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4          # phiên bản lấy từ "packageManager" trong package.json
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Bản chép mã chấm điểm cho Edge Functions còn khớp
+        run: node tools/sync-scoring.mjs --check
+      - run: pnpm typecheck
+      - run: pnpm test
+      - name: Kiểm thử trình chạy ETL (hàm thuần)
+        run: node --test tools/migrate-v1/test/lib.test.mjs
+      - name: Cấu hình bảo mật trình duyệt (CSP)
+        run: node --test tools/make-headers.test.mjs
+      - run: pnpm build                     # learner, teacher, present
+      - name: Ngân sách — chunk chính app học sinh ≤ 170 KB gzip
+        run: node tools/check-budget.mjs --dist apps/learner/dist --budget 170
+      - name: Số liệu dung lượng (JSON)
+        if: always()
+        run: node tools/check-budget.mjs --json > budget.json || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: budget, path: budget.json, retention-days: 30 }
+
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Postgres 16 + pgTAP (không cần Docker / Supabase CLI)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-16-pgtap libtap-parser-sourcehandler-pgtap-perl
+          sudo systemctl start postgresql
+          sudo -u postgres psql -c "alter user postgres password 'postgres'"
+      - name: pgTAP (RLS) + ETL migrate-v1 trên dữ liệu mẫu
+        env: { PGHOST: localhost, PGUSER: postgres, PGPASSWORD: postgres }
+        run: tools/run-db-tests.sh --plain --migrate

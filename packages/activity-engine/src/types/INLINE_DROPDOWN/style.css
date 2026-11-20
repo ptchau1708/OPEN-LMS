@@ -1,0 +1,110 @@
+/* INLINE_DROPDOWN: ô chọn ngay trong câu, chạm mở bảng lựa chọn to (không dùng <select>). */
+.ae-dd { display: flex; flex-direction: column; gap: var(--ae-gap); }
+.ae-dd__passage { position: relative; }
+
+.ae-dd__slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 3.6em;
+  min-height: max(52px, 2.3em);
+  margin: 0;
+  padding: 0 12px 0 16px;
+  border: 3px solid var(--ae-accent);
+  border-radius: 14px;
+  background: var(--k-card);
+  color: var(--k-ink);
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.1;
+  vertical-align: middle;
+  box-shadow: 0 4px 0 var(--k-press);
+  cursor: pointer;
+  transform: translateY(0);
+  transition: transform .2s var(--k-ease), box-shadow .15s ease, background-color .15s ease;
+}
+.ae-dd__slot:focus-visible { outline: 4px solid var(--k-focus); outline-offset: 2px; }
+@media (hover: hover) { .ae-dd__slot:not(.is-locked):hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--k-press); } }
+.ae-dd__slot:not(.is-locked):active { transform: translateY(3px); box-shadow: 0 1px 0 var(--k-press); }
+.ae-dd__slot.is-open { box-shadow: 0 0 0 5px var(--k-focus); transform: scale(1.04); }
+.ae-dd__slot.is-filled { box-shadow: 0 4px 0 var(--ae-accent); }
+.ae-dd__slot.is-filled .ae-dd__value { animation: ae-e-pop .3s var(--k-ease); }
+.ae-dd__slot.is-locked { cursor: default; padding: 0 16px; }
+.ae-dd__q { color: var(--k-sub); }
+.ae-dd__caret {
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 9px solid var(--ae-accent);
+  transition: transform .2s var(--k-ease);
+}
+.ae-dd__slot.is-open .ae-dd__caret { transform: rotate(180deg); }
+
+.ae-dd__slot.is-ok, .ae-dd__slot.is-try {
+  border-color: var(--ae-state);
+  background: var(--ae-state-soft);
+  box-shadow: 0 4px 0 var(--ae-state);
+}
+.ae-dd__slot.is-ok { animation: ae-e-pop .4s var(--k-ease); }
+.ae-dd__slot.is-try { animation: ae-e-wiggle .5s ease; }
+
+/* ---------- bảng lựa chọn ---------- */
+.ae-dd__pop {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  width: max-content;
+  max-width: min(92vw, 520px);
+  padding: 14px;
+  border: 3px solid var(--ae-accent);
+  border-radius: var(--ae-radius);
+  background: var(--k-card);
+  box-shadow: 0 10px 0 var(--k-press), 0 18px 40px var(--k-press);
+  line-height: 1.2;
+  visibility: hidden;
+  transform-origin: var(--arrow, 50%) 0;
+}
+.ae-dd__pop.is-placed { visibility: visible; animation: ae-e-pop .26s var(--k-ease) both; }
+.ae-dd__pop::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: calc(var(--arrow, 24px) - 11px);
+  width: 0;
+  height: 0;
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-bottom: 12px solid var(--ae-accent);
+}
+.ae-dd__opt {
+  min-width: 88px;
+  min-height: 60px;
+  margin: 0;
+  padding: 6px 22px;
+  border: 3px solid var(--k-line);
+  border-radius: var(--k-radius-sm);
+  background: var(--k-card);
+  color: var(--k-ink);
+  font-family: var(--f-kid);
+  font-size: var(--ae-fs-opt);
+  font-weight: 800;
+  box-shadow: 0 5px 0 var(--k-press);
+  cursor: pointer;
+  transition: transform .18s var(--k-ease), box-shadow .18s ease, border-color .15s ease;
+}
+@media (hover: hover) { .ae-dd__opt:hover { transform: translateY(-3px); border-color: var(--ae-accent); box-shadow: 0 8px 0 var(--k-press); } }
+.ae-dd__opt:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--k-press); }
+.ae-dd__opt:focus-visible { outline: 4px solid var(--k-focus); outline-offset: 2px; }
+.ae-dd__opt.is-selected { border-color: var(--ae-accent); background: var(--ae-accent); color: var(--k-card); }
+.ae-dd__none { padding: 8px 12px; color: var(--k-sub); font-weight: 700; }
+
+/* ---------- TV ---------- */
+.ae-dd--bigscreen .ae-passage { padding: 3vmin 4vmin; border-width: clamp(3px, .5vmin, 7px); line-height: 2.5; }
+.ae-dd--bigscreen .ae-dd__slot { border-width: clamp(3px, .5vmin, 7px); border-radius: clamp(14px, 1.8vmin, 28px); }
+.ae-dd--bigscreen .ae-dd__pop { max-width: min(80vw, 60vmin * 1.6); padding: 2vmin; gap: 1.6vmin; border-width: clamp(3px, .5vmin, 7px); }
+.ae-dd--bigscreen .ae-dd__opt { min-height: clamp(60px, 10vmin, 140px); min-width: clamp(88px, 16vmin, 260px); border-width: clamp(3px, .5vmin, 6px); }

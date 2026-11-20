@@ -1,0 +1,7 @@
+.pr-gtv { min-height: 100%; box-sizing: border-box; padding: 2.4vmin 3vmin; display: flex; flex-direction: column; }
+.pr-gtv--msg { align-items: center; justify-content: center; text-align: center; font-size: 3.4vmin; }
+.pr-gtv__head { display: flex; align-items: center; gap: 2vmin; margin-bottom: 1.6vmin; }
+.pr-gtv__title { margin: 0; font-family: var(--f-kid-display); font-size: 6.4vmin; line-height: 1.05; }
+.pr-gtv__sub { margin: .6vmin 0 0; font-size: 3.6vmin; font-weight: 800; color: var(--k-ok-dark); }
+.pr-gtv .k-gd { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; }
+.pr-gtv__col { display: flex; align-items: flex-end; gap: 1vmin; margin-top: 1.4vmin; font-size: 3vmin; font-weight: 800; }

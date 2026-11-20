@@ -1,0 +1,78 @@
+/* Phase 6 — huy hiệu, cửa hàng trang phục, Vườn lớp (tải lười cùng trang). */
+.ln-coin { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px 4px 6px; border-radius: 999px; background: #fff6d6; border: 2px solid var(--k-ink); font-weight: 800; font-size: calc(18px * var(--k-scale)); white-space: nowrap; }
+
+/* màn chúc mừng huy hiệu (dùng khung .ln-unlock) */
+.ln-badge-pop__hero { width: 180px; height: 180px; margin: 10px auto 4px; animation: ln-badge-in 700ms var(--k-ease) both; }
+@keyframes ln-badge-in { from { opacity: 0; transform: scale(.4) rotate(-20deg); } to { opacity: 1; transform: none; } }
+.ln-badge-pop.is-still, .ln-badge-pop.is-still .ln-unlock__card, .ln-badge-pop.is-still .ln-badge-pop__hero { animation: none; }
+.k-reduced .ln-badge-pop__hero { animation: none; }
+@media (prefers-reduced-motion: reduce) { .ln-badge-pop__hero, .ln-badge-pop .ln-unlock__rays { animation: none; } }
+
+/* kệ huy hiệu */
+.ln-shelf__count { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-weight: 700; }
+.ln-shelf__count .k-icon { color: var(--k-star-dark); }
+.ln-shelf__row { margin-bottom: 10px; padding: 12px 12px 4px; border-radius: 22px; background: var(--k-card); box-shadow: inset 0 -10px 0 #e8d2b0; border: 2px solid var(--k-line); }
+.ln-shelf__cat { margin: 0 0 6px 4px; font-family: var(--f-kid-display); font-size: calc(18px * var(--k-scale)); }
+.ln-shelf__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 6px; }
+.ln-shelf__item { display: flex; flex-direction: column; align-items: center; min-height: 56px; padding: 6px 4px 12px; border: 0; border-radius: 16px; background: none; font: inherit; color: var(--k-sub); cursor: pointer; text-align: center; }
+.ln-shelf__item:focus-visible { outline: 3px solid var(--k-focus); }
+.ln-shelf__item.is-on { color: var(--k-ink); }
+.ln-shelf__item.is-on .k-badge { filter: drop-shadow(0 3px 0 rgba(34, 48, 74, .25)); }
+.ln-shelf__name { margin-top: 2px; font-size: calc(14px * var(--k-scale)); font-weight: 700; line-height: 1.2; }
+.ln-badge-detail { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.ln-badge-detail p { margin: 10px 0 0; font-weight: 600; }
+.ln-badge-detail .k-progress { width: 100%; margin-top: 12px; }
+
+/* cửa hàng */
+.ln-shop__grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 820px) { .ln-shop__grid { grid-template-columns: 360px 1fr; align-items: start; } .ln-shop__stage { position: sticky; top: 12px; } }
+.ln-shop__stage { display: flex; flex-direction: column; align-items: center; padding: 16px; }
+.ln-shop__hero { width: 240px; height: 240px; }
+.ln-shop__who { margin: 6px 0 0; font-family: var(--f-kid-display); font-weight: 800; font-size: calc(20px * var(--k-scale)); }
+.ln-shop__friends { display: flex; flex-wrap: wrap; justify-content: center; margin: 8px -4px 0; }
+.ln-shop__friend { width: 58px; height: 58px; margin: 4px; padding: 3px; border-radius: 16px; border: 2px solid var(--k-line); background: var(--k-bg); cursor: pointer; }
+.ln-shop__friend.is-on { border-color: var(--k-ink); box-shadow: 0 0 0 3px var(--k-star); }
+.ln-shop__action { display: flex; flex-direction: column; align-items: stretch; width: 100%; margin-top: 12px; }
+.ln-shop__action > * + * { margin-top: 10px; }
+.ln-shop__selname { text-align: center; font-size: calc(20px * var(--k-scale)); }
+.ln-shop__need { display: flex; align-items: flex-start; gap: 8px; margin: 0; padding: 10px 14px; border-radius: 16px; background: var(--k-try-soft); font-weight: 600; }
+.ln-shop__tip { margin: 14px 0 0; text-align: center; }
+.ln-seg { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.ln-seg__btn { min-height: 56px; padding: 0 18px; border-radius: 999px; border: 2px solid var(--k-ink); background: var(--k-card); font: inherit; font-weight: 800; font-size: calc(17px * var(--k-scale)); cursor: pointer; box-shadow: 0 4px 0 var(--k-press); }
+.ln-seg__btn.is-on { background: var(--k-art); color: #fff; }
+.ln-seg__btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--k-press); }
+.ln-shop__items { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; }
+.ln-item { position: relative; display: flex; flex-direction: column; align-items: center; padding: 10px 8px 12px; border-radius: 20px; border: 2px solid var(--k-line); background: var(--k-card); font: inherit; cursor: pointer; box-shadow: 0 4px 0 var(--k-line); }
+.ln-item__art { width: 76px; height: 76px; opacity: var(--afford, 1); }
+.ln-item.is-sel { border-color: var(--k-ink); box-shadow: 0 0 0 3px var(--k-star), 0 4px 0 var(--k-press); }
+.ln-item__name { margin: 4px 0 6px; font-weight: 800; text-align: center; line-height: 1.15; }
+.ln-item__price .ln-coin { font-size: 15px; padding: 2px 10px 2px 4px; }
+.ln-item__price .ln-coin svg { width: 20px; height: 20px; }
+.ln-item__tag { padding: 3px 10px; border-radius: 999px; background: var(--k-ok-soft); color: var(--k-ok-dark); font-weight: 800; font-size: 14px; }
+.ln-item__tag.is-on { background: var(--k-ok); color: #fff; }
+.ln-shop__rule { margin-top: 14px; }
+
+/* lối vào (trang Quà / Hôm nay) */
+.ln-reward-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0; }
+.ln-reward-link { display: flex; align-items: center; min-height: 64px; padding: 8px 14px 8px 8px; border-radius: 20px; border: 2px solid var(--k-ink); background: var(--k-card); color: var(--k-ink); font: inherit; font-weight: 800; font-size: calc(17px * var(--k-scale)); text-align: left; cursor: pointer; box-shadow: 0 5px 0 var(--k-press); }
+.ln-reward-link:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--k-press); }
+.ln-reward-link__art { flex: none; width: 52px; height: 52px; margin-right: 10px; display: flex; align-items: center; justify-content: center; }
+
+/* Vườn lớp */
+.ln-garden6 .k-mbubble { margin-bottom: 14px; }
+.ln-garden6__grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 900px) { .ln-garden6__grid { grid-template-columns: 1fr 320px; align-items: start; } }
+.ln-garden6__side > * + * { margin-top: 12px; }
+.ln-garden6__side .k-card { padding: 14px 16px; }
+.ln-garden6__side .ln-h3 { margin-top: 0; }
+.ln-garden6__mine-row { display: flex; align-items: center; gap: 12px; }
+.ln-garden6__mine-row p { margin: 0; }
+.ln-garden6__big { display: flex; align-items: center; gap: 4px; font-size: 34px; font-weight: 800; }
+.ln-garden6__big .k-icon { color: var(--k-star); }
+.ln-garden6__team { border: 3px solid; }
+.ln-garden6__team p { margin: 0; }
+.ln-garden6__pots { display: flex; flex-wrap: wrap; gap: 6px; }
+.ln-garden6__pot { padding: 2px; border-radius: 14px; background: var(--k-bg); }
+.ln-me__dressed { flex: none; width: 110px; height: 110px; padding: 0; border: 0; background: none; cursor: pointer; }
+.ln-me__badges { margin: 20px 0; }
+.ln-me__badges > .k-btn { margin-top: 6px; }

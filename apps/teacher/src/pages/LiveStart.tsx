@@ -1,0 +1,64 @@
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
+import { SUBJECTS, type Profile } from '@openedu/contracts';
+import { useClasses, useCreateLiveSession, useDataSource, useLessons } from '@openedu/data';
+import { Btn, Empty, ErrorNote, Field, Loading, PageHead, SubjectDot } from '../components/common';
+import { cx } from '../lib/format';
+import { matchesSearch } from '@openedu/data';
+
+export default function LiveStart({ user }: { user: Profile }) {
+  const nav = useNavigate();
+  const [params] = useSearchParams();
+  const ds = useDataSource();
+  const lessons = useLessons(user.role === 'admin' ? {} : { ownerId: user.id });
+  const classes = useClasses(user.role === 'admin' ? undefined : user.id);
+  const create = useCreateLiveSession();
+  const [lessonId, setLessonId] = useState(params.get('bai') ?? '');
+  const [classId, setClassId] = useState('');
+  const [search, setSearch] = useState('');
+  useEffect(() => { if (!classId && classes.data?.[0]) setClassId(user.classId && classes.data.some((c) => c.id === user.classId) ? user.classId : classes.data[0].id); }, [classes.data, classId, user.classId]);
+  const list = (lessons.data ?? []).filter((l) => !search.trim() || matchesSearch(l.title, search));
+  const start = () => create.mutate({ lessonId, classId: classId || undefined }, { onSuccess: (s) => nav(`/truc-tiep/${s.sessionId}${classId ? `?lop=${classId}` : ''}`) });
+
+  return (
+    <div className="tc-page">
+      <PageHead title="Lớp học trực tiếp" sub="Bài giảng chiếu trên TV, học sinh trả lời trên máy, thầy cô điều khiển bằng điện thoại." />
+      {ds.mode === 'demo' ? (
+        <div className="tc-alert tc-alert--info"><span><strong>Chế độ demo</strong> dùng máy chủ lớp học trong mạng LAN. Trên máy giáo viên, chạy <code>pnpm relay</code> trong thư mục open-edu trước khi bắt đầu.</span></div>
+      ) : null}
+      <div className="tc-livestart">
+        <section className="tc-card tc-stack">
+          <h2>1. Chọn bài giảng</h2>
+          <input className="tc-input" placeholder="Tìm bài…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          {lessons.isLoading ? <Loading /> : !list.length ? <Empty title="Không có bài giảng" /> : (
+            <ul className="tc-list tc-list--plain">
+              {list.map((l) => {
+                const s = SUBJECTS[l.subject] ?? SUBJECTS.khac;
+                return (
+                  <li key={l.id}>
+                    <button type="button" className={cx('tc-listrow', lessonId === l.id && 'is-active')} onClick={() => setLessonId(l.id)} aria-pressed={lessonId === l.id}>
+                      <SubjectDot colorVar={s.colorVar} />
+                      <span className="tc-listrow__main">{l.title}</span>
+                      <span className="tc-muted tc-small">{s.name} · Lớp {l.grade} · {l.slides.length} slide</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+        <section className="tc-card tc-stack">
+          <h2>2. Chọn lớp</h2>
+          <Field label="Lớp">
+            <select className="tc-input" value={classId} onChange={(e) => setClassId(e.target.value)}>
+              {(classes.data ?? []).map((c) => <option key={c.id} value={c.id}>Lớp {c.name} ({c.studentIds.length} HS)</option>)}
+            </select>
+          </Field>
+          <ErrorNote error={create.error} />
+          <Btn kind="primary" size="lg" icon="play" disabled={!lessonId || create.isPending} onClick={start}>{create.isPending ? 'Đang mở lớp…' : 'Bắt đầu'}</Btn>
+          <p className="tc-muted tc-small">Sau khi bắt đầu: mở link TV trên màn hình lớp, cho HS quét mã QR hoặc nhập mã 6 số.</p>
+        </section>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,42 @@
+// THUẦN: không import React/DOM. File này được chép sang Edge Function để chấm ở server (cùng shared/text.ts).
+import type { ItemOf, ResponseOf, ScoreResult } from '@openedu/contracts';
+import { blankIds, normalizeText } from '../../shared/text';
+
+function gradedIds(item: ItemOf<'INLINE_DROPDOWN'>, blanks: Record<string, string>): string[] {
+  const inPassage = blankIds(item.payload?.passage ?? '').filter((id) => typeof blanks[id] === 'string');
+  return inPassage.length ? inPassage : Object.keys(blanks);
+}
+
+/**
+ * Câu trả lời và đáp án là id lựa chọn trong từng ô. Nếu GV ghi đáp án bằng chữ thay vì id, vẫn so được theo chữ.
+ * Điểm = số ô đúng / tổng số ô. parts: id ô → đúng/sai.
+ */
+export function score(item: ItemOf<'INLINE_DROPDOWN'>, r: ResponseOf<'INLINE_DROPDOWN'> | undefined): ScoreResult {
+  const key = item.key;
+  if (!key || !key.blanks || typeof key.blanks !== 'object') return { graded: false, correct: false, score: 0 };
+  const ids = gradedIds(item, key.blanks);
+  if (!ids.length) return { graded: false, correct: false, score: 0 };
+  const given = r?.blanks ?? {};
+  const parts: Record<string, boolean> = {};
+  let hits = 0;
+  for (const id of ids) {
+    const want = key.blanks[id];
+    const got = given[id];
+    let ok = !!got && got === want;
+    if (!ok && got) {
+      const choice = (item.payload?.dropdowns?.[id] ?? []).find((c) => c.id === got);
+      ok = !!choice?.text && normalizeText(choice.text) === normalizeText(want);
+    }
+    parts[id] = ok;
+    if (ok) hits++;
+  }
+  return { graded: true, correct: hits === ids.length, score: hits / ids.length, parts };
+}
+
+/** Đủ khi mọi ô chọn trong đoạn văn đã có lựa chọn. */
+export function isComplete(item: ItemOf<'INLINE_DROPDOWN'>, r: ResponseOf<'INLINE_DROPDOWN'> | undefined): boolean {
+  if (!r || !r.blanks) return false;
+  const ids = blankIds(item.payload?.passage ?? '');
+  if (!ids.length) return false;
+  return ids.every((id) => typeof r.blanks[id] === 'string' && r.blanks[id].length > 0);
+}

@@ -1,0 +1,17 @@
+// THUẦN: không import React/DOM. File này được chép sang Edge Function để chấm ở server.
+import type { ItemOf, ResponseOf, ScoreResult } from '@openedu/contracts';
+
+/** Giống MCQ. parts: id đáp án đúng → true; id đã chọn mà chưa đúng → false. */
+export function score(item: ItemOf<'LISTEN_CHOOSE'>, r: ResponseOf<'LISTEN_CHOOSE'> | undefined): ScoreResult {
+  const key = item.key;
+  if (!key || typeof key.correct !== 'string') return { graded: false, correct: false, score: 0 };
+  const choice = r?.choice;
+  const correct = !!choice && choice === key.correct;
+  const parts: Record<string, boolean> = { [key.correct]: true };
+  if (choice && !correct) parts[choice] = false;
+  return { graded: true, correct, score: correct ? 1 : 0, parts };
+}
+
+export function isComplete(_item: ItemOf<'LISTEN_CHOOSE'>, r: ResponseOf<'LISTEN_CHOOSE'> | undefined): boolean {
+  return !!r && typeof r.choice === 'string' && r.choice.length > 0;
+}

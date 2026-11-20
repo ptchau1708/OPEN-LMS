@@ -1,0 +1,95 @@
+/**
+ * Dữ liệu mẫu cho bộ chấm mẫu (demo): mã rubric mẫu và nội dung các ảnh bài làm viết tay mẫu.
+ * THUẦN DỮ LIỆU, không import (tools/gen-work-images.mjs nạp trực tiếp file này để vẽ ảnh PNG).
+ */
+
+export const SAMPLE_RUBRIC_IDS = {
+  toan4TongHieu: 'rb-toan4-tong-hieu',
+  toan5ChuyenDong: 'rb-toan5-chuyen-dong',
+  tv4TaConVat: 'rb-tv4-ta-con-vat',
+  tv3ViecTot: 'rb-tv3-viec-tot',
+} as const;
+
+export interface PhotoSample {
+  /** Khớp theo tên file ảnh (url chứa key). */
+  key: string;
+  /** Các dòng viết trên giấy (vẽ ảnh). */
+  lines: string[];
+  /** Dòng bị nhòe mực (vẽ vết mực, OCR không đọc được phần đó). */
+  smudged?: { line: number; from: number; to: number }[];
+  /** Bản chép (OCR) bộ chấm mẫu trả về. Mặc định: lines nối bằng xuống dòng. */
+  ocr?: string;
+  confidence: number;
+  flags?: ('unreadable' | 'off-topic' | 'possible-copy' | 'low-confidence')[];
+  /** Ghi chú cho GV về chất lượng ảnh. */
+  note?: string;
+}
+
+export const PHOTO_SAMPLES: PhotoSample[] = [
+  {
+    key: 'toan4-hai',
+    lines: [
+      'Bài giải',
+      'Số cây lớp 4A trồng được là:',
+      '(96 + 18) : 2 = 57 (cây)',
+      'Số cây lớp 4B trồng được là:',
+      '57 - 18 = 39 (cây)',
+      'Đáp số: Lớp 4A: 57 cây;',
+      '            Lớp 4B: 39 cây.',
+      'Thử lại: 57 + 39 = 96 (đúng)',
+    ],
+    confidence: 0.93,
+  },
+  {
+    key: 'toan4-khoa',
+    lines: [
+      'Bài giải',
+      'Số cây lớp 4A trồng là:',
+      '(96 + 18) : 2 = 52 (cây)',
+      'Số cây lớp 4B trồng là:',
+      '52 - 18 = 34 (cây)',
+      'Đáp số: 4A: 52 cây; 4B: 34 cây',
+    ],
+    smudged: [{ line: 2, from: 0, to: 9 }],
+    ocr: 'Bài giải\nSố cây lớp 4A trồng là:\n(96 + 18) : 2 = 52 (cây)\nSố cây lớp 4B trồng là:\n52 - 18 = 34 (cây)\nĐáp số: 4A: 52 cây; 4B: 34 cây',
+    confidence: 0.62,
+    note: 'Dòng 3 hơi nhòe mực ở phần "(96 + 18)" — đã đoán theo ngữ cảnh.',
+  },
+  {
+    key: 'toan4-nam',
+    lines: ['Lớp 4B: (96 - 18) : 2 = 39', 'Lớp 4A: 39 + 18 = 57'],
+    confidence: 0.82,
+  },
+  {
+    key: 'tv4-lan',
+    lines: [
+      'Nhà em nuôi một chú mèo tên là Mướp. Mướp có bộ',
+      'lông vàng óng như tơ, sờ vào thấy mềm mượt. Đôi',
+      'mắt tròn xoe, long lanh như hai hòn bi ve. Hai cái',
+      'tai nhỏ xíu lúc nào cũng vểnh lên nghe ngóng. Cái',
+      'đuôi dài cứ ngoe nguẩy mỗi khi em đi học về. Ban',
+      'đêm, Mướp rình bắt chuột rất giỏi. Ban ngày, nó',
+      'nằm sưởi nắng bên hiên. Em rất yêu quý Mướp vì nó',
+      'như một người bạn nhỏ của em.',
+    ],
+    confidence: 0.88,
+  },
+  {
+    key: 'tv4-tuan',
+    lines: [
+      'Nhà em có một chú chó tên là Vàng. lông nó màu',
+      'vàng. Mắt nó đen. Mỗi chiều đi học về nó chạy ra',
+      'đón em nó rất khôn và hay sủa khi có người lạ',
+      'Em rất thích con Vàng',
+    ],
+    smudged: [{ line: 1, from: 18, to: 34 }],
+    ocr: 'Nhà em có một chú chó tên là Vàng. lông nó màu\nvàng. Mắt nó đen. [không đọc được] nó chạy ra\nđón em nó rất khôn và hay sủa khi có người lạ\nEm rất thích con Vàng',
+    confidence: 0.55,
+    flags: ['unreadable'],
+    note: 'Một đoạn ở dòng 2 bị nhòe, không đọc được.',
+  },
+];
+
+export function findPhotoSample(url: string): PhotoSample | undefined {
+  return PHOTO_SAMPLES.find((s) => url.includes(s.key));
+}

@@ -1,0 +1,40 @@
+/* RECORD_READ: đoạn đọc chữ to + ghi âm (agent E2). */
+.ae-rr { display: grid; gap: 16px; justify-items: center; width: 100%; }
+.ae-rr-paper {
+  position: relative; width: 100%; box-sizing: border-box; padding: 20px 22px 18px;
+  border-radius: var(--k-radius); background: var(--k-card); box-shadow: 0 5px 0 var(--k-press);
+  display: grid; gap: 12px; justify-items: start;
+}
+.ae-rr-text { margin: 0; white-space: pre-line; color: var(--k-ink); font: 700 calc(28px * var(--k-scale)) / 1.65 var(--f-kid); letter-spacing: 0.2px; }
+.ae-rr-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--k-gap); }
+.ae-rr-btn { min-height: 64px; }
+.ae-rr-mic { font-size: 1.2em; }
+.ae-rr-help, .ae-rr-saved { margin: 0; text-align: center; font: 700 var(--k-fs-body) / 1.4 var(--f-kid); color: var(--k-sub); }
+.ae-rr-saved { color: var(--k-ok-dark); }
+.ae-rr-msg {
+  margin: 0; max-width: 560px; padding: 12px 16px; border-radius: var(--k-radius-sm);
+  background: var(--k-try-soft); color: var(--k-ink); border: 2px solid var(--k-try);
+  font: 700 var(--k-fs-body) / 1.4 var(--f-kid); text-align: center;
+}
+
+.ae-rr-live {
+  display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 8px 14px;
+  width: 100%; max-width: 480px; padding: 12px 16px; box-sizing: border-box;
+  border-radius: var(--k-radius); background: var(--k-card); box-shadow: 0 4px 0 var(--k-press);
+}
+.ae-rr-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--k-music); animation: ae-rr-blink 1s ease-in-out infinite; }
+@keyframes ae-rr-blink { 50% { opacity: 0.25; transform: scale(0.8); } }
+.ae-rr-meter { display: inline-flex; align-items: center; gap: 4px; height: 44px; }
+.ae-rr-bar { display: block; width: 8px; height: 44px; border-radius: 4px; background: var(--k-nat); transform: scaleY(0.12); transform-origin: 50% 50%; transition: transform 60ms linear; }
+.ae-rr-left { justify-self: end; font: 800 var(--k-fs-body) / 1 var(--f-kid); color: var(--k-sub); }
+.ae-rr-left strong { font: 900 calc(30px * var(--k-scale)) / 1 var(--f-kid-display); color: var(--k-ink); }
+.ae-rr-track { grid-column: 1 / -1; height: 10px; border-radius: 5px; background: var(--k-bg); overflow: hidden; }
+.ae-rr-progress { display: block; height: 100%; background: var(--k-viet); transform-origin: 0 50%; transition: transform 200ms linear; }
+
+.ae-activity--bigscreen .ae-rr-text, .ae-rr--view .ae-rr-text { font-size: 48px; line-height: 1.6; }
+.ae-activity--bigscreen .ae-rr-paper { padding: 32px 40px; }
+
+@media (max-width: 420px) {
+  .ae-rr-paper { padding: 16px; }
+  .ae-rr-text { font-size: calc(23px * var(--k-scale)); }
+}

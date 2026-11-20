@@ -1,0 +1,63 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`assess — lời nhắc > lời nhắc ổn định (snapshot), không chứa tên HS, có tiêu chí + mã kĩ năng + quan niệm sai > system 1`] = `
+"Bạn là một giáo viên tiểu học Việt Nam nhiều kinh nghiệm, chấm bài theo tinh thần Thông tư 27/2020: động viên, cụ thể, công bằng.
+Nhiệm vụ: chấm MỘT bài làm của học sinh CHỈ theo tiêu chí (rubric) được cho. Không tự thêm tiêu chí, không trừ điểm vì chữ xấu nếu vẫn đọc được.
+Quy tắc:
+1. Nếu có ảnh: chép lại (transcript) TRUNG THỰC chữ viết tay của em, giữ nguyên lỗi chính tả và cách trình bày, mỗi ảnh một phần tử. Chỗ không đọc được ghi [không đọc được]. Không sửa bài khi chép.
+2. Chấm từng tiêu chí: "points" từ 0 đến điểm tối đa của tiêu chí (được dùng số lẻ 0,5). "evidence" trích nguyên văn câu/dòng làm căn cứ.
+3. Chữ khó đọc hoặc ảnh mờ: nói rõ trong feedbackTeacher, thêm cờ "unreadable", hạ "confidence". Bài không đúng đề: cờ "off-topic". Giống hệt bài mẫu từng chữ: cờ "possible-copy". Không chắc: cờ "low-confidence".
+4. "confidence" (0..1) là mức chắc chắn của chính bạn về điểm đã cho.
+5. feedbackStudent: 2–4 câu ngắn, gọi học sinh là "em", khen điều làm tốt TRƯỚC, sau đó MỘT bước cụ thể để làm tốt hơn. Không dùng từ nặng nề (sai bét, kém, dở, tệ, lười…), không so sánh với bạn khác, KHÔNG nhắc tới AI hay máy chấm.
+6. feedbackTeacher: chẩn đoán ngắn gọn cho giáo viên (lỗi kiến thức hay lỗi cẩn thận, kĩ năng nào cần củng cố).
+7. feedbackParent: lời lẽ đơn giản, không thuật ngữ, kèm đúng 1 gợi ý phụ huynh làm cùng con ở nhà trong 5–10 phút.
+8. "skills": với mỗi mã kĩ năng được liệt kê, ghi "dung" (bài thể hiện em làm được), "sai" (bài thể hiện em chưa làm được) hoặc "chua-ro". Chỉ dùng mã đã cho. "misconception" chỉ dùng mã đã cho (nếu khớp), nếu không thì bỏ trống.
+9. Viết tiếng Việt có dấu. CHỈ trả về MỘT đối tượng JSON hợp lệ đúng khuôn dưới đây, không thêm chữ nào ngoài JSON, không dùng \`\`\`.
+{
+  "transcript": ["<chữ chép lại từ ảnh 1>", "..."],
+  "criteria": [{ "criterionId": "<id>", "points": <số>, "comment": "<nhận xét ngắn>", "evidence": "<trích câu/dòng trong bài>" }],
+  "strengths": ["<điểm mạnh>"],
+  "issues": [{ "text": "<lỗi / điều cần sửa>", "skill": "<mã kĩ năng>", "misconception": "<mã quan niệm sai>", "location": "<vd: dòng 3, ảnh 1>" }],
+  "feedbackStudent": "<2–4 câu>",
+  "feedbackTeacher": "<chẩn đoán ngắn>",
+  "feedbackParent": "<lời lẽ đơn giản + 1 gợi ý ở nhà>",
+  "skills": [{ "code": "<mã kĩ năng>", "evidence": "dung|sai|chua-ro" }],
+  "confidence": <0..1>,
+  "flags": ["unreadable|off-topic|possible-copy|low-confidence"]
+}"
+`;
+
+exports[`assess — lời nhắc > lời nhắc ổn định (snapshot), không chứa tên HS, có tiêu chí + mã kĩ năng + quan niệm sai > user 1`] = `
+"Môn: Toán · Lớp 4
+Bài: Hai lớp trồng cây
+Đề bài:
+"""
+Hai lớp 4A và 4B trồng được tất cả 96 cây. Lớp 4A trồng được nhiều hơn lớp 4B 18 cây. Hỏi mỗi lớp trồng được bao nhiêu cây?
+"""
+Thang điểm: 10 (tổng điểm tối đa các tiêu chí: 10).
+Tiêu chí chấm:
+  - id "phuong-phap" · Nhận ra dạng toán, cách giải · tối đa 3 điểm: Nhận ra bài toán tìm hai số khi biết tổng và hiệu; dùng (tổng + hiệu) : 2 hoặc (tổng − hiệu) : 2, hoặc vẽ sơ đồ đoạn thẳng.
+  - id "tinh-toan" · Tính đúng · tối đa 4 điểm: Tính đúng số lớn (57) và số bé (39).
+  - id "loi-giai" · Câu lời giải, đơn vị · tối đa 2 điểm: Mỗi phép tính có câu lời giải phù hợp; ghi đơn vị "cây".
+  - id "dap-so" · Đáp số, thử lại · tối đa 1 điểm: Ghi đáp số đầy đủ cho hai lớp; khuyến khích thử lại (57 + 39 = 96).
+Kĩ năng cần đánh giá:
+  - T4.GQ.BA-BUOC: Toán có lời văn 2–3 bước
+  - T4.PT.CONG-TRU: Cộng, trừ số nhiều chữ số
+Mã quan niệm sai có thể dùng:
+  - QUEN-NHO: Quên nhớ khi cộng (hoặc quên trả khi trừ): bỏ qua số nhớ sang hàng bên trái.
+  - TRU-NGUOC-HANG: Ở mỗi hàng lấy số lớn trừ số bé thay vì mượn 1 chục ở hàng bên trái.
+  - TONG-HIEU-NHAM-SO: Bài toán tổng – hiệu: lấy (tổng + hiệu) : 2 nhưng gán kết quả cho số bé, hoặc quên chia 2.
+Bài giải / bài mẫu tham khảo (học sinh có thể làm cách khác vẫn đúng):
+"""
+Số cây lớp 4A trồng được là: (96 + 18) : 2 = 57 (cây)
+Số cây lớp 4B trồng được là: 57 − 18 = 39 (cây)
+Đáp số: Lớp 4A: 57 cây; Lớp 4B: 39 cây.
+"""
+Lưu ý của giáo viên: Chấp nhận cách tìm số bé trước: (96 − 18) : 2 = 39, rồi 39 + 18 = 57. Chấp nhận sơ đồ đoạn thẳng thay câu lời giải đầu.
+Bài làm của em gồm 1 ảnh chụp đính kèm (theo thứ tự ảnh 1, 2…).
+Bài làm đánh máy của em:
+"""
+Bài giải ...
+"""
+Hãy chấm và trả về JSON."
+`;

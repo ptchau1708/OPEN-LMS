@@ -1,0 +1,76 @@
+/*
+ * lesson-player — phần dùng chung: thẻ, chấm chờ, hoạt ảnh.
+ * Chỉ dùng biến trong packages/ui/src/tokens.css. An toàn Chrome 109 / Safari 14:
+ * không flex-gap (Safari 14.0), không aspect-ratio, không inset, không :has(), không container query.
+ */
+.lp-card {
+  background: var(--k-card);
+  border: 2px solid var(--k-line);
+  border-radius: var(--k-radius);
+  box-shadow: 0 6px 0 var(--k-line);
+}
+
+.lp-cta {
+  min-width: 200px;
+}
+@media (max-width: 420px) {
+  .lp-cta { min-width: 0; }
+}
+
+.lp-dots { display: inline-block; white-space: nowrap; vertical-align: middle; }
+.lp-dots i {
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin: 0 0.12em;
+  border-radius: 50%;
+  background: currentColor;
+  animation: lp-dot 1s ease-in-out infinite;
+}
+.lp-dots i:nth-child(2) { animation-delay: 0.15s; }
+.lp-dots i:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes lp-dot {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-0.4em); opacity: 1; }
+}
+@keyframes lp-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes lp-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes lp-jump {
+  from { transform: translateY(0) rotate(-2deg); }
+  to { transform: translateY(-14px) rotate(2deg); }
+}
+@keyframes lp-fade-up {
+  from { transform: translateY(18px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes lp-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes lp-drop {
+  from { transform: translate(-50%, -24px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+@keyframes lp-wobble {
+  from { transform: rotate(-6deg) translateY(0); }
+  to { transform: rotate(6deg) translateY(-3px); }
+}
+@keyframes lp-shake {
+  0% { transform: translate(0, 0) rotate(0); }
+  25% { transform: translate(-4px, 1px) rotate(-3deg); }
+  50% { transform: translate(3px, -1px) rotate(2deg); }
+  75% { transform: translate(-2px, 2px) rotate(-2deg); }
+  100% { transform: translate(0, 0) rotate(0); }
+}
+@keyframes lp-pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.12); }
+}

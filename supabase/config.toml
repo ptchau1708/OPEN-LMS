@@ -1,0 +1,46 @@
+# Cấu hình tối thiểu cho Supabase CLI (supabase start / db push / functions deploy / test db).
+# Dự án thật là project Supabase CÓ SẴN của trường: liên kết bằng `supabase link --project-ref <ref>`.
+project_id = "open-edu"  # tên thư mục local, không phải project ref
+
+[api]
+enabled = true
+port = 54321
+# Thêm "v2" để PostgREST phục vụ schema mới. Trên project thật cần bật tương tự trong
+# Dashboard → Project Settings → API (Data API) → Exposed schemas.
+schemas = ["public", "graphql_public", "v2"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+# Đặt bằng phiên bản Postgres của project thật (Dashboard → Settings → Infrastructure). Cần >= 15.
+major_version = 15
+
+[realtime]
+enabled = true
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+
+[functions.grade]
+verify_jwt = true
+
+[functions.ai-gateway]
+verify_jwt = true
+
+[functions.pkg-sign]
+verify_jwt = true
+
+# Phase 5: register-parent không có JWT; action khác tự kiểm tra (requireCaller).
+[functions.school-admin]
+verify_jwt = false

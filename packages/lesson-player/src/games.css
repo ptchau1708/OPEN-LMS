@@ -1,0 +1,162 @@
+/* Trò chơi lớp: vòng quay, đua vịt, bom hẹn giờ. Hoạt ảnh chỉ dùng transform/opacity. */
+.lp-game {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-gap: clamp(14px, 3vw, 44px);
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 8px auto 0;
+  font-size: var(--lp-text, 20px);
+}
+@media (orientation: landscape) and (min-width: 700px) {
+  .lp-wheel,
+  .lp-bombgame { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+}
+.lp-game--big.lp-wheel,
+.lp-game--big.lp-bombgame { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+
+.lp-game__side { display: grid; grid-gap: 16px; justify-items: center; text-align: center; width: 100%; }
+.lp-game__result {
+  min-width: min(100%, 320px);
+  max-width: 100%;
+  padding: 16px 28px;
+  border: 4px solid var(--k-line);
+  border-radius: var(--k-radius);
+  background: var(--k-card);
+  box-shadow: 0 6px 0 var(--k-line);
+  transition: border-color 0.3s;
+}
+.lp-game__result.is-on { border-color: var(--k-star); box-shadow: 0 6px 0 var(--k-star-dark); }
+.lp-game__result-label { display: block; color: var(--k-sub); font-weight: 700; }
+.lp-game__result strong {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--f-kid-display);
+  font-size: var(--lp-h2, 32px);
+  line-height: 1.15;
+  color: var(--k-ink);
+  overflow-wrap: break-word;
+  animation: lp-pop 0.5s var(--k-ease) both;
+}
+.lp-game__actions { display: grid; grid-gap: 12px; justify-items: center; }
+
+/* ---------- vòng quay ---------- */
+.lp-wheel__stage { position: relative; width: min(86vw, 54vh, 560px); }
+.lp-game--big .lp-wheel__stage { width: min(72vmin, 860px); }
+.lp-wheel__stage::before { content: ''; display: block; padding-top: 100%; }
+.lp-wheel__disc {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 10px 0 var(--k-press), 0 0 0 8px var(--k-card), 0 0 0 12px var(--k-line);
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.12, 0.7, 0.1, 1);
+  will-change: transform;
+}
+.lp-wheel__disc svg { display: block; width: 100%; height: 100%; font-family: var(--f-kid); }
+.lp-wheel__pointer {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  border-left: 22px solid transparent;
+  border-right: 22px solid transparent;
+  border-top: 42px solid var(--k-ink);
+  transform: translateX(-50%);
+}
+.lp-game--big .lp-wheel__pointer { border-left-width: 36px; border-right-width: 36px; border-top-width: 68px; top: -24px; }
+
+/* ---------- đua vịt ---------- */
+.lp-race__pond {
+  width: 100%;
+  overflow: hidden;
+  border: 3px solid var(--k-line);
+  border-radius: var(--k-radius);
+  background: var(--k-card);
+  box-shadow: 0 6px 0 var(--k-line);
+}
+.lp-race__lane {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(64px, 20%) minmax(0, 1fr) 14px;
+  align-items: center;
+  min-height: 64px;
+  padding: 4px 8px;
+  border-bottom: 2px dashed var(--k-line);
+  background: var(--k-bg);
+  transition: background-color 0.3s;
+}
+.lp-race__lane:nth-child(even) { background: var(--k-bg-2); }
+.lp-race__lane:last-child { border-bottom: 0; }
+.lp-race__lane.is-winner { background: var(--k-ok-soft); }
+.lp-race__name {
+  padding-right: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-weight: 800;
+  font-size: 0.85em;
+}
+.lp-race__track { position: relative; height: 56px; }
+.lp-race__mover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% - 52px);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  transition: transform 0.35s linear;
+}
+.lp-race__duck { display: inline-block; line-height: 0; }
+.lp-race__duck.is-swimming .lp-duck { animation: lp-wobble 0.45s ease-in-out infinite alternate; }
+.lp-race__lane.is-winner .lp-duck { animation: lp-pulse 0.5s ease-in-out infinite alternate; }
+.lp-race__finish {
+  align-self: stretch;
+  border-radius: 4px;
+  background: repeating-linear-gradient(45deg, var(--k-ink) 0, var(--k-ink) 6px, var(--k-card) 6px, var(--k-card) 12px);
+}
+.lp-game--big .lp-race__lane { min-height: 9vmin; }
+.lp-game--big .lp-race__track { height: 8.5vmin; }
+.lp-game--big .lp-race__mover { width: calc(100% - 76px); }
+.lp-game--big .lp-race__finish { width: 22px; }
+
+/* ---------- bom hẹn giờ ---------- */
+.lp-bombgame__stage { position: relative; display: flex; align-items: center; justify-content: center; min-height: 240px; }
+.lp-bombgame__bomb { position: relative; line-height: 0; }
+.lp-bomb { width: min(62vw, 40vh, 300px); height: auto; }
+.lp-game--big .lp-bomb { width: min(56vmin, 560px); }
+.lp-bombgame__bomb.is-lit .lp-bomb__spark { animation: lp-pulse 0.22s ease-in-out infinite alternate; }
+.lp-bomb__fuse { transition: transform 0.3s linear; }
+.lp-bombgame__count {
+  position: absolute;
+  right: -6%;
+  bottom: 6%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7em;
+  height: 1.7em;
+  border-radius: 50%;
+  background: var(--k-star);
+  color: var(--k-ink);
+  font-family: var(--f-kid-display);
+  font-size: clamp(32px, 8vmin, 120px);
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 5px 0 var(--k-star-dark);
+}
+.lp-bombgame.is-danger .lp-bombgame__bomb { animation: lp-shake 0.18s linear infinite; }
+.lp-bombgame.is-danger .lp-bombgame__count { background: var(--k-try); animation: lp-pulse 0.5s ease-in-out infinite alternate; }
+.lp-bombgame__boom { line-height: 0; animation: lp-pop 0.6s var(--k-ease) both; }
+.lp-burst { width: min(70vw, 44vh, 340px); height: auto; }
+.lp-game--big .lp-burst { width: min(60vmin, 600px); }

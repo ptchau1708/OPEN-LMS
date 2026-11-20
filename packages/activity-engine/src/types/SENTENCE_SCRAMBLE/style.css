@@ -1,0 +1,4 @@
+/* SENTENCE_SCRAMBLE dùng SequenceBoard (ORDERING/style.css); chỉnh riêng cho thẻ từ. */
+.ae-type-sentence_scramble .ae-seq-chip { font-size: calc(24px * var(--k-scale)); padding: 8px 20px; }
+.ae-type-sentence_scramble .ae-seq-bank { background: var(--k-card); box-shadow: 0 4px 0 var(--k-press); }
+.ae-activity--bigscreen.ae-type-sentence_scramble .ae-seq-chip { font-size: 40px; padding: 14px 30px; }

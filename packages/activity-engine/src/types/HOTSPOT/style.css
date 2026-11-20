@@ -1,0 +1,97 @@
+/* HOTSPOT: tranh co theo chiều rộng giữ tỉ lệ; chạm → vòng sáng nhấp nháy; chỉ hiện viền vùng khi xem đáp án. */
+.ae-hs { display: flex; flex-direction: column; align-items: center; gap: var(--ae-gap); }
+.ae-hs__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.ae-hs__frame { width: 100%; }
+.ae-hs__box {
+  position: relative;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  border: 4px solid var(--k-card);
+  border-radius: var(--ae-radius);
+  background: var(--k-bg-2);
+  box-shadow: 0 6px 0 var(--k-press);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.ae-hs__box.is-locked { cursor: default; }
+.ae-hs__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.ae-hs__box.is-loaded .ae-hs__img { opacity: 1; }
+.ae-hs__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+
+/* vòng chọn */
+.ae-hs__ring { fill: none; stroke: var(--k-card); stroke-width: 5px; }
+.ae-hs__pick .ae-hs__ring { stroke: var(--ae-accent); }
+.ae-hs__halo { fill: none; stroke: var(--k-card); stroke-width: 10px; }
+.ae-hs__dot { fill: var(--ae-accent); stroke: var(--k-card); stroke-width: .6; }
+.ae-hs__pulse { fill: none; stroke: var(--ae-accent); stroke-width: 4px; opacity: 0; }
+.ae-hs__ring, .ae-hs__halo, .ae-hs__dot, .ae-hs__pulse, .ae-hs__miss { transform-box: fill-box; transform-origin: center; }
+.ae-hs__pick .ae-hs__ring, .ae-hs__pick .ae-hs__halo { animation: ae-e-pop .35s var(--k-ease) both; }
+.ae-hs__pick .ae-hs__pulse { animation: ae-pulse 1.4s ease-out infinite; }
+.ae-hs__pick.is-ok .ae-hs__ring { stroke: var(--k-ok); }
+.ae-hs__pick.is-ok .ae-hs__dot { fill: var(--k-ok); }
+.ae-hs__pick.is-try .ae-hs__ring { stroke: var(--k-try); }
+.ae-hs__pick.is-try .ae-hs__dot { fill: var(--k-try); }
+
+/* chạm trượt: gợn nhỏ rồi tắt */
+.ae-hs__miss { fill: var(--k-card); fill-opacity: .35; stroke: var(--k-card); stroke-width: 3px; animation: ae-pulse .65s ease-out both; }
+
+/* viền vùng khi xem đáp án */
+.ae-hs__region { stroke-width: 5px; animation: ae-e-pop .4s var(--k-ease) both; }
+.ae-hs__region.is-ok, .ae-hs__region.is-missed { fill: var(--k-ok-soft); fill-opacity: .45; stroke: var(--k-ok); }
+.ae-hs__region.is-missed { stroke-dasharray: 10 7; }
+.ae-hs__region.is-try { fill: var(--k-try-soft); fill-opacity: .45; stroke: var(--k-try); }
+.ae-hs__region { transform-box: fill-box; transform-origin: center; }
+
+.ae-hs--bigscreen .ae-hs__box { border-width: clamp(4px, .7vmin, 10px); box-shadow: 0 clamp(6px, 1vmin, 12px) 0 var(--k-press); }
+.ae-hs--bigscreen .ae-hs__ring { stroke-width: 9px; }
+.ae-hs--bigscreen .ae-hs__halo { stroke-width: 17px; }
+.ae-hs--bigscreen .ae-hs__pulse { stroke-width: 7px; }
+.ae-hs--bigscreen .ae-hs__region { stroke-width: 8px; }
+
+/* ---------- trình soạn GV ---------- */
+.ae-ed-hs { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 860px) { .ae-ed-hs { grid-template-columns: minmax(0, 1fr); } }
+.ae-ed-hs__box {
+  position: relative;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  border: 1px solid var(--p-line);
+  border-radius: 10px;
+  background: var(--p-bg);
+  cursor: crosshair;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ae-ed-hs__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; }
+.ae-ed-hs__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ae-ed-hs__region { fill: var(--p-accent-soft); fill-opacity: .45; stroke: var(--p-accent); stroke-width: 2px; cursor: pointer; }
+.ae-ed-hs__region.is-correct { fill: var(--k-ok-soft); stroke: var(--k-ok); }
+.ae-ed-hs__region.is-sel { stroke-width: 4px; stroke-dasharray: 6 4; fill-opacity: .7; }
+.ae-ed-hs__num-label { fill: var(--p-ink); font-family: var(--f-pro); font-size: 3.4px; font-weight: 700; pointer-events: none; paint-order: stroke; stroke: var(--p-surface); stroke-width: .8px; }
+.ae-ed-hs__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  border: 1px dashed var(--p-line);
+  border-radius: 10px;
+  color: var(--p-muted);
+}
+.ae-ed-hs__list { max-height: 520px; overflow: auto; padding-right: 2px; }
+.ae-ed-hs__shape { width: auto; flex: none; }
+.ae-ed-hs__nums { display: flex; flex-wrap: wrap; gap: 8px; }
+.ae-ed-hs__num { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--p-muted); font-weight: 600; }
