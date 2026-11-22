@@ -63,7 +63,9 @@ export function buildCsp(env, opts = {}) {
   const google = opts.app === 'teacher' && !!(env.VITE_GOOGLE_CLIENT_ID ?? '').trim();
   if (google) connect.push('https://accounts.google.com', 'https://classroom.googleapis.com');
   connect.push(...extra('CSP_EXTRA_CONNECT'));
-  const frame = ["'self'", 'https://www.youtube-nocookie.com', ...(content ? [content] : []), ...EMBED_FRAME_ORIGINS, ...(google ? ['https://accounts.google.com'] : []), ...(demo ? ['http:'] : []), ...extra('CSP_EXTRA_FRAME')];
+  // Trang được phép nhúng do GV / quản trị quản lí trong app (v2.embed_sites) nên khung nhúng mở cho mọi https;
+  // app tự kiểm danh sách trước khi tạo khung. EMBED_FRAME_ORIGINS chỉ còn là danh sách có sẵn.
+  const frame = ["'self'", 'https:', ...(content ? [content] : []), ...(google ? ['https://accounts.google.com'] : []), ...(demo ? ['http:'] : []), ...extra('CSP_EXTRA_FRAME')];
   const csp = [
     "default-src 'self'",
     google ? "script-src 'self' https://accounts.google.com/gsi/client" : "script-src 'self'",
@@ -79,8 +81,10 @@ export function buildCsp(env, opts = {}) {
     "manifest-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'none'",
+    // Trang /lti/auth (app học sinh; app giáo viên khi chọn bài) tự gửi biểu mẫu id_token tới app LTI ngoài → cho https.
+    opts.app === 'learner' || opts.app === 'teacher' ? `form-action 'self' https:${demo ? ' http:' : ''}` : "form-action 'self'",
+    // App học sinh mở app LTI trong khung của chính nó (/lti/auth chạy trong khung) → 'self'.
+    opts.app === 'learner' ? "frame-ancestors 'self'" : "frame-ancestors 'none'",
   ];
   return csp.join('; ');
 }
@@ -90,9 +94,10 @@ export function buildHeaders(env, opts = {}) {
     'Content-Security-Policy': buildCsp(env, opts),
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'X-Frame-Options': 'DENY',
+    'X-Frame-Options': opts.app === 'learner' ? 'SAMEORIGIN' : 'DENY',
     // Micro: đọc thành tiếng; camera: chụp bài làm. Còn lại tắt.
-    'Permissions-Policy': 'camera=(self), microphone=(self), geolocation=(), payment=(), usb=()',
+    // App học sinh: app học tập mở trong khung (vd luyện đọc dùng micro) được xin micro / camera khi khung có allow="…".
+    'Permissions-Policy': opts.app === 'learner' ? 'camera=*, microphone=*, geolocation=(), payment=(), usb=()' : 'camera=(self), microphone=(self), geolocation=(), payment=(), usb=()',
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
   };
 }

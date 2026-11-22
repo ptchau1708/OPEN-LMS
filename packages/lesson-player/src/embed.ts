@@ -5,9 +5,10 @@
  */
 import { youtubeId } from './util';
 
-export type EmbedProvider = 'youtube' | 'google-slides' | 'google-docs' | 'google-sheets' | 'google-forms' | 'google-drive' | 'quizizz' | 'wordwall' | 'canva' | 'padlet' | 'geogebra' | 'scratch';
+export type EmbedProvider = 'other' | 'youtube' | 'google-slides' | 'google-docs' | 'google-sheets' | 'google-forms' | 'google-drive' | 'quizizz' | 'wordwall' | 'canva' | 'padlet' | 'geogebra' | 'scratch';
 
 export const EMBED_PROVIDER_LABEL: Record<EmbedProvider, string> = {
+  other: 'Trang web',
   youtube: 'YouTube',
   'google-slides': 'Google Trang trình bày',
   'google-docs': 'Google Tài liệu',
@@ -36,6 +37,24 @@ export const EMBED_FRAME_ORIGINS = [
   'https://scratch.mit.edu',
 ] as const;
 
+/*
+ * Danh sách trang được phép nhúng do giáo viên / quản trị quản lí (v2.embed_sites). App nạp rồi gọi setEmbedOrigins.
+ * null = chưa nạp → chỉ nhận các trang quen thuộc ở trên.
+ */
+let allowed: Set<string> | null = null;
+const listeners = new Set<() => void>();
+export function setEmbedOrigins(origins: readonly string[] | null): void {
+  allowed = origins ? new Set(origins.map((o) => o.replace(/\/+$/, '').toLowerCase())) : null;
+  for (const l of listeners) l();
+}
+export function subscribeEmbedOrigins(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+}
+export function embedOriginsVersion(): Set<string> | null {
+  return allowed;
+}
+
 export type EmbedResult =
   | { ok: true; provider: EmbedProvider; src: string; openUrl: string }
   | { ok: false; reason: string; openUrl?: string };
@@ -48,6 +67,18 @@ function extractUrl(input: string): string {
 }
 
 export function toEmbed(input: string): EmbedResult {
+  const r = toEmbedRaw(input);
+  if (!r.ok || !allowed) return r;
+  // Trang quen thuộc đã bị GV / quản trị bớt khỏi danh sách → không nhúng nữa.
+  let o = '';
+  try { o = new URL(r.src).origin.toLowerCase(); } catch { /* bỏ qua */ }
+  if (r.provider === 'youtube' ? allowed.has('https://www.youtube-nocookie.com') || allowed.has('https://www.youtube.com') : allowed.has(o)) return r;
+  return { ok: false, reason: NOT_ALLOWED, openUrl: r.openUrl };
+}
+
+const NOT_ALLOWED = 'Trang này chưa có trong danh sách trang được phép nhúng. Thầy cô thêm ở mục “Trang học” → “Trang được phép nhúng”. Học sinh vẫn mở được bằng nút “Mở trong tab mới”.';
+
+function toEmbedRaw(input: string): EmbedResult {
   const raw = extractUrl(input ?? '');
   if (!raw) return { ok: false, reason: 'Dán link trang cần nhúng.' };
   let u: URL;
@@ -110,5 +141,8 @@ export function toEmbed(input: string): EmbedResult {
     const m = /^\/projects\/(\d+)/.exec(p);
     if (m) return ok('scratch', `https://scratch.mit.edu/projects/${m[1]}/embed`);
   }
-  return { ok: false, reason: 'Trang này chưa nằm trong danh sách được nhúng (YouTube, Google Trang trình bày / Tài liệu / Biểu mẫu / Trang tính / Drive, Quizizz, Wordwall, Canva, Padlet, GeoGebra, Scratch). Học sinh vẫn mở được bằng nút “Mở trong tab mới”.', openUrl: open };
+  // Trang khác GV / quản trị đã cho phép (ví dụ app đọc hiểu của trường): nhúng nguyên link (chỉ https).
+  if (allowed && u.protocol === 'https:' && allowed.has(u.origin.toLowerCase())) return ok('other', open);
+  if (allowed && u.protocol === 'http:' && /^(localhost|127\.0\.0\.1)$/.test(u.hostname) && allowed.has(u.origin.toLowerCase())) return ok('other', open);
+  return { ok: false, reason: NOT_ALLOWED, openUrl: open };
 }

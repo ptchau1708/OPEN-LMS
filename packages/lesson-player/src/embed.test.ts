@@ -32,3 +32,17 @@ describe('nhúng trang web', () => {
     }
   });
 });
+
+describe('danh sách trang được phép nhúng (GV / quản trị)', () => {
+  it('nhận trang đã cho phép, bớt trang quen thuộc thì không nhúng nữa', async () => {
+    const { setEmbedOrigins } = await import('./embed');
+    expect(toEmbed('https://doc.truong.edu.vn/bai/3').ok).toBe(false);
+    setEmbedOrigins(['https://doc.truong.edu.vn', 'https://www.youtube-nocookie.com']);
+    expect(toEmbed('https://doc.truong.edu.vn/bai/3')).toMatchObject({ ok: true, provider: 'other', src: 'https://doc.truong.edu.vn/bai/3' });
+    expect(toEmbed('http://doc.truong.edu.vn/bai/3').ok).toBe(false);
+    expect(toEmbed('https://youtu.be/dQw4w9WgXcQ').ok).toBe(true);
+    expect(toEmbed('https://scratch.mit.edu/projects/123').ok).toBe(false);
+    setEmbedOrigins(null);
+    expect(toEmbed('https://scratch.mit.edu/projects/123').ok).toBe(true);
+  });
+});

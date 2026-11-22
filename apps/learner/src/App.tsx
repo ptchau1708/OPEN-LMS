@@ -1,7 +1,7 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router';
 import type { Profile, Role } from '@openedu/contracts';
-import { useCurrentUser, useSignOut } from '@openedu/data';
+import { handoffTo, useCurrentUser, useSignOut } from '@openedu/data';
 import { Button, Icon, KidShell, Mascot, setSoundEnabled } from '@openedu/ui';
 import { ErrorState, LoadingScreen, Toasts } from './components/Common';
 import { UnlockCelebration } from './components/UnlockCelebration';
@@ -30,13 +30,17 @@ const Shop = lazy(() => import('./pages/rewards/Shop'));
 const ClassGardenPage = lazy(() => import('./pages/garden/ClassGardenPage'));
 const BadgeWatcher = lazy(() => import('./pages/rewards/BadgeWatcher'));
 const KetNoi = lazy(() => import('./pages/connect/KetNoi'));
+const LtiAuth = lazy(() => import('./pages/connect/LtiAuth'));
+const LtiApps = lazy(() => import('./pages/connect/LtiApps'));
+const PageView = lazy(() => import('./pages/connect/PageView'));
 
 export function App() {
   const me = useCurrentUser().data ?? null;
   const s = resolveSettings(me);
   useEffect(() => { setSoundEnabled(s.sound); }, [s.sound]);
   // Cửa sổ /ket-noi (app ngoài mở): không hiện màn chúc mừng che mất màn xin phép.
-  const quiet = useLocation().pathname === '/ket-noi';
+  const path = useLocation().pathname;
+  const quiet = path === '/ket-noi' || path === '/lti/auth';
   return (
     <KidShell bigText={s.bigText} reducedMotion={s.reducedMotion}>
       <Suspense fallback={null}><OfflineHost /></Suspense>
@@ -45,6 +49,7 @@ export function App() {
           <Route path="/dang-nhap" element={<Login />} />
           <Route path="/phu-huynh/lien-ket" element={<ParentLink />} />
           <Route path="/ket-noi" element={<KetNoi />} />
+          <Route path="/lti/auth" element={<LtiAuth />} />
           <Route element={<Guard allow={['student']} />}>
             <Route index element={<Home />} />
             <Route path="hoc" element={<Learn />} />
@@ -63,6 +68,9 @@ export function App() {
             <Route path="kiem-tra/:examId" element={<ExamPage />} />
             <Route path="lop" element={<LiveJoin />} />
             <Route path="lop/:sessionId" element={<LiveRoom />} />
+            <Route path="ung-dung" element={<LtiApps />} />
+            <Route path="ung-dung/:appId" element={<PageView />} />
+            <Route path="trang/:pageId" element={<PageView />} />
           </Route>
           <Route element={<Guard allow={['student', 'parent']} />}>
             <Route path="phu-huynh" element={<Parent />} />
@@ -89,14 +97,26 @@ function Guard({ allow }: { allow: Role[] }) {
   return <MeContext.Provider value={me}><Outlet /></MeContext.Provider>;
 }
 
+/**
+ * Đăng nhập chung (docs/DANG_NHAP_CHUNG.md): tài khoản giáo viên / quản trị đăng nhập ở đây được TỰ chuyển sang app
+ * giáo viên kèm phiên. Nút bên dưới chỉ để dự phòng khi trình duyệt không tự chuyển.
+ */
 export function TeacherHint({ me }: { me: Profile }) {
   const out = useSignOut();
   const nav = useNavigate();
+  const started = useRef(false);
+  const [moving, setMoving] = useState(true);
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    void handoffTo(teacherUrl()).finally(() => setTimeout(() => setMoving(false), 4000));
+  }, []);
+  if (moving) return <LoadingScreen label="Đang chuyển sang Bàn làm việc giáo viên" />;
   return (
     <div className="ln-state">
       <Mascot id={me.avatarMascot} mood="wave" size={130} title="" />
       <h2 className="ln-state__title">Chào {me.name}!</h2>
-      <p className="ln-state__text">Đây là Góc học tập của học sinh. Thầy cô dùng Bàn làm việc giáo viên nhé.</p>
+      <p className="ln-state__text">Thầy cô dùng Bàn làm việc giáo viên. Nếu trang chưa tự chuyển, thầy cô bấm nút dưới đây và đăng nhập lại.</p>
       <div className="ln-row ln-row--center">
         <a className="k-btn k-btn--primary k-btn--lg" href={teacherUrl()}><span className="k-btn__label">Mở Bàn làm việc giáo viên</span></a>
         <Button size="lg" variant="secondary" onClick={() => out.mutate(undefined, { onSuccess: () => nav('/dang-nhap') })}>Đăng xuất</Button>

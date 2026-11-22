@@ -38,3 +38,6 @@
   .br-codes li > .tc-small { display: none; }
   .br-exports li { flex-direction: column; align-items: flex-start; }
 }
+/* Tệp VnEdu tự nhận. */
+.br-page .tc-alert--warn { background: var(--tc-warn-soft); border-color: transparent; color: var(--tc-warn); justify-content: flex-start; }
+.br-err { color: var(--p-danger); }

@@ -113,3 +113,34 @@ export function buildConnectSnippet(learnerUrl: string, appId: string): string {
     '</script>',
   ].join('\n');
 }
+
+/* ============================ LTI 1.3 ============================ */
+export { launchStartUrl, toolConfigJson } from '../lti/platform';
+export { LtiPlatformStorage } from '../lti/storage';
+
+/** Giống kiểm tra trong CSDL (v2._lti_url_ok): https, hoặc http://localhost / 127.0.0.1 để chạy thử. */
+export function ltiUrlOk(u: string): boolean {
+  return u.length <= 500 && /^(https:\/\/[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?|http:\/\/(localhost|127\.0\.0\.1))(:[0-9]{1,5})?(\/[^\s"<>]*)?$/.test(u);
+}
+
+/** Client ID ngẫu nhiên cho app mới bật LTI. */
+export function newLtiClientId(): string {
+  const b = new Uint8Array(12);
+  crypto.getRandomValues(b);
+  return `openedu-${Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('')}`;
+}
+
+/** Lỗi đầu tiên của cấu hình LTI (tiếng Việt), hoặc null nếu hợp lệ. */
+export function ltiConfigError(c: import('./types').LtiConfig): string | null {
+  if (!/^[A-Za-z0-9._~-]{8,100}$/.test(c.clientId)) return 'Client ID chỉ gồm chữ, số, dấu chấm, gạch (8–100 kí tự).';
+  if (!/^[A-Za-z0-9._~-]{1,100}$/.test(c.deploymentId)) return 'Deployment ID chưa đúng dạng.';
+  if (!ltiUrlOk(c.loginUrl)) return 'Login URL phải là địa chỉ https (hoặc http://localhost khi chạy thử).';
+  if (!ltiUrlOk(c.launchUrl)) return 'Launch URL phải là địa chỉ https (hoặc http://localhost khi chạy thử).';
+  if (c.deepLinkUrl && !ltiUrlOk(c.deepLinkUrl)) return 'Deep link URL phải là địa chỉ https (hoặc http://localhost khi chạy thử).';
+  if (c.jwksUrl && !ltiUrlOk(c.jwksUrl)) return 'JWKS URL phải là địa chỉ https.';
+  if (!c.jwksUrl && !c.publicKey?.trim()) return 'Cần JWKS URL của app, hoặc dán khóa công khai (PEM).';
+  if (c.publicKey && c.publicKey.length > 4000) return 'Khóa công khai quá dài.';
+  if (c.publicKey?.trim() && !/BEGIN PUBLIC KEY|^\s*\{/.test(c.publicKey)) return 'Khóa công khai phải ở dạng PEM "-----BEGIN PUBLIC KEY-----" hoặc JWK.';
+  if ((c.redirectUris ?? []).some((u) => !ltiUrlOk(u))) return 'Redirect URI phải là địa chỉ https.';
+  return null;
+}

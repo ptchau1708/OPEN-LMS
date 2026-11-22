@@ -7,6 +7,9 @@
  *     OpenEdu.init({ learnerUrl: 'https://HOC.TRUONG.EDU.VN', appId: 'doc-hieu' });
  *     nut.onclick = function () { OpenEdu.signIn().then(function (user) { ... }); };
  *     OpenEdu.record({ activityId: 'bai-1', title: 'Chú sẻ nhỏ', kind: 'reading', correct: 4, total: 5, durationSec: 180 });
+ *     // Dữ liệu học chi tiết (xAPI) — từng câu, kèm mã kĩ năng OPEN-EDU (để tính mức thành thạo):
+ *     OpenEdu.answer({ activityId: 'bai-1', questionId: 'cau-2', question: 'Ý chính của đoạn 1?', correct: false, skills: ['TV5-DH-YCHINH'], durationSec: 40 });
+ *     OpenEdu.xapi([{ verb: { id: 'http://adlnet.gov/expapi/verbs/completed' }, object: { id: 'https://…/bai-1' }, result: { score: { raw: 8, max: 10 } } }]);
  *   </script>
  *
  * Bảo mật: trang này chỉ nhận tin nhắn từ đúng origin của app học sinh OPEN-EDU và đúng mã `state` nó vừa sinh.
@@ -395,6 +398,58 @@
     };
   }
 
+
+  /* ---------------------------- xAPI (dữ liệu học chi tiết) ---------------------------- */
+  var XAPI_SKILLS = 'https://open-edu.vn/xapi/skills';
+  function uuid4() {
+    var c = win.crypto;
+    if (c && c.randomUUID) return c.randomUUID();
+    var h = ''; for (var i = 0; i < 32; i++) h += Math.floor(Math.random() * 16).toString(16);
+    return h.slice(0, 8) + '-' + h.slice(8, 12) + '-4' + h.slice(13, 16) + '-a' + h.slice(17, 20) + '-' + h.slice(20);
+  }
+  /**
+   * Gửi câu xAPI (một hoặc mảng, tối đa 50) về OPEN-EDU. Người học luôn là em đang đăng nhập (actor bị bỏ qua).
+   * Trả Promise<{saved, ids?, reason?, message?}> — không reject.
+   */
+  function xapi(statements) {
+    need();
+    var list = Array.isArray(statements) ? statements : [statements];
+    if (!session) return Promise.resolve({ saved: false, reason: 'signed_out', message: 'Em chưa đăng nhập.' });
+    if (session.demo || !session.api) return Promise.resolve({ saved: false, reason: 'demo', message: 'Chế độ thử: không gửi dữ liệu.' });
+    if (!tokenValid()) { expire(); return Promise.resolve({ saved: false, reason: 'expired', message: 'Phiên đăng nhập đã hết hạn.' }); }
+    var s = session;
+    for (var i = 0; i < list.length; i++) { if (!list[i].id) list[i].id = uuid4(); if (!list[i].timestamp) list[i].timestamp = new Date().toISOString(); }
+    return win.fetch(s.api.url.replace(/\/+$/, '') + '/functions/v1/lti/xapi/statements', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': s.api.anonKey, 'Authorization': 'Bearer ' + s.token.accessToken, 'X-OpenEdu-App': cfg.appId, 'X-Experience-API-Version': '1.0.3' },
+      body: JSON.stringify(list)
+    }).then(function (res) {
+      return res.text().then(function (text) {
+        var body = null; try { body = JSON.parse(text); } catch (e) { body = null; }
+        if (res.ok) return { saved: true, ids: body };
+        if (res.status === 401) { expire(); return { saved: false, reason: 'expired', message: 'Phiên đăng nhập đã hết hạn.' }; }
+        return { saved: false, reason: 'server', message: (body && body.error_description) || ('Máy chủ từ chối (' + res.status + ').') };
+      });
+    }, function () { return { saved: false, reason: 'offline', message: 'Mất mạng.' }; });
+  }
+  /**
+   * Một câu trả lời: { activityId, questionId, question?, correct, skills?: [mã kĩ năng], response?, durationSec?, score?: 0..1 }
+   */
+  function answer(d) {
+    need();
+    var base = (win.location ? win.location.origin : 'app') + '/' + str(d.activityId || 'bai', 120);
+    var result = { success: !!d.correct };
+    if (typeof d.score === 'number') result.score = { scaled: Math.max(0, Math.min(1, d.score)) };
+    if (typeof d.durationSec === 'number') result.duration = 'PT' + Math.max(0, Math.round(d.durationSec)) + 'S';
+    if (d.response !== undefined) result.response = str(d.response, 500);
+    var ext = {}; ext[XAPI_SKILLS] = Array.isArray(d.skills) ? d.skills.slice(0, 10) : [];
+    return xapi({
+      verb: { id: 'http://adlnet.gov/expapi/verbs/answered' },
+      object: { id: base + '/' + str(d.questionId || 'cau', 120), definition: { name: { 'vi-VN': str(d.question || d.questionId, 300) }, extensions: ext } },
+      result: result
+    });
+  }
+
   function renderButtons() {
     for (var i = 0; i < buttons.length; i++) renderButton(buttons[i]);
   }
@@ -449,6 +504,8 @@
     getUser: getUser,
     isSignedIn: isSignedIn,
     record: record,
+    xapi: xapi,
+    answer: answer,
     flush: flush,
     pendingCount: pendingCount,
     on: on,

@@ -2,6 +2,7 @@
  * Nguồn dữ liệu demo: chạy hoàn toàn trên máy (localStorage hoặc bộ nhớ), nội dung mẫu nạp lần đầu.
  * Lớp học trực tiếp dùng tools/live-relay (WebSocket trong mạng LAN).
  */
+import { packSession, unpackSession } from '../sessionPack';
 import {
   uid,
   SKILL_BY_CODE,
@@ -305,6 +306,24 @@ export class DemoDataSource implements DataSource {
 
   async signOut(): Promise<void> {
     this.storage.remove(K.session);
+  }
+
+  /** Đăng nhập chung (bản demo): chuyển mã người dùng sang app kia. Chỉ dữ liệu mẫu trong trình duyệt. */
+  async exportSession(): Promise<string | null> {
+    await this.ready();
+    const s = this.get<{ userId: string } | null>(K.session, null);
+    if (!s) return null;
+    this.storage.remove(K.session);
+    return packSession({ d: s.userId });
+  }
+
+  async importSession(packed: string): Promise<Profile | null> {
+    await this.ready();
+    const t = unpackSession(packed);
+    const user = t?.d ? this.findUser(t.d) : undefined;
+    if (!user) return null;
+    this.put(K.session, { userId: user.id });
+    return clone(user);
   }
 
   async listDemoUsers(): Promise<Profile[]> {

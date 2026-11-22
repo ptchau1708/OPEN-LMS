@@ -64,7 +64,7 @@ export default function BridgePage({ user }: { user: Profile }) {
       <ErrorNote error={classes.error ?? q.error} onRetry={refetch} />
       {!list.length && !classes.isLoading ? <Empty icon="team" title="Thầy cô chưa có lớp nào" /> : !data || q.isLoading ? <Loading /> : (
         <div key={`${classId}-${groupOf}`}>
-          {tab === 'fill' ? <TemplateFill data={data} /> : null}
+          {tab === 'fill' ? <TemplateFill data={data} onChanged={refetch} /> : null}
           {tab === 'roster' ? <RosterImport data={data} onChanged={refetch} /> : null}
           {tab === 'export' ? <QuickExport data={data} /> : null}
           {tab === 'codes' ? <CodeEditor data={data} onChanged={refetch} /> : null}

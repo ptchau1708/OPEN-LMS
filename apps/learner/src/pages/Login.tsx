@@ -4,7 +4,7 @@ import type { Profile } from '@openedu/contracts';
 import { isDemoMode, useClasses, useCurrentUser, useDemoUsers, useSignIn } from '@openedu/data';
 import { Button, Icon, Mascot, sfx } from '@openedu/ui';
 import { Avatar, LoadingScreen } from '../components/Common';
-import { errText, teacherUrl } from '../lib/util';
+import { errText } from '../lib/util';
 
 const LOGO_COLORS = ['--k-math', '--k-viet', '--k-nat', '--k-art', '--k-eng', '--k-star-dark', '--k-sci', '--k-music'];
 
@@ -51,9 +51,9 @@ export default function Login() {
 
       {showForm ? (
         <form className="ln-login__form k-card" onSubmit={submit}>
-          <h2 className="ln-h2">Đăng nhập bằng tên</h2>
+          <h2 className="ln-h2">Đăng nhập</h2>
           <label className="ln-field">
-            <span className="ln-field__label">Tên đăng nhập</span>
+            <span className="ln-field__label">Tên đăng nhập hoặc email</span>
             <input className="ln-input" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoCapitalize="none" spellCheck={false} placeholder="ví dụ: an2a1" />
           </label>
           <label className="ln-field">
@@ -77,7 +77,7 @@ export default function Login() {
       )}
 
       <p className="ln-login__teacher">Bố mẹ? <Link to="/phu-huynh/lien-ket">Tạo tài khoản phụ huynh bằng mã của con</Link> · Đăng nhập bằng email / số điện thoại ở ô “Đăng nhập bằng tên”.</p>
-      <p className="ln-login__teacher">Thầy cô? <a href={teacherUrl()}>Mở Bàn làm việc giáo viên</a></p>
+      <p className="ln-login__teacher" data-testid="login-staff-note">Thầy cô và quản trị cũng đăng nhập ở đây (bằng email hoặc tên đăng nhập) — trang tự chuyển sang Bàn làm việc giáo viên.</p>
     </div>
   );
 }
@@ -94,6 +94,7 @@ function DemoPicker({ onPick, busyId }: { onPick: (u: Profile) => void; busyId: 
   const list = users.data ?? [];
   const students = list.filter((u) => u.role === 'student');
   const parents = list.filter((u) => u.role === 'parent');
+  const staff = list.filter((u) => u.role === 'teacher' || u.role === 'admin');
   const card = (u: Profile, sub: string) => (
     <button key={u.id} type="button" className="ln-pick" onClick={() => onPick(u)} disabled={!!busyId}>
       <Avatar mascot={u.avatarMascot} color={u.avatarColor} size={72} />
@@ -109,6 +110,12 @@ function DemoPicker({ onPick, busyId }: { onPick: (u: Profile) => void; busyId: 
         <>
           <h3 className="ln-h3 ln-center">Phụ huynh</h3>
           <div className="ln-pick-grid ln-pick-grid--small">{parents.map((u) => card(u, 'Xem việc học của con'))}</div>
+        </>
+      )}
+      {staff.length > 0 && (
+        <>
+          <h3 className="ln-h3 ln-center">Thầy cô</h3>
+          <div className="ln-pick-grid ln-pick-grid--small">{staff.map((u) => card(u, u.role === 'admin' ? 'Quản trị trường' : 'Bàn làm việc giáo viên'))}</div>
         </>
       )}
     </section>

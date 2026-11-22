@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
-import { useCurrentUser } from '@openedu/data';
+import { useCurrentUser, useEmbedOriginsSync } from '@openedu/data';
+import { setEmbedOrigins } from '@openedu/lesson-player';
 import { Layout } from './components/Layout';
 import { Loading } from './components/common';
 import { Login } from './pages/Login';
@@ -39,14 +40,19 @@ const AdminUsers = lazy(() => import('./pages/admin/Admin').then((m) => ({ defau
 const AdminSettings = lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.AdminSettings })));
 const ConnectApps = lazy(() => import('./pages/admin/ConnectApps'));
 const BridgePage = lazy(() => import('./pages/bridge/BridgePage'));
+const ClassPages = lazy(() => import('./pages/pages/ClassPages'));
+const TeacherLtiAuth = lazy(() => import('./pages/pages/LtiAuth'));
 
 export function App() {
   const me = useCurrentUser();
+  const staff = me.data?.role === 'teacher' || me.data?.role === 'admin';
+  useEmbedOriginsSync(setEmbedOrigins, staff);
   if (me.isLoading) return <div className="tc-app theme-pro tc-center"><Loading /></div>;
   const user = me.data;
   if (!user || (user.role !== 'teacher' && user.role !== 'admin')) return <Login wrongRole={user ?? null} />;
   return (
     <Routes>
+      <Route path="lti/auth" element={<Suspense fallback={<Loading />}><TeacherLtiAuth /></Suspense>} />
       <Route element={<Layout user={user} />}>
         <Route index element={<Dashboard user={user} />} />
         <Route path="bai-giang" element={<Lessons user={user} />} />
@@ -78,6 +84,7 @@ export function App() {
         <Route path="bao-cao" element={<Suspense fallback={<Loading />}><Reports user={user} /></Suspense>} />
         <Route path="bao-cao/ban-do-khoi" element={<Suspense fallback={<Loading />}><GradeMap user={user} /></Suspense>} />
         <Route path="phu-huynh" element={<Suspense fallback={<Loading />}><ParentLinks user={user} /></Suspense>} />
+        <Route path="trang-hoc" element={<Suspense fallback={<Loading />}><ClassPages user={user} /></Suspense>} />
         <Route path="xuat-nhap" element={<Suspense fallback={<Loading />}><BridgePage user={user} /></Suspense>} />
         <Route path="quan-tri/lop" element={user.role === 'admin' ? <Suspense fallback={<Loading />}><AdminClasses /></Suspense> : <Navigate to="/" replace />} />
         <Route path="quan-tri/tai-khoan" element={user.role === 'admin' ? <Suspense fallback={<Loading />}><AdminUsers /></Suspense> : <Navigate to="/" replace />} />

@@ -2,10 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { bridge } from '@openedu/data';
 import { Btn, Empty } from '../../components/common';
 import { applyPicks, baseName, ExcelPicker, FileSummary, MatchChip, StudentSelect, type BridgeData, type OpenedFile } from './shared';
+import { VnEduBookFill } from './VnEduBookFill';
 
 /** "Điền vào mẫu": tải tệp từ VnEdu → ghép học sinh → chọn dữ liệu cho từng cột → xem trước → tải tệp đã điền. */
-export function TemplateFill({ data }: { data: BridgeData }) {
+export function TemplateFill({ data, onChanged }: { data: BridgeData; onChanged: () => void }) {
   const [file, setFile] = useState<OpenedFile | null>(null);
+  const [manual, setManual] = useState(false);
+  const book = useMemo(() => (file ? bridge.recognizeVnEdu(file.opened.wb) : null), [file]);
   const [picks, setPicks] = useState<Record<number, string>>({});
   const [mapping, setMapping] = useState<bridge.ColumnMapping>({});
   const [savedAt, setSavedAt] = useState<string | null>(null);
@@ -56,8 +59,8 @@ export function TemplateFill({ data }: { data: BridgeData }) {
     setError('');
     try {
       const res = bridge.fillTemplate(file.bytes, file.opened.wb, file.opened.sheetIndex, table, plan);
-      const fileName = `${baseName(file.name)}-da-dien.xlsx`;
-      bridge.downloadBytes(fileName, res.bytes);
+      const fileName = `${baseName(file.name)}-da-dien.${res.ext}`;
+      bridge.downloadBytes(fileName, res.bytes, res.ext === 'xls' ? 'application/vnd.ms-excel' : bridge.XLSX_MIME);
       bridge.saveMapping(table, mapping);
       setSavedAt(new Date().toISOString());
       setDone({ mode: res.mode, note: res.note, filled: plan.filled, formulas: res.formulasReplaced, fileName });
@@ -75,10 +78,12 @@ export function TemplateFill({ data }: { data: BridgeData }) {
           <li>Tải tệp đó lên đây. OPEN-EDU tự tìm dòng tiêu đề và ghép từng dòng với học sinh của lớp.</li>
           <li>Chọn dữ liệu cho từng cột, xem trước, rồi tải tệp đã điền về và nhập lại vào VnEdu.</li>
         </ol>
-        <ExcelPicker testId="br-fill-file" label="Chọn tệp Excel từ VnEdu" hint="Tệp .xlsx. Tệp giữ nguyên định dạng, chỉ các ô được chọn mới thay đổi. Tệp không rời khỏi máy thầy cô." onOpen={setFile} />
+        <ExcelPicker testId="br-fill-file" label="Chọn tệp Excel từ VnEdu" hint="Tệp .xls hoặc .xlsx. Sổ điểm các môn và mẫu nhận xét năng lực phẩm chất của VnEdu được nhận ra và điền tự động. Tệp giữ nguyên định dạng, không rời khỏi máy thầy cô." onOpen={(f) => { setManual(false); setFile(f); }} />
       </section>
     );
   }
+
+  if (book && !manual) return <VnEduBookFill data={data} file={file} book={book} onManual={() => setManual(true)} onClear={() => setFile(null)} onChanged={onChanged} />;
 
   const review = matches.filter((m) => !m.studentId || m.status === 'manual' || m.status === 'loose');
   const shown = showAll ? matches : review;
@@ -172,8 +177,8 @@ export function TemplateFill({ data }: { data: BridgeData }) {
               </table>
             </div>
             <div className="tc-row tc-wrap br-actions">
-              <Btn kind="primary" icon="check" size="lg" data-testid="br-download" disabled={!plan.filled} onClick={download}>Tải tệp đã điền (.xlsx)</Btn>
-              <span className="tc-small tc-muted">Tệp mới có tên “{baseName(file.name)}-da-dien.xlsx”. Tệp gốc không bị sửa.</span>
+              <Btn kind="primary" icon="check" size="lg" data-testid="br-download" disabled={!plan.filled} onClick={download}>Tải tệp đã điền (.{file.opened.wb.format === 'xls' ? 'xls' : 'xlsx'})</Btn>
+              <span className="tc-small tc-muted">Tệp mới có tên “{baseName(file.name)}-da-dien.{file.opened.wb.format === 'xls' ? 'xls' : 'xlsx'}”. Tệp gốc không bị sửa.</span>
             </div>
           </>
         )}

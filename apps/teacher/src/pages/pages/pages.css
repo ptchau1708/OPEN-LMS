@@ -1,0 +1,17 @@
+/* Trang học */
+.pg-page .tc-card { margin-bottom: 16px; }
+.pg-list, .pg-sites { list-style: none; margin: 0; padding: 0; }
+.pg-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--p-line); }
+.pg-list li:last-child { border-bottom: 0; }
+.pg-list li.is-hidden .pg-list__main { opacity: .6; }
+.pg-list__main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pg-list__main .tc-small { overflow-wrap: anywhere; }
+.pg-list__actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.pg-siteform { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin: 8px 0; }
+.pg-sites li { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--p-line); }
+.pg-sites li .tc-small { flex: 1; min-width: 0; }
+.pg-sites code { overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .pg-list li { flex-direction: column; align-items: flex-start; }
+  .pg-siteform { grid-template-columns: 1fr; }
+}

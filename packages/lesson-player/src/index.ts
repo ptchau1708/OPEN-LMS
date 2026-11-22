@@ -18,7 +18,7 @@ export type { GameProps } from './games';
 export { VideoBlock } from './VideoBlock';
 export type { VideoBlockProps } from './VideoBlock';
 export { EmbedBlock } from './EmbedBlock';
-export { toEmbed, EMBED_FRAME_ORIGINS, EMBED_PROVIDER_LABEL, type EmbedProvider, type EmbedResult } from './embed';
+export { toEmbed, setEmbedOrigins, subscribeEmbedOrigins, embedOriginsVersion, EMBED_FRAME_ORIGINS, EMBED_PROVIDER_LABEL, type EmbedProvider, type EmbedResult } from './embed';
 export { computeLiveStats, latestPerStudent } from './liveStats';
 export type { LiveStats, LiveOptionStat } from './liveStats';
 export { isBridgeMessage, launcherUrl, contentOrigin } from './bridge';

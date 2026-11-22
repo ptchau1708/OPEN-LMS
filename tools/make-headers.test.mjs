@@ -7,7 +7,7 @@ test('CSP bản chạy thật chỉ mở cho Supabase, origin nội dung, R2', (
   const csp = buildCsp({ VITE_SUPABASE_URL: 'https://abc.supabase.co', VITE_CONTENT_ORIGIN: 'https://nd.truong.edu.vn/' });
   assert.match(csp, /script-src 'self';/);
   assert.match(csp, /connect-src 'self' https:\/\/abc\.supabase\.co wss:\/\/abc\.supabase\.co https:\/\/\*\.r2\.cloudflarestorage\.com https:\/\/nd\.truong\.edu\.vn;/);
-  assert.match(csp, /frame-src 'self' https:\/\/www\.youtube-nocookie\.com https:\/\/nd\.truong\.edu\.vn https:\/\/docs\.google\.com [^;]*https:\/\/scratch\.mit\.edu;/);
+  assert.match(csp, /frame-src 'self' https: https:\/\/nd\.truong\.edu\.vn;/);
   assert.doesNotMatch(csp, /accounts\.google\.com|classroom\.googleapis/);
   assert.doesNotMatch(csp, /connect-src[^;]* (ws:|http:|https:)(;| )/);
   assert.doesNotMatch(csp, /unsafe-eval/);
@@ -41,4 +41,14 @@ test('Vercel: header áp cho mọi đường dẫn, tệp tĩnh trước, còn l
   assert.deepEqual(c.routes[i + 1], { src: '/(.*)', dest: '/index.html' });
   assert.ok(c.routes.slice(0, i).every((r) => r.continue === true));
   assert.ok(new RegExp(`^${c.routes[1].src}$`).test('/sw.js'));
+});
+
+test('app học sinh cho gửi biểu mẫu LTI tới https; app giáo viên thì không', async () => {
+  const { buildCsp: csp } = await import('./make-headers.mjs');
+  const env = { VITE_SUPABASE_URL: 'https://abc.supabase.co' };
+  assert.match(csp(env, { app: 'learner' }), /form-action 'self' https:(;|$)/);
+  assert.match(csp(env, { app: 'teacher' }), /form-action 'self' https:(;|$)/);
+  assert.match(csp(env, { app: 'present' }), /form-action 'self'(;|$)/);
+  assert.match(csp(env, { app: 'learner' }), /frame-ancestors 'self'/);
+  assert.match(csp(env, { app: 'teacher' }), /frame-ancestors 'none'/);
 });

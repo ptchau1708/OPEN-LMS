@@ -247,6 +247,19 @@ export function createOfflineAware(inner: DataSource, o: OfflineAwareOptions): O
     await inner.signOut();
     await store.delete('cache', ck.me).catch(() => undefined);
   };
+  if (inner.exportSession) {
+    wrapped.exportSession = async () => {
+      const r = await inner.exportSession!();
+      await store.delete('cache', ck.me).catch(() => undefined);
+      return r;
+    };
+  }
+  if (inner.importSession) {
+    wrapped.importSession = (async (packed: string) => {
+      await store.delete('cache', ck.me).catch(() => undefined);
+      return inner.importSession!(packed);
+    }) as AnyFn;
+  }
   wrapped.getLesson = ((id: string) => cachedRead(ck.lesson(id), () => inner.getLesson(id), (v) => (v ? put(ck.lesson(id), stripLessonKeys(v)) : undefined))) as AnyFn;
 
   const getItemsCached = async (ids: string[]): Promise<Item[]> => {

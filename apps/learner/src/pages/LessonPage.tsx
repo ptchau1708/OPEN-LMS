@@ -3,10 +3,11 @@ import { useNavigate, useParams } from 'react-router';
 import type { AnswerEvent, ContentPackage, MascotId } from '@openedu/contracts';
 import { SUBJECTS } from '@openedu/contracts';
 import {
+  useEmbedOriginsSync,
   lessonItemIds, useCompleteLesson, useItemsByIds, useLesson, usePackages, usePassport, useProgress,
   useHint, useRecordEvent, useSaveProgress, useSubmitAnswer, useTodayTasks,
 } from '@openedu/data';
-import { SelfPacedPlayer } from '@openedu/lesson-player';
+import { SelfPacedPlayer, setEmbedOrigins } from '@openedu/lesson-player';
 import { Button, Confetti, Icon, Mascot, StarCount, sfx } from '@openedu/ui';
 import { ErrorState, LoadingScreen } from '../components/Common';
 import { useUi } from '../lib/store';
@@ -17,6 +18,7 @@ import { useOfflineState } from '../offline/state';
 interface Done { summary: { correct: number; total: number; stars: number }; bonus: number | null; failed?: boolean; pending?: boolean }
 
 export default function LessonPage() {
+  useEmbedOriginsSync(setEmbedOrigins);
   const { lessonId = '' } = useParams();
   const me = useMe();
   const nav = useNavigate();

@@ -1,0 +1,16 @@
+{
+  "https://dhrkppsbamebiklosmzn.supabase.co/functions/v1/lti": [
+    {
+      "default": true,
+      "client_id": "DÁN CLIENT ID TỪ TRANG QUẢN TRỊ OPEN-EDU",
+      "auth_login_url": "https://ĐỊA-CHỈ-APP-HỌC-SINH/lti/auth",
+      "auth_token_url": "https://dhrkppsbamebiklosmzn.supabase.co/functions/v1/lti/token",
+      "auth_audience": "https://dhrkppsbamebiklosmzn.supabase.co/functions/v1/lti/token",
+      "key_set_url": "https://dhrkppsbamebiklosmzn.supabase.co/functions/v1/lti/jwks",
+      "key_set": null,
+      "private_key_file": "private.key",
+      "public_key_file": "public.key",
+      "deployment_ids": ["DÁN DEPLOYMENT ID TỪ TRANG QUẢN TRỊ OPEN-EDU"]
+    }
+  ]
+}

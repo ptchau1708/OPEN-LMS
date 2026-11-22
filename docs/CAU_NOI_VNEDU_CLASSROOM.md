@@ -21,8 +21,30 @@ VnEdu (qua tệp Excel) và Google Classroom. Giáo viên thấy các lớp mìn
 ## Hướng dẫn cho thầy cô
 
 ### 1. Điền vào mẫu VnEdu
-1. Trên VnEdu, tải tệp Excel của lớp (sổ điểm, bảng nhận xét TT27, bảng chuyên cần…) về máy. Nếu VnEdu cho chọn
-   định dạng, chọn **.xlsx**. Tệp **.xls** đời cũ: mở bằng Excel → *Lưu thành* → *Excel Workbook (.xlsx)*.
+
+**Hai tệp VnEdu được nhận ra và điền TỰ ĐỘNG** (đã đối chiếu tệp thật của trường, 20/11/2026):
+
+| Tệp tải từ VnEdu | OPEN-EDU nhận ra | Điền gì |
+|---|---|---|
+| Sổ điểm các môn (`so_diem_cac_mon_lop_5a2.xls`, mỗi môn một trang tính) | Dòng 4 “BẢNG ĐIỂM CHI TIẾT - MÔN … - HỌC KỲ … - GIỮA/CUỐI KỲ … - NĂM HỌC …”, ô B6 là mã bảng của VnEdu (vd `5004627967-50-2-ck2-2026`, giữ nguyên), cột B “Mã học sinh” (ẩn), “Họ và tên” gộp 2 cột (họ đệm + tên) | Mọi trang cùng lúc: **Nhận xét**, **KT** (điểm nguyên 1–10 theo TT27), **XL** (T/H/C) từ đánh giá TT27 của OPEN-EDU. Cột “(Sau thi lại)” để nguyên. Môn OPEN-EDU chưa có (Lịch sử và Địa lí, Đạo đức, Tin học, Công nghệ, GD thể chất, HĐ trải nghiệm) được bỏ qua và ghi rõ. |
+| Mẫu nhận xét năng lực, phẩm chất (`mau_nhan_xet_nang_luc_pham_chat_1.xls`) | 2 dòng tiêu đề: Năng lực chung (3) · Năng lực đặc thù (7) · Phẩm chất (5), mỗi nhóm có cột “Nhận xét về …” | Mẫu trống → viết một dòng cho mỗi em **có mã học sinh VnEdu**: STT, mã, họ tên, Học kì, các mức **T/Đ/C**. Ba cột “Nhận xét về …” để trống cho thầy cô viết. Mẫu đã có dòng → ghép và điền. |
+
+Cách làm: **Xuất / nhập dữ liệu → Điền vào mẫu** → chọn lớp và **Kì** cho đúng kì của tệp (trang báo nếu lệch) → chọn
+tệp → xem bảng “Các môn trong tệp” → **Tải tệp đã điền (.xls)** → trên VnEdu vào đúng màn hình nhập điểm / nhận xét
+của lớp, chọn “Nhập từ Excel”. Tệp ra **cùng định dạng .xls** với tệp gốc, giữ cột ẩn, ô gộp, mã bảng ô B6 và mọi trang
+tính; đã kiểm tra đọc lại bằng LibreOffice, xlrd và PhpSpreadsheet (thư viện PHP mà tệp VnEdu được tạo ra).
+
+**Mã học sinh**: sổ điểm VnEdu có mã từng em. Khi tải sổ điểm lên, bấm **“Lưu mã học sinh VnEdu vào OPEN-EDU”** — lần
+sau ghép chắc chắn theo mã, và mẫu năng lực phẩm chất mới viết được dòng cho các em.
+
+⚠ Chưa thử **nhập ngược** tệp đã điền vào VnEdu thật. Lần đầu nên thử với một lớp, kiểm tra vài em trên VnEdu.
+Giá trị cột “Học kì” của mẫu năng lực phẩm chất (mặc định 1 cho giữa/cuối kì I, 2 cho giữa kì II/cuối năm) là phỏng
+đoán — nếu VnEdu báo lỗi, đổi ô “Giá trị ghi vào cột Học kì” rồi tải lại.
+
+Tệp khác (bảng chuyên cần, danh sách…) vẫn dùng cách ghép cột như dưới đây (bấm “Tự ghép cột” để dùng cách này với cả
+hai tệp trên):
+
+1. Trên VnEdu, tải tệp Excel của lớp về máy (.xls hoặc .xlsx đều được).
 2. Vào **Xuất / nhập dữ liệu → Điền vào mẫu**, chọn lớp, kì (TT27) và tháng (chuyên cần), rồi **Chọn tệp Excel từ VnEdu**.
 3. **Ghép học sinh**: OPEN-EDU tự tìm dòng tiêu đề (bỏ qua tên trường, tên bảng phía trên), rồi ghép từng dòng với học sinh
    trong lớp — theo **mã học sinh** trước, sau đó theo **họ tên** (không phân biệt dấu, nhận cả khi tệp ghi đủ họ còn
@@ -32,7 +54,7 @@ VnEdu (qua tệp Excel) và Google Classroom. Giáo viên thấy các lớp mìn
    số buổi vắng có phép / không phép / đi muộn / có mặt trong tháng… OPEN-EDU gợi ý sẵn theo tên cột; thầy cô xem lại.
    Tích “Giữ nguyên ô đã có dữ liệu” nếu chỉ muốn điền ô trống.
 5. **Xem trước** (ô xanh = sẽ điền; “–” = OPEN-EDU chưa có dữ liệu, ô để nguyên) rồi **Tải tệp đã điền**. Tệp mới tên
-   `<tên cũ>-da-dien.xlsx`; mở kiểm tra rồi nhập vào VnEdu như bình thường.
+   `<tên cũ>-da-dien.xls` (hoặc `.xlsx`, cùng định dạng tệp gốc); mở kiểm tra rồi nhập vào VnEdu như bình thường.
 6. Lần sau dùng cùng mẫu (cùng tiêu đề cột), OPEN-EDU **nhớ cách ghép cột** trên máy này — chỉ cần bấm tải.
 
 Tệp được xử lí ngay trong trình duyệt, không gửi lên máy chủ. OPEN-EDU chỉ sửa giá trị các ô được chọn bên trong tệp
@@ -110,12 +132,11 @@ Token chỉ giữ trong bộ nhớ trang (khoảng 1 giờ), không lưu xuống
 - **Google Classroom API chưa thử với Google thật** (môi trường dựng mã không có tài khoản Google). Lớp API
   (`packages/data/src/export/classroom.ts`) là hàm thuần trên `fetch` tiêm vào, có kiểm thử với phản hồi giả: phân trang,
   403 “ProjectPermissionDenied”, 401, mất mạng, lỗi từng phần. Luồng đăng nhập GIS (`gis.ts`) chưa chạy lần nào.
-- **Chưa có tệp mẫu VnEdu thật.** Bộ nhận dạng đã thử với tệp giả lập kiểu VnEdu (dòng tên trường gộp ô, tiêu đề 2 tầng
-  ở dòng 6–7, mã định danh có số 0 đầu, dòng chữ kí cuối bảng) tạo bằng openpyxl và bằng chính bộ ghi của OPEN-EDU.
-  Khi có tệp thật, thêm vào kiểm thử `packages/data/src/__tests__/bridge.test.ts`; tên cột lạ thêm vào `ALIASES`
-  trong `export/detect.ts`.
-- Không đọc được tệp .xls đời cũ (BIFF) và tệp có mật khẩu — báo lỗi kèm cách lưu lại thành .xlsx. Tệp “.xls” thực chất
-  là bảng HTML thì đọc được (khi điền sẽ ghi ra .xlsx mới).
+- **Đã có 2 tệp VnEdu thật** (sổ điểm các môn lớp 5A2, mẫu năng lực phẩm chất) — dùng để đối chiếu cấu trúc, KHÔNG đưa
+  vào kho mã (có tên và mã học sinh thật). Kiểm thử dùng 2 tệp giả cùng cấu trúc trong `export/__fixtures__/`
+  (tạo bằng `tools/make-vnedu-fixtures.py`). Chưa thử nhập ngược vào VnEdu.
+- Tệp .xls (BIFF8) đọc và sửa được; Excel 95 trở về trước và tệp có mật khẩu thì báo lỗi kèm cách lưu lại thành .xlsx.
+  Tệp “.xls” thực chất là bảng HTML thì đọc được (khi điền sẽ ghi ra .xlsx mới).
 - Cách ghép cột nhớ theo máy (localStorage), không theo tài khoản.
 - Bản Supabase của `BridgeSource` (RPC `set_student_external_ids`, bảng `student_external_ids`) có kiểm thử pgTAP nhưng
   chưa chạy với project thật.
@@ -123,6 +144,8 @@ Token chỉ giữ trong bộ nhớ trang (khoảng 1 giờ), không lưu xuống
 
 ## Kĩ thuật
 - `packages/data/src/export/` (xuất ra `@openedu/data` dưới không gian tên `bridge`):
+  `xls.ts` (đọc / điền tệp .xls BIFF8: Compound File, bảng chuỗi SST + CONTINUE, viết lại bảng ô, sửa INDEX/DBCELL/
+  BOUNDSHEET/EXTSST), `vneduBook.ts` (nhận ra sổ điểm các môn / mẫu năng lực phẩm chất, điền mọi trang),
   `xlsx.ts` (đọc/ghi .xlsx tự viết trên fflate), `xlsxPatch.ts` (điền ô trong tệp gốc: sửa XML trang tính,
   sharedStrings / inlineStr, bỏ calcChain khi đè công thức), `detect.ts` (dòng tiêu đề, cột, dấu vân tay mẫu),
   `match.ts` (ghép học sinh), `fields.ts` (trường dữ liệu + tải dữ liệu lớp), `template.ts` (kế hoạch điền, dự phòng,

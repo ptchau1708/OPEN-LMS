@@ -4,7 +4,7 @@ import './styles/app.css';
 import type { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, useLocation } from 'react-router';
-import { DataProvider, initDataSource, installClientErrorHandlers, isChunkLoadError, reportClientError } from '@openedu/data';
+import { DataProvider, consumeHandoff, initDataSource, installClientErrorHandlers, isChunkLoadError, reportClientError } from '@openedu/data';
 import { unlockAudio, ErrorBoundary, ErrorScreen } from '@openedu/ui';
 import { App } from './App';
 
@@ -28,7 +28,8 @@ function Guard({ children }: { children: ReactNode }) {
   return <ErrorBoundary tone="kid" resetKey={pathname} isStale={isChunkLoadError} onError={(e, stack) => reportClientError('learner', e, stack)}>{children}</ErrorBoundary>;
 }
 
-void initDataSource({ offline: true }).then(() => root.render(
+// Đăng nhập chung: nhận phiên app giáo viên chuyển sang (phần #oe_s=…) trước khi vẽ — docs/DANG_NHAP_CHUNG.md.
+void initDataSource({ offline: true }).then((ds) => consumeHandoff(ds)).then(() => root.render(
   <DataProvider>
     <BrowserRouter>
 <Guard>

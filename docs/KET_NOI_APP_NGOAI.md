@@ -137,6 +137,17 @@ Giữ tối đa 200 dòng trong 30 ngày. Phiên đăng nhập sống khoảng 1
 
 ---
 
+### Dữ liệu học chi tiết (xAPI) — thêm 21/11/2026
+```js
+OpenEdu.answer({ activityId: 'bai-1', questionId: 'cau-2', question: 'Ý chính của đoạn 1?', correct: false,
+                 skills: ['TV5-DH-YCHINH'], response: 'B', durationSec: 40 });
+OpenEdu.xapi([{ verb: { id: 'http://adlnet.gov/expapi/verbs/completed' }, object: { id: 'https://…/bai-1' },
+                result: { score: { raw: 8, max: 10 }, completion: true } }]);
+```
+Trả `Promise<{ saved, ids?, reason?, message? }>`, không reject. Gửi tới Edge Function `lti` (`/xapi/statements`) bằng
+phiên đăng nhập của em + `X-OpenEdu-App`; origin trang phải nằm trong “Địa chỉ được phép”. Chưa có hàng đợi ngoại tuyến
+cho xAPI (khác `record`). Cùng định dạng với app LTI — xem docs/KET_NOI_LTI.md.
+
 ## 3. Bên dưới hoạt động thế nào
 
 ```

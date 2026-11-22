@@ -4,6 +4,7 @@
  * ⚠ CHƯA KIỂM THỬ với một project Supabase thật (môi trường dựng mã không có mạng tới Supabase).
  * Những giả định cần đối chiếu với migrations được đánh dấu "GIẢ ĐỊNH".
  */
+import { packSession, unpackSession } from '../sessionPack';
 import {
   SKILL_BY_CODE,
   type Assignment,
@@ -207,6 +208,33 @@ export class SupabaseDataSource implements DataSource {
   async signOut(): Promise<void> {
     const sb = await this.db();
     await sb.auth.signOut();
+  }
+
+  /** Đăng nhập chung: đóng gói phiên rồi bỏ phiên ở app này mà KHÔNG gọi máy chủ (signOut sẽ thu hồi luôn phiên). */
+  async exportSession(): Promise<string | null> {
+    const sb = await this.db();
+    const { data } = await sb.auth.getSession();
+    const s = data.session;
+    if (!s) return null;
+    await sb.auth.stopAutoRefresh();
+    try {
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('sb-') && k.includes('-auth-token')) keys.push(k);
+      }
+      keys.forEach((k) => localStorage.removeItem(k));
+    } catch { /* không có localStorage */ }
+    return packSession({ a: s.access_token, r: s.refresh_token });
+  }
+
+  async importSession(packed: string): Promise<Profile | null> {
+    const t = unpackSession(packed);
+    if (!t?.a || !t.r) return null;
+    const sb = await this.db();
+    const { error } = await sb.auth.setSession({ access_token: t.a, refresh_token: t.r });
+    if (error) return null;
+    return this.getCurrentUser();
   }
 
   async listDemoUsers(): Promise<Profile[]> {

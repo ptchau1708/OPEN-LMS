@@ -19,7 +19,7 @@ export async function refreshMastery(admin: AdminClient, userId: string, skills:
     .select('id, verb, object_type, object_id, at, correct:result->correct, score:result->score, weight:result->weight, skills:result->skills, misconceptions:result->misconceptions')
     .eq('user_id', userId)
     .in('verb', ['answered', 'completed'])
-    .in('object_type', ['item', 'arena', 'remediation', 'work', 'exam'])
+    .in('object_type', ['item', 'arena', 'remediation', 'work', 'exam', 'external'])
     .gte('at', since)
     .order('at', { ascending: true })
     .limit(5000);

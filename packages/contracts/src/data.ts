@@ -92,6 +92,13 @@ export interface DataSource {
   /** HS dùng tên ngắn (an2a1) hoặc email; GV dùng email. */
   signIn(username: string, password: string): Promise<Profile>;
   signOut(): Promise<void>;
+  /**
+   * Đăng nhập chung (docs/DANG_NHAP_CHUNG.md): chuyển phiên sang app khác (origin khác) mà không bắt gõ lại mật khẩu.
+   * Trả chuỗi phiên đóng gói và BỎ phiên ở app này (không thu hồi trên máy chủ — app nhận dùng tiếp). null = chưa đăng nhập.
+   */
+  exportSession?(): Promise<string | null>;
+  /** Nhận phiên do exportSession của app khác chuyển sang. Trả người dùng, hoặc null nếu phiên không hợp lệ. */
+  importSession?(packed: string): Promise<Profile | null>;
   /** Chỉ chế độ demo: danh sách tài khoản mẫu để chọn nhanh. */
   listDemoUsers(): Promise<Profile[]>;
   updateSettings(userId: string, settings: Partial<StudentSettings>): Promise<Profile>;

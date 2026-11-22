@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 import { Icon } from '@openedu/ui';
-import { EMBED_PROVIDER_LABEL, toEmbed } from './embed';
+import { EMBED_PROVIDER_LABEL, embedOriginsVersion, subscribeEmbedOrigins, toEmbed } from './embed';
 
 /**
  * Khung nhúng trang web học tập (danh sách cho phép trong embed.ts), sandbox: không cho chuyển trang chính,
@@ -8,7 +8,9 @@ import { EMBED_PROVIDER_LABEL, toEmbed } from './embed';
  * nên luôn có nút "Mở trong tab mới" bên dưới.
  */
 export function EmbedBlock({ url, title, interactive = true }: { url: string; title?: string; interactive?: boolean }) {
-  const r = useMemo(() => toEmbed(url), [url]);
+  // Danh sách trang được phép nhúng nạp sau (từ máy chủ) → tính lại khi đổi.
+  const ver = useSyncExternalStore(subscribeEmbedOrigins, embedOriginsVersion, embedOriginsVersion);
+  const r = useMemo(() => toEmbed(url), [url, ver]);
   if (!interactive) {
     return (
       <div className="lp-video lp-video--placeholder" role="img" aria-label="Trang nhúng đang chiếu trên bảng">

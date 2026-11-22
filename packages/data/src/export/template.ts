@@ -10,6 +10,7 @@ import { fieldValue, type BridgeData, type BridgeField, type FieldValue } from '
 import type { RowMatch } from './match';
 import { XlsxError, cellText, readXlsx, writeXlsx, type XCell, type XSheet, type XWorkbook } from './xlsx';
 import { patchXlsx, type CellPatch } from './xlsxPatch';
+import { patchXls, readXls } from './xls';
 
 /** Cột (chỉ số) → id trường OPEN-EDU. */
 export type ColumnMapping = Record<number, string>;
@@ -56,6 +57,8 @@ export interface FillResult {
   /** Lời nhắn cho GV khi phải dùng cách dự phòng. */
   note?: string;
   formulasReplaced: number;
+  /** Đuôi tệp ra: cùng định dạng tệp gốc khi sửa trực tiếp được. */
+  ext: 'xlsx' | 'xls';
 }
 
 /** Ghi tệp mới sạch: cùng dòng tiêu đề, thứ tự cột, ô gộp; mất màu sắc / phông chữ của tệp gốc. */
@@ -77,7 +80,17 @@ export function fillTemplate(original: Uint8Array, wb: XWorkbook, sheetIndex: nu
       // Tự kiểm tra: đọc lại tệp vừa ghi, mọi ô phải đúng giá trị — sai thì dùng cách dự phòng.
       const back = readXlsx(r.bytes).sheets.find((s) => s.name === sheet.name);
       const ok = !!back && plan.patches.every((p) => cellText(back.rows[p.r]?.[p.c]) === cellText(p.value));
-      if (ok) return { bytes: r.bytes, mode: 'patched', formulasReplaced: r.formulasReplaced };
+      if (ok) return { bytes: r.bytes, mode: 'patched', formulasReplaced: r.formulasReplaced, ext: 'xlsx' };
+    } catch (e) {
+      if (!(e instanceof XlsxError)) throw e;
+    }
+  }
+  if (wb.format === 'xls') {
+    try {
+      const r = patchXls(original, [{ sheet: sheet.name, patches: plan.patches, styleBelowRow: table.headerEnd }]);
+      const back = readXls(r.bytes).sheets.find((s) => s.name === sheet.name);
+      const ok = !!back && plan.patches.every((p) => cellText(back.rows[p.r]?.[p.c] ?? null) === cellText(p.value === '' ? null : p.value));
+      if (ok) return { bytes: r.bytes, mode: 'patched', formulasReplaced: 0, ext: 'xls' };
     } catch (e) {
       if (!(e instanceof XlsxError)) throw e;
     }
@@ -87,6 +100,7 @@ export function fillTemplate(original: Uint8Array, wb: XWorkbook, sheetIndex: nu
     bytes: rebuildSheet(sheet, table, plan.patches),
     mode: 'rebuilt',
     formulasReplaced: 0,
+    ext: 'xlsx',
     note: wb.format === 'html'
       ? 'Tệp tải lên là bảng dạng web (đuôi .xls) nên không sửa trực tiếp được. Đã tạo tệp .xlsx mới có cùng tiêu đề và thứ tự cột.'
       : `Tệp gốc có cấu trúc ít gặp nên không sửa trực tiếp được. Đã tạo tệp mới có cùng tiêu đề và thứ tự cột (không giữ màu sắc, phông chữ${others > 0 ? `, và bỏ ${others} trang tính khác` : ''}).`,

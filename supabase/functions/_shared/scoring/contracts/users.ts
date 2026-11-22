@@ -106,7 +106,7 @@ export interface LearningEvent {
   id: string;
   userId: string;
   verb: LearningVerb;
-  objectType: 'slide' | 'item' | 'lesson' | 'package' | 'live' | 'arena' | 'remediation' | 'work' | 'exam';
+  objectType: 'slide' | 'item' | 'lesson' | 'package' | 'live' | 'arena' | 'remediation' | 'work' | 'exam' | 'external';
   objectId: string;
   lessonId?: string;
   assignmentId?: string;

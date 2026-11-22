@@ -262,7 +262,7 @@ export function suggestTt27(input: SuggestTt27Input): Tt27Suggestion {
     const weak = ms.filter((m) => m.level === 'can-on').sort((a, b) => a.p - b.p).slice(0, 2).map((m) => lowerFirst(shortOf(m.skillCode)));
     const bestWork = ws.find((w) => w.level === 'T');
     const parts: string[] = [];
-    parts.push(`${LEVEL_WORD[level]} nội dung môn học ${TT27_TERM_LABEL[termId].toLowerCase()}.`);
+    parts.push(`${LEVEL_WORD[level]} nội dung môn học ${TT27_TERM_LABEL[termId].charAt(0).toLowerCase()}${TT27_TERM_LABEL[termId].slice(1)}.`);
     if (strong.length) parts.push(`Em thực hiện tốt ${joinVi(strong)}.`);
     if (bestWork) parts.push(`Bài “${bestWork.title}” làm tốt.`);
     if (weak.length) parts.push(`Cần rèn thêm ${joinVi(weak)}.`);

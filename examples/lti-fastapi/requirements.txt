@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pylti1p3
+python-multipart
+itsdangerous
+cryptography
+requests

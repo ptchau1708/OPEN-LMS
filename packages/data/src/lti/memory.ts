@@ -1,0 +1,59 @@
+/** Kho LTI trong bộ nhớ — cho kiểm thử và máy chủ thử đầu-cuối (tools/lti-e2e). Không dùng ở bản thật. */
+import { generateKeyPair } from './jwt';
+import type { LtiContext, LtiLineItem, LtiPage, LtiPageInput, LtiResult, LtiScore, LtiStore, LtiTool, LtiUser, XapiRow } from './platform';
+
+export interface MemoryLtiData {
+  tools: LtiTool[];
+  users: LtiUser[];
+  contexts: (LtiContext & { learners: string[]; teachers: string[] })[];
+  pages?: (LtiPage & { openIn?: 'iframe' | 'window' })[];
+  /** App đăng kí cho openedu-connect.js (xAPI từ trang HTML). */
+  apps?: { appId: string; enabled: boolean; allowedOrigins: string[] }[];
+}
+
+export class MemoryLtiStore implements LtiStore {
+  private key: Awaited<ReturnType<typeof generateKeyPair>> | null = null;
+  readonly items: LtiLineItem[] = [];
+  readonly scores: { lineItemId: string; score: LtiScore; appId: string }[] = [];
+  private jtis = new Map<string, number>();
+  constructor(readonly data: MemoryLtiData) {}
+  async platformKey() { return (this.key ??= await generateKeyPair()); }
+  async toolByClientId(id: string) { return this.data.tools.find((t) => t.clientId === id) ?? null; }
+  async tool(id: string) { return this.data.tools.find((t) => t.appId === id) ?? null; }
+  async user(id: string) { return this.data.users.find((u) => u.id === id) ?? null; }
+  async context(id: string) { const c = this.data.contexts.find((x) => x.id === id); return c ? { id: c.id, name: c.name, grade: c.grade ?? null } : null; }
+  async contextsOf(uid: string) { return this.data.contexts.filter((c) => c.learners.includes(uid) || c.teachers.includes(uid)).map((c) => ({ id: c.id, name: c.name, grade: c.grade ?? null })); }
+  async isLearner(uid: string, ctx: string) { return !!this.data.contexts.find((c) => c.id === ctx)?.learners.includes(uid); }
+  async lineItems(appId: string, ctx: string) { return this.items.filter((x) => x.appId === appId && x.contextId === ctx); }
+  async lineItem(id: string) { return this.items.find((x) => x.id === id) ?? null; }
+  async createLineItem(li: Omit<LtiLineItem, 'id'>) { const x = { ...li, id: `li${this.items.length + 1}` }; this.items.push(x); return x; }
+  async saveScore(li: LtiLineItem, s: LtiScore, tool: LtiTool) {
+    const i = this.scores.findIndex((x) => x.lineItemId === li.id && x.score.userId === s.userId);
+    const row = { lineItemId: li.id, score: s, appId: tool.appId };
+    if (i >= 0) this.scores[i] = row; else this.scores.push(row);
+  }
+  async results(li: LtiLineItem, uid?: string): Promise<LtiResult[]> {
+    return this.scores.filter((x) => x.lineItemId === li.id && (!uid || x.score.userId === uid)).map((x) => ({
+      userId: x.score.userId,
+      ...(x.score.scoreGiven !== undefined && x.score.scoreMaximum ? { resultScore: (x.score.scoreGiven / x.score.scoreMaximum) * li.scoreMaximum } : {}),
+      resultMaximum: li.scoreMaximum,
+      ...(x.score.comment ? { comment: x.score.comment } : {}),
+    }));
+  }
+  async rememberJti(k: string, exp: number) { if (this.jtis.has(k)) return false; this.jtis.set(k, exp); return true; }
+  readonly xapi: { appId: string; row: XapiRow }[] = [];
+  async canTeach(uid: string, ctx: string) {
+    const u = await this.user(uid);
+    return u?.role === 'admin' || !!this.data.contexts.find((c) => c.id === ctx)?.teachers.includes(uid);
+  }
+  async page(id: string) { return (this.data.pages ?? []).find((p) => p.id === id) ?? null; }
+  async createPages(tool: LtiTool, ctx: string, _uid: string, items: LtiPageInput[]) {
+    this.data.pages ??= [];
+    for (const it of items) this.data.pages.push({ id: `page${this.data.pages.length + 1}`, contextId: ctx, appId: tool.appId, title: it.title, openIn: it.openIn, ...(it.url ? { url: it.url } : {}), ...(it.custom ? { custom: it.custom } : {}), ...(it.scoreMaximum ? { scoreMaximum: it.scoreMaximum } : {}), ...(it.resourceId ? { resourceId: it.resourceId } : {}), ...(it.tag ? { tag: it.tag } : {}) });
+    return items.length;
+  }
+  async connectApp(id: string) { return (this.data.apps ?? []).find((a) => a.appId === id) ?? null; }
+  async saveXapi(appId: string, rows: XapiRow[]) {
+    for (const row of rows) if (!this.xapi.some((x) => x.row.id === row.id)) this.xapi.push({ appId, row });
+  }
+}

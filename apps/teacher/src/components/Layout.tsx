@@ -15,6 +15,7 @@ const NAV: { to: string; label: string; icon: IconName; end?: boolean; match?: R
   { to: '/hoc-sinh', label: 'Hồ sơ học sinh', icon: 'user', match: /^\/hoc-sinh/ },
   { to: '/kien-thuc', label: 'Kiến thức', icon: 'map', match: /^\/(kien-thuc|lop\/[^/]+\/ban-do-kien-thuc)/ },
   { to: '/truc-tiep', label: 'Trực tiếp', icon: 'tv' },
+  { to: '/trang-hoc', label: 'Trang học', icon: 'puzzle' },
   { to: '/bai-viet', label: 'Bài viết', icon: 'pencil', section: 'Đánh giá', match: /^\/bai-viet/ },
   { to: '/cham-bai', label: 'Chấm bài', icon: 'eye', match: /^\/cham-bai/ },
   { to: '/de-kiem-tra', label: 'Đề kiểm tra', icon: 'check', match: /^\/de-kiem-tra/ },

@@ -137,7 +137,7 @@ export function observationsFromEvents(events: LearningEvent[], items?: Record<s
   const out: Observation[] = [];
   for (const e of events) {
     const res = e.result ?? {};
-    if (e.verb === 'answered' && (e.objectType === 'item' || e.objectType === 'arena' || e.objectType === 'exam')) {
+    if (e.verb === 'answered' && (e.objectType === 'item' || e.objectType === 'arena' || e.objectType === 'exam' || e.objectType === 'external')) {
       const item = items?.[e.objectId];
       if (item && !isGradedType(item.type)) continue;
       const skills = res.skills ?? item?.skills ?? [];

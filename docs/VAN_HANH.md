@@ -28,14 +28,15 @@ Không dùng GitHub: mỗi tuần mở app một lần là đủ để dự án 
 
 ```
 pnpm typecheck && pnpm lint && pnpm test     # mã
-pnpm e2e                                      # 11 kịch bản giao diện ở chế độ demo (cần: pnpm exec playwright install chromium)
-tools/run-db-tests.sh --plain                 # 215 kiểm tra CSDL (cần Postgres 16 + pgTAP)
+pnpm e2e                                      # 15 kịch bản giao diện ở chế độ demo (cần: pnpm exec playwright install chromium)
+tools/run-db-tests.sh --plain                 # 299 kiểm tra CSDL (cần Postgres 16 + pgTAP)
 ```
 
 ## 3. Cập nhật lên Supabase thật
 
 1. Migration mới: dán vào SQL Editor theo thứ tự tên (hoặc `supabase db push`).
 2. Hàm máy chủ đổi: `npx supabase@latest functions deploy <tên> --project-ref <ref> --use-api`.
+   Riêng `lti` và `school-admin` thêm `--no-verify-jwt` (hai hàm này tự kiểm tra đăng nhập).
 3. App: `pnpm build` với `.env.local` đúng, rồi đưa `apps/*/dist` lên nơi đặt web (xem `docs/HARDENING.md`).
 
 ## 4. Theo dõi

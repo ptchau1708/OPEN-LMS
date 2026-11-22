@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Profile } from '@openedu/contracts';
-import { useClasses, useDataSource, useDemoUsers, useSignIn, useSignOut } from '@openedu/data';
+import { handoffTo, useClasses, useDataSource, useDemoUsers, useSignIn, useSignOut } from '@openedu/data';
+import { learnerBase } from '../lib/env';
 import { Avatar, Btn, ErrorNote, Field } from '../components/common';
 import { Brand } from '../components/Layout';
 
@@ -14,6 +15,15 @@ export function Login({ wrongRole }: { wrongRole: Profile | null }) {
   const classes = useClasses();
   const [u, setU] = useState('');
   const [p, setP] = useState('');
+  // Đăng nhập chung (docs/DANG_NHAP_CHUNG.md): HS / phụ huynh đăng nhập nhầm ở đây → tự chuyển sang app học sinh kèm phiên.
+  const moved = useRef(false);
+  const [moving, setMoving] = useState(false);
+  useEffect(() => {
+    if (!wrongRole || moved.current) return;
+    moved.current = true;
+    setMoving(true);
+    void handoffTo(learnerBase()).finally(() => setTimeout(() => setMoving(false), 4000));
+  }, [wrongRole]);
   const quick = (demo.data ?? []).filter((x) => QUICK.includes(x.username ?? '')).sort((a, b) => QUICK.indexOf(a.username ?? '') - QUICK.indexOf(b.username ?? ''));
 
   return (
@@ -22,7 +32,10 @@ export function Login({ wrongRole }: { wrongRole: Profile | null }) {
         <Brand />
         <h1>Đăng nhập</h1>
         <p className="tc-muted">Soạn bài giảng tương tác, giao bài và điều khiển lớp học trực tiếp.</p>
-        {wrongRole ? (
+        <p className="tc-muted">Có thể đăng nhập ở <a href={learnerBase()}>trang đăng nhập chung</a> — hệ thống tự chuyển đúng chỗ.</p>
+        {wrongRole && moving ? (
+          <div className="tc-alert" role="status">Đang chuyển <strong>{wrongRole.name}</strong> sang Góc học tập…</div>
+        ) : wrongRole ? (
           <div className="tc-alert">
             <span>Tài khoản <strong>{wrongRole.name}</strong> không phải tài khoản giáo viên. Học sinh và phụ huynh dùng app Góc học tập.</span>
             <Btn size="sm" onClick={() => signOut.mutate()}>Đăng xuất</Btn>

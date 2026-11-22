@@ -3,9 +3,11 @@
  *
  * Đọc: chữ tiếng Việt, số / chữ (mã học sinh có số 0 đứng đầu vẫn là chữ nếu ô là chữ), ngày tháng (theo định dạng ô),
  *      nhiều trang tính, ô gộp. Ghi: nhiều trang tính, độ rộng cột, dòng tiêu đề đậm, ô gộp, cố định dòng tiêu đề.
- * Không hỗ trợ: .xls kiểu cũ (BIFF), tệp có mật khẩu. Tệp "xls" thực chất là bảng HTML thì đọc được (readHtmlTable).
+ * Tệp .xls kiểu cũ (BIFF8, VnEdu cho tải về) đọc qua `./xls`. Tệp "xls" thực chất là bảng HTML cũng đọc được
+ * (readHtmlTable). Không hỗ trợ: tệp có mật khẩu.
  */
 import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate';
+import { isCfb, readXls } from './xls';
 
 export type XCell = string | number | boolean | Date | null;
 
@@ -21,8 +23,8 @@ export interface XSheet {
 
 export interface XWorkbook {
   sheets: XSheet[];
-  /** 'xlsx' hoặc 'html' (tệp .xls thực chất là bảng HTML). */
-  format: 'xlsx' | 'html';
+  /** 'xlsx', 'xls' (BIFF8 kiểu cũ) hoặc 'html' (tệp .xls thực chất là bảng HTML). */
+  format: 'xlsx' | 'xls' | 'html';
 }
 
 export class XlsxError extends Error {
@@ -263,9 +265,10 @@ function toBytes(data: Uint8Array | ArrayBuffer): Uint8Array {
   return data instanceof Uint8Array ? data : new Uint8Array(data);
 }
 
-/** Đọc .xlsx. Tệp .xls thực chất là HTML (một số phần mềm trường xuất như vậy) cũng đọc được. */
+/** Đọc .xlsx, .xls kiểu cũ (BIFF8), và tệp .xls thực chất là HTML (một số phần mềm trường xuất như vậy). */
 export function readXlsx(data: Uint8Array | ArrayBuffer): XWorkbook {
   const bytes = toBytes(data);
+  if (isCfb(bytes)) return readXls(bytes);
   const head = strFromU8(bytes.subarray(0, 512)).replace(/^﻿/, '').trimStart().toLowerCase();
   if (head.startsWith('<') && /<(html|table|\?xml|!doctype|meta|style)/.test(head) && !(bytes[0] === 0x50 && bytes[1] === 0x4b)) {
     const sheets = readHtmlTables(strFromU8(bytes));

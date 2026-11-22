@@ -18,6 +18,10 @@ export function presentUrl(sessionId: string): string {
     return `${base}?s=${encodeURIComponent(sessionId)}`;
   }
 }
+/** Địa chỉ app học sinh — cũng là trang đăng nhập chung. */
+export function learnerBase(): string {
+  return (env('VITE_LEARNER_URL') ?? `http://${host()}:5173`).replace(/\/+$/, '');
+}
 /** Link học sinh vào lớp bằng mã PIN (cho mã QR). */
 export function learnerUrl(pin: string): string {
   const base = (env('VITE_LEARNER_URL') ?? `http://${host()}:5173`).replace(/\/+$/, '');

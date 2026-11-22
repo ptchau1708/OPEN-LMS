@@ -173,6 +173,19 @@ export function detectTable(sheet: XSheet, maxScan = 60): DetectedTable | null {
     if (col[cdef.kind] === undefined) col[cdef.kind] = cdef.index;
     else cdef.kind = 'other';
   }
+  // VnEdu: ô "Họ và tên" gộp ngang 2 cột (C: họ đệm, D: tên) → ghép hai cột.
+  if (col.name !== undefined && col.lastName === undefined && col.firstName === undefined) {
+    const c = col.name;
+    const hr = best.r;
+    const m = sheet.merges.find((x) => x.c1 === c && x.c2 === c + 1 && x.r1 <= hr && x.r2 >= hr);
+    if (m && columns[c + 1]?.kind === 'other') {
+      col.lastName = c;
+      col.firstName = c + 1;
+      delete col.name;
+      columns[c].kind = 'lastName';
+      columns[c + 1].kind = 'firstName';
+    }
+  }
   // "Tên" chỉ có nghĩa khi đi cùng "Họ đệm".
   if (col.name === undefined && !(col.lastName !== undefined && col.firstName !== undefined)) return null;
 

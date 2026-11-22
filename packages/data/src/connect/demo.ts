@@ -5,7 +5,7 @@
  */
 import { createDefaultStorage, readJson, writeJson, type KVStorage } from '../storage';
 import { APP_ID_RE, MAX_ORIGINS, normalizeOrigin } from './rules';
-import type { ConnectSource, ExternalActivity, ExternalApp, ExternalAppInput, ExternalAppPublic } from './types';
+import type { ConnectSource, ExternalActivity, ExternalApp, ExternalAppInput, ExternalAppPublic, LtiAuthForm, LtiToolPublic } from './types';
 
 const KEY = 'connect';
 const MIN = 60_000;
@@ -21,8 +21,8 @@ function seed(now: Date, stamp: string): Store {
   const t = now.getTime();
   const iso = (ms: number) => new Date(ms).toISOString();
   const apps: ExternalApp[] = [
-    { id: DEMO_CONNECT_APP_ID, name: 'Đọc hiểu vui', description: 'Trang đọc hiểu mẫu (examples/connect/doc-hieu-mau.html).', allowedOrigins: [...DEMO_CONNECT_ORIGINS], enabled: true, createdAt: iso(t - 20 * DAY) },
-    { id: 'luyen-chu', name: 'Luyện chữ đẹp', description: 'Tệp HTML luyện viết của tổ Tiếng Việt.', allowedOrigins: ['https://luyenchu.truong.edu.vn'], enabled: true, createdAt: iso(t - 9 * DAY) },
+    { id: DEMO_CONNECT_APP_ID, name: 'Đọc hiểu vui', description: 'Trang đọc hiểu mẫu (examples/connect/doc-hieu-mau.html).', allowedOrigins: [...DEMO_CONNECT_ORIGINS], enabled: true, createdAt: iso(t - 20 * DAY), lti: null },
+    { id: 'luyen-chu', name: 'Luyện chữ đẹp', description: 'Tệp HTML luyện viết của tổ Tiếng Việt.', allowedOrigins: ['https://luyenchu.truong.edu.vn'], enabled: true, createdAt: iso(t - 9 * DAY), lti: null },
   ];
   const row = (n: number, userId: string, appId: string, appName: string, title: string, kind: string, correct: number, total: number, sec: number, ago: number): ExternalActivity => ({
     id: `ext-demo-${n}`, userId, appId, appName, activityId: `bai-${n}`, title, kind,
@@ -46,7 +46,7 @@ export class DemoConnectSource implements ConnectSource {
     // Bộ dữ liệu mẫu được nạp lại (resetDemo) → làm mới theo.
     const stamp = readJson<{ seededAt?: string } | null>(this.storage, 'meta', null)?.seededAt ?? '';
     const cur = readJson<Store | null>(this.storage, KEY, null);
-    if (cur && cur.stamp === stamp && Array.isArray(cur.apps)) return cur;
+    if (cur && cur.stamp === stamp && Array.isArray(cur.apps)) return { ...cur, apps: cur.apps.map((a) => ({ ...a, lti: a.lti ?? null })) };
     const s = seed(this.now(), stamp);
     writeJson(this.storage, KEY, s);
     return s;
@@ -63,11 +63,11 @@ export class DemoConnectSource implements ConnectSource {
     const at = s.apps.findIndex((a) => a.id === i.id);
     if (isNew) {
       if (at >= 0) throw new Error('Mã ứng dụng này đã có. Hãy chọn mã khác.');
-      s.apps.push({ ...i, name: i.name.trim(), description: i.description.trim(), createdAt: this.now().toISOString() });
+      s.apps.push({ ...i, name: i.name.trim(), description: i.description.trim(), createdAt: this.now().toISOString(), lti: i.lti ?? null });
     } else {
       const old = s.apps[at];
       if (!old) throw new Error('Không tìm thấy ứng dụng.');
-      s.apps[at] = { ...old, ...i, name: i.name.trim(), description: i.description.trim() };
+      s.apps[at] = { ...old, ...i, name: i.name.trim(), description: i.description.trim(), lti: i.lti === undefined ? old.lti ?? null : i.lti };
       for (const a of s.activities) if (a.appId === i.id) a.appName = i.name.trim();
     }
     writeJson(this.storage, KEY, s);
@@ -87,5 +87,14 @@ export class DemoConnectSource implements ConnectSource {
   }
   async getAccess(): Promise<null> {
     return null;
+  }
+  ltiIssuer(): null {
+    return null;
+  }
+  async listLtiTools(): Promise<LtiToolPublic[]> {
+    return this.load().apps.filter((a) => a.enabled && a.lti).map((a) => ({ id: a.id, name: a.name, description: a.description, clientId: a.lti?.clientId ?? '', deploymentId: a.lti?.deploymentId ?? '', loginUrl: a.lti?.loginUrl ?? '', launchUrl: a.lti?.launchUrl ?? '', deepLinkUrl: a.lti?.deepLinkUrl ?? null }));
+  }
+  async ltiAuthorize(): Promise<LtiAuthForm> {
+    throw new Error('Chế độ thử (demo) không có máy chủ để kí đăng nhập LTI. Cần nối OPEN-EDU với Supabase.');
   }
 }

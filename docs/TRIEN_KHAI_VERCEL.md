@@ -59,3 +59,11 @@ Cách app chạy trên Vercel: khi build có biến `VERCEL=1`, `tools/make-head
 - **Trang vào chế độ demo**: thiếu `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` → thêm rồi Redeploy.
 - **Build lỗi `pnpm`**: thêm `ENABLE_EXPERIMENTAL_COREPACK=1`.
 - **Chấm bài / AI báo lỗi mạng**: chưa đặt `CORS_ORIGINS` (mục 3.1).
+
+
+## Bổ sung 21/11/2026
+Dự án **học sinh** thêm biến `VITE_TEACHER_URL` = địa chỉ app giáo viên (để giáo viên chọn bài trong app LTI — Deep Linking), rồi Redeploy.
+
+## Bổ sung: đăng nhập chung
+Địa chỉ app học sinh là **trang đăng nhập chung** cho mọi người — giáo viên / quản trị được tự chuyển sang app giáo viên
+(docs/DANG_NHAP_CHUNG.md). Cần `VITE_TEACHER_URL` ở dự án học sinh và `VITE_LEARNER_URL` ở dự án giáo viên.

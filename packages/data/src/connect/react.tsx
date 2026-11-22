@@ -51,3 +51,20 @@ export function useConnectAccess() {
   const cs = useCs();
   return useMutation({ mutationFn: async () => (await cs()).getAccess() });
 }
+
+/* ============================ LTI 1.3 ============================ */
+/** Mã nền tảng (iss) của OPEN-EDU — null ở chế độ demo. */
+export function useLtiIssuer() {
+  const cs = useCs();
+  return useQuery({ queryKey: ['connect', 'lti-issuer'], queryFn: async () => (await cs()).ltiIssuer(), staleTime: Infinity });
+}
+/** App LTI đang bật (trang "Ứng dụng học"). */
+export function useLtiTools(enabled = true) {
+  const cs = useCs();
+  return useQuery({ queryKey: ['connect', 'lti-tools'], queryFn: async () => (await cs()).listLtiTools(), enabled, staleTime: 5 * 60_000, retry: 1 });
+}
+/** Trang /lti/auth: kí id_token cho người đang đăng nhập. */
+export function useLtiAuthorize() {
+  const cs = useCs();
+  return useMutation({ mutationFn: async (v: { params: Record<string, string>; returnUrl?: string }) => (await cs()).ltiAuthorize(v.params, v.returnUrl) });
+}
