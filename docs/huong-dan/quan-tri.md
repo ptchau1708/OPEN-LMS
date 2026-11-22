@@ -17,7 +17,8 @@ Dành cho GV tin học / cán bộ CNTT được giao quản trị. Phần kĩ t
   app cũ để đồng bộ mang sang.
 - **Liên kết phụ huynh – con**: theo quy trình nhà trường (phiếu GVCN). Kiểm tra bằng cách đăng nhập tài khoản phụ
   huynh: chỉ thấy đúng con.
-- Cấp lại mật khẩu: Dashboard → Authentication → Users → *Send password recovery* / đặt mật khẩu mới.
+- Cấp lại mật khẩu: trong app — học sinh, giáo viên ở **Tài khoản**; phụ huynh ở **Liên kết phụ huynh** (mật khẩu tạm,
+  phải đổi khi đăng nhập). Người dùng email thật tự lấy lại ở *Quên mật khẩu?*. Chi tiết: `docs/MAT_KHAU.md`.
 
 ## 2. Việc định kì
 | Khi nào | Việc |

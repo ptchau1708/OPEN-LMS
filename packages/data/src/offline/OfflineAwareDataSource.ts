@@ -254,6 +254,14 @@ export function createOfflineAware(inner: DataSource, o: OfflineAwareOptions): O
       return r;
     };
   }
+  for (const m of ['changePassword', 'completePasswordReset'] as const) {
+    const f = inner[m];
+    if (!f) continue;
+    wrapped[m] = (async (...args: unknown[]) => {
+      await (f as AnyFn).apply(inner, args);
+      await store.delete('cache', ck.me).catch(() => undefined);
+    }) as AnyFn;
+  }
   if (inner.importSession) {
     wrapped.importSession = (async (packed: string) => {
       await store.delete('cache', ck.me).catch(() => undefined);

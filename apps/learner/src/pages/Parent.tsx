@@ -120,7 +120,10 @@ function ParentView({ child, siblings, onPick, parent, onExitLabel }: { child: P
     <div className="ln-parent">
       <header className="ln-pp-head">
         <div className="ln-pp-head__brand"><Icon name="parent" size={26} /> Chế độ phụ huynh</div>
-        <Button variant="secondary" onClick={exit}>{onExitLabel ?? 'Đăng xuất'}</Button>
+        <div className="ln-row">
+          {parent && <Link className="k-btn k-btn--ghost" to="/doi-mat-khau" data-testid="parent-change-pw"><span className="k-btn__label">Đổi mật khẩu</span></Link>}
+          <Button variant="secondary" onClick={exit}>{onExitLabel ?? 'Đăng xuất'}</Button>
+        </div>
       </header>
 
       {parent && siblings && (

@@ -21,6 +21,10 @@ const Duel = lazy(() => import('./pages/duel/DuelPage'));
 const Passport = lazy(() => import('./pages/Passport'));
 const Parent = lazy(() => import('./pages/Parent'));
 const ParentLink = lazy(() => import('./pages/parent/ParentLink'));
+const ChangePassword = lazy(() => import('./pages/account/Password'));
+const ForgotPassword = lazy(() => import('./pages/account/Password').then((m) => ({ default: m.ForgotPasswordPage })));
+const ResetPassword = lazy(() => import('./pages/account/Password').then((m) => ({ default: m.ResetPasswordPage })));
+const ForcedChange = lazy(() => import('./pages/account/Password').then((m) => ({ default: m.ForcedChange })));
 const Remediation = lazy(() => import('./pages/Remediation'));
 const WorkPage = lazy(() => import('./pages/WorkPage'));
 const ExamPage = lazy(() => import('./pages/exam/ExamPage'));
@@ -48,6 +52,9 @@ export function App() {
         <Routes>
           <Route path="/dang-nhap" element={<Login />} />
           <Route path="/phu-huynh/lien-ket" element={<ParentLink />} />
+          <Route path="/quen-mat-khau" element={<ForgotPassword />} />
+          <Route path="/dat-lai-mat-khau" element={<ResetPassword />} />
+          <Route path="/doi-mat-khau" element={<ChangePassword />} />
           <Route path="/ket-noi" element={<KetNoi />} />
           <Route path="/lti/auth" element={<LtiAuth />} />
           <Route element={<Guard allow={['student']} />}>
@@ -93,6 +100,8 @@ function Guard({ allow }: { allow: Role[] }) {
   const me = q.data;
   if (!me) return <Navigate to="/dang-nhap" replace state={{ from: loc.pathname + loc.search }} />;
   if (me.role === 'teacher' || me.role === 'admin') return <TeacherHint me={me} />;
+  // Mật khẩu tạm do thầy cô cấp → đổi trước khi dùng tiếp (docs/MAT_KHAU.md).
+  if (me.mustChangePassword) return <ForcedChange me={me} />;
   if (allow.indexOf(me.role) < 0) return <Navigate to={me.role === 'parent' ? '/phu-huynh' : '/'} replace />;
   return <MeContext.Provider value={me}><Outlet /></MeContext.Provider>;
 }

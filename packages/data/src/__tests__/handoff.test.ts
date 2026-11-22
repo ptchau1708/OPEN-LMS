@@ -81,3 +81,12 @@ describe('đăng nhập chung — Supabase (client giả)', () => {
     delete (globalThis as { localStorage?: unknown }).localStorage;
   });
 });
+
+describe('phụ huynh đăng nhập bằng số điện thoại', () => {
+  it('mọi cách viết số đều về cùng một tài khoản', async () => {
+    const { usernameToEmail } = await import('../supabase/SupabaseDataSource');
+    for (const v of ['0912345678', '0912 345 678', '+84912345678', '84912345678', '0912.345.678']) expect(usernameToEmail(v)).toBe('0912345678@parent.openlms.edu');
+    expect(usernameToEmail('an2a1')).toBe('an2a1@openlms.edu');
+    expect(usernameToEmail('Me.Lan@Gmail.com')).toBe('me.lan@gmail.com');
+  });
+});

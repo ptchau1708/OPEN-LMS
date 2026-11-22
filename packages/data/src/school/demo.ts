@@ -462,15 +462,24 @@ export class DemoSchoolSource implements SchoolSource {
     const u = this.users(s).find((x) => x.id === userId);
     if (!u) throw err('Không tìm thấy tài khoản này.');
     const v = this.viewer(s);
-    // Admin đặt lại mọi tài khoản (trừ phụ huynh — phụ huynh tự đổi); GV đặt lại cho HS lớp mình.
+    // Quản trị: mọi tài khoản. GVCN: HS lớp mình + phụ huynh của các em (docs/MAT_KHAU.md).
     if (v && v.role !== 'admin') {
-      if (!(v.role === 'teacher' && u.role === 'student' && u.classId && this.classes(s).find((c) => c.id === u.classId)?.teacherId === v.id)) throw err('Thầy cô chỉ đặt lại mật khẩu cho học sinh lớp mình.');
+      const homeroom = (studentId: string) => {
+        const st = this.users(s).find((x) => x.id === studentId);
+        return !!st?.classId && this.classes(s).find((c) => c.id === st.classId)?.teacherId === v.id;
+      };
+      const ok = v.role === 'teacher' && (u.role === 'student' ? homeroom(u.id) : u.role === 'parent' && (this.guardians(s)[u.id] ?? []).some(homeroom));
+      if (!ok) throw err('Thầy cô chỉ cấp lại mật khẩu cho học sinh lớp mình chủ nhiệm và phụ huynh của các em.');
     }
-    if (u.role === 'parent') throw err('Phụ huynh tự đặt lại mật khẩu bằng email / số điện thoại.');
+    if (v && v.id === u.id) throw err('Muốn đổi mật khẩu của chính mình, thầy cô dùng mục Đổi mật khẩu.');
     const password = generatePassword(this.rand);
     this.setPassword(s, u.id, password);
+    const temporary = u.role !== 'student';
+    const mc = this.g<Record<string, boolean>>(s, 'mustChange', {});
+    if (temporary) mc[u.id] = true; else delete mc[u.id];
+    this.p(s, 'mustChange', mc);
     const cls = u.classId ? this.classes(s).find((c) => c.id === u.classId) : undefined;
-    return { userId: u.id, role: u.role, name: u.name, username: u.username ?? '', password, ...(u.role === 'student' && cls ? { classId: cls.id, className: cls.name } : {}) };
+    return { userId: u.id, role: u.role, name: u.name, username: u.username ?? '', password, temporary, ...(u.role === 'student' && cls ? { classId: cls.id, className: cls.name } : {}) };
   }
 
   private setPassword(s: KVStorage, userId: string, password: string): void {

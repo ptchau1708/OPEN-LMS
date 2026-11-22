@@ -51,6 +51,7 @@ export function Login({ wrongRole }: { wrongRole: Profile | null }) {
           <ErrorNote error={signIn.error} />
           <Btn kind="primary" size="lg" type="submit" disabled={signIn.isPending || !u}>{signIn.isPending ? 'Đang đăng nhập…' : 'Đăng nhập'}</Btn>
         </form>
+        <p className="tc-muted"><a href={`${learnerBase()}/quen-mat-khau`} data-testid="login-forgot">Quên mật khẩu?</a> Đăng nhập bằng tên đăng nhập thì nhờ quản trị trường cấp lại.</p>
         {ds.mode === 'demo' && quick.length ? (
           <section className="tc-login__demo">
             <h2>Tài khoản mẫu (chế độ demo, mật khẩu 123456)</h2>

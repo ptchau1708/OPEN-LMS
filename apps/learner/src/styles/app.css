@@ -279,3 +279,4 @@ body { background: var(--k-bg); }
 @keyframes ln-twinkle { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.6); } }
 .k-reduced .ln-spark { animation: none; }
 @media (prefers-reduced-motion: reduce) { .ln-spark { animation: none; } }
+.ln-login__forgot { display: block; text-align: right; font-size: 17px; font-weight: 700; }

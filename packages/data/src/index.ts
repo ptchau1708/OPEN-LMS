@@ -36,4 +36,5 @@ export * from './connect';
 // Cầu nối VnEdu / Google Classroom (Excel, điền mẫu, mã bên ngoài) — gom trong một không gian tên để không trùng tên.
 export * as bridge from './export';
 export * from './pages';
+export { newPasswordProblem, isSystemEmail, NO_REAL_EMAIL_TEXT, PASSWORD_MIN, PASSWORD_MAX } from './password';
 export { handoffTo, consumeHandoff, handoffUrl, readHandoffHash, packSession, unpackSession, HANDOFF_KEY, type PackedSession } from './handoff';

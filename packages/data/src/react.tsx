@@ -141,6 +141,41 @@ export function useSignIn() {
   });
 }
 
+/** Đổi mật khẩu (docs/MAT_KHAU.md). Xong thì tải lại hồ sơ (bỏ cờ “mật khẩu tạm”). */
+export function useChangePassword() {
+  const ds = useDataSource();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (v: { current: string; next: string }) => {
+      if (!ds.changePassword) throw new Error('Chưa hỗ trợ đổi mật khẩu.');
+      await ds.changePassword(v.current, v.next);
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: qk.me }),
+  });
+}
+
+export function useRequestPasswordReset() {
+  const ds = useDataSource();
+  return useMutation({
+    mutationFn: async (v: { email: string; redirectTo: string }) => {
+      if (!ds.requestPasswordReset) throw new Error('Chưa hỗ trợ khôi phục mật khẩu.');
+      await ds.requestPasswordReset(v.email, v.redirectTo);
+    },
+  });
+}
+
+export function useCompletePasswordReset() {
+  const ds = useDataSource();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (next: string) => {
+      if (!ds.completePasswordReset) throw new Error('Bản thử không đặt lại mật khẩu qua thư được.');
+      await ds.completePasswordReset(next);
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: qk.me }),
+  });
+}
+
 export function useSignOut() {
   const ds = useDataSource();
   const qc = useQueryClient();

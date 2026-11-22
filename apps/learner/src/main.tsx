@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, useLocation } from 'react-router';
 import { DataProvider, consumeHandoff, initDataSource, installClientErrorHandlers, isChunkLoadError, reportClientError } from '@openedu/data';
 import { unlockAudio, ErrorBoundary, ErrorScreen } from '@openedu/ui';
+import { captureAuthLink } from './lib/authLink';
 import { App } from './App';
 
 // Trình duyệt chỉ cho phát âm thanh sau lần chạm đầu tiên.
@@ -28,6 +29,8 @@ function Guard({ children }: { children: ReactNode }) {
   return <ErrorBoundary tone="kid" resetKey={pathname} isStale={isChunkLoadError} onError={(e, stack) => reportClientError('learner', e, stack)}>{children}</ErrorBoundary>;
 }
 
+// Link đặt lại mật khẩu trong thư (docs/MAT_KHAU.md) — trước khi tạo Supabase client.
+captureAuthLink();
 // Đăng nhập chung: nhận phiên app giáo viên chuyển sang (phần #oe_s=…) trước khi vẽ — docs/DANG_NHAP_CHUNG.md.
 void initDataSource({ offline: true }).then((ds) => consumeHandoff(ds)).then(() => root.render(
   <DataProvider>

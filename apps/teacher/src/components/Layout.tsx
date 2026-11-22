@@ -60,6 +60,9 @@ export function Layout({ user }: { user: Profile }) {
       </button>
       {userMenu ? (
         <div className="tc-menu tc-user__menu" role="menu">
+          <button type="button" role="menuitem" onClick={() => nav('/doi-mat-khau')} data-testid="menu-change-pw">
+            <Icon name="lock" size={16} /> Đổi mật khẩu
+          </button>
           <button type="button" role="menuitem" onClick={() => signOut.mutate(undefined, { onSuccess: () => nav('/') })}>
             <Icon name="back" size={16} /> Đăng xuất
           </button>

@@ -97,7 +97,7 @@ export function AdminUsers() {
 
   return (
     <div className="tc-page ad-page">
-      <PageHead title="Tài khoản" sub="Tạo tài khoản giáo viên, học sinh hàng loạt, in phiếu, đặt lại mật khẩu. Phụ huynh tự đăng ký bằng mã liên kết." actions={<Seg label="Loại tài khoản" value={tab} onChange={setTab} options={[{ value: 'student', label: 'Học sinh' }, { value: 'teacher', label: 'Giáo viên' }]} />} />
+      <PageHead title="Tài khoản" sub="Tạo tài khoản giáo viên, học sinh hàng loạt, in phiếu, cấp lại mật khẩu (giáo viên nhận mật khẩu tạm, phải đổi khi đăng nhập). Phụ huynh: cấp lại ở mục Liên kết phụ huynh." actions={<Seg label="Loại tài khoản" value={tab} onChange={setTab} options={[{ value: 'student', label: 'Học sinh' }, { value: 'teacher', label: 'Giáo viên' }]} />} />
       <ErrorNote error={bulk.error ?? createT.error ?? reset.error ?? users.error} />
       {tab === 'student' ? (
         <div className="ad-split">

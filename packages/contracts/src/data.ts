@@ -97,6 +97,12 @@ export interface DataSource {
    * Trả chuỗi phiên đóng gói và BỎ phiên ở app này (không thu hồi trên máy chủ — app nhận dùng tiếp). null = chưa đăng nhập.
    */
   exportSession?(): Promise<string | null>;
+  /** Mật khẩu (docs/MAT_KHAU.md): tự đổi — kiểm tra mật khẩu hiện tại trước. */
+  changePassword?(current: string, next: string): Promise<void>;
+  /** Quên mật khẩu: gửi thư đặt lại — CHỈ với email thật (không phải địa chỉ hệ thống tự ghép). */
+  requestPasswordReset?(email: string, redirectTo: string): Promise<void>;
+  /** Đặt mật khẩu mới sau khi mở link trong thư (đang ở phiên khôi phục). */
+  completePasswordReset?(next: string): Promise<void>;
   /** Nhận phiên do exportSession của app khác chuyển sang. Trả người dùng, hoặc null nếu phiên không hợp lệ. */
   importSession?(packed: string): Promise<Profile | null>;
   /** Chỉ chế độ demo: danh sách tài khoản mẫu để chọn nhanh. */

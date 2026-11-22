@@ -6,7 +6,9 @@
  *       gọi v2.redeem_guardian_code thay phụ huynh. Mã sai → không tạo tài khoản. → { ok, userId }
  *   { action: 'create-teacher', name, username?, password? }                (admin)  → AccountSlip
  *   { action: 'create-students', classId, names: string[] }                 (admin)  → { slips: AccountSlip[] }
- *   { action: 'reset-password', userId }                                    (admin; GV cho HS lớp mình) → AccountSlip
+ *   { action: 'reset-password', userId }     (admin: mọi TK; GVCN: HS lớp mình + phụ huynh của các em) → AccountSlip
+ *       Phụ huynh / GV / admin nhận mật khẩu tạm (app_metadata.must_change_password = true).
+ *   { action: 'password-changed' }           (người đã đăng nhập, sau khi tự đổi mật khẩu) → bỏ cờ bắt đổi
  *
  * Mật khẩu chỉ trả về một lần trong phản hồi (để in phiếu), không lưu dạng chữ ở đâu cả.
  * Miền email HS/GV: STUDENT_EMAIL_DOMAIN (mặc định openlms.edu) — trùng VITE_STUDENT_EMAIL_DOMAIN của app.
@@ -145,6 +147,13 @@ async function createStudents(req: Request, b: Record<string, unknown>) {
   return { slips };
 }
 
+/**
+ * Cấp lại mật khẩu (docs/MAT_KHAU.md).
+ * - Quản trị: mọi tài khoản.
+ * - GV chủ nhiệm: học sinh lớp mình và phụ huynh của học sinh lớp mình.
+ * Phụ huynh / GV / quản trị nhận mật khẩu TẠM: lần đăng nhập sau bị bắt đổi (app_metadata.must_change_password).
+ * Học sinh không bị bắt đổi (mật khẩu trên phiếu là mật khẩu của em — trẻ nhỏ tự đặt dễ quên).
+ */
 async function resetPassword(req: Request, b: Record<string, unknown>) {
   const caller = await requireCaller(req);
   const userId = str(b.userId, 64);
@@ -153,13 +162,44 @@ async function resetPassword(req: Request, b: Record<string, unknown>) {
   if (error) throw fromPgError(error);
   if (!p) throw new HttpError(404, 'Không tìm thấy tài khoản này.', 'not_found');
   const u = p as unknown as { id: string; role: string; name: string; username: string | null; class_id: string | null; classes: { name: string; teacher_id: string | null } | null };
-  if (u.role === 'parent') throw new HttpError(400, 'Phụ huynh tự đặt lại mật khẩu bằng email / số điện thoại.', 'invalid');
-  const ok = caller.role === 'admin' || (caller.role === 'teacher' && u.role === 'student' && u.classes?.teacher_id === caller.id);
-  if (!ok) throw new HttpError(403, 'Thầy cô chỉ đặt lại mật khẩu cho học sinh lớp mình.', 'forbidden');
+  let ok = caller.role === 'admin';
+  if (!ok && caller.role === 'teacher') {
+    if (u.role === 'student') ok = u.classes?.teacher_id === caller.id;
+    else if (u.role === 'parent') {
+      const { data: links, error: le } = await db.from('guardian_links').select('student_id').eq('parent_id', u.id);
+      if (le) throw fromPgError(le);
+      const ids = ((links ?? []) as { student_id: string }[]).map((l) => l.student_id);
+      if (ids.length) {
+        const { data: kids, error: ke } = await db.from('profiles').select('id, classes:classes!profiles_class_id_fkey(teacher_id)').in('id', ids);
+        if (ke) throw fromPgError(ke);
+        ok = ((kids ?? []) as unknown as { classes: { teacher_id: string | null } | null }[]).some((k) => k.classes?.teacher_id === caller.id);
+      }
+    }
+  }
+  if (!ok) throw new HttpError(403, 'Thầy cô chỉ cấp lại mật khẩu cho học sinh lớp mình chủ nhiệm và phụ huynh của các em.', 'forbidden');
+  if (u.id === caller.id) throw new HttpError(400, 'Muốn đổi mật khẩu của chính mình, thầy cô dùng mục Đổi mật khẩu.', 'invalid');
   const pw = password();
-  const { error: ue } = await db.auth.admin.updateUserById(u.id, { password: pw });
+  const temp = u.role !== 'student';
+  const { data: au, error: ge } = await db.auth.admin.getUserById(u.id);
+  if (ge || !au.user) throw new HttpError(404, 'Tài khoản này chưa có trong hệ thống đăng nhập.', 'not_found');
+  // Giữ role / username trong app_metadata khớp hồ sơ: trigger v2.sync_auth_app_meta nạp lại role từ app_metadata khi nó đổi.
+  const meta = { ...(au.user.app_metadata ?? {}), role: u.role, ...(u.username ? { username: u.username } : {}), must_change_password: temp };
+  const { error: ue } = await db.auth.admin.updateUserById(u.id, { password: pw, app_metadata: meta });
   if (ue) throw new HttpError(500, 'Chưa đặt lại được mật khẩu.', 'auth');
-  return { userId: u.id, role: u.role, name: u.name, username: u.username ?? '', password: pw, ...(u.class_id && u.role === 'student' ? { classId: u.class_id, className: u.classes?.name } : {}) };
+  return { userId: u.id, role: u.role, name: u.name, username: u.username ?? au.user.email ?? '', password: pw, temporary: temp, ...(u.class_id && u.role === 'student' ? { classId: u.class_id, className: u.classes?.name } : {}) };
+}
+
+/** Người dùng vừa đổi mật khẩu (app đã đổi bằng phiên của chính họ) → bỏ cờ “bắt đổi mật khẩu”. */
+async function passwordChanged(req: Request) {
+  const caller = await requireCaller(req);
+  const db = adminClient();
+  const { data: au, error } = await db.auth.admin.getUserById(caller.id);
+  if (error || !au.user) throw new HttpError(404, 'Không tìm thấy tài khoản.', 'not_found');
+  if (!au.user.app_metadata?.must_change_password) return { ok: true };
+  const meta = { ...au.user.app_metadata, role: caller.role, must_change_password: false };
+  const { error: ue } = await db.auth.admin.updateUserById(caller.id, { app_metadata: meta });
+  if (ue) throw new HttpError(500, 'Chưa cập nhật được tài khoản.', 'auth');
+  return { ok: true };
 }
 
 serveJson(async (req) => {
@@ -170,6 +210,7 @@ serveJson(async (req) => {
     case 'create-teacher': await requireAdmin(req); return createTeacher(b);
     case 'create-students': return createStudents(req, b);
     case 'reset-password': return resetPassword(req, b);
+    case 'password-changed': return passwordChanged(req);
     default: throw new HttpError(400, 'Thao tác không hỗ trợ.', 'invalid');
   }
 });

@@ -42,6 +42,8 @@ const ConnectApps = lazy(() => import('./pages/admin/ConnectApps'));
 const BridgePage = lazy(() => import('./pages/bridge/BridgePage'));
 const ClassPages = lazy(() => import('./pages/pages/ClassPages'));
 const TeacherLtiAuth = lazy(() => import('./pages/pages/LtiAuth'));
+const ChangePassword = lazy(() => import('./pages/Password'));
+const ForcedChange = lazy(() => import('./pages/Password').then((m) => ({ default: m.ForcedChange })));
 
 export function App() {
   const me = useCurrentUser();
@@ -50,6 +52,8 @@ export function App() {
   if (me.isLoading) return <div className="tc-app theme-pro tc-center"><Loading /></div>;
   const user = me.data;
   if (!user || (user.role !== 'teacher' && user.role !== 'admin')) return <Login wrongRole={user ?? null} />;
+  // Mật khẩu tạm do quản trị cấp → đổi trước khi vào (docs/MAT_KHAU.md).
+  if (user.mustChangePassword) return <Suspense fallback={<Loading />}><ForcedChange user={user} /></Suspense>;
   return (
     <Routes>
       <Route path="lti/auth" element={<Suspense fallback={<Loading />}><TeacherLtiAuth /></Suspense>} />
@@ -84,6 +88,7 @@ export function App() {
         <Route path="bao-cao" element={<Suspense fallback={<Loading />}><Reports user={user} /></Suspense>} />
         <Route path="bao-cao/ban-do-khoi" element={<Suspense fallback={<Loading />}><GradeMap user={user} /></Suspense>} />
         <Route path="phu-huynh" element={<Suspense fallback={<Loading />}><ParentLinks user={user} /></Suspense>} />
+        <Route path="doi-mat-khau" element={<Suspense fallback={<Loading />}><ChangePassword /></Suspense>} />
         <Route path="trang-hoc" element={<Suspense fallback={<Loading />}><ClassPages user={user} /></Suspense>} />
         <Route path="xuat-nhap" element={<Suspense fallback={<Loading />}><BridgePage user={user} /></Suspense>} />
         <Route path="quan-tri/lop" element={user.role === 'admin' ? <Suspense fallback={<Loading />}><AdminClasses /></Suspense> : <Navigate to="/" replace />} />

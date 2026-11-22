@@ -3,6 +3,8 @@
  * Lớp học trực tiếp dùng tools/live-relay (WebSocket trong mạng LAN).
  */
 import { packSession, unpackSession } from '../sessionPack';
+import { normalizeParentLogin } from '../school/login';
+import { NO_REAL_EMAIL_TEXT, isSystemEmail, newPasswordProblem } from '../password';
 import {
   uid,
   SKILL_BY_CODE,
@@ -287,21 +289,48 @@ export class DemoDataSource implements DataSource {
     await this.ready();
     const s = this.get<{ userId: string } | null>(K.session, null);
     if (!s) return null;
-    return clone(this.findUser(s.userId) ?? null);
+    const u = this.findUser(s.userId);
+    if (!u) return null;
+    const out = clone(u);
+    if (this.get<Record<string, boolean>>('mustChange', {})[u.id]) out.mustChangePassword = true;
+    return out;
+  }
+
+  async changePassword(current: string, next: string): Promise<void> {
+    await this.ready();
+    const s = this.get<{ userId: string } | null>(K.session, null);
+    if (!s) throw friendly('Phiên đăng nhập đã hết hạn. Đăng nhập lại rồi đổi mật khẩu nhé.');
+    const { DEMO_PASSWORD } = await import('../seed');
+    const pw = this.get<Record<string, string>>(K.passwords, {});
+    if ((current ?? '').trim() !== (pw[s.userId] ?? DEMO_PASSWORD)) throw friendly('Mật khẩu hiện tại chưa đúng.');
+    const bad = newPasswordProblem(next, current);
+    if (bad) throw friendly(bad);
+    pw[s.userId] = next;
+    this.put(K.passwords, pw);
+    const mc = this.get<Record<string, boolean>>('mustChange', {});
+    delete mc[s.userId];
+    this.put('mustChange', mc);
+  }
+
+  async requestPasswordReset(email: string, _redirectTo?: string): Promise<void> {
+    if (isSystemEmail(email)) throw friendly(NO_REAL_EMAIL_TEXT);
+    throw friendly('Bản thử không gửi thư được. Trên hệ thống thật, thư đặt lại mật khẩu sẽ gửi tới email này.');
   }
 
   async signIn(username: string, password: string): Promise<Profile> {
     await this.ready();
-    const raw = (username ?? '').trim().toLowerCase();
+    let raw = (username ?? '').trim().toLowerCase();
     if (!raw) throw friendly('Em nhập tên đăng nhập nhé.');
+    const phone = raw.includes('@') ? null : normalizeParentLogin(raw);
+    if (phone?.ok && phone.kind === 'phone') raw = phone.username;
     const name = raw.includes('@') ? raw.slice(0, raw.indexOf('@')) : raw;
     const user = this.users().find((u) => (u.username ?? '').toLowerCase() === raw) ?? this.users().find((u) => (u.username ?? '').toLowerCase() === name);
-    if (!user) throw friendly('Không tìm thấy tên đăng nhập này. Em kiểm tra lại chữ và số nhé (ví dụ: an2a1).');
+    if (!user) throw friendly('Không tìm thấy tài khoản này. Kiểm tra lại tên đăng nhập (ví dụ: an2a1), email hoặc số điện thoại nhé.');
     const { DEMO_PASSWORD } = await import('../seed');
     const own = this.get<Record<string, string>>(K.passwords, {})[user.id];
     if (own !== undefined ? (password ?? '').trim() !== own : (password ?? '').trim() !== DEMO_PASSWORD) throw friendly('Mật khẩu chưa đúng. Tài khoản mẫu dùng mật khẩu 123456.');
     this.put(K.session, { userId: user.id });
-    return clone(user);
+    return (await this.getCurrentUser()) ?? clone(user);
   }
 
   async signOut(): Promise<void> {

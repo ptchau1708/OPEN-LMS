@@ -53,8 +53,8 @@ export default function Login() {
         <form className="ln-login__form k-card" onSubmit={submit}>
           <h2 className="ln-h2">Đăng nhập</h2>
           <label className="ln-field">
-            <span className="ln-field__label">Tên đăng nhập hoặc email</span>
-            <input className="ln-input" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoCapitalize="none" spellCheck={false} placeholder="ví dụ: an2a1" />
+            <span className="ln-field__label">Tên đăng nhập, email hoặc số điện thoại</span>
+            <input className="ln-input" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoCapitalize="none" spellCheck={false} placeholder="ví dụ: an2a1 hoặc 0912 345 678" />
           </label>
           <label className="ln-field">
             <span className="ln-field__label">Mật khẩu</span>
@@ -68,6 +68,7 @@ export default function Login() {
           <Button type="submit" size="xl" block disabled={signIn.isPending || !username.trim()} icon={<Icon name="next" size={28} />}>
             {signIn.isPending ? 'Đang vào…' : 'Vào học'}
           </Button>
+          <Link className="ln-link ln-login__forgot" to="/quen-mat-khau" data-testid="login-forgot">Quên mật khẩu?</Link>
           {demo && <Button variant="ghost" block onClick={() => setShowForm(false)}>Chọn tài khoản mẫu</Button>}
         </form>
       ) : (

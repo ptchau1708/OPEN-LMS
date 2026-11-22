@@ -5,6 +5,8 @@
  * Những giả định cần đối chiếu với migrations được đánh dấu "GIẢ ĐỊNH".
  */
 import { packSession, unpackSession } from '../sessionPack';
+import { normalizeParentLogin } from '../school/login';
+import { NO_REAL_EMAIL_TEXT, isSystemEmail, newPasswordProblem } from '../password';
 import {
   SKILL_BY_CODE,
   type Assignment,
@@ -162,8 +164,8 @@ export function usernameToEmail(username: string): string {
   if (u.includes('@')) return u;
   const domain = readEnv('VITE_STUDENT_EMAIL_DOMAIN') ?? 'openlms.edu';
   // Phase 5: phụ huynh đăng nhập bằng số điện thoại → <số>@parent.<miền> (xem school/login.ts).
-  const phone = u.replace(/[\s.\-()]/g, '').replace(/^\+84/, '0');
-  if (/^0\d{9}$/.test(phone)) return `${phone}@parent.${domain}`;
+  const p = normalizeParentLogin(u);
+  if (p.ok && p.kind === 'phone') return `${p.username}@parent.${domain}`;
   return `${u}@${domain}`;
 }
 
@@ -193,7 +195,58 @@ export class SupabaseDataSource implements DataSource {
     const sb = await this.db();
     const { data, error } = await sb.from('profiles').select('*').eq('id', id).maybeSingle();
     if (error) fail(error, 'Không tải được hồ sơ người dùng');
-    return data ? fromProfile(data as Row) : null;
+    if (!data) return null;
+    const p = fromProfile(data as Row);
+    // Cờ “mật khẩu tạm” nằm trong app_metadata (chỉ máy chủ ghi được) — docs/MAT_KHAU.md.
+    const { data: s } = await sb.auth.getSession();
+    if (s.session?.user.app_metadata?.must_change_password === true) p.mustChangePassword = true;
+    return p;
+  }
+
+  async changePassword(current: string, next: string): Promise<void> {
+    const bad = newPasswordProblem(next, current);
+    if (bad) throw new Error(bad);
+    const sb = await this.db();
+    const { data: u } = await sb.auth.getUser();
+    const email = u.user?.email;
+    if (!email) throw new Error('Phiên đăng nhập đã hết hạn. Đăng nhập lại rồi đổi mật khẩu nhé.');
+    const check = await sb.auth.signInWithPassword({ email, password: current });
+    if (check.error) throw new Error(check.error.status === 429 ? 'Thử sai nhiều lần quá. Đợi vài phút rồi thử lại nhé.' : 'Mật khẩu hiện tại chưa đúng.');
+    await this.setNewPassword(sb, next);
+  }
+
+  async requestPasswordReset(email: string, redirectTo: string): Promise<void> {
+    const e = (email ?? '').trim().toLowerCase();
+    if (isSystemEmail(e)) throw new Error(NO_REAL_EMAIL_TEXT);
+    const sb = await this.db();
+    const { error } = await sb.auth.resetPasswordForEmail(e, { redirectTo });
+    if (error) throw new Error(error.status === 429 ? 'Đã gửi nhiều thư quá. Đợi khoảng một giờ rồi thử lại nhé.' : 'Chưa gửi được thư. Thử lại sau nhé.');
+  }
+
+  async completePasswordReset(next: string): Promise<void> {
+    const bad = newPasswordProblem(next);
+    if (bad) throw new Error(bad);
+    const sb = await this.db();
+    const { data } = await sb.auth.getSession();
+    if (!data.session) throw new Error('Link đặt lại mật khẩu đã hết hạn hoặc đã dùng. Gửi lại thư mới nhé.');
+    await this.setNewPassword(sb, next);
+  }
+
+  private async setNewPassword(sb: V2Client, next: string): Promise<void> {
+    const { error } = await sb.auth.updateUser({ password: next });
+    if (error) {
+      const code = (error as { code?: string }).code ?? '';
+      if (code === 'same_password') throw new Error('Mật khẩu mới phải khác mật khẩu cũ.');
+      if (code === 'weak_password') throw new Error('Mật khẩu này yếu quá, chọn mật khẩu khác nhé.');
+      if (code === 'reauthentication_needed') throw new Error('Cần đăng nhập lại rồi mới đổi được mật khẩu.');
+      throw new Error('Chưa đổi được mật khẩu. Thử lại sau nhé.');
+    }
+    // Bỏ cờ “mật khẩu tạm” (máy chủ) rồi lấy phiên mới để app thấy cờ đã bỏ. Thử 2 lần.
+    for (let i = 0; i < 2; i++) {
+      const r = await sb.functions.invoke('school-admin', { body: { action: 'password-changed' } });
+      if (!r.error) break;
+    }
+    await sb.auth.refreshSession();
   }
 
   async signIn(username: string, password: string): Promise<Profile> {

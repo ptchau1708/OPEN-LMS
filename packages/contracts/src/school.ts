@@ -210,6 +210,8 @@ export interface AccountSlip {
   name: string;
   username: string;
   password: string;
+  /** Mật khẩu tạm: người dùng phải đổi ở lần đăng nhập sau (phụ huynh, giáo viên). */
+  temporary?: boolean;
   classId?: string;
   className?: string;
 }

@@ -68,13 +68,15 @@ export function CodeSlip({ code, studentName, className, schoolName }: { code: G
 export function AccountSlipCard({ slip, schoolName }: { slip: AccountSlip; schoolName?: string }) {
   return (
     <article className="ad-slip ad-slip--acc">
-      <header className="ad-slip__head"><strong>{schoolName || 'OPEN-EDU'}</strong><span>{slip.className ? `Lớp ${slip.className}` : slip.role === 'teacher' ? 'Giáo viên' : ''}</span></header>
+      <header className="ad-slip__head"><strong>{schoolName || 'OPEN-EDU'}</strong><span>{slip.className ? `Lớp ${slip.className}` : slip.role === 'teacher' ? 'Giáo viên' : slip.role === 'parent' ? 'Phụ huynh' : slip.role === 'admin' ? 'Quản trị' : ''}</span></header>
       <p className="ad-slip__lead"><strong>{slip.name}</strong></p>
       <dl className="ad-slip__acc">
-        <dt>Tên đăng nhập</dt><dd>{slip.username}</dd>
-        <dt>Mật khẩu</dt><dd>{slip.password}</dd>
+        <dt>{slip.role === 'parent' ? 'Đăng nhập bằng' : 'Tên đăng nhập'}</dt><dd>{slip.username}</dd>
+        <dt>{slip.temporary ? 'Mật khẩu tạm' : 'Mật khẩu'}</dt><dd>{slip.password}</dd>
       </dl>
-      <p className="ad-slip__fine">Mở {learnerBase().replace(/^https?:\/\//, '')} · Giữ phiếu cẩn thận, không cho bạn khác xem.</p>
+      {slip.temporary
+        ? <p className="ad-slip__fine">Mở {learnerBase().replace(/^https?:\/\//, '')} · Đăng nhập bằng mật khẩu tạm, hệ thống sẽ yêu cầu đặt mật khẩu mới ngay.</p>
+        : <p className="ad-slip__fine">Mở {learnerBase().replace(/^https?:\/\//, '')} · Giữ phiếu cẩn thận, không cho bạn khác xem.</p>}
     </article>
   );
 }
