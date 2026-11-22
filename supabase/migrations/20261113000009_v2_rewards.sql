@@ -440,7 +440,7 @@ begin
   select * into c from v2.classes where id = p_class;
   if not found then raise exception 'Không tìm thấy lớp.' using errcode = 'P0002'; end if;
   create temp table if not exists _g_stars (user_id uuid primary key, stars int, team_id text) on commit drop;
-  delete from _g_stars;
+  delete from _g_stars where true;  -- Supabase bật pg_safeupdate cho API: DELETE phải có WHERE.
   insert into _g_stars
   select s.id, coalesce((select sum(r.stars) from v2.reward_ledger r where r.user_id = s.id and r.stars > 0 and r.at >= v_from), 0),
          (select m.team_id from v2.class_members m where m.class_id = p_class and m.user_id = s.id)
