@@ -236,6 +236,9 @@ export function fromAssignment(r: Row): Assignment {
     openAt: str(r, 'openAt'),
     dueAt: optStr(r, 'dueAt'),
     createdBy: str(r, 'createdBy'),
+    latePolicy: (optStr(r, 'latePolicy') as Assignment['latePolicy']) ?? undefined,
+    parentId: optStr(r, 'parentId'),
+    round: typeof r.round === 'number' ? r.round : undefined,
   });
 }
 export function toAssignmentRow(a: Omit<Assignment, 'id'> & { id?: string }): Row {
@@ -249,6 +252,10 @@ export function toAssignmentRow(a: Omit<Assignment, 'id'> & { id?: string }): Ro
     due_at: a.dueAt ?? null,
     created_by: a.createdBy,
   };
+  // Cột mới (SQL 13) — chỉ gửi khi có, để bản CSDL chưa nâng cấp vẫn giao bài được như cũ.
+  if (a.latePolicy && a.latePolicy !== 'allow') row.late_policy = a.latePolicy;
+  if (a.parentId) row.parent_id = a.parentId;
+  if (a.round && a.round > 1) row.round = a.round;
   if (a.id) row.id = a.id;
   return row;
 }

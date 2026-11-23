@@ -3,3 +3,4 @@ export * from './types';
 export * from './rules';
 export { getPagesSource } from './source';
 export * from './react';
+export * from './tree';

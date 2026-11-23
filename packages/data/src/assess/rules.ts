@@ -164,3 +164,88 @@ export function approvalReward(a: Pick<ApprovalInput, 'submissionId' | 'studentI
     sourceId: a.submissionId,
   };
 }
+
+/* ------------------------------------------------------------------ */
+/* GV tự chấm (không cần AI)                                           */
+/* ------------------------------------------------------------------ */
+/** `AiGrade.model` của bản GV tự chấm — lưu cùng bảng ai_grades để mọi luồng sau (duyệt, hồ sơ, thành thạo) dùng chung. */
+export const TEACHER_GRADER_MODEL = 'manual/teacher';
+export const TEACHER_GRADER_LABEL = 'GV tự chấm';
+/** Điểm gợi ý khi GV chỉ chọn mức: T 90% · H 70% · C 40% thang điểm. */
+export const LEVEL_SUGGEST_RATIO: Record<Tt27Level, number> = { T: 0.9, H: 0.7, C: 0.4 };
+export const LEVEL_DEFAULT_FEEDBACK: Record<Tt27Level, { student: string; parent: string }> = {
+  T: { student: 'Em làm bài rất tốt! Cô khen em. Em tiếp tục cố gắng nhé.', parent: 'Con hoàn thành tốt bài này. Gia đình khen ngợi để con giữ vững nhé.' },
+  H: { student: 'Em đã hoàn thành bài. Em xem lại phần cô góp ý để làm tốt hơn nhé.', parent: 'Con hoàn thành bài. Gia đình nhắc con xem lại lời góp ý của cô.' },
+  C: { student: 'Em đã cố gắng. Em làm lại phần chưa đúng cùng cô nhé.', parent: 'Con chưa hoàn thành bài này. Gia đình cùng con ôn lại ở nhà nhé.' },
+};
+
+export function isTeacherGrade(g: Pick<AiGrade, 'model'> | undefined | null): boolean {
+  return !!g && g.model === TEACHER_GRADER_MODEL;
+}
+
+/** Điểm gợi ý theo mức (làm tròn 0,5 với thang 10). */
+export function suggestTotal(level: Tt27Level, max: number): number {
+  const v = clamp(LEVEL_SUGGEST_RATIO[level] * max, 0, max);
+  return max === 10 ? Math.round(v * 2) / 2 : round1(v);
+}
+
+export interface TeacherGradeInput {
+  submissionId: string;
+  rubric: Pick<Rubric, 'criteria' | 'maxScore'>;
+  /** Mức GV chọn; bỏ trống → tính từ điểm. */
+  level?: Tt27Level;
+  /** Tổng điểm; bỏ trống → tính từ tiêu chí, hoặc điểm gợi ý theo mức. */
+  total?: number;
+  /** Điểm từng tiêu chí (tuỳ chọn). */
+  criteria?: { criterionId: string; points: number; comment?: string }[];
+  feedbackStudent?: string;
+  feedbackParent?: string;
+  feedbackTeacher?: string;
+  now: string;
+}
+
+/**
+ * Bản chấm do GV tự nhập, cùng dạng AiGrade (model TEACHER_GRADER_MODEL, tin cậy 1, không cờ) → duyệt ngay.
+ * Ưu tiên: điểm tiêu chí → tổng điểm → điểm gợi ý theo mức. Mức GV chọn luôn được giữ.
+ */
+export function teacherGrade(i: TeacherGradeInput): AiGrade {
+  const max = i.rubric.maxScore > 0 ? i.rubric.maxScore : 10;
+  const given = (i.criteria ?? []).filter((c) => Number.isFinite(Number(c.points)));
+  const hasTotal = typeof i.total === 'number' && Number.isFinite(i.total);
+  if (!i.level && !hasTotal && !given.length) throw new Error('Thầy cô chọn mức T/H/C hoặc nhập điểm nhé.');
+  const rc = i.rubric.criteria;
+  let total: number;
+  let criteria: AiGrade['criteria'];
+  if (given.length && rc.length) {
+    criteria = rc.map((c) => {
+      const e = given.find((x) => x.criterionId === c.id);
+      return { criterionId: c.id, points: e ? clamp(Number(e.points), 0, c.points) : 0, max: c.points, comment: e?.comment?.trim() ?? '' };
+    });
+    total = hasTotal ? clamp(i.total as number, 0, max) : totalFromCriteria(criteria.map((c) => c.points), i.rubric).total;
+  } else {
+    total = hasTotal ? clamp(i.total as number, 0, max) : suggestTotal(i.level as Tt27Level, max);
+    const cm = criteriaMax(i.rubric) || max;
+    criteria = rc.map((c) => ({ criterionId: c.id, points: round1((total / max) * cm * (c.points / cm)), max: c.points, comment: '' }));
+  }
+  total = round1(total);
+  const level = i.level ?? levelFor(total, max);
+  const fb = LEVEL_DEFAULT_FEEDBACK[level];
+  return {
+    submissionId: i.submissionId,
+    transcript: [],
+    criteria,
+    total,
+    max,
+    level,
+    strengths: [],
+    issues: [],
+    feedbackStudent: i.feedbackStudent?.trim() || fb.student,
+    feedbackParent: i.feedbackParent?.trim() || fb.parent,
+    feedbackTeacher: i.feedbackTeacher?.trim() ?? '',
+    skills: [],
+    confidence: 1,
+    flags: [],
+    model: TEACHER_GRADER_MODEL,
+    createdAt: i.now,
+  };
+}

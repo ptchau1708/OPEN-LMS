@@ -36,6 +36,8 @@ const BadgeWatcher = lazy(() => import('./pages/rewards/BadgeWatcher'));
 const KetNoi = lazy(() => import('./pages/connect/KetNoi'));
 const LtiAuth = lazy(() => import('./pages/connect/LtiAuth'));
 const LtiApps = lazy(() => import('./pages/connect/LtiApps'));
+const DiscussHome = lazy(() => import('./pages/discuss/Discuss').then((m) => ({ default: m.DiscussHome })));
+const DiscussRoom = lazy(() => import('./pages/discuss/Discuss'));
 const PageView = lazy(() => import('./pages/connect/PageView'));
 
 export function App() {
@@ -76,6 +78,8 @@ export function App() {
             <Route path="lop" element={<LiveJoin />} />
             <Route path="lop/:sessionId" element={<LiveRoom />} />
             <Route path="ung-dung" element={<LtiApps />} />
+            <Route path="thao-luan" element={<DiscussHome />} />
+            <Route path="thao-luan/:id" element={<DiscussRoom />} />
             <Route path="ung-dung/:appId" element={<PageView />} />
             <Route path="trang/:pageId" element={<PageView />} />
           </Route>

@@ -2,6 +2,7 @@
  * Edge Function `grade` — chấm câu trả lời ở server (máy HS không có đáp án).
  *
  * Vào:  { itemId, response, context?: { lessonId?, assignmentId?, liveSessionId?, slideIndex?, durationMs?, duelId?, duelQ? } }
+ *       assignmentId của lần giao khóa bài khi quá hạn (late_policy 'lock') → 403 past_due.
  *       Có duelId (Đấu 1–1): ghi v2.duel_record_answer (điểm = đúng + thưởng tốc độ), learning_events 'arena', không cộng sao;
  *       ra thêm { points, ms }.
  * Ra:   { correct, score, graded, parts?, starsAwarded, wallet, newlyUnlocked, duplicate? }
@@ -177,6 +178,15 @@ serveJson(async (req) => {
   const answeredAt = plaus === 'ok' && answeredAtRaw ? new Date(answeredAtRaw).toISOString() : null;
 
   const admin = adminClient();
+  // Lần giao khóa bài khi quá hạn (SQL 13, late_policy = 'lock'): không nhận câu trả lời mới. Bản CSDL cũ chưa có cột → bỏ qua.
+  if (assignmentId) {
+    const { data: asg, error: ae } = await admin.from('assignments').select('due_at, late_policy').eq('id', assignmentId).maybeSingle();
+    const a = asg as { due_at: string | null; late_policy?: string } | null;
+    const answeredMs = answeredAt ? Date.parse(answeredAt) : Date.now();
+    if (!ae && a?.late_policy === 'lock' && a.due_at && Date.parse(a.due_at) < answeredMs) {
+      throw new HttpError(403, 'Bài này đã hết hạn nộp nên không nhận thêm câu trả lời.', 'past_due');
+    }
+  }
   const [itemRes, keyRes] = await Promise.all([
     admin
       .from('items')

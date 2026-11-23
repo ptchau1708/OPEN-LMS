@@ -62,7 +62,8 @@ export function Controls({ state, activityId, slideCount, send }: ControlsProps)
       else if (k === 'ArrowRight' || k === 'PageDown') a.next();
       else if (k === ' ' || k === 'Spacebar') a.toggle();
       else if (k === 'r' || k === 'R') a.reveal();
-      else if (k >= '1' && k <= '4') a.award(Number(k) - 1);
+      else if (k >= '1' && k <= '9') a.award(Number(k) - 1);
+      else if (k === '0') a.award(9);
       else return;
       e.preventDefault();
     };
@@ -91,8 +92,8 @@ export function Controls({ state, activityId, slideCount, send }: ControlsProps)
       <button type="button" className="pr-ctl__b is-wide" onClick={reveal} disabled={!canReveal} title="Phím R">
         <Icon name="eye" size={30} /> Hiện đáp án
       </button>
-      {state.teams.slice(0, 4).map((t, i) => (
-        <button key={t.id} type="button" className="pr-ctl__b is-team" style={{ '--team': t.color } as CSSProperties} onClick={() => award(i)} disabled={ended} title={`Phím ${i + 1}`}>
+      {state.teams.slice(0, 10).map((t, i) => (
+        <button key={t.id} type="button" className="pr-ctl__b is-team" style={{ '--team': t.color } as CSSProperties} onClick={() => award(i)} disabled={ended} title={`Phím ${(i + 1) % 10}`}>
           <Icon name="star" size={28} /> {t.name} +1
         </button>
       ))}

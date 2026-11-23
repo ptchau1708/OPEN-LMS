@@ -5,6 +5,7 @@ import { useClasses, useCreateLiveSession, useDataSource, useLessons } from '@op
 import { Btn, Empty, ErrorNote, Field, Loading, PageHead, SubjectDot } from '../components/common';
 import { cx } from '../lib/format';
 import { matchesSearch } from '@openedu/data';
+import { GameSetupDialog } from './live/GameSetup';
 
 export default function LiveStart({ user }: { user: Profile }) {
   const nav = useNavigate();
@@ -16,6 +17,7 @@ export default function LiveStart({ user }: { user: Profile }) {
   const [lessonId, setLessonId] = useState(params.get('bai') ?? '');
   const [classId, setClassId] = useState('');
   const [search, setSearch] = useState('');
+  const [game, setGame] = useState(false);
   useEffect(() => { if (!classId && classes.data?.[0]) setClassId(user.classId && classes.data.some((c) => c.id === user.classId) ? user.classId : classes.data[0].id); }, [classes.data, classId, user.classId]);
   const list = (lessons.data ?? []).filter((l) => !search.trim() || matchesSearch(l.title, search));
   const start = () => create.mutate({ lessonId, classId: classId || undefined }, { onSuccess: (s) => nav(`/truc-tiep/${s.sessionId}${classId ? `?lop=${classId}` : ''}`) });
@@ -56,9 +58,12 @@ export default function LiveStart({ user }: { user: Profile }) {
           </Field>
           <ErrorNote error={create.error} />
           <Btn kind="primary" size="lg" icon="play" disabled={!lessonId || create.isPending} onClick={start}>{create.isPending ? 'Đang mở lớp…' : 'Bắt đầu'}</Btn>
+          <Btn size="lg" icon="trophy" disabled={!lessonId || !list.some((l) => l.id === lessonId && l.slides.some((x) => x.layout === 'activity'))} onClick={() => setGame(true)} data-testid="live-game">Chơi thi đua với các câu hỏi của bài</Btn>
+          <p className="tc-muted tc-small">Thi đua kiểu Kahoot, Quizizz hoặc thẻ giấy. Muốn chọn từng câu: vào <a href="/ngan-hang">Ngân hàng câu hỏi</a>, tích câu → “Chơi trực tiếp”.</p>
           <p className="tc-muted tc-small">Sau khi bắt đầu: mở link TV trên màn hình lớp, cho HS quét mã QR hoặc nhập mã 6 số.</p>
         </section>
       </div>
+      {game ? <GameSetupDialog user={user} lesson={(lessons.data ?? []).find((l) => l.id === lessonId)} onClose={() => setGame(false)} /> : null}
     </div>
   );
 }

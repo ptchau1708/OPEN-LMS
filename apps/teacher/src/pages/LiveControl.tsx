@@ -9,6 +9,7 @@ import { SlideThumb } from '../components/SlideThumb';
 import { cx, layoutMeta } from '../lib/format';
 import { learnerUrl, presentUrl } from '../lib/env';
 import { defaultTeams, teamsFor, useTeamsStore } from '../lib/teams';
+import { GameControl } from './live/GameControl';
 
 function useNow(on: boolean) {
   const [now, setNow] = useState(Date.now());
@@ -67,6 +68,8 @@ export default function LiveControl({ user }: { user: Profile }) {
       </div>
     );
   }
+
+  if (state.game || params.get('choi')) return <GameControl user={user} view={view} lesson={lesson} items={items} cls={cls.data ?? undefined} />;
 
   const slides = lesson?.slides ?? [];
   const slide = slides[state.slideIndex];

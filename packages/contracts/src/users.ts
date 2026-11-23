@@ -56,7 +56,14 @@ export interface Task {
   /** lessonId / practice set id / ... */
   targetId: string;
   dueAt?: string;
+  /** Lần giao tạo ra việc này (mở bài kèm ?giao=<id> để ghi kết quả theo lần giao). */
+  assignmentId?: string;
+  /** Quá hạn và lần giao không cho nộp muộn. */
+  locked?: boolean;
 }
+
+/** Quá hạn nộp: 'allow' — vẫn làm được (ghi nhận muộn); 'lock' — khóa bài. */
+export type LatePolicy = 'allow' | 'lock';
 
 export interface Assignment {
   id: string;
@@ -69,6 +76,12 @@ export interface Assignment {
   openAt: string;
   dueAt?: string;
   createdBy: string;
+  /** Mặc định 'allow'. */
+  latePolicy?: LatePolicy;
+  /** Giao lại: id lần giao ĐẦU TIÊN của chuỗi (các lượt cùng một bài). */
+  parentId?: string;
+  /** Lượt thứ mấy (1 = lần đầu). */
+  round?: number;
 }
 
 export interface Wallet {

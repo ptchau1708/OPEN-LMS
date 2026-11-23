@@ -3,7 +3,7 @@
  */
 import { useEffect, useState } from 'react';
 import { BADGE_CATEGORIES, PLANTS, TEACHER_BADGE_GLYPHS, type BadgeGlyph, type PlantKind, type Profile } from '@openedu/contracts';
-import { defaultGoalTarget, useClassGarden, useGrantTeacherBadge, useSetGardenGoal, useTeacherBadges } from '@openedu/data';
+import { defaultGoalTarget, useClassGarden, useGardenTvKey, useGrantTeacherBadge, useSetGardenGoal, useTeacherBadges } from '@openedu/data';
 import { BadgeArt, GardenScene, Icon, Plant } from '@openedu/ui';
 import { Btn, Empty, ErrorNote, Field, Loading, PageHead } from '../../components/common';
 import { ClassPicker, useClassPick, useRoster } from '../../lib/assess';
@@ -11,10 +11,47 @@ import { relTime } from '../../lib/format';
 import '@openedu/ui/rewards.css';
 import '../../styles/rewards.css';
 
-function presentGardenUrl(classId: string): string {
+function presentGardenUrl(classId: string, key?: string): string {
   const v = (import.meta.env as Record<string, unknown>).VITE_PRESENT_URL;
   const base = typeof v === 'string' && v.trim() ? v.trim() : `http://${typeof location !== 'undefined' ? location.hostname : 'localhost'}:5175/`;
-  try { const u = new URL('vuon-lop', base.endsWith('/') ? base : base + '/'); u.searchParams.set('lop', classId); return u.toString(); } catch { return `${base}vuon-lop?lop=${encodeURIComponent(classId)}`; }
+  try {
+    const u = new URL('vuon-lop', base.endsWith('/') ? base : base + '/');
+    u.searchParams.set('lop', classId);
+    if (key) u.searchParams.set('ma', key);
+    return u.toString();
+  } catch { return `${base}vuon-lop?lop=${encodeURIComponent(classId)}${key ? `&ma=${key}` : ''}`; }
+}
+
+/**
+ * Nút "Mở trên TV": link mang khóa TV của lớp — màn hình lớp xem được mà không cần đăng nhập (chỉ tổng sao,
+ * không tên HS). "Đổi link": khóa mới, link TV cũ ngừng hoạt động.
+ */
+function TvLink({ classId }: { classId: string }) {
+  const key = useGardenTvKey();
+  const [url, setUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [sure, setSure] = useState(false);
+  useEffect(() => { setUrl(''); setCopied(false); setSure(false); }, [classId]);
+  const open = (renew = false) => {
+    // Mở cửa sổ ngay khi bấm (trình duyệt chặn cửa sổ mở sau khi chờ mạng), rồi gán địa chỉ.
+    const w = renew ? null : window.open('about:blank', '_blank');
+    key.mutate({ classId, renew }, {
+      onSuccess: (k) => { const u = presentGardenUrl(classId, k); setUrl(u); setCopied(false); setSure(false); if (w) w.location.href = u; },
+      onError: () => w?.close(),
+    });
+  };
+  return (
+    <>
+      <Btn icon="tv" onClick={() => open()} disabled={!classId || key.isPending} data-testid="garden-tv-open">Mở trên TV</Btn>
+      {url && (
+        <span className="tc-row tc-garden__tvlink" data-testid="garden-tv-link">
+          <Btn size="sm" onClick={() => { void navigator.clipboard?.writeText(url).then(() => setCopied(true)); }}>{copied ? 'Đã chép link' : 'Chép link TV'}</Btn>
+          <Btn size="sm" kind={sure ? 'danger' : 'ghost'} onClick={() => (sure ? open(true) : setSure(true))} title="Màn hình đang mở link cũ sẽ ngừng hiện Vườn lớp">{sure ? 'Bấm lần nữa: link cũ ngừng hoạt động' : 'Đổi link'}</Btn>
+        </span>
+      )}
+      {key.error ? <ErrorNote error={key.error} /> : null}
+    </>
+  );
 }
 
 const PINK = BADGE_CATEGORIES.find((c) => c.id === 'cua-co')?.color ?? '#ff5d8f';
@@ -38,7 +75,7 @@ export default function ClassGardenTeacher({ user }: { user: Profile }) {
       <PageHead title="Vườn lớp" sub="Sao cả lớp kiếm trong tuần tưới cây chung. Học sinh chỉ thấy cây của mình và tổng lớp — không có bảng xếp hạng."
         actions={<>
           <ClassPicker list={list} value={classId} onChange={setClassId} />
-          <a className="tc-btn tc-btn--default" href={presentGardenUrl(classId)} target="_blank" rel="noreferrer"><Icon name="tv" size={16} /><span>Mở trên TV</span></a>
+          <TvLink classId={classId} />
         </>} />
       {garden.isLoading ? <Loading /> : garden.error ? <ErrorNote error={garden.error} onRetry={() => void garden.refetch()} /> : g ? (
         <div className="tc-garden__grid">

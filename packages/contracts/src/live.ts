@@ -45,7 +45,64 @@ export interface LiveState {
   participants: LiveParticipant[];
   /** Sao theo học sinh trong phiên. */
   studentStars: Record<string, number>;
+  /** Chế độ thi đua (đố vui kiểu Kahoot / Quizizz / thẻ giấy). Không có = lớp học trực tiếp thường. */
+  game?: LiveGame;
   updatedAt: string;
+}
+
+/**
+ * class: cả lớp cùng câu, GV bấm câu tiếp (kiểu Kahoot) · self: mỗi em tự làm theo nhịp riêng, bảng xếp hạng chạy trực tiếp
+ * (kiểu Quizizz) · paper: HS giơ thẻ giấy A/B/C/D, GV quét bằng camera điện thoại (kiểu Quizizz Paper mode / Plickers).
+ */
+export type LiveGameMode = 'class' | 'self' | 'paper';
+
+/** Một học sinh dùng thẻ giấy số `card`. */
+export interface LivePaperCard {
+  card: number;
+  userId: string;
+  name: string;
+}
+
+export interface LiveGame {
+  mode: LiveGameMode;
+  /** Giây mỗi câu (class, paper); 0 = không đếm ngược. Với self: thời gian tính điểm tốc độ mỗi câu. */
+  seconds: number;
+  /** Điểm thi đua theo học sinh (đúng + nhanh + chuỗi). */
+  points: Record<string, number>;
+  /** Số câu đúng. */
+  correct: Record<string, number>;
+  /** Số câu đã trả lời. */
+  answered: Record<string, number>;
+  /** Chuỗi đúng liên tiếp hiện tại. */
+  streak: Record<string, number>;
+  /** self: các câu (slideIndex) đã tính điểm của từng em. */
+  done?: Record<string, number[]>;
+  /** slideIndex của các câu đã tính điểm (class, paper). */
+  tallied: number[];
+  /** Điểm cộng ở câu vừa tính (để TV hiện "+850"). */
+  lastGain?: Record<string, number>;
+  /** Thời điểm mở câu hiện tại (máy GV). */
+  openedAt?: string;
+  /** TV đang hiện bảng xếp hạng. */
+  board?: boolean;
+  /** self: đã bắt đầu / thời điểm hết giờ cả bài (ISO, tuỳ chọn). */
+  startedAt?: string;
+  endsAt?: string;
+  /** paper: thẻ của từng HS. */
+  cards?: LivePaperCard[];
+  /** paper: câu trả lời quét được theo câu: slideIndex → userId → 'A' | 'B' | 'C' | 'D'. */
+  paper?: Record<string, Record<string, string>>;
+}
+
+/** Điểm thêm khi tính một câu. */
+export interface LiveGain {
+  userId: string;
+  points: number;
+  correct: boolean;
+  /** false = không trả lời (vẫn mất chuỗi). */
+  answered?: boolean;
+  /** Chế độ self: câu của em này (bỏ qua nếu đã tính). */
+  slideIndex?: number;
 }
 
 export type LiveCommand =
@@ -57,7 +114,13 @@ export type LiveCommand =
   | { type: 'award'; target: { kind: 'team' | 'student'; id: string }; stars: number }
   | { type: 'set-teams'; teams: LiveTeam[] }
   | { type: 'assign-team'; userId: string; teamId: string }
-  | { type: 'end' };
+  | { type: 'end' }
+  /* ---- thi đua ---- */
+  | { type: 'game-setup'; game: Pick<LiveGame, 'mode' | 'seconds'> & { cards?: LivePaperCard[] } }
+  | { type: 'game-tally'; slideIndex?: number; gains: LiveGain[] }
+  | { type: 'game-board'; show: boolean }
+  | { type: 'game-start'; endsAt?: string }
+  | { type: 'paper-answer'; slideIndex: number; answers: Record<string, string | null> };
 
 export interface LiveResponse {
   sessionId: string;

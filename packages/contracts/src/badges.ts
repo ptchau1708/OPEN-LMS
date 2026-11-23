@@ -272,7 +272,12 @@ export interface RewardsSource {
   getShop(userId: string): Promise<ShopState>;
   buyItem(userId: string, itemId: string): Promise<ShopState>;
   equipItem(userId: string, slot: OutfitSlot, itemId: string | null): Promise<ShopState>;
-  /** display 'tv': màn hình lớp — ô HS ẩn tên, ẩn số sao (demo: không cần đăng nhập). */
-  getClassGarden(classId: string, opts?: { display?: 'tv' }): Promise<ClassGarden>;
+  /**
+   * display 'tv': màn hình lớp — ô HS ẩn tên, ẩn số sao. tvKey: khóa TV của lớp (màn hình TV không đăng nhập,
+   * migration 20261122000002_v2_garden_tv.sql). Demo: không cần đăng nhập / khóa.
+   */
+  getClassGarden(classId: string, opts?: { display?: 'tv'; tvKey?: string }): Promise<ClassGarden>;
+  /** Khóa TV của lớp (GV lớp). renew = true: đổi khóa mới, link TV cũ ngừng hoạt động. */
+  gardenTvKey?(classId: string, renew?: boolean): Promise<string>;
   setGardenGoal(input: SetGardenGoalInput): Promise<ClassGarden>;
 }

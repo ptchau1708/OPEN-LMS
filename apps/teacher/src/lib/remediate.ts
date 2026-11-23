@@ -28,7 +28,7 @@ export function useRemediate(user: Profile) {
   const make = (t: RemediationTarget) => save.mutateAsync(remediationLesson({ title: t.title, subject: t.subject, grade: t.grade, ownerId: user.id, itemIds: t.itemIds, note: t.note }));
 
   const run = async (t: RemediationTarget, mode: 'assign' | 'live') => {
-    if (!t.itemIds.length) { setError({ key: t.key, error: new Error('Chưa có câu hỏi gợi ý cho nhóm này — thêm câu hỏi có gắn kĩ năng trong Ngân hàng hoạt động.') }); return; }
+    if (!t.itemIds.length) { setError({ key: t.key, error: new Error('Chưa có câu hỏi gợi ý cho nhóm này — thêm câu hỏi có gắn kĩ năng trong Ngân hàng câu hỏi.') }); return; }
     setBusy(`${t.key}:${mode}`);
     setError(null);
     try {

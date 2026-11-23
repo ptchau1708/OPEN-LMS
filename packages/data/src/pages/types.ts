@@ -10,7 +10,8 @@ export interface EmbedSite {
   createdAt: string;
 }
 
-export type ClassPageKind = 'link' | 'lti';
+/** link: trang web nhúng · lti: bài trong app · section: trang nội dung (chữ + các trang con), như Google Sites. */
+export type ClassPageKind = 'link' | 'lti' | 'section';
 
 export interface ClassPage {
   id: string;
@@ -27,9 +28,13 @@ export interface ClassPage {
   position: number;
   hidden: boolean;
   createdAt: string;
+  /** Trang cha (null = trang gốc). SQL 14. */
+  parentId: string | null;
+  /** Phần chữ của trang (trang nội dung; trang web có thể có lời dẫn). */
+  body: string;
 }
 
-export type ClassPageInput = Pick<ClassPage, 'classId' | 'title' | 'description' | 'kind' | 'url' | 'appId' | 'openIn' | 'hidden'> & { id?: string };
+export type ClassPageInput = Pick<ClassPage, 'classId' | 'title' | 'description' | 'kind' | 'url' | 'appId' | 'openIn' | 'hidden'> & { id?: string; parentId?: string | null; body?: string; position?: number };
 
 export interface PagesSource {
   listEmbedSites(): Promise<EmbedSite[]>;
@@ -41,4 +46,6 @@ export interface PagesSource {
   /** GV của lớp / quản trị: thêm (không có id) hoặc sửa. */
   saveClassPage(input: ClassPageInput): Promise<ClassPage>;
   deleteClassPage(id: string): Promise<void>;
+  /** Đổi thứ tự (vị trí) nhiều trang một lần. */
+  movePages(moves: { id: string; position: number }[]): Promise<void>;
 }

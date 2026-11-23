@@ -150,3 +150,46 @@ body { background: var(--k-bg-2); }
 @keyframes pr-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 @keyframes pr-rise { from { opacity: 0; transform: translateY(20vmin); } to { opacity: 1; transform: none; } }
 @keyframes pr-gain { 0% { opacity: 0; transform: translateY(1vmin) scale(0.6); } 20% { opacity: 1; transform: translateY(-2vmin) scale(1.2); } 100% { opacity: 0; transform: translateY(-8vmin) scale(1); } }
+
+/* ---------- Thi đua (Kahoot / Quizizz / thẻ giấy) ---------- */
+.pr-game { display: flex; flex-direction: column; }
+.pr-ghud__mode { font-size: 3.4vmin; font-weight: 800; padding: 1vmin 2vmin; }
+.pr-ready { font-size: 9vmin; margin: 0; }
+.pr-gq { margin: 2vmin 4vmin 1vmin; font-size: 5.4vmin; line-height: 1.2; text-align: center; }
+.pr-gq__img { display: block; max-height: 26vh; max-width: 60vw; margin: 0 auto 1vmin; object-fit: contain; border-radius: 1.5vmin; }
+.pr-gcount { margin: 1vmin auto; font-size: 3.6vmin; text-align: center; }
+.pr-gcount b { font-size: 1.4em; }
+.pr-gtiles { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1.6vmin; margin: 0; padding: 2vmin 3vmin 3vmin; list-style: none; min-height: 0; }
+.pr-gtile { display: flex; align-items: center; gap: 2vmin; padding: 2vmin 3vmin; border-radius: 1.6vmin; background: var(--tile); color: #fff; font-size: 4.6vmin; font-weight: 800; box-shadow: 0 .8vmin 0 rgba(0, 0, 0, .22); min-height: 0; transition: opacity .3s, transform .3s; }
+.pr-gtile img { max-height: 16vh; max-width: 30%; object-fit: contain; border-radius: 1vmin; background: #fff; }
+.pr-gtile__k { flex: none; display: flex; align-items: center; justify-content: center; width: 9vmin; height: 9vmin; border-radius: 50%; background: rgba(255, 255, 255, .22); font-size: 5.5vmin; }
+.pr-gtile.is-dim { opacity: .28; }
+.pr-gtile.is-ok { transform: scale(1.02); box-shadow: 0 0 0 .8vmin #fff, 0 0 0 1.6vmin #26890c; }
+.pr-gbars { display: flex; align-items: flex-end; justify-content: center; gap: 4vmin; height: 22vh; margin: 1vmin auto 0; }
+.pr-gbar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 12vmin; height: 100%; }
+.pr-gbar i { display: block; width: 100%; min-height: 1vmin; background: var(--tile); border-radius: 1vmin 1vmin 0 0; transition: height .6s; }
+.pr-gbar__n { font-size: 3.6vmin; font-weight: 800; }
+.pr-gbar__l { margin-top: .6vmin; font-size: 3.4vmin; font-weight: 800; }
+.pr-gbar.is-ok .pr-gbar__l { color: #26890c; }
+.pr-lb { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 2vmin 6vmin; min-height: 0; }
+.pr-lb__h { margin: 0 0 1.5vmin; font-size: 7vmin; }
+.pr-lb__teams { display: flex; flex-wrap: wrap; justify-content: center; gap: 2vmin; font-size: 3.4vmin; margin: 0 0 1.5vmin; }
+.pr-lb__teams span { padding: .6vmin 2vmin; border-radius: 99px; border: .5vmin solid var(--team); }
+.pr-lb__list { width: min(1100px, 92vw); margin: 0; padding: 0; list-style: none; display: grid; gap: 1vmin; }
+.pr-lb__list li { display: flex; align-items: center; gap: 2.4vmin; padding: 1.2vmin 3vmin; border-radius: 1.4vmin; background: #fff; box-shadow: 0 .4vmin 0 rgba(0, 0, 0, .08); font-size: 4vmin; animation: pr-lbin .5s both; }
+.pr-lb__list li.is-top1 { background: #fff3c4; } .pr-lb__list li.is-top2 { background: #eef0f4; } .pr-lb__list li.is-top3 { background: #f9e6d6; }
+.pr-lb__rank { width: 7vmin; text-align: center; font-weight: 800; }
+.pr-lb__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.pr-lb__gain { color: #1f8a4c; font-weight: 800; animation: pr-gain 1.2s both; }
+.pr-lb__pts { font-weight: 800; min-width: 14vmin; text-align: right; }
+.pr-self__meta { font-size: 3.4vmin; margin: 0 0 1.5vmin; }
+.pr-self__bar { flex: 0 0 26vmin; height: 2vmin; border-radius: 1vmin; background: #e3e8ef; overflow: hidden; }
+.pr-self__bar i { display: block; height: 100%; background: #1368ce; transition: width .5s; }
+.pr-podium__pts { font-size: 3.6vmin; font-weight: 800; }
+.pr-gend__rest { margin-top: 2vmin; }
+.pr-paperlobby { max-width: 1100px; margin: 2vmin auto; text-align: center; }
+.pr-paperlobby__big { font-size: 6vmin; margin: 1vmin 0 2vmin; }
+.pr-paperlobby__steps { text-align: left; font-size: 4vmin; line-height: 1.5; margin: 0 auto; max-width: 900px; }
+@keyframes pr-lbin { from { opacity: 0; transform: translateY(1.5vmin); } }
+@keyframes pr-gain { from { opacity: 0; transform: translateY(1vmin); } 30% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .pr-lb__list li, .pr-lb__gain { animation: none; } }

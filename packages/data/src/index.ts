@@ -6,6 +6,7 @@ export { SupabaseDataSource, usernameToEmail } from './supabase/SupabaseDataSour
 export { SupabaseLiveChannel } from './supabase/SupabaseLiveChannel';
 export { RelayLiveChannel, registerRoomOnRelay, type RelayChannelOptions } from './live/RelayLiveChannel';
 export { applyLiveCommand, createInitialLiveState, mergeIncomingState, randomPin } from './live/reducer';
+export * from './live/game';
 export { isStatusful, type ChannelStatus, type StatusfulLiveChannel } from './live/types';
 export { MemoryStorage, PrefixedWebStorage, createDefaultStorage, STORAGE_PREFIX, type KVStorage } from './storage';
 export { computeWallet, streakDays, levelForXp, newlyUnlockable, nextUnlock, normalizeReward, dayKey } from './rewards';
@@ -36,5 +37,8 @@ export * from './connect';
 // Cầu nối VnEdu / Google Classroom (Excel, điền mẫu, mã bên ngoài) — gom trong một không gian tên để không trùng tên.
 export * as bridge from './export';
 export * from './pages';
+export * from './assignReport';
+export * from './behaviorStats';
 export { newPasswordProblem, isSystemEmail, NO_REAL_EMAIL_TEXT, PASSWORD_MIN, PASSWORD_MAX } from './password';
 export { handoffTo, consumeHandoff, handoffUrl, readHandoffHash, packSession, unpackSession, HANDOFF_KEY, type PackedSession } from './handoff';
+export * from './discuss';

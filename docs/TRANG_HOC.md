@@ -23,3 +23,16 @@ mà học sinh mở **ngay trong OPEN-EDU** (app học sinh → Hôm nay → “
 `supabase/tests/database/embed_pages.test.sql` (22), `packages/lesson-player/src/embed.test.ts`,
 `e2e/bridge-lti.spec.ts` (GV thêm trang + cho phép nhúng + ẩn + bớt; HS mở trong khung / thẻ mới). ⚠ Chưa chạy với
 Supabase thật.
+
+## Trang con (như Google Sites) — 23/11/2026
+- Ba loại trang: **Trang nội dung** (tiêu đề + phần chữ, chứa các trang con), **Trang web nhúng**, **Bài trong ứng dụng**.
+- Mỗi trang chọn được **Nằm trong** (trang cha) — sâu tối đa 4 tầng, cùng lớp, không vòng lặp (kiểm ở CSDL).
+  Nút **Trang con** trên mỗi dòng, **↑ ↓** đổi thứ tự, **Sửa** để chuyển sang trang cha khác.
+- Xóa trang cha: các trang con lên làm trang chính (không mất). Ẩn trang cha: ẩn cả nhánh với HS.
+- Trang web nhúng: chọn "Hiện ngay trong trang" với địa chỉ chưa có trong danh sách → khi lưu, trang được tự thêm vào
+  danh sách được phép nhúng. Trang web vẫn phải cho phép hiện trong khung (Google Drive: dùng link Xem trước / Nhúng).
+- HS: mục **Ứng dụng học** chỉ hiện các trang chính; vào trong có **mục lục** (thanh bên, trên điện thoại là nút
+  "Mục lục"), **đường dẫn** (Tiếng Việt › Tuần 12), phần chữ, trang web nhúng và thẻ các trang con.
+- Cài: chạy `14_trang-con.sql` (migration `20261123000002_v2_page_tree.sql`). Chưa chạy thì Trang học vẫn dùng như cũ
+  (danh sách phẳng), chỉ chưa tạo được trang nội dung / trang con.
+- Kiểm thử: `__tests__/pageTree.test.ts`, `supabase/tests/database/page_tree.test.sql`, `e2e/trang-con.spec.ts`.

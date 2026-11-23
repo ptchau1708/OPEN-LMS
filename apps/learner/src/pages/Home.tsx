@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router';
 import type { RemediationSet, Task } from '@openedu/contracts';
-import { MAX_REMEDIATION_TASKS, remediationTask, useClass, useClassPages, useLtiTools, usePassport, useRemediationSets, useTodayTasks, useWallet } from '@openedu/data';
+import { discussionState, MAX_REMEDIATION_TASKS, remediationTask, useClass, useClassPages, useDiscussions, useLtiTools, usePassport, useRemediationSets, useTodayTasks, useWallet } from '@openedu/data';
 import { Button, Card, Confetti, Icon, Mascot, MascotBubble, ProgressBar, SpeakButton, StarCount, sfx } from '@openedu/ui';
 import type { IconName } from '@openedu/ui';
 import { AppTabs, Avatar, EmptyState, ErrorState } from '../components/Common';
@@ -18,7 +18,7 @@ const KIND_ICON: Record<Task['kind'], IconName> = { lesson: 'book', practice: 'p
 
 export function openTask(t: Task, nav: (p: string) => void) {
   sfx.tap();
-  if (t.kind === 'lesson') nav(`/bai/${t.targetId}`);
+  if (t.kind === 'lesson') nav(`/bai/${t.targetId}${t.assignmentId ? `?giao=${encodeURIComponent(t.assignmentId)}` : ''}`);
   else if (t.kind === 'package') nav(`/goi/${t.targetId}`);
   else if (isReviewTask(t)) nav(remPath(t.targetId));
   else nav('/choi/thap');
@@ -42,6 +42,7 @@ export default function Home() {
   const writing = workQ.items;
   const writeLeft = writing.filter((x) => x.state === 'todo' || x.state === 'redo').length;
   const ltiCount = (useLtiTools().data?.length ?? 0) + (useClassPages(me.classId).data?.length ?? 0);
+  const openDisc = (useDiscussions(me.classId).data ?? []).filter((d) => discussionState(d) === 'open').length;
 
   let line = `${partOfDay()}, ${me.name}! `;
   if (tasksQ.isPending) line += 'Mình đang xem hôm nay có gì nhé…';
@@ -109,6 +110,7 @@ export default function Home() {
           <Button size="xl" block className="ln-live-btn" onClick={() => nav('/lop')} icon={<Icon name="tv" size={32} />}>Vào lớp trực tiếp</Button>
           <p className="ln-live-hint">Khi cô mở bài trên TV, em bấm vào đây và nhập mã nhé.</p>
           {me.classId && <Button size="lg" block variant="secondary" className="ln-garden-btn" onClick={() => { sfx.tap(); nav('/vuon-lop'); }} icon={<Icon name="star" size={26} />}>Vườn lớp em</Button>}
+          {me.classId && <Button size="lg" block variant="secondary" className="ln-garden-btn" onClick={() => { sfx.tap(); nav('/thao-luan'); }} icon={<Icon name="team" size={26} />} data-testid="home-discuss">Thảo luận{openDisc > 0 ? <span className="ln-count">{openDisc}</span> : null}</Button>}
           {ltiCount > 0 && <Button size="lg" block variant="secondary" className="ln-garden-btn" onClick={() => { sfx.tap(); nav('/ung-dung'); }} icon={<Icon name="puzzle" size={26} />} data-testid="home-lti">Ứng dụng học</Button>}
         </section>
       </div>
@@ -145,7 +147,7 @@ function TaskCard({ t, onOpen }: { t: Task; onOpen: () => void }) {
         <span className="ln-task__sub">{t.subtitle}</span>
         <span className="ln-task__meta">
           <ProgressBar value={t.progress} color={done ? 'var(--k-ok)' : color} label={`Đã làm ${Math.round(t.progress * 100)}%`} className="ln-task__bar" />
-          {due && <span className={`ln-due${due.late ? ' is-late' : ''}`}><Icon name="clock" size={16} /> {due.text}</span>}
+          {t.locked && !done ? <span className="ln-due is-late"><Icon name="clock" size={16} /> Đã hết hạn nộp</span> : due && <span className={`ln-due${due.late ? ' is-late' : ''}`}><Icon name="clock" size={16} /> {due.text}{due.late && t.assignmentId ? ' · vẫn nộp được' : ''}</span>}
         </span>
       </span>
       <span className="ln-task__go" aria-hidden="true"><Icon name={done ? 'check' : 'play'} size={28} strokeWidth={2.6} /></span>

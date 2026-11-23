@@ -20,5 +20,9 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: { locale: 'vi-VN', timezoneId: 'Asia/Ho_Chi_Minh', serviceWorkers: 'block', trace: 'retain-on-failure', viewport: { width: 1366, height: 900 } },
-  webServer: [preview('learner', 4611), preview('teacher', 4612), preview('present', 4613)],
+  webServer: [
+    preview('learner', 4611), preview('teacher', 4612), preview('present', 4613),
+    // Máy chủ lớp học trực tiếp (chế độ demo): e2e/do-vui.spec.ts.
+    { command: 'node tools/live-relay/server.mjs', url: 'http://localhost:8787/health', reuseExistingServer: !process.env.CI, timeout: 30_000 },
+  ],
 });

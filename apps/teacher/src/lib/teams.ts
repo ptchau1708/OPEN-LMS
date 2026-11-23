@@ -4,11 +4,13 @@ import type { ClassInfo, DataSource } from '@openedu/contracts';
 
 export interface TeamDef { id: string; name: string; color: string; studentIds: string[] }
 
-export const TEAM_COLORS = ['#ff8a3d', '#2f7bf6', '#20a974', '#8b5cf6', '#ff5d8f', '#0ea5a4', '#e8485f', '#64748b'];
-const DEFAULT_NAMES = ['Tổ Mặt Trời', 'Tổ Cầu Vồng', 'Tổ Ngôi Sao', 'Tổ Mây Xanh'];
+export const TEAM_COLORS = ['#ff8a3d', '#2f7bf6', '#20a974', '#8b5cf6', '#ff5d8f', '#0ea5a4', '#e8485f', '#64748b', '#d4a20b', '#6d8f1f'];
+export const MIN_TEAMS = 2;
+export const MAX_TEAMS = 10;
+const DEFAULT_NAMES = ['Tổ Mặt Trời', 'Tổ Cầu Vồng', 'Tổ Ngôi Sao', 'Tổ Mây Xanh', 'Tổ Mặt Trăng', 'Tổ Hoa Mai', 'Tổ Hoa Sen', 'Tổ Cánh Diều', 'Tổ Búp Măng', 'Tổ Sóc Nâu'];
 
 export function defaultTeams(n: number, prefix = 'tm'): TeamDef[] {
-  return Array.from({ length: n }, (_, i) => ({ id: `${prefix}-${i + 1}`, name: DEFAULT_NAMES[i] ?? `Tổ ${i + 1}`, color: TEAM_COLORS[i], studentIds: [] }));
+  return Array.from({ length: n }, (_, i) => ({ id: `${prefix}-${i + 1}`, name: DEFAULT_NAMES[i] ?? `Tổ ${i + 1}`, color: TEAM_COLORS[i % TEAM_COLORS.length], studentIds: [] }));
 }
 
 interface TeamsStore {

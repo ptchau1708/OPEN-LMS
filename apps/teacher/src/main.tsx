@@ -7,6 +7,8 @@ import '@openedu/ui/tokens.css';
 import '@openedu/ui/kid.css';
 import './styles/app.css';
 import './styles/assess.css';
+import './styles/game.css';
+import './styles/discuss.css';
 import { App } from './App';
 
 

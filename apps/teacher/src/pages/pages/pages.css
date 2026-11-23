@@ -15,3 +15,9 @@
   .pg-list li { flex-direction: column; align-items: flex-start; }
   .pg-siteform { grid-template-columns: 1fr; }
 }
+
+/* Trang học dạng cây */
+.pg-tree li { padding-left: calc(var(--depth, 0) * 28px); }
+.pg-tree li[style*="--depth: 1"], .pg-tree li[style*="--depth: 2"], .pg-tree li[style*="--depth: 3"] { border-left: 0; }
+.pg-tree__title { display: inline-flex; align-items: center; gap: 6px; }
+.pg-tree li .pg-list__main { position: relative; }

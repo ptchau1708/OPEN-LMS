@@ -6,6 +6,7 @@ import { Button, Icon } from '@openedu/ui';
 import { ErrorState } from '../components/Common';
 import { resolveSettings, useMe } from '../lib/util';
 import '../styles/live.css';
+import { GameBar, GameOver, PaperNotice, SelfPlay } from './live/GamePlay';
 
 export default function LiveRoom() {
   const [attempt, setAttempt] = useState(0);
@@ -52,7 +53,12 @@ function Room({ onRetry }: { onRetry: () => void }) {
         <Button variant="secondary" onClick={() => nav('/')} icon={<Icon name="close" size={22} />}>Thoát</Button>
       </div>
       <div className="ln-live__stage">
-        {live.channel ? (
+        {live.channel && live.state?.game ? (
+          live.state.phase === 'ended' ? <GameOver state={live.state} userId={me.id} mascot={companion} />
+            : live.state.game.mode === 'self' ? <SelfPlay channel={live.channel} state={live.state} lesson={lesson} items={{ ...items, ...(live.state.items ?? {}) }} me={{ id: me.id, name: me.name }} mascot={companion} bigText={settings.bigText ?? false} />
+            : live.state.game.mode === 'paper' ? <PaperNotice mascot={companion} />
+            : <div className="ln-gamewrap"><GameBar state={live.state} userId={me.id} /><div className="ln-gamewrap__view"><LiveStudentView channel={live.channel} items={items} me={{ userId: me.id, name: me.name }} settings={settings} lesson={lesson} /></div></div>
+        ) : live.channel ? (
           <LiveStudentView channel={live.channel} items={items} me={{ userId: me.id, name: me.name }} settings={settings} lesson={lesson} />
         ) : (
           <div className="ln-live__wait"><span className="ln-dots"><i /><i /><i /></span><p>Đang vào lớp…</p></div>

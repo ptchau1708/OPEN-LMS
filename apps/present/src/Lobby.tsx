@@ -24,7 +24,18 @@ export function Lobby({ state }: { state: LiveState }) {
   return (
     <main className="pr-lobby">
       <h1 className="pr-lobby__title">{state.lesson?.title ?? 'Lớp học trực tiếp'}</h1>
-      <div className="pr-lobby__grid">
+      {state.game?.mode === 'paper' ? (
+        <section className="pr-paperlobby" aria-label="Chế độ thẻ giấy">
+          <p className="pr-paperlobby__big">🃏 Hôm nay chơi bằng <b>thẻ giấy</b></p>
+          <ol className="pr-paperlobby__steps">
+            <li>Mỗi bạn cầm đúng thẻ có <b>số và tên</b> của mình.</li>
+            <li>Chọn đáp án: xoay thẻ cho <b>chữ em chọn (A, B, C, D) ở phía trên</b>.</li>
+            <li>Giơ thẻ thẳng, không lấy tay che mã. Cô sẽ quét cả lớp.</li>
+          </ol>
+          <p className="pr-room__count"><strong>{state.game.cards?.length ?? 0}</strong> thẻ</p>
+        </section>
+      ) : null}
+      {state.game?.mode === 'paper' ? null : <div className="pr-lobby__grid">
         <section className="pr-join" aria-label="Cách vào lớp">
           <p className="pr-join__label">Mã lớp</p>
           <p className="pr-join__pin" aria-label={state.pin.split('').join(' ')}>
@@ -48,7 +59,7 @@ export function Lobby({ state }: { state: LiveState }) {
             ))}
           </ul>
         </section>
-      </div>
+      </div>}
     </main>
   );
 }

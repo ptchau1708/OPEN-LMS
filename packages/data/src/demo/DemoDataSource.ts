@@ -69,7 +69,7 @@ import {
   type WorkTask,
   type WorkTaskFilter,
 } from '@openedu/contracts';
-import { approvalEvents, approvalReward, mergeFinal, mockGrade, statusAfterGrade } from '../assess';
+import { approvalEvents, approvalReward, mergeFinal, mockGrade, statusAfterGrade, teacherGrade } from '../assess';
 import { attendanceSummary, classLeaderboard, defaultBehaviors, suggestTt27, vnWeekStart, workEntryOf } from '../engagement';
 import { getExamService } from '../exam/service';
 import { compressWorkImage } from '../workImage';
@@ -538,6 +538,23 @@ export class DemoDataSource implements DataSource {
     return clone([...list].sort((a, b) => b.openAt.localeCompare(a.openAt)));
   }
 
+  async startAssignment(assignmentId: string): Promise<void> {
+    await this.ready();
+    const s = this.get<{ userId: string } | null>(K.session, null);
+    const a = this.get<Assignment[]>(K.assignments, []).find((x) => x.id === assignmentId);
+    if (!s || !a) return;
+    if (a.latePolicy === 'lock' && a.dueAt && Date.parse(a.dueAt) < this.now().getTime()) throw friendly('Bài này đã hết hạn nộp. Em hỏi thầy cô nhé.');
+    if (a.targetType !== 'lesson') return;
+    const key = `${s.userId}|${a.targetId}`;
+    const all = this.get<Record<string, LessonProgress>>(K.progress, {});
+    const p = all[key];
+    if (p && Date.parse(p.updatedAt) < Date.parse(a.openAt)) {
+      all[key] = { ...p, slideIndex: 0, completedSlides: [], answers: {}, completedAt: undefined, updatedAt: this.now().toISOString() };
+      delete all[key]!.completedAt;
+      this.put(K.progress, all);
+    }
+  }
+
   async createAssignment(a: Omit<Assignment, 'id'>): Promise<Assignment> {
     await this.ready();
     const list = this.get<Assignment[]>(K.assignments, []);
@@ -592,10 +609,10 @@ export class DemoDataSource implements DataSource {
     this.masteryCache.delete(e.userId);
   }
 
-  async listEvents(filter: { userId?: string; lessonId?: string; limit?: number }): Promise<LearningEvent[]> {
+  async listEvents(filter: { userId?: string; lessonId?: string; assignmentIds?: string[]; limit?: number }): Promise<LearningEvent[]> {
     await this.ready();
     const list = this.events()
-      .filter((e) => (!filter.userId || e.userId === filter.userId) && (!filter.lessonId || e.lessonId === filter.lessonId))
+      .filter((e) => (!filter.userId || e.userId === filter.userId) && (!filter.lessonId || e.lessonId === filter.lessonId) && (!filter.assignmentIds || (!!e.assignmentId && filter.assignmentIds.includes(e.assignmentId))))
       .sort((a, b) => b.at.localeCompare(a.at));
     return clone(list.slice(0, filter.limit ?? 100));
   }
@@ -1207,11 +1224,31 @@ export class DemoDataSource implements DataSource {
       this.putSub(next);
       return clone(this.detailOf(next, true));
     }
-    const grade = this.gradesMap()[sub.id];
-    if (!grade) throw friendly('Bài chưa được chấm — thầy cô bấm "Chấm bằng AI" trước nhé.');
     const task = this.tasksList().find((t) => t.id === sub.taskId);
     const rubric = task ? this.rubricsList().find((r) => r.id === task.rubricId) : undefined;
-    const final = mergeFinal(grade, saved, rubric);
+    if (review.manual) {
+      const f = review.final ?? {};
+      let g: AiGrade;
+      try {
+        g = teacherGrade({
+          submissionId: sub.id, rubric: rubric ?? { criteria: [], maxScore: 10 }, now: nowIso,
+          ...(f.level ? { level: f.level } : {}), ...(typeof f.total === 'number' ? { total: f.total } : {}), ...(f.criteria ? { criteria: f.criteria } : {}),
+          ...(f.feedbackStudent !== undefined ? { feedbackStudent: f.feedbackStudent } : {}), ...(f.feedbackParent !== undefined ? { feedbackParent: f.feedbackParent } : {}),
+          ...(f.feedbackTeacher !== undefined ? { feedbackTeacher: f.feedbackTeacher } : {}),
+        });
+      } catch (e) {
+        throw friendly(e instanceof Error ? e.message : 'Thiếu mức hoặc điểm.');
+      }
+      const gm = this.gradesMap();
+      gm[sub.id] = g;
+      this.put(K.aiGrades, gm);
+      const { final: _given, ...kept } = saved;
+      rv[sub.id] = kept;
+      this.put(K.gradeReviews, rv);
+    }
+    const grade = this.gradesMap()[sub.id];
+    if (!grade) throw friendly('Bài chưa được chấm — thầy cô bấm "Tự chấm" hoặc "Chấm bằng AI" trước nhé.');
+    const final = mergeFinal(grade, rv[sub.id], rubric);
     this.removeWorkEvents(sub.id);
     for (const e of approvalEvents({ submissionId: sub.id, studentId: sub.studentId, taskId: sub.taskId, taskTitle: task?.title ?? 'Bài làm', rubric: rubric ?? { skills: [] }, grade, final })) {
       await this.recordEvent(e);

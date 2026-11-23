@@ -5,6 +5,9 @@
  *   { submissionId }                                → chấm (HS chủ bài hoặc GV của lớp). Ra: SubmissionDetail.
  *   { action: 'review', review: { submissionId, decision: 'approved'|'edited'|'regrade'|'redo', final?, note? } }
  *                                                   → GV của lớp duyệt. Ra: SubmissionDetail.
+ *   { action: 'review', review: { submissionId, decision: 'edited', manual: true, final: { level?, total?, criteria?, feedback… } } }
+ *                                                   → GV TỰ CHẤM (không cần khóa AI): ghi bản chấm của GV vào ai_grades
+ *                                                     (model 'manual/teacher', tin cậy 1) rồi duyệt như 'edited'.
  * Chấm: tải ảnh từ bucket `submissions` (service role) → dataURL; lời nhắc + kiểm tra JSON dùng CHUNG mã thuần
  * _shared/assess (chép từ packages/data/src/assess bằng tools/sync-scoring.mjs). OpenRouter (OPENROUTER_API_KEY,
  * OPENROUTER_GRADE_MODEL mặc định google/gemini-2.5-flash) → dự phòng Gemini REST (GEMINI_API_KEY, inline_data).
@@ -29,6 +32,7 @@ import {
   gradeFromModelText,
   mergeFinal,
   statusAfterGrade,
+  teacherGrade,
   type GradePrompt,
   type ValidateResult,
 } from '../_shared/assess/index.ts';
@@ -287,6 +291,34 @@ async function grade(admin: AdminClient, caller: Caller, id: string, staff: bool
   return detail(admin, id);
 }
 
+/** Bản GV tự chấm từ payload (kiểm tra kiểu từng trường). */
+function manualGrade(raw: unknown, id: string, rubric: Rubric, now: string): AiGrade {
+  const f = isObject(raw) ? raw : {};
+  const level = f.level === 'T' || f.level === 'H' || f.level === 'C' ? f.level : undefined;
+  const total = typeof f.total === 'number' && Number.isFinite(f.total) ? f.total : undefined;
+  const criteria = Array.isArray(f.criteria)
+    ? f.criteria.filter(isObject).slice(0, 50).map((c) => ({
+        criterionId: String(c.criterionId ?? '').slice(0, 64),
+        points: Number(c.points),
+        comment: typeof c.comment === 'string' ? c.comment.slice(0, 1000) : '',
+      }))
+    : undefined;
+  const text = (v: unknown) => (typeof v === 'string' ? v.slice(0, 2000) : undefined);
+  try {
+    return teacherGrade({
+      submissionId: id, rubric, now,
+      ...(level ? { level } : {}),
+      ...(total !== undefined ? { total } : {}),
+      ...(criteria ? { criteria } : {}),
+      ...(text(f.feedbackStudent) !== undefined ? { feedbackStudent: text(f.feedbackStudent) } : {}),
+      ...(text(f.feedbackParent) !== undefined ? { feedbackParent: text(f.feedbackParent) } : {}),
+      ...(text(f.feedbackTeacher) !== undefined ? { feedbackTeacher: text(f.feedbackTeacher) } : {}),
+    });
+  } catch (e) {
+    throw new HttpError(400, e instanceof Error ? e.message : 'Thiếu mức hoặc điểm.', 'bad_request');
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Duyệt                                                               */
 /* ------------------------------------------------------------------ */
@@ -314,8 +346,19 @@ async function review(admin: AdminClient, caller: Caller, raw: JsonObject): Prom
     await setStatus(admin, id, 'returned');
     return detail(admin, id);
   }
-  if (!l.grade) throw new HttpError(400, 'Bài chưa được chấm — thầy cô bấm "Chấm bằng AI" trước nhé.', 'not_graded');
-  const edits = isObject(raw.final) ? (raw.final as Partial<GradeFinal>) : undefined;
+  const manual = raw.manual === true;
+  if (manual) {
+    if (decision !== 'edited') throw new HttpError(400, 'Tự chấm cần quyết định "edited".', 'bad_request');
+    l.grade = manualGrade(raw.final, id, l.rubric, now);
+    const g = l.grade;
+    const gu = await admin.from('ai_grades').upsert(
+      { submission_id: id, data: g, total: g.total, max: g.max, level: g.level, confidence: g.confidence, flags: g.flags, model: g.model, repairs: [], created_at: g.createdAt },
+      { onConflict: 'submission_id' },
+    );
+    if (gu.error) throw fromPgError(gu.error);
+  }
+  if (!l.grade) throw new HttpError(400, 'Bài chưa được chấm — thầy cô bấm "Tự chấm" hoặc "Chấm bằng AI" trước nhé.', 'not_graded');
+  const edits = !manual && isObject(raw.final) ? (raw.final as Partial<GradeFinal>) : undefined;
   const final = mergeFinal(l.grade, { decision, ...(edits ? { final: edits } : {}) }, l.rubric);
   const up = await admin.from('grade_reviews').upsert({ submission_id: id, teacher_id: caller.id, final, decision, note, at: now }, { onConflict: 'submission_id' });
   if (up.error) throw fromPgError(up.error);

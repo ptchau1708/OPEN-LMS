@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import type { AnswerEvent, ContentPackage, MascotId } from '@openedu/contracts';
 import { SUBJECTS } from '@openedu/contracts';
 import {
   useEmbedOriginsSync,
   lessonItemIds, useCompleteLesson, useItemsByIds, useLesson, usePackages, usePassport, useProgress,
-  useHint, useRecordEvent, useSaveProgress, useSubmitAnswer, useTodayTasks,
+  useDataSource, useHint, useRecordEvent, useSaveProgress, useSubmitAnswer, useTodayTasks,
 } from '@openedu/data';
+import { useQueryClient } from '@tanstack/react-query';
 import { SelfPacedPlayer, setEmbedOrigins } from '@openedu/lesson-player';
 import { Button, Confetti, Icon, Mascot, StarCount, sfx } from '@openedu/ui';
 import { ErrorState, LoadingScreen } from '../components/Common';
@@ -20,6 +21,21 @@ interface Done { summary: { correct: number; total: number; stars: number }; bon
 export default function LessonPage() {
   useEmbedOriginsSync(setEmbedOrigins);
   const { lessonId = '' } = useParams();
+  // ?giao=<lần giao>: kết quả ghi theo lần giao (báo cáo bài giao); lượt mới thì làm lại từ đầu.
+  const [sp] = useSearchParams();
+  const assignmentId = sp.get('giao') ?? undefined;
+  const ds = useDataSource();
+  const qc = useQueryClient();
+  const [gate, setGate] = useState<'wait' | 'ok' | { error: string }>(assignmentId && ds.startAssignment ? 'wait' : 'ok');
+  useEffect(() => {
+    if (!assignmentId || !ds.startAssignment) return;
+    let live = true;
+    ds.startAssignment(assignmentId)
+      .then(() => qc.invalidateQueries({ queryKey: ['progress'] }))
+      .then(() => { if (live) setGate('ok'); })
+      .catch((e: unknown) => { if (live) setGate(/hết hạn/.test(errText(e, '')) ? { error: errText(e, '') } : 'ok'); });
+    return () => { live = false; };
+  }, [assignmentId, ds, qc]);
   const me = useMe();
   const nav = useNavigate();
   const settings = resolveSettings(me);
@@ -50,7 +66,7 @@ export default function LessonPage() {
   useEffect(() => {
     if (!lesson || started.current) return;
     started.current = true;
-    record.mutate({ userId: me.id, verb: 'started', objectType: 'lesson', objectId: lesson.id, lessonId: lesson.id });
+    record.mutate({ userId: me.id, verb: 'started', objectType: 'lesson', objectId: lesson.id, lessonId: lesson.id, ...(assignmentId ? { assignmentId } : {}) });
   }, [lesson, me.id, record]);
 
   const packages = useMemo(() => {
@@ -59,6 +75,8 @@ export default function LessonPage() {
     return m;
   }, [pkgQ.data]);
 
+  if (typeof gate === 'object') return <ErrorState title="Bài đã hết hạn nộp" message={gate.error} extra={<Button size="lg" variant="secondary" onClick={() => nav('/')}>Về trang Hôm nay</Button>} />;
+  if (gate === 'wait') return <LoadingScreen label="Đang mở bài học" mascot={companion} />;
   if (lessonQ.isError) return <ErrorState message="Chưa mở được bài học." onRetry={() => void lessonQ.refetch()} />;
   if (lessonQ.isPending || (ids.length > 0 && itemsQ.isPending) || progressQ.isPending || (needsPkg && pkgQ.isPending))
     return <LoadingScreen label="Đang mở bài học" mascot={companion} />;
@@ -67,7 +85,7 @@ export default function LessonPage() {
 
   const onAnswer = (e: AnswerEvent) => {
     submit.mutate(
-      { userId: me.id, item: e.item, response: e.response, context: { lessonId: lesson.id, slideId: e.slide.id, source: 'lesson' }, attempt: e.attempts },
+      { userId: me.id, item: e.item, response: e.response, context: { lessonId: lesson.id, slideId: e.slide.id, source: 'lesson', ...(assignmentId ? { assignmentId } : {}) }, attempt: e.attempts },
       {
         onSuccess: (r) => {
           if (r.starsAwarded > 0) toast(`+${r.starsAwarded} sao đã vào túi của em!`, 'star', 2200);

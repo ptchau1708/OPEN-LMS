@@ -60,16 +60,22 @@ export function buildTodayTasks(input: TodayTaskInput): Task[] {
   const now = input.now ?? new Date();
   const tasks: Task[] = [];
   const seen = new Set<string>();
-  for (const a of input.assignments) {
+  // Giao lại cùng một bài nhiều lượt: lượt MỚI NHẤT đã mở là việc của hôm nay.
+  const ordered = [...input.assignments].sort((x, y) => (y.openAt ?? '').localeCompare(x.openAt ?? ''));
+  for (const a of ordered) {
     if (!assignmentAppliesTo(a, input.user)) continue;
     if (a.openAt && new Date(a.openAt).getTime() > now.getTime()) continue;
+    const locked = a.latePolicy === 'lock' && !!a.dueAt && new Date(a.dueAt).getTime() < now.getTime();
+    const extra = { assignmentId: a.id, ...(locked ? { locked: true } : {}) };
     const key = `${a.targetType}:${a.targetId}`;
     if (seen.has(key)) continue;
     seen.add(key);
     if (a.targetType === 'lesson') {
       const lesson = input.lessons[a.targetId];
       if (!lesson) continue;
-      const p = input.progress[a.targetId];
+      // Tiến độ từ trước ngày mở của lượt này là của lượt cũ → lượt mới bắt đầu lại từ 0.
+      const raw = input.progress[a.targetId];
+      const p = raw && a.openAt && raw.updatedAt && Date.parse(raw.updatedAt) < Date.parse(a.openAt) ? undefined : raw;
       const n = lesson.slides.length;
       tasks.push({
         id: `task-${a.id}`,
@@ -81,6 +87,7 @@ export function buildTodayTasks(input: TodayTaskInput): Task[] {
         isNew: !p && !input.openedLessonIds.has(a.targetId),
         targetId: a.targetId,
         dueAt: a.dueAt,
+        ...extra,
       });
     } else if (a.targetType === 'package') {
       const pkg = input.packages?.[a.targetId];
@@ -94,6 +101,7 @@ export function buildTodayTasks(input: TodayTaskInput): Task[] {
         isNew: !input.openedLessonIds.has(a.targetId),
         targetId: a.targetId,
         dueAt: a.dueAt,
+        ...extra,
       });
     } else {
       tasks.push({
@@ -106,6 +114,7 @@ export function buildTodayTasks(input: TodayTaskInput): Task[] {
         isNew: !input.openedLessonIds.has(a.targetId),
         targetId: a.targetId,
         dueAt: a.dueAt,
+        ...extra,
       });
     }
   }

@@ -43,6 +43,11 @@ export function useSaveClassPage() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: async (i: ClassPageInput) => (await ps()).saveClassPage(i), onSuccess: () => void qc.invalidateQueries({ queryKey: ['pages'] }) });
 }
+export function useMovePages() {
+  const ps = usePs();
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: async (moves: { id: string; position: number }[]) => (await ps()).movePages(moves), onSuccess: () => void qc.invalidateQueries({ queryKey: ['pages'] }) });
+}
 export function useDeleteClassPage() {
   const ps = usePs();
   const qc = useQueryClient();

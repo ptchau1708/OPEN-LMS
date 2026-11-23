@@ -584,14 +584,35 @@ export class SupabaseDataSource implements DataSource {
     if (error && (error.code === 'PGRST202' || /could not find the function/i.test(error.message))) this.recordEventUnavailable = true;
   }
 
-  async listEvents(filter: { userId?: string; lessonId?: string; limit?: number }): Promise<LearningEvent[]> {
+  async listEvents(filter: { userId?: string; lessonId?: string; assignmentIds?: string[]; limit?: number }): Promise<LearningEvent[]> {
     const sb = await this.db();
     let q = sb.from('learning_events').select('*').order('at', { ascending: false }).limit(filter.limit ?? 100);
     if (filter.userId) q = q.eq('user_id', filter.userId);
     if (filter.lessonId) q = q.eq('lesson_id', filter.lessonId);
+    if (filter.assignmentIds) q = q.in('assignment_id', filter.assignmentIds.length ? filter.assignmentIds : ['-']);
+    // Báo cáo bài giao cần nhiều dòng: Supabase trả tối đa 1000 dòng mỗi lần → đọc theo trang.
+    if ((filter.limit ?? 100) > 1000) {
+      const out: Row[] = [];
+      for (let from = 0; from < (filter.limit as number); from += 1000) {
+        const { data: page, error: pe } = await q.range(from, Math.min(from + 999, (filter.limit as number) - 1));
+        if (pe) fail(pe, 'Không tải được nhật ký học tập');
+        out.push(...((page ?? []) as Row[]));
+        if (!page || page.length < 1000) break;
+      }
+      return out.map(fromEvent);
+    }
     const { data, error } = await q;
     if (error) fail(error, 'Không tải được nhật ký học tập');
     return ((data ?? []) as Row[]).map(fromEvent);
+  }
+
+  async startAssignment(assignmentId: string): Promise<void> {
+    const sb = await this.db();
+    const { error } = await sb.rpc('start_assignment', { p_assignment: assignmentId });
+    if (!error) return;
+    // CSDL chưa chạy SQL 13: bỏ qua (vẫn học được như cũ).
+    if (error.code === 'PGRST202' || /start_assignment/.test(error.message ?? '') && /not find|does not exist/i.test(error.message ?? '')) return;
+    fail(error, 'Chưa mở được bài.');
   }
 
   async submitAnswer(input: SubmitAnswerInput): Promise<SubmitAnswerResult> {
@@ -1160,6 +1181,17 @@ export class SupabaseDataSource implements DataSource {
     if (filter.studentId) q = q.eq('student_id', filter.studentId);
     if (filter.from) q = q.gte('at', filter.from);
     if (filter.to) q = q.lte('at', filter.to);
+    // Tháng / học kì có thể quá 1000 dòng (Supabase trả tối đa 1000 dòng mỗi lần) → đọc theo trang.
+    if ((filter.limit ?? 500) > 1000) {
+      const out: Row[] = [];
+      for (let from = 0; from < (filter.limit as number); from += 1000) {
+        const { data: page, error: pe } = await q.range(from, Math.min(from + 999, (filter.limit as number) - 1));
+        if (pe) fail(pe, 'Không tải được nhật kí thi đua');
+        out.push(...((page ?? []) as Row[]));
+        if (!page || page.length < 1000) break;
+      }
+      return out.map(fromBehaviorLog);
+    }
     const { data, error } = await q;
     if (error) fail(error, 'Không tải được nhật kí thi đua');
     return ((data ?? []) as Row[]).map(fromBehaviorLog);
@@ -1182,7 +1214,7 @@ export class SupabaseDataSource implements DataSource {
     const now = new Date();
     const from = range.from ?? vnWeekStart(now);
     const to = range.to ?? now.toISOString();
-    const [cls, students, logs] = await Promise.all([this.getClass(classId), this.listStudents(classId), this.listBehaviorLogs({ classId, from, to, limit: 5000 })]);
+    const [cls, students, logs] = await Promise.all([this.getClass(classId), this.listStudents(classId), this.listBehaviorLogs({ classId, from, to, limit: 20000 })]);
     if (!cls) throw new Error('Không tìm thấy lớp này.');
     return classLeaderboard({ cls, students, logs, from, to });
   }

@@ -23,3 +23,21 @@
 .ln-live__stage { position: relative; flex: 1; min-height: 0; -webkit-transform: translateZ(0); transform: translateZ(0); overflow: hidden; }
 .ln-live__wait { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; font-weight: 800; color: var(--k-sub); }
 @media (max-width: 420px) { .ln-live__title { display: none; } .ln-live__bar { justify-content: space-between; } }
+
+/* ---------- thi đua (Kahoot / Quizizz / thẻ giấy) ---------- */
+.ln-gamewrap { display: flex; flex-direction: column; height: 100%; }
+.ln-gamewrap__view { position: relative; flex: 1; min-height: 0; transform: translateZ(0); overflow: hidden; }
+.ln-gamebar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; flex: none; padding: 8px 12px; background: var(--k-star-soft, #fff4cc); font-family: var(--f-kid-display); font-weight: 800; font-size: 1.05rem; }
+.ln-gamebar b { font-size: 1.2em; }
+.ln-gamebar__gain { padding: 2px 10px; border-radius: 999px; background: var(--k-ok, #1f9d55); color: #fff; animation: k-pop 400ms var(--k-ease, ease); }
+.ln-gamecenter { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; height: 100%; padding: 16px; text-align: center; font-weight: 700; }
+.ln-gamecenter > .ln-gamebar { position: absolute; top: 0; left: 0; right: 0; }
+.ln-gamecenter h1 { margin: 0; font-family: var(--f-kid-display); font-size: 2rem; }
+.ln-gameflash.is-ok { background: var(--k-ok-soft, #e6f6ec); color: var(--k-ok-dark, #135c32); }
+.ln-gameflash.is-try { background: var(--k-try-soft, #fdecec); color: #8a1c1c; }
+.ln-selfplay { display: flex; flex-direction: column; gap: 12px; height: 100%; overflow-y: auto; padding-bottom: 16px; }
+.ln-selfplay > .lp-card { margin: 0 12px; }
+.ln-selfplay > .lp-cta { align-self: center; }
+.ln-gameover { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; height: 100%; padding: 16px; text-align: center; }
+.ln-gameover h1 { margin: 0; font-family: var(--f-kid-display); font-size: 2.2rem; }
+.ln-gameover__big { font-size: 1.3rem; font-weight: 800; }

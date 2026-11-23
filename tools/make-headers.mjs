@@ -68,7 +68,8 @@ export function buildCsp(env, opts = {}) {
   const frame = ["'self'", 'https:', ...(content ? [content] : []), ...(google ? ['https://accounts.google.com'] : []), ...(demo ? ['http:'] : []), ...extra('CSP_EXTRA_FRAME')];
   const csp = [
     "default-src 'self'",
-    google ? "script-src 'self' https://accounts.google.com/gsi/client" : "script-src 'self'",
+    // App giáo viên: quét thẻ giấy (zxing-wasm) cần biên dịch WebAssembly → 'wasm-unsafe-eval' (không cho eval JS).
+    `script-src 'self'${opts.app === 'teacher' ? " 'wasm-unsafe-eval'" : ''}${google ? ' https://accounts.google.com/gsi/client' : ''}`,
     // React đặt style nội tuyến (vị trí kéo–thả, màu theo môn) nên phải cho 'unsafe-inline' với style; script thì KHÔNG.
     google ? "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style" : "style-src 'self' 'unsafe-inline'",
     // Ảnh / âm thanh / video bài giảng do thầy cô dán link từ nhiều nơi.

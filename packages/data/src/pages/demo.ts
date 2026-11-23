@@ -51,19 +51,40 @@ export class DemoPagesSource implements PagesSource {
     await this.staff();
     if (!i.title.trim()) throw new Error('Nhập tên trang.');
     if (i.kind === 'link' && !i.url) throw new Error('Nhập địa chỉ trang.');
+    if (i.parentId) {
+      const all = (await this.load()).s.pages;
+      const par = all.find((p) => p.id === i.parentId);
+      if (!par || par.classId !== i.classId) throw new Error('Trang cha phải thuộc cùng lớp.');
+      for (let cur: string | null = i.parentId, d = 1; cur; d++) {
+        if (cur === i.id) throw new Error('Không chuyển trang vào trong trang con của nó được.');
+        if (d >= 4) throw new Error('Trang con sâu tối đa 4 tầng.');
+        cur = all.find((p) => p.id === cur)?.parentId ?? null;
+      }
+    }
     const { s, save, now } = await this.load();
     const old = i.id ? s.pages.find((p) => p.id === i.id) : undefined;
     const page: ClassPage = {
       id: old?.id ?? `pg-${Math.random().toString(36).slice(2, 10)}`, lti: old?.lti ?? {}, position: old?.position ?? s.pages.filter((p) => p.classId === i.classId).length,
       createdAt: old?.createdAt ?? now.toISOString(), classId: i.classId, title: i.title.trim(), description: i.description.trim(), kind: i.kind, url: i.url, appId: i.appId, openIn: i.openIn, hidden: i.hidden,
+      parentId: i.parentId !== undefined ? i.parentId : old?.parentId ?? null, body: i.body !== undefined ? i.body : old?.body ?? '',
     };
+    if (i.position !== undefined) page.position = i.position;
+    else if (!old) page.position = s.pages.filter((p) => p.classId === i.classId && (p.parentId ?? null) === page.parentId).length;
     if (old) s.pages[s.pages.indexOf(old)] = page; else s.pages.push(page);
     save();
     return page;
   }
+  async movePages(moves: { id: string; position: number }[]) {
+    await this.staff();
+    const { s, save } = await this.load();
+    for (const m of moves) { const p = s.pages.find((x) => x.id === m.id); if (p) p.position = m.position; }
+    save();
+  }
   async deleteClassPage(id: string) {
     await this.staff();
     const { s, save } = await this.load();
+    // Như CSDL (on delete set null): trang con lên làm trang gốc.
+    s.pages.forEach((p) => { if (p.parentId === id) p.parentId = null; });
     s.pages = s.pages.filter((p) => p.id !== id);
     save();
   }

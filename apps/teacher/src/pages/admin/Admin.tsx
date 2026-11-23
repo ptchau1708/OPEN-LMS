@@ -200,7 +200,7 @@ export function AdminSettings() {
 }
 
 /* ======================= Kho nội dung mẫu ======================= */
-function SampleContent() {
+export function SampleContent() {
   const ds = useDataSource();
   const me = useCurrentUser().data;
   const items = useItems({});
@@ -217,7 +217,7 @@ function SampleContent() {
   return (
     <section className="tc-card tc-stack">
       <header className="tc-card__head"><h2 className="ad-h2">Kho nội dung mẫu</h2></header>
-      <p className="tc-muted">Nạp khoảng 120 câu hỏi mẫu (Toán, Tiếng Việt, Tự nhiên và Xã hội, Tiếng Anh lớp 1–5, đã gắn mã kĩ năng), 6 bài giảng mẫu và tiêu chí chấm bài viết vào Ngân hàng hoạt động. Chạy lại không tạo bản trùng. Thầy cô sửa, xóa hoặc thêm câu của mình sau.</p>
+      <p className="tc-muted">Nạp khoảng 120 câu hỏi mẫu (Toán, Tiếng Việt, Tự nhiên và Xã hội, Tiếng Anh lớp 1–5, đã gắn mã kĩ năng), 6 bài giảng mẫu và tiêu chí chấm bài viết vào Ngân hàng câu hỏi. Chạy lại không tạo bản trùng. Thầy cô sửa, xóa hoặc thêm câu của mình sau.</p>
       <p className="tc-small">Ngân hàng hiện có: <strong>{items.isLoading ? '…' : (items.data?.length ?? 0)}{(items.data?.length ?? 0) >= 500 ? '+' : ''}</strong> câu hỏi.</p>
       <ErrorNote error={err} />
       {busy && prog ? (

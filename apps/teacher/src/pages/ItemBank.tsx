@@ -1,11 +1,51 @@
 import { useMemo, useState } from 'react';
-import { uid } from '@openedu/contracts';
+import { useNavigate } from 'react-router';
+import { uid, type Lesson, type Profile } from '@openedu/contracts';
 import { ACTIVITY_TYPES, SUBJECT_LIST, SUBJECTS, type Grade, type Item, type ItemType, type SubjectId } from '@openedu/contracts';
-import { useDeleteItem, useItems, useLessons, useSaveItem } from '@openedu/data';
-import { Btn, ConfirmBar, Empty, ErrorNote, Loading, PageHead } from '../components/common';
+import { useCurrentUser, useDataSource, useDeleteItem, useItems, useLessons, useSaveItem, useSaveLesson } from '@openedu/data';
+import { Btn, ConfirmBar, Dialog, Empty, ErrorNote, Field, Loading, PageHead } from '../components/common';
+import { SampleContent } from './admin/Admin';
 import { ItemPreview, ItemStudio, newItemOfType, TypeBadge, TypePickerDialog } from '../components/items';
 import { cx, relTime, shorten } from '../lib/format';
 import { exportBankXlsx, QuickAddDialog } from './itembank/QuickAdd';
+import { GameSetupDialog } from './live/GameSetup';
+
+/** Giao các câu đã chọn: tạo một bài luyện tập (mỗi câu một trang hoạt động) rồi sang trang Giao bài để chọn lớp, hạn nộp. */
+function AssignDialog({ items, me, onClose }: { items: Item[]; me: Profile; onClose: () => void }) {
+  const nav = useNavigate();
+  const saveLesson = useSaveLesson();
+  const top = <K extends 'subject' | 'grade'>(k: K) => {
+    const c = new Map<Item[K], number>();
+    items.forEach((it) => c.set(it[k], (c.get(it[k]) ?? 0) + 1));
+    return [...c.entries()].sort((a, b) => b[1] - a[1])[0]![0];
+  };
+  const subject = top('subject');
+  const grade = top('grade');
+  const [title, setTitle] = useState(`Luyện tập ${SUBJECTS[subject]?.name ?? ''} lớp ${grade} (${items.length} câu)`);
+  const create = () => {
+    const id = uid('ls');
+    const lesson: Lesson = {
+      id, title: title.trim() || 'Bài luyện tập', subject, grade, ownerId: me.id, status: 'published', updatedAt: new Date().toISOString(),
+      minutes: Math.max(5, Math.round(items.length * 1.5)),
+      description: 'Tạo từ Ngân hàng câu hỏi.',
+      slides: items.map((it, i) => ({ id: `${id}-s${i + 1}`, layout: 'activity' as const, title: `Câu ${i + 1}`, itemId: it.id })),
+    };
+    saveLesson.mutate(lesson, { onSuccess: (l) => nav(`/giao-bai?bai=${encodeURIComponent(l.id)}`) });
+  };
+  return (
+    <Dialog open title={`Giao ${items.length} câu cho học sinh`} onClose={onClose} footer={<>
+      <Btn onClick={onClose}>Hủy</Btn>
+      <Btn kind="primary" icon="check" disabled={saveLesson.isPending || !title.trim()} onClick={create} data-testid="qb-assign-go">{saveLesson.isPending ? 'Đang tạo…' : 'Tạo bài và chọn lớp'}</Btn>
+    </>}>
+      <div className="tc-stack">
+        <p className="tc-muted">Các câu đã chọn được gộp thành một <strong>bài luyện tập</strong> (mỗi câu một trang, theo thứ tự trong danh sách). Bước sau: chọn lớp hoặc từng em, ngày mở và hạn nộp. Kết quả từng câu vào hồ sơ học tập và mức thành thạo kĩ năng như bài giảng thường.</p>
+        <Field label="Tên bài cho học sinh"><input className="tc-input" value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
+        <ol className="tc-small tc-qbpicked">{items.map((it) => <li key={it.id}>{shorten(it.prompt.text, 90)}</li>)}</ol>
+        <ErrorNote error={saveLesson.error} />
+      </div>
+    </Dialog>
+  );
+}
 
 export default function ItemBank() {
   const [subject, setSubject] = useState<SubjectId | ''>('');
@@ -17,6 +57,12 @@ export default function ItemBank() {
   const [confirm, setConfirm] = useState(false);
   const [quick, setQuick] = useState(false);
   const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
+  const [picked, setPicked] = useState<string[]>([]);
+  const [assign, setAssign] = useState(false);
+  const [play, setPlay] = useState(false);
+  const me = useCurrentUser().data;
+  const ds = useDataSource();
+  const togglePick = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
   const q = useItems({ ...(subject ? { subject } : {}), ...(grade ? { grade } : {}), ...(type ? { type } : {}), ...(search.trim() ? { search: search.trim() } : {}) });
   const lessons = useLessons();
   const save = useSaveItem();
@@ -51,7 +97,7 @@ export default function ItemBank() {
 
   return (
     <div className={cx('tc-page tc-bank', open && 'has-drawer')}>
-      <PageHead title="Ngân hàng hoạt động" sub="Câu hỏi và hoạt động dùng chung cho bài giảng, luyện tập và lớp trực tiếp." actions={<>
+      <PageHead title="Ngân hàng câu hỏi" sub="Câu hỏi và hoạt động dùng chung cho bài giảng, luyện tập và lớp trực tiếp. Tích chọn các câu rồi bấm “Giao cho học sinh” (làm ở nhà) hoặc “Chơi trực tiếp” (thi đua trên lớp)." actions={<>
         <Btn icon="upload" onClick={() => void doExport()} disabled={!list.length} title="Xuất các câu đang hiện (theo bộ lọc) ra Excel, cùng mẫu với nhập">Xuất ra Excel</Btn>
         <Btn icon="plus" onClick={() => setQuick(true)} data-testid="qb-open">Thêm nhanh nhiều câu</Btn>
         <Btn kind="primary" icon="plus" onClick={() => setTypePick(true)}>Tạo hoạt động</Btn>
@@ -62,12 +108,32 @@ export default function ItemBank() {
         <select className="tc-input" value={subject} onChange={(e) => setSubject(e.target.value as SubjectId | '')} aria-label="Môn"><option value="">Mọi môn</option>{SUBJECT_LIST.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
         <select className="tc-input" value={grade} onChange={(e) => setGrade(Number(e.target.value) as Grade | 0)} aria-label="Lớp"><option value={0}>Mọi lớp</option>{[1, 2, 3, 4, 5].map((g) => <option key={g} value={g}>Lớp {g}</option>)}</select>
         <select className="tc-input" value={type} onChange={(e) => setType(e.target.value as ItemType | '')} aria-label="Dạng"><option value="">Mọi dạng</option>{ACTIVITY_TYPES.map((t) => <option key={t.type} value={t.type}>{t.label}{t.isNew ? ' (mới)' : ''}</option>)}</select>
-        <span className="tc-muted tc-small">{q.data ? `${q.data.length} hoạt động` : ''}</span>
+        <span className="tc-muted tc-small">{q.data ? `${q.data.length} câu` : ''}</span>
       </div>
-      {q.isLoading ? <Loading /> : !list.length ? <Empty icon="puzzle" title="Không có hoạt động phù hợp">Bỏ bớt bộ lọc hoặc tạo hoạt động mới.</Empty> : (
+      {list.length ? (
+        <div className="tc-qbbar" data-testid="qb-bar">
+          <label className="tc-row tc-small"><input type="checkbox" checked={list.length > 0 && list.every((it) => picked.includes(it.id))} onChange={(e) => setPicked(e.target.checked ? Array.from(new Set([...picked, ...list.map((it) => it.id)])) : picked.filter((id) => !list.some((it) => it.id === id)))} data-testid="qb-pick-all" /> Chọn tất cả câu đang hiện</label>
+          {picked.length ? <>
+            <strong className="tc-small">Đã chọn {picked.length} câu</strong>
+            <Btn size="sm" kind="ghost" onClick={() => setPicked([])}>Bỏ chọn</Btn>
+            <span className="tc-ebar__spacer" />
+            <Btn icon="play" disabled={!me} onClick={() => setPlay(true)} data-testid="qb-play" title="Thi đua trực tiếp trên lớp: kiểu Kahoot, Quizizz hoặc thẻ giấy">Chơi trực tiếp</Btn>
+            <Btn kind="primary" icon="check" disabled={!me} onClick={() => setAssign(true)} data-testid="qb-assign">Giao cho học sinh ({picked.length} câu)</Btn>
+          </> : <span className="tc-muted tc-small">Tích ô trước mỗi câu để chọn câu giao cho học sinh.</span>}
+        </div>
+      ) : null}
+      {q.isLoading ? <Loading /> : !list.length ? (
+        subject || grade || type || search.trim() ? <Empty icon="puzzle" title="Không có câu phù hợp">Bỏ bớt bộ lọc hoặc tạo câu mới.</Empty> : (
+          <div className="tc-stack">
+            <Empty icon="puzzle" title="Ngân hàng câu hỏi đang trống">Bấm <strong>Tạo hoạt động</strong> để soạn từng câu, <strong>Thêm nhanh nhiều câu</strong> để dán / nhập từ Excel{me?.role === 'admin' && ds.mode !== 'demo' ? ', hoặc nạp bộ câu hỏi mẫu ngay bên dưới' : '. Quản trị trường có thể nạp bộ câu hỏi mẫu'}.</Empty>
+            {me?.role === 'admin' && ds.mode !== 'demo' ? <SampleContent /> : null}
+          </div>
+        )
+      ) : (
         <ul className="tc-list tc-card tc-card--flush">
           {list.map((it) => (
-            <li key={it.id}>
+            <li key={it.id} className={cx('tc-qbrow', picked.includes(it.id) && 'is-picked')}>
+              <input type="checkbox" className="tc-qbrow__pick" checked={picked.includes(it.id)} onChange={() => togglePick(it.id)} aria-label={`Chọn câu: ${shorten(it.prompt.text, 60)}`} />
               <button type="button" className={cx('tc-listrow', open?.item.id === it.id && 'is-active')} onClick={() => { setConfirm(false); setOpen({ item: it, mode: 'view' }); }}>
                 <TypeBadge type={it.type} />
                 <span className="tc-listrow__main">{shorten(it.prompt.text, 120)}</span>
@@ -124,6 +190,8 @@ export default function ItemBank() {
           </footer>
         </aside>
       ) : null}
+      {play && me ? <GameSetupDialog user={me} items={picked.map((id) => (q.data ?? []).find((it) => it.id === id)).filter((x): x is Item => !!x)} onClose={() => setPlay(false)} /> : null}
+      {assign && me ? <AssignDialog items={picked.map((id) => (q.data ?? []).find((it) => it.id === id)).filter((x): x is Item => !!x)} me={me} onClose={() => setAssign(false)} /> : null}
       <QuickAddDialog open={quick} onClose={() => setQuick(false)} initial={{ ...(subject ? { subject } : {}), ...(grade ? { grade } : {}) }} onSaved={(n) => n > 0 && setToast({ text: `Đã lưu ${n} câu vào ngân hàng.` })} />
       <TypePickerDialog open={typePick} onClose={() => setTypePick(false)} onPick={(t) => { setTypePick(false); setOpen({ item: newItemOfType(t, grade || undefined, subject || undefined), mode: 'edit', isNew: true }); }} />
     </div>

@@ -8,6 +8,8 @@ import { Controls } from './Controls';
 import { slideItemId } from './util';
 
 const Stage = lazy(() => import('./Stage'));
+const GameStage = lazy(() => import('./GameStage'));
+const GameEnded = lazy(() => import('./GameStage').then((m) => ({ default: m.GameEnded })));
 
 export const BOARD_USER = 'bang-lop';
 
@@ -75,6 +77,12 @@ export function Session({ sessionId, ctl, onLeave }: SessionProps) {
     );
   } else if (state.phase === 'lobby') {
     body = <Lobby state={state} />;
+  } else if (state.game) {
+    body = (
+      <Suspense fallback={<div className="pr-center"><Mascot id="nghe" size={160} animate className="pr-center__mascot" /></div>}>
+        {state.phase === 'ended' ? <GameEnded state={state} /> : <GameStage state={state} items={items} responses={responses} />}
+      </Suspense>
+    );
   } else if (state.phase === 'ended') {
     body = <Ended state={state} />;
   } else {
@@ -99,7 +107,7 @@ export function Session({ sessionId, ctl, onLeave }: SessionProps) {
         </div>
       )}
       <FullscreenButton />
-      {ctl && state && (
+      {ctl && state && !state.game && (
         <Controls
           state={state}
           activityId={slideItemId(state.lesson?.slides[state.slideIndex])}

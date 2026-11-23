@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
-import { GRADE_FLAG_LABEL, MISCONCEPTIONS, SKILL_BY_CODE, TT27_LEVEL_LABEL, type GradeFinal, type Profile, type Rubric, type SubmissionDetail } from '@openedu/contracts';
+import { GRADE_FLAG_LABEL, MISCONCEPTIONS, SKILL_BY_CODE, TT27_LEVEL_LABEL, type GradeFinal, type Profile, type Rubric, type SubmissionDetail, type Tt27Level } from '@openedu/contracts';
 import { Icon } from '@openedu/ui';
-import { clamp, fmtScore, levelFor, totalFromCriteria, useRequestAiGrade, useReviewGrade, useSubmission, useSubmissions, useWorkTasks } from '@openedu/data';
+import { clamp, fmtScore, isTeacherGrade, LEVEL_DEFAULT_FEEDBACK, levelFor, suggestTotal, TEACHER_GRADER_LABEL, totalFromCriteria, useRequestAiGrade, useReviewGrade, useSubmission, useSubmissions, useWorkTasks } from '@openedu/data';
 import { Avatar, Btn, Empty, ErrorNote, Field, Loading, PageHead } from '../../components/common';
 import { ClassPicker, LevelBadge, MockBadge, QUEUE_TABS, StatusChip, useClassPick, useHotkeys, useRoster } from '../../lib/assess';
 import { cx, relTime } from '../../lib/format';
@@ -46,7 +46,7 @@ export default function ReviewQueue({ user }: { user: Profile }) {
 
   return (
     <div className="tc-page">
-      <PageHead title="Chấm bài" sub="AI chấm trước, thầy cô duyệt. Học sinh và phụ huynh chỉ thấy điểm sau khi duyệt." actions={<>
+      <PageHead title="Chấm bài" sub="Thầy cô tự chấm, hoặc để AI chấm trước rồi duyệt. Học sinh và phụ huynh chỉ thấy điểm sau khi duyệt." actions={<>
         <ClassPicker list={classes} value={classId} onChange={setClassId} />
         <select className="tc-input tc-input--sm" aria-label="Lọc theo bài" value={taskId} onChange={(e) => setParam('bai', e.target.value)}>
           <option value="">Tất cả bài</option>
@@ -64,7 +64,8 @@ export default function ReviewQueue({ user }: { user: Profile }) {
       {tab.id === 'cho-cham' && list.length ? (
         <div className="tc-alert tc-alert--info">
           <span>{batch ? `Đang chấm ${batch.done}/${batch.total}…` : `${list.length} bài chưa có điểm.`}</span>
-          <Btn size="sm" kind="primary" disabled={!!batch} onClick={() => void gradeAll()}>Chấm tất cả bằng AI</Btn>
+          <span className="tc-small tc-muted">Mở từng bài để tự chấm, hoặc</span>
+          <Btn size="sm" disabled={!!batch} onClick={() => void gradeAll()}>Chấm tất cả bằng AI</Btn>
         </div>
       ) : null}
       {subs.isLoading || cq.isLoading ? <Loading /> : !list.length ? (
@@ -88,6 +89,7 @@ export default function ReviewQueue({ user }: { user: Profile }) {
                     {s.grade?.flags.map((f) => <span key={f} className="tc-chip tc-chip--warn">{GRADE_FLAG_LABEL[f]}</span>)}
                     {s.grade && s.status !== 'approved' ? <ConfBadge c={s.grade.confidence} /> : null}
                     {s.grade?.mock ? <MockBadge /> : null}
+                    {isTeacherGrade(s.grade) ? <span className="tc-chip tc-chip--ok">{TEACHER_GRADER_LABEL}</span> : null}
                     {s.status === 'error' && s.error ? <span className="tc-small tc-warn">{s.error}</span> : null}
                     <StatusChip status={s.status} />
                   </span>
@@ -157,7 +159,7 @@ function initFinal(d: SubmissionDetail, rubric: Rubric | undefined): GradeFinal 
   return { ...src, criteria: crit, feedbackTeacher: src.feedbackTeacher ?? g.feedbackTeacher };
 }
 
-function GradePanel({ d, user, onDone }: { d: SubmissionDetail; user: Profile; onDone: (next: boolean) => void }) {
+function GradePanel({ d, user, onDone, onManual }: { d: SubmissionDetail; user: Profile; onDone: (next: boolean) => void; onManual: () => void }) {
   const rubric = d.rubric;
   const g = d.grade!;
   const [f, setF] = useState<GradeFinal>(() => initFinal(d, rubric)!);
@@ -189,8 +191,10 @@ function GradePanel({ d, user, onDone }: { d: SubmissionDetail; user: Profile; o
         </div>
         <span className="tc-ebar__spacer" />
         <span className="tc-row tc-wrap" style={{ justifyContent: 'flex-end' }}>
-          <ConfBadge c={g.confidence} />
-          {g.mock ? <MockBadge /> : <span className="tc-chip" title="Mô hình chấm">{g.model}</span>}
+          {isTeacherGrade(g) ? <span className="tc-chip tc-chip--ok">{TEACHER_GRADER_LABEL}</span> : <>
+            <ConfBadge c={g.confidence} />
+            {g.mock ? <MockBadge /> : <span className="tc-chip" title="Mô hình chấm">{g.model}</span>}
+          </>}
         </span>
       </header>
       {g.flags.length ? (
@@ -248,10 +252,130 @@ function GradePanel({ d, user, onDone }: { d: SubmissionDetail; user: Profile; o
         <div className="tc-gradepanel__actions">
           <Btn kind={dirty ? 'default' : 'primary'} size="lg" icon="check" disabled={review.isPending} onClick={() => act('approved')} title="Phím A khi chưa sửa">{approved && !dirty ? 'Duyệt lại' : dirty ? 'Duyệt bản AI' : 'Duyệt'}</Btn>
           <Btn kind={dirty ? 'primary' : 'default'} size="lg" icon="pencil" disabled={review.isPending || !dirty} onClick={() => act('edited')} title="Phím A khi đã sửa">Sửa &amp; duyệt</Btn>
-          <Btn icon="retry" disabled={review.isPending} onClick={() => act('regrade')}>Chấm lại</Btn>
+          <Btn icon="pencil" disabled={review.isPending} onClick={onManual}>Tự chấm</Btn>
+          {isTeacherGrade(g) ? null : <Btn icon="retry" disabled={review.isPending} onClick={() => act('regrade')}>Chấm lại bằng AI</Btn>}
           <Btn icon="back" disabled={review.isPending} onClick={() => setRedo(true)}>Trả lại cho HS</Btn>
         </div>
       )}
+    </section>
+  );
+}
+
+/* ============================ GV tự chấm ============================ */
+const LEVELS: Tt27Level[] = ['T', 'H', 'C'];
+
+/** GV tự chấm, không cần AI: chọn mức T/H/C, (tuỳ chọn) nhập điểm, điểm từng tiêu chí, nhận xét → lưu & duyệt. */
+export function ManualPanel({ d, user, onDone, onCancel, onAi }: { d: SubmissionDetail; user: Profile; onDone: (next: boolean) => void; onCancel?: () => void; onAi?: () => void }) {
+  const rubric = d.rubric;
+  const max = rubric && rubric.maxScore > 0 ? rubric.maxScore : (d.final?.max ?? 10);
+  const prev = d.final ?? (d.grade ? { level: d.grade.level, total: d.grade.total, feedbackStudent: d.grade.feedbackStudent, feedbackParent: d.grade.feedbackParent, feedbackTeacher: d.grade.feedbackTeacher, criteria: d.grade.criteria } : undefined);
+  const [level, setLevel] = useState<Tt27Level | null>(prev?.level ?? null);
+  const [total, setTotal] = useState<string>(prev ? String(prev.total) : '');
+  const [byCrit, setByCrit] = useState(false);
+  const [crit, setCrit] = useState<Record<string, number>>(() => Object.fromEntries((rubric?.criteria ?? []).map((c) => [c.id, prev?.criteria.find((x) => x.criterionId === c.id)?.points ?? 0])));
+  const [student, setStudent] = useState(prev?.feedbackStudent ?? '');
+  const [parent, setParent] = useState(prev?.feedbackParent ?? '');
+  const [teacher, setTeacher] = useState(prev?.feedbackTeacher ?? '');
+  const [redo, setRedo] = useState(false);
+  const [note, setNote] = useState('');
+  const review = useReviewGrade();
+
+  const critTotal = rubric && byCrit ? totalFromCriteria(rubric.criteria.map((c) => crit[c.id] ?? 0), rubric).total : null;
+  const typed = total.trim() === '' ? null : clamp(Number(total.replace(',', '.')), 0, max);
+  const score = critTotal ?? (typed !== null && Number.isFinite(typed) ? typed : level ? suggestTotal(level, max) : null);
+  const shownLevel = level ?? (score !== null ? levelFor(score, max) : null);
+  const pickLevel = (l: Tt27Level) => {
+    setLevel(l);
+    if (!byCrit) setTotal(String(suggestTotal(l, max)));
+  };
+  const onTotal = (v: string) => {
+    setTotal(v);
+    const n = Number(v.replace(',', '.'));
+    if (v.trim() !== '' && Number.isFinite(n)) setLevel(levelFor(clamp(n, 0, max), max));
+  };
+  const setPts = (id: string, v: number) => setCrit((x) => {
+    const next = { ...x, [id]: v };
+    if (rubric) setLevel(levelFor(totalFromCriteria(rubric.criteria.map((c) => next[c.id] ?? 0), rubric).total, max));
+    return next;
+  });
+  const fb = shownLevel ? LEVEL_DEFAULT_FEEDBACK[shownLevel] : null;
+  const ready = !!shownLevel && score !== null;
+  const save = () => {
+    if (!ready) return;
+    review.mutate({
+      submissionId: d.id, teacherId: user.id, decision: 'edited', manual: true,
+      final: {
+        level: shownLevel!,
+        total: score!,
+        ...(byCrit && rubric ? { criteria: rubric.criteria.map((c) => ({ criterionId: c.id, points: crit[c.id] ?? 0, comment: '' })) } : {}),
+        feedbackStudent: student.trim() || fb!.student,
+        feedbackParent: parent.trim() || fb!.parent,
+        feedbackTeacher: teacher.trim(),
+      },
+    }, { onSuccess: () => onDone(true) });
+  };
+  const sendRedo = () => review.mutate({ submissionId: d.id, teacherId: user.id, decision: 'redo', note: note.trim() || 'Em xem lại bài và làm lại giúp cô nhé.' }, { onSuccess: () => onDone(false) });
+
+  return (
+    <section className="tc-card tc-gradepanel tc-manual" aria-label="Tự chấm">
+      <header className="tc-row tc-wrap">
+        <h3 className="tc-h3" style={{ margin: 0 }}>Tự chấm</h3>
+        <span className="tc-ebar__spacer" />
+        {onAi ? <Btn size="sm" kind="ghost" icon="hint" onClick={onAi}>Chấm bằng AI</Btn> : null}
+        {onCancel ? <Btn size="sm" kind="ghost" onClick={onCancel}>Quay lại bản AI</Btn> : null}
+      </header>
+      {d.status === 'error' && d.error ? <p className="tc-small tc-muted">AI chưa chấm được ({d.error}) — thầy cô tự chấm bên dưới.</p> : null}
+
+      <div role="radiogroup" aria-label="Mức đạt được" className="tc-manual__levels">
+        {LEVELS.map((l) => (
+          <button key={l} type="button" role="radio" aria-checked={shownLevel === l} className={cx('tc-manual__level', `is-${l}`, shownLevel === l && 'is-active')} onClick={() => pickLevel(l)}>
+            <b>{l}</b><small>{TT27_LEVEL_LABEL[l]}</small>
+          </button>
+        ))}
+      </div>
+
+      <div className="tc-row tc-wrap">
+        <Field label={`Điểm (thang ${fmtScore(max)})`}>
+          <input className="tc-input tc-manual__score" type="text" inputMode="decimal" aria-label="Điểm" disabled={byCrit} value={byCrit && critTotal !== null ? String(critTotal) : total} onChange={(e) => onTotal(e.target.value)} placeholder="Bỏ trống = theo mức" />
+        </Field>
+        {score !== null ? <span className="tc-small tc-muted">Sẽ lưu: <b>{fmtScore(score)}</b>/{fmtScore(max)}{shownLevel ? ` · ${TT27_LEVEL_LABEL[shownLevel]}` : ''}</span> : null}
+      </div>
+
+      {rubric?.criteria.length ? (
+        <details className="tc-manual__crit" open={byCrit} onToggle={(e) => setByCrit((e.currentTarget as HTMLDetailsElement).open)}>
+          <summary>Chấm theo từng tiêu chí (tuỳ chọn)</summary>
+          <ol className="tc-critlist">
+            {rubric.criteria.map((c) => (
+              <li key={c.id}>
+                <div className="tc-critlist__head">
+                  <strong>{c.name}</strong>
+                  <Stepper label={c.name} value={crit[c.id] ?? 0} max={c.points} onChange={(v) => setPts(c.id, v)} />
+                </div>
+                {c.description ? <small className="tc-muted">{c.description}</small> : null}
+              </li>
+            ))}
+          </ol>
+        </details>
+      ) : null}
+
+      <Field label="Nhận xét cho học sinh"><textarea className="tc-input" rows={3} value={student} onChange={(e) => setStudent(e.target.value)} placeholder={fb?.student ?? 'Khen điều em làm tốt, rồi một bước tiếp theo.'} /></Field>
+      <Field label="Lời nhắn cho phụ huynh"><textarea className="tc-input" rows={2} value={parent} onChange={(e) => setParent(e.target.value)} placeholder={fb?.parent ?? ''} /></Field>
+      <Field label="Ghi chú riêng (chỉ thầy cô thấy)"><textarea className="tc-input tc-input--private" rows={2} value={teacher} onChange={(e) => setTeacher(e.target.value)} /></Field>
+      <p className="tc-small tc-muted">Bỏ trống nhận xét thì dùng câu mẫu theo mức (chữ mờ ở trên).</p>
+
+      <ErrorNote error={review.error} />
+      {redo ? (
+        <div className="tc-redo">
+          <Field label="Lời dặn khi trả bài (học sinh thấy)"><textarea className="tc-input" rows={2} autoFocus value={note} onChange={(e) => setNote(e.target.value)} placeholder="Em viết lại phần lời giải cho rõ nhé." /></Field>
+          <div className="tc-row"><Btn onClick={() => setRedo(false)}>Hủy</Btn><Btn kind="primary" disabled={review.isPending} onClick={sendRedo}>Trả lại cho HS</Btn></div>
+        </div>
+      ) : (
+        <div className="tc-gradepanel__actions">
+          <Btn kind="primary" size="lg" icon="check" disabled={review.isPending || !ready} onClick={save}>Lưu &amp; duyệt</Btn>
+          <Btn icon="back" disabled={review.isPending} onClick={() => setRedo(true)}>Trả lại cho HS</Btn>
+        </div>
+      )}
+      {!ready ? <p className="tc-small tc-muted">Chọn mức T/H/C hoặc nhập điểm để lưu.</p> : null}
     </section>
   );
 }
@@ -265,6 +389,8 @@ export function ReviewScreen({ user }: { user: Profile }) {
   const { list, tab } = useQueue(classId, sp.get('tab') ?? QUEUE_TABS[0].id, sp.get('bai') ?? '');
   const regrade = useRequestAiGrade();
   const [toast, setToast] = useState<string | null>(null);
+  const [manualFor, setManualFor] = useState<string | null>(null);
+  const manual = manualFor === submissionId;
   const ids = useMemo(() => list.map((s) => s.id), [list]);
   const idx = ids.indexOf(submissionId);
   const qs = sp.toString();
@@ -303,18 +429,16 @@ export function ReviewScreen({ user }: { user: Profile }) {
 
       <div className="tc-review__grid">
         <ImageViewer key={d.id} sub={d} transcript={d.grade?.transcript ?? []} />
-        {d.grade && d.status !== 'grading' ? (
-          <GradePanel key={`${d.id}:${d.grade.createdAt}:${d.review?.at ?? ''}`} d={d} user={user} onDone={onDone} />
+        {d.status === 'grading' || regrade.isPending ? (
+          <section className="tc-card tc-gradepanel"><Loading label="AI đang chấm…" /><ErrorNote error={regrade.error} /></section>
+        ) : d.grade && !manual ? (
+          <GradePanel key={`${d.id}:${d.grade.createdAt}:${d.review?.at ?? ''}`} d={d} user={user} onDone={onDone} onManual={() => setManualFor(d.id)} />
         ) : (
-          <section className="tc-card tc-gradepanel">
-            {d.status === 'grading' || regrade.isPending ? <Loading label="AI đang chấm…" /> : (
-              <Empty icon="pencil" title={d.status === 'error' ? 'Chưa chấm được' : 'Bài chưa được chấm'}>
-                {d.error ? <p className="tc-warn">{d.error}</p> : null}
-                <Btn kind="primary" size="lg" onClick={() => regrade.mutate(d.id)}>Chấm bằng AI</Btn>
-              </Empty>
-            )}
+          <div>
+            <ManualPanel key={`m:${d.id}:${d.review?.at ?? ''}`} d={d} user={user} onDone={(n) => { setManualFor(null); onDone(n); }}
+              {...(d.grade ? { onCancel: () => setManualFor(null) } : { onAi: () => regrade.mutate(d.id) })} />
             <ErrorNote error={regrade.error} />
-          </section>
+          </div>
         )}
       </div>
       {toast ? <div className="tc-toast" role="status">{toast}</div> : null}

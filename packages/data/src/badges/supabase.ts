@@ -60,9 +60,15 @@ export class SupabaseRewardsSource implements RewardsSource {
   async equipItem(_userId: string, slot: OutfitSlot, itemId: string | null): Promise<ShopState> {
     return this.rpc('equip_item', { p_slot: slot, p_item: itemId }, 'Chưa mặc được món này.');
   }
-  async getClassGarden(classId: string, opts: { display?: 'tv' } = {}): Promise<ClassGarden> {
-    const g = assembleGarden(await this.rpc<GardenRaw>('get_class_garden', { p_class: classId }, 'Chưa mở được Vườn lớp. Màn hình lớp cần đăng nhập tài khoản giáo viên.'));
-    return opts.display === 'tv' ? anonymizeGarden(g) : g;
+  async getClassGarden(classId: string, opts: { display?: 'tv'; tvKey?: string } = {}): Promise<ClassGarden> {
+    const raw = opts.tvKey
+      ? await this.rpc<GardenRaw>('get_class_garden_tv', { p_class: classId, p_key: opts.tvKey }, 'Link TV không còn hiệu lực. Thầy cô mở lại từ Bàn làm việc giáo viên → Vườn lớp → Mở trên TV.')
+      : await this.rpc<GardenRaw>('get_class_garden', { p_class: classId }, 'Chưa mở được Vườn lớp.');
+    const g = assembleGarden(raw);
+    return opts.display === 'tv' || opts.tvKey ? anonymizeGarden(g) : g;
+  }
+  async gardenTvKey(classId: string, renew = false): Promise<string> {
+    return this.rpc<string>('garden_tv_key', { p_class: classId, p_new: renew }, 'Chưa tạo được link TV.');
   }
   async setGardenGoal(i: SetGardenGoalInput): Promise<ClassGarden> {
     return assembleGarden(await this.rpc<GardenRaw>('set_garden_goal', { p_class: i.classId, p_target: i.targetStars, p_plant: i.plant }, 'Chưa lưu được mục tiêu.'));

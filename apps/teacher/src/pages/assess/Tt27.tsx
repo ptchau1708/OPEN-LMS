@@ -24,6 +24,56 @@ function Pick<T extends string>({ value, opts, onChange, label, title }: { value
   );
 }
 
+/**
+ * Thao tác cho NHIỀU học sinh cùng lúc: chọn các em ở cột đầu bảng rồi đặt mức môn học, nhận xét môn,
+ * phẩm chất & năng lực hoặc nhận xét chung một lần. Chỉ thay đổi bản nháp trên màn hình — bấm Lưu nháp / Chốt để lưu.
+ */
+function BulkBar({ count, subjects, onLevel, onComment, onRatings, onGeneral, onSuggest, onClear, busy }: {
+  count: number; subjects: SubjectId[]; busy: boolean;
+  onLevel: (subj: SubjectId | 'all', v: Tt27Level) => void;
+  onComment: (subj: SubjectId | 'all', text: string, mode: 'replace' | 'append') => void;
+  onRatings: (v: Tt27Rating) => void;
+  onGeneral: (text: string, mode: 'replace' | 'append') => void;
+  onSuggest: () => void; onClear: () => void;
+}) {
+  const [subj, setSubj] = useState<SubjectId | 'all'>(subjects[0] ?? 'all');
+  const [text, setText] = useState('');
+  const [general, setGeneral] = useState('');
+  const [mode, setMode] = useState<'replace' | 'append'>('replace');
+  return (
+    <section className="tc-card tc-tt27bulk" aria-label="Thao tác cho nhiều học sinh" data-testid="tt27-bulk">
+      <div className="tc-row tc-wrap">
+        <strong>Đã chọn {count} em</strong>
+        <Btn size="sm" kind="ghost" onClick={onClear}>Bỏ chọn</Btn>
+        <span className="tc-ebar__spacer" />
+        <Btn size="sm" icon="hint" disabled={busy} onClick={onSuggest}>Gợi ý từ dữ liệu cho {count} em</Btn>
+      </div>
+      <div className="tc-tt27bulk__grid">
+        <div className="tc-stack">
+          <label className="tc-row">
+            <span className="tc-small">Môn</span>
+            <select className="tc-input tc-input--sm" value={subj} onChange={(e) => setSubj(e.target.value as SubjectId | 'all')} aria-label="Môn áp dụng">
+              {subjects.map((x) => <option key={x} value={x}>{SUBJECTS[x].name}</option>)}
+              <option value="all">Tất cả các môn</option>
+            </select>
+          </label>
+          <div className="tc-row"><span className="tc-small">Mức</span><Pick label="Mức cho các em đã chọn" opts={LEVELS} onChange={(v) => onLevel(subj, v)} title={(v) => `Đặt mức ${TT27_LEVEL_LABEL[v]} cho ${count} em`} /></div>
+          <textarea className="tc-input tc-input--sm" rows={2} placeholder="Nhận xét môn cho các em đã chọn…" value={text} onChange={(e) => setText(e.target.value)} aria-label="Nhận xét môn cho các em đã chọn" />
+          <Btn size="sm" disabled={!text.trim()} onClick={() => onComment(subj, text.trim(), mode)}>Áp dụng nhận xét môn</Btn>
+        </div>
+        <div className="tc-stack">
+          <div className="tc-row"><span className="tc-small">Phẩm chất &amp; năng lực</span><Pick label="Phẩm chất và năng lực cho các em đã chọn" opts={RATINGS} onChange={onRatings} title={(v) => `Đặt tất cả phẩm chất, năng lực = ${TT27_RATING_LABEL[v]}`} /></div>
+          <textarea className="tc-input tc-input--sm" rows={2} placeholder="Nhận xét chung cho các em đã chọn…" value={general} onChange={(e) => setGeneral(e.target.value)} aria-label="Nhận xét chung cho các em đã chọn" />
+          <Btn size="sm" disabled={!general.trim()} onClick={() => onGeneral(general.trim(), mode)}>Áp dụng nhận xét chung</Btn>
+          <label className="tc-row tc-small">
+            <input type="checkbox" checked={mode === 'append'} onChange={(e) => setMode(e.target.checked ? 'append' : 'replace')} /> Thêm vào sau nhận xét đang có (không xóa)
+          </label>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Tt27({ user }: { user: Profile }) {
   const { list, cls, classId, setClassId, classes } = useClassPick(user);
   const [termId, setTermId] = useState<Tt27TermId>('GK1');
@@ -39,6 +89,7 @@ export default function Tt27({ user }: { user: Profile }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [print, setPrint] = useState(false);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
   const subjects = subjectsFor(cls?.grade ?? 4);
 
   useEffect(() => {
@@ -46,6 +97,7 @@ export default function Tt27({ user }: { user: Profile }) {
     for (const e of q.data ?? []) m[e.studentId] = e;
     setDrafts(m); setDirty(new Set()); setBasis({});
   }, [q.data]);
+  useEffect(() => { setPicked(new Set()); }, [classId, termId]);
 
   const evalOf = (sid: string) => drafts[sid] ?? blank(sid, classId, termId, schoolYear);
   const edit = (sid: string, fn: (e: Tt27Evaluation) => Tt27Evaluation) => {
@@ -57,6 +109,15 @@ export default function Tt27({ user }: { user: Profile }) {
     if (next.score === undefined || Number.isNaN(next.score)) delete next.score;
     return { ...e, subjects: { ...e.subjects, [subj]: next } };
   });
+
+  const join = (old: string | undefined, text: string, mode: 'replace' | 'append') => (mode === 'append' && old?.trim() ? `${old.trim()} ${text}` : text);
+  const pickedIds = () => roster.map((s) => s.id).filter((id) => picked.has(id));
+  const bulk = (fn: (sid: string) => void, what: string) => {
+    const ids = pickedIds();
+    ids.forEach(fn);
+    setMsg(`${what} cho ${ids.length} em (chưa lưu).`);
+  };
+  const toggle = (sid: string) => setPicked((p) => { const n = new Set(p); if (n.has(sid)) n.delete(sid); else n.add(sid); return n; });
 
   const suggestFor = async (ids: string[]) => {
     setMsg(null);
@@ -138,17 +199,26 @@ export default function Tt27({ user }: { user: Profile }) {
         <Btn kind="primary" icon="check" disabled={!!busy} onClick={() => void saveAll('final')}>Chốt chính thức</Btn>
       </div>
       <ErrorNote error={classes.error ?? q.error ?? save.error ?? suggest.error} onRetry={() => void q.refetch()} />
+      {picked.size > 0 && (
+        <BulkBar count={picked.size} subjects={subjects} busy={!!busy} onClear={() => setPicked(new Set())}
+          onLevel={(subj, v) => bulk((sid) => (subj === 'all' ? subjects : [subj]).forEach((x) => setSubj(sid, x, { level: v })), `Đã đặt mức ${v}`)}
+          onComment={(subj, text, mode) => bulk((sid) => (subj === 'all' ? subjects : [subj]).forEach((x) => edit(sid, (e) => ({ ...e, subjects: { ...e.subjects, [x]: { level: 'H', ...e.subjects[x], comment: join(e.subjects[x]?.comment, text, mode) } } }))), 'Đã điền nhận xét môn')}
+          onRatings={(v) => bulk((sid) => edit(sid, (e) => ({ ...e, qualities: Object.fromEntries(QUALITIES.map((k) => [k, v])) as Tt27Evaluation['qualities'], competencies: Object.fromEntries(COMPETENCIES.map((k) => [k, v])) as Tt27Evaluation['competencies'] })), `Đã đặt phẩm chất, năng lực = ${v}`)}
+          onGeneral={(text, mode) => bulk((sid) => edit(sid, (e) => ({ ...e, generalComment: join(e.generalComment, text, mode) })), 'Đã điền nhận xét chung')}
+          onSuggest={() => void suggestFor(pickedIds())} />
+      )}
       {q.isLoading || rl ? <Loading /> : !roster.length ? <Empty icon="team" title="Lớp chưa có học sinh" /> : (
         <section className="tc-card tc-card--flush">
           <div className="tc-tablewrap">
             <table className="tc-table tc-tt27">
-              <thead><tr><th scope="col">Học sinh</th>{subjects.map((s) => <th key={s} scope="col">{SUBJECTS[s].name}</th>)}<th scope="col">Phẩm chất · Năng lực</th><th scope="col">Trạng thái</th></tr></thead>
+              <thead><tr><th scope="col" className="tc-tt27__pick"><input type="checkbox" aria-label="Chọn tất cả học sinh" checked={picked.size > 0 && picked.size === roster.length} ref={(el) => { if (el) el.indeterminate = picked.size > 0 && picked.size < roster.length; }} onChange={(e) => setPicked(e.target.checked ? new Set(roster.map((x) => x.id)) : new Set())} data-testid="tt27-pick-all" /></th><th scope="col">Học sinh</th>{subjects.map((s) => <th key={s} scope="col">{SUBJECTS[s].name}</th>)}<th scope="col">Phẩm chất · Năng lực</th><th scope="col">Trạng thái</th></tr></thead>
               <tbody>
                 {roster.map((s) => {
                   const e = evalOf(s.id);
                   const qs = RATINGS.map((r) => ({ r, n: Object.values(e.qualities).filter((v) => v === r).length + Object.values(e.competencies).filter((v) => v === r).length }));
                   return (
-                    <tr key={s.id} className={cx(dirty.has(s.id) && 'is-dirty')}>
+                    <tr key={s.id} className={cx(dirty.has(s.id) && 'is-dirty', picked.has(s.id) && 'is-picked')}>
+                      <td className="tc-tt27__pick"><input type="checkbox" aria-label={`Chọn ${s.name}`} checked={picked.has(s.id)} onChange={() => toggle(s.id)} /></td>
                       <th scope="row"><span className="tc-row"><Avatar mascot={s.avatarMascot} color={s.avatarColor} size={26} /><span>{s.name}{dirty.has(s.id) ? <em className="tc-warn tc-small"> · chưa lưu</em> : null}</span></span></th>
                       {subjects.map((subj) => (
                         <td key={subj} className="tc-tt27__cell">

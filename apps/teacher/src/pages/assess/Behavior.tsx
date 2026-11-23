@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router';
 import type { Behavior as BehaviorDef, Profile } from '@openedu/contracts';
 import { Icon } from '@openedu/ui';
 import { useBehaviorLogs, useBehaviors, useClassLeaderboard, useRecordBehavior, useSaveBehavior, useUndoBehavior } from '@openedu/data';
@@ -9,35 +10,86 @@ import { cx, relTime } from '../../lib/format';
 type Target = { kind: 'student' | 'team' | 'many'; ids: string[]; label: string };
 const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`.replace('-', '−'));
 
+/** Biểu tượng gợi ý cho hành vi (vẫn gõ / dán emoji khác được). */
+const ICONS_POSITIVE = ['🙋', '🤝', '🤫', '✅', '✍️', '💎', '⭐', '🌟', '👏', '💡', '📚', '🧹', '🎨', '🏃', '🎵', '🌱', '❤️', '😊', '🏆', '👍', '🧠', '🗣️', '⏰', '🎯'];
+const ICONS_NEEDS = ['🎒', '💬', '📒', '⏰', '🙉', '😴', '📵', '🚫', '🗑️', '😠', '✏️', '🏃', '⚠️', '🔇', '📝', '🤚'];
+
+function IconPick({ value, options, onChange }: { value: string; options: string[]; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [open]);
+  return (
+    <div className="tc-iconpick" ref={ref}>
+      <button type="button" className="tc-input tc-input--sm tc-bheditor__icon" aria-label="Đổi biểu tượng" aria-expanded={open} onClick={() => setOpen((o) => !o)} data-testid="bh-icon">{value || '＋'}</button>
+      {open && (
+        <div className="tc-iconpick__pop" role="dialog" aria-label="Chọn biểu tượng">
+          <div className="tc-iconpick__grid">
+            {options.map((ic) => (
+              <button key={ic} type="button" className={cx('tc-iconpick__opt', ic === value && 'is-on')} onClick={() => { onChange(ic); setOpen(false); }} aria-label={`Biểu tượng ${ic}`}>{ic}</button>
+            ))}
+          </div>
+          <label className="tc-iconpick__own">
+            <span className="tc-small tc-muted">Hoặc dán emoji khác</span>
+            <input className="tc-input tc-input--sm" value={value} maxLength={4} onChange={(e) => onChange(e.target.value)} aria-label="Emoji khác" />
+          </label>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function BehaviorEditor({ classId, list, onClose }: { classId: string; list: BehaviorDef[]; onClose: () => void }) {
   const save = useSaveBehavior();
   const [rows, setRows] = useState<BehaviorDef[]>(list);
   const [changed, setChanged] = useState<Set<number>>(new Set());
   const upd = (i: number, p: Partial<BehaviorDef>) => { setRows((r) => r.map((x, j) => (j === i ? { ...x, ...p } : x))); setChanged((s) => new Set(s).add(i)); };
+  const add = (positive: boolean) => {
+    setRows((r) => [...r, positive ? { id: '', classId, label: '', points: 1, icon: '⭐', kind: 'positive' } : { id: '', classId, label: '', points: -1, icon: '⚠️', kind: 'needs-work' }]);
+    setChanged((s) => new Set(s).add(rows.length));
+  };
   const submit = async () => {
-    for (const i of Array.from(changed)) await save.mutateAsync({ ...rows[i], classId, kind: rows[i].points >= 0 ? 'positive' : 'needs-work' });
+    for (const i of Array.from(changed)) {
+      if (!rows[i].label.trim()) continue;
+      await save.mutateAsync({ ...rows[i], label: rows[i].label.trim(), classId, kind: rows[i].points >= 0 ? 'positive' : 'needs-work' });
+    }
     onClose();
+  };
+  const group = (positive: boolean) => {
+    const idx = rows.map((b, i) => ({ b, i })).filter(({ b }) => (b.points >= 0) === positive);
+    return (
+      <section className={cx('tc-bhgroup', positive ? 'tc-bhgroup--pos' : 'tc-bhgroup--neg')} data-testid={positive ? 'bh-group-pos' : 'bh-group-neg'}>
+        <h3 className="tc-bhgroup__h">{positive ? 'Hành vi tích cực (cộng điểm)' : 'Điều cần cố gắng (trừ điểm)'} <span className="tc-muted tc-small">{idx.length}</span></h3>
+        {idx.length ? (
+          <ul className="tc-bheditor">
+            {idx.map(({ b, i }) => (
+              <li key={b.id || `new${i}`}>
+                <IconPick value={b.icon} options={positive ? ICONS_POSITIVE : ICONS_NEEDS} onChange={(icon) => upd(i, { icon })} />
+                <input className="tc-input tc-input--sm tc-grow" aria-label="Tên hành vi" placeholder={positive ? 'vd: Hăng hái phát biểu' : 'vd: Quên đồ dùng học tập'} value={b.label} onChange={(e) => upd(i, { label: e.target.value })} />
+                <select className="tc-input tc-input--sm" aria-label="Điểm" value={b.points} onChange={(e) => upd(i, { points: Number(e.target.value) })}>
+                  {(positive ? [1, 2, 3] : [-1, -2, -3]).map((n) => <option key={n} value={n}>{signed(n)}</option>)}
+                </select>
+              </li>
+            ))}
+          </ul>
+        ) : <p className="tc-muted tc-small">Chưa có.</p>}
+        <Btn size="sm" icon="plus" onClick={() => add(positive)}>{positive ? 'Thêm hành vi tích cực' : 'Thêm điều cần cố gắng'}</Btn>
+      </section>
+    );
   };
   return (
     <Dialog open wide title="Danh sách hành vi thi đua" onClose={onClose} footer={<>
-      <span className="tc-small tc-muted">Điểm dương cộng sao cho học sinh (1 sao/điểm).</span>
+      <span className="tc-small tc-muted">Điểm dương cộng sao cho học sinh (1 sao/điểm). Bấm vào biểu tượng để đổi.</span>
       <Btn onClick={onClose}>Hủy</Btn>
       <Btn kind="primary" disabled={save.isPending || !changed.size} onClick={() => void submit().catch(() => undefined)}>{save.isPending ? 'Đang lưu…' : 'Lưu'}</Btn>
     </>}>
-      <ul className="tc-bheditor">
-        {rows.map((b, i) => (
-          <li key={b.id || `new${i}`}>
-            <input className="tc-input tc-input--sm tc-bheditor__icon" aria-label="Biểu tượng" value={b.icon} maxLength={4} onChange={(e) => upd(i, { icon: e.target.value })} />
-            <input className="tc-input tc-input--sm tc-grow" aria-label="Tên hành vi" value={b.label} onChange={(e) => upd(i, { label: e.target.value })} />
-            <select className="tc-input tc-input--sm" aria-label="Điểm" value={b.points} onChange={(e) => upd(i, { points: Number(e.target.value) })}>
-              {[3, 2, 1, -1, -2, -3].map((n) => <option key={n} value={n}>{signed(n)}</option>)}
-            </select>
-          </li>
-        ))}
-      </ul>
-      <div className="tc-row">
-        <Btn size="sm" icon="plus" onClick={() => { setRows((r) => [...r, { id: '', classId, label: '', points: 1, icon: '⭐', kind: 'positive' }]); setChanged((s) => new Set(s).add(rows.length)); }}>Thêm hành vi tích cực</Btn>
-        <Btn size="sm" icon="plus" onClick={() => { setRows((r) => [...r, { id: '', classId, label: '', points: -1, icon: '⚠️', kind: 'needs-work' }]); setChanged((s) => new Set(s).add(rows.length)); }}>Thêm điều cần cố gắng</Btn>
+      <div className="tc-bhgroups">
+        {group(true)}
+        {group(false)}
       </div>
       <ErrorNote error={save.error} />
     </Dialog>
@@ -93,6 +145,7 @@ export default function BehaviorPage({ user }: { user: Profile }) {
     <div className="tc-page tc-page--wide">
       <PageHead title="Thi đua" sub="Chạm vào em (hoặc tổ) để ghi nhận. Điểm tính từ thứ Hai tuần này." actions={<>
         <ClassPicker list={list} value={classId} onChange={setClassId} />
+        <Link className="tc-btn tc-btn--primary" to="/thi-dua/thong-ke" data-testid="bh-stats-link"><Icon name="trophy" size={16} /> <span>Thống kê &amp; vinh danh</span></Link>
         <Btn icon="settings" onClick={() => setEditor(true)} disabled={!bl.length}>Sửa danh sách hành vi</Btn>
       </>} />
       <ErrorNote error={classes.error ?? behaviors.error ?? board.error ?? record.error ?? undo.error} onRetry={() => { void board.refetch(); void behaviors.refetch(); }} />
@@ -145,7 +198,7 @@ export default function BehaviorPage({ user }: { user: Profile }) {
           </div>
           <aside className="tc-bh__side">
             <section className="tc-card">
-              <header className="tc-card__head"><h2><Icon name="trophy" size={16} /> Bảng tuần này</h2></header>
+              <header className="tc-card__head"><h2><Icon name="trophy" size={16} /> Bảng tuần này</h2><Link className="tc-small" to="/thi-dua/thong-ke">Tháng, học kì →</Link></header>
               {teamMode && lb ? (
                 <ol className="tc-board">{lb.teams.map((t, i) => <li key={t.id}><b>{i + 1}</b><i style={{ background: t.color }} aria-hidden="true" /><span>{t.name}</span><strong>{t.points}</strong></li>)}</ol>
               ) : null}

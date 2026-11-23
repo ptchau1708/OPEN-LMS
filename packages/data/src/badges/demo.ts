@@ -192,8 +192,13 @@ export class DemoRewardsSource implements RewardsSource {
   }
 
   /* ---------- Vườn lớp ---------- */
-  async getClassGarden(classId: string, opts: { display?: 'tv' } = {}): Promise<ClassGarden> {
-    const tv = opts.display === 'tv';
+  /** Demo: khóa TV chỉ để link giống bản thật — màn hình lớp (origin khác) không có dữ liệu khóa nên không kiểm tra. */
+  async gardenTvKey(classId: string): Promise<string> {
+    return `demo${classId.replace(/[^a-z0-9]/gi, '')}`.padEnd(40, '0');
+  }
+
+  async getClassGarden(classId: string, opts: { display?: 'tv'; tvKey?: string } = {}): Promise<ClassGarden> {
+    const tv = opts.display === 'tv' || !!opts.tvKey;
     const me = await this.viewer();
     const cls = await this.ds.getClass(classId);
     if (!cls) throw fail('Không tìm thấy lớp.');

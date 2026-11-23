@@ -204,6 +204,11 @@ export interface GradeReview {
   final?: Partial<GradeFinal>;
   decision: ReviewDecision;
   note?: string;
+  /**
+   * GV tự chấm (không cần AI): gửi kèm decision 'edited' và `final` { level?, total?, criteria?, feedback… }.
+   * Máy chủ tạo bản chấm của GV (AiGrade model 'manual/teacher') rồi duyệt luôn.
+   */
+  manual?: boolean;
   at: string;
 }
 

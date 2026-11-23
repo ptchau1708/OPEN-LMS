@@ -12,3 +12,4 @@ export * as gc from './classroom';
 export * from './gis';
 export * from './externalIds';
 export * from './vneduBook';
+export * from './assignReportXlsx';

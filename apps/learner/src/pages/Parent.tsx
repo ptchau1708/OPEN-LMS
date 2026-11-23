@@ -1,3 +1,4 @@
+import { ParentDiscuss } from './parent/ParentDiscuss';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useQueries } from '@tanstack/react-query';
@@ -148,6 +149,7 @@ function ParentView({ child, siblings, onPick, parent, onExitLabel }: { child: P
           {sum && <section className="ln-pp-headline"><p className="ln-pp-headline__lead">{sum.headline}</p>{otherSentences(sum).length > 0 && <ul className="ln-pp-sents">{otherSentences(sum).map((t, i) => <li key={i}>{t}</li>)}</ul>}</section>}
           {sum && <SchoolCard sum={sum} prof={prof} />}
           <ParentWeek child={child} />
+          <ParentDiscuss child={child} />
           <h2 className="ln-pp-h ln-pp-h--sec">Tuần này của con</h2>
           <section className="ln-pp-grid">
             <div className="ln-pp-stat"><span className="ln-pp-stat__n">{w ? w.stars : week.stars}</span><span>sao trong tuần</span></div>

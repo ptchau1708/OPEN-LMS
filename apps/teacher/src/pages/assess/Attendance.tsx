@@ -15,7 +15,12 @@ export default function Attendance({ user }: { user: Profile }) {
   const { roster, isLoading: rl } = useRoster(cls);
   const [date, setDate] = useState(vnToday());
   const month = date.slice(0, 7);
-  const range = useMemo(() => ({ from: `${month}-01`, to: `${month}-31` }), [month]);
+  // Ngày cuối tháng thật (tháng 11 có 30 ngày — "2026-11-31" làm Postgres báo lỗi ngày không hợp lệ).
+  const range = useMemo(() => {
+    const [y, m] = month.split('-').map(Number);
+    const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    return { from: `${month}-01`, to: `${month}-${String(last).padStart(2, '0')}` };
+  }, [month]);
   const q = useAttendance(classId, range);
   const save = useSaveAttendance();
   const [entries, setEntries] = useState<Record<string, AttendanceStatus>>({});

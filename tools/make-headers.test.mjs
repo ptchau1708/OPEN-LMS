@@ -21,7 +21,8 @@ test('parseEnv bỏ chú thích và dấu nháy', () => {
 test('Google Classroom chỉ mở cho app giáo viên khi có VITE_GOOGLE_CLIENT_ID', () => {
   const env = { VITE_SUPABASE_URL: 'https://abc.supabase.co', VITE_GOOGLE_CLIENT_ID: '123.apps.googleusercontent.com' };
   const t = buildCsp(env, { app: 'teacher' });
-  assert.match(t, /script-src 'self' https:\/\/accounts\.google\.com\/gsi\/client;/);
+  assert.match(t, /script-src 'self' 'wasm-unsafe-eval' https:\/\/accounts\.google\.com\/gsi\/client;/);
+  assert.doesNotMatch(buildCsp(env, { app: 'learner' }), /wasm-unsafe-eval/);
   assert.match(t, /connect-src [^;]*https:\/\/accounts\.google\.com https:\/\/classroom\.googleapis\.com/);
   assert.match(t, /frame-src [^;]*https:\/\/accounts\.google\.com/);
   assert.doesNotMatch(buildCsp(env, { app: 'learner' }), /accounts\.google\.com/);

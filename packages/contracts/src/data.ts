@@ -149,7 +149,12 @@ export interface DataSource {
   getHint(input: HintInput): Promise<HintResult>;
   /** Hoàn thành bài giảng: thưởng một lần mỗi bài (Supabase: RPC complete_lesson). */
   completeLesson(userId: string, lessonId: string, opts?: CompleteLessonOptions): Promise<AwardResult & { starsAwarded: number; pending?: boolean }>;
-  listEvents(filter: { userId?: string; lessonId?: string; limit?: number }): Promise<LearningEvent[]>;
+  listEvents(filter: { userId?: string; lessonId?: string; assignmentIds?: string[]; limit?: number }): Promise<LearningEvent[]>;
+  /**
+   * HS mở bài từ một lần giao: lượt mới (tiến độ cũ có trước ngày mở của lần giao) → làm lại từ đầu; quá hạn mà lần
+   * giao khóa bài → lỗi. docs/BAO_CAO_BAI_GIAO.md
+   */
+  startAssignment?(assignmentId: string): Promise<void>;
 
   /* ---- phần thưởng ---- */
   getWallet(userId: string): Promise<Wallet>;

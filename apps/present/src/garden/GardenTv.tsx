@@ -12,7 +12,9 @@ import './garden-tv.css';
 export default function GardenTv() {
   const [sp] = useSearchParams();
   const classId = sp.get('lop') ?? '';
-  const q = useClassGarden(classId || undefined, { refetchMs: 60_000, display: 'tv' });
+  // Khóa TV của lớp (link tạo ở Bàn làm việc giáo viên → Vườn lớp → Mở trên TV): xem không cần đăng nhập.
+  const tvKey = sp.get('ma') ?? undefined;
+  const q = useClassGarden(classId || undefined, { refetchMs: 60_000, display: 'tv', ...(tvKey ? { tvKey } : {}) });
   const still = sp.get('tinh') === '1' || (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
   if (!classId) return <main className="pr-gtv pr-gtv--msg"><Mascot id="koala" mood="think" size={200} /><h1>Thiếu mã lớp</h1><p>Mở từ trang Vườn lớp trong Bàn làm việc giáo viên nhé.</p></main>;
   if (q.isPending) return <main className="pr-gtv pr-gtv--msg"><Mascot id="koala" mood="wave" size={200} animate /><h1>Đang ra vườn…</h1></main>;

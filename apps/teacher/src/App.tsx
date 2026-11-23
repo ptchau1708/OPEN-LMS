@@ -14,6 +14,9 @@ const Assign = lazy(() => import('./pages/Assign'));
 const Classes = lazy(() => import('./pages/Classes'));
 const LiveStart = lazy(() => import('./pages/LiveStart'));
 const LiveControl = lazy(() => import('./pages/LiveControl'));
+const PaperCards = lazy(() => import('./pages/live/PaperCards'));
+const DiscussList = lazy(() => import('./pages/discuss/DiscussList'));
+const DiscussBoard = lazy(() => import('./pages/discuss/DiscussBoard'));
 const Heatmap = lazy(() => import('./pages/Heatmap'));
 const KnowledgeRedirect = lazy(() => import('./pages/Heatmap').then((m) => ({ default: m.KnowledgeRedirect })));
 const StudentProfile = lazy(() => import('./pages/StudentProfile'));
@@ -42,6 +45,8 @@ const ConnectApps = lazy(() => import('./pages/admin/ConnectApps'));
 const BridgePage = lazy(() => import('./pages/bridge/BridgePage'));
 const ClassPages = lazy(() => import('./pages/pages/ClassPages'));
 const TeacherLtiAuth = lazy(() => import('./pages/pages/LtiAuth'));
+const BehaviorStats = lazy(() => import('./pages/assess/BehaviorStats'));
+const AssignReport = lazy(() => import('./pages/assign/report'));
 const ChangePassword = lazy(() => import('./pages/Password'));
 const ForcedChange = lazy(() => import('./pages/Password').then((m) => ({ default: m.ForcedChange })));
 
@@ -69,6 +74,9 @@ export function App() {
         <Route path="hoc-sinh" element={<Suspense fallback={<Loading />}><Students user={user} /></Suspense>} />
         <Route path="hoc-sinh/:studentId" element={<Suspense fallback={<Loading />}><StudentProfile user={user} /></Suspense>} />
         <Route path="truc-tiep" element={<Suspense fallback={<Loading />}><LiveStart user={user} /></Suspense>} />
+        <Route path="thao-luan" element={<Suspense fallback={<Loading />}><DiscussList user={user} /></Suspense>} />
+        <Route path="thao-luan/:id" element={<Suspense fallback={<Loading />}><DiscussBoard user={user} /></Suspense>} />
+        <Route path="truc-tiep/the-giay" element={<Suspense fallback={<Loading />}><PaperCards user={user} /></Suspense>} />
         <Route path="truc-tiep/:sessionId" element={<Suspense fallback={<Loading />}><LiveControl user={user} /></Suspense>} />
         <Route path="bai-viet" element={<Suspense fallback={<Loading />}><WorkTasks user={user} /></Suspense>} />
         <Route path="bai-viet/:taskId/chup" element={<Suspense fallback={<Loading />}><BatchUpload /></Suspense>} />
@@ -88,6 +96,8 @@ export function App() {
         <Route path="bao-cao" element={<Suspense fallback={<Loading />}><Reports user={user} /></Suspense>} />
         <Route path="bao-cao/ban-do-khoi" element={<Suspense fallback={<Loading />}><GradeMap user={user} /></Suspense>} />
         <Route path="phu-huynh" element={<Suspense fallback={<Loading />}><ParentLinks user={user} /></Suspense>} />
+        <Route path="thi-dua/thong-ke" element={<Suspense fallback={<Loading />}><BehaviorStats user={user} /></Suspense>} />
+        <Route path="bao-cao-bai-giao" element={<Suspense fallback={<Loading />}><AssignReport user={user} /></Suspense>} />
         <Route path="doi-mat-khau" element={<Suspense fallback={<Loading />}><ChangePassword /></Suspense>} />
         <Route path="trang-hoc" element={<Suspense fallback={<Loading />}><ClassPages user={user} /></Suspense>} />
         <Route path="xuat-nhap" element={<Suspense fallback={<Loading />}><BridgePage user={user} /></Suspense>} />

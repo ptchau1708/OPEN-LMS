@@ -1,6 +1,6 @@
 /** /ung-dung — "Ứng dụng học": Trang học của lớp (trang web, bài trong app) và ứng dụng LTI của trường. */
 import { useNavigate } from 'react-router';
-import { useClassPages, useLtiTools } from '@openedu/data';
+import { buildPageTree, useClassPages, useLtiTools } from '@openedu/data';
 import { Button, Card, Icon, sfx } from '@openedu/ui';
 import { AppTabs, EmptyState, ErrorState, LoadingScreen } from '../../components/Common';
 import { useMe } from '../../lib/util';
@@ -13,7 +13,8 @@ export default function LtiApps() {
   const pages = useClassPages(me.classId);
   const go = (to: string) => { sfx.tap(); nav(to); };
   const loading = tools.isPending || (!!me.classId && pages.isPending);
-  const list = pages.data ?? [];
+  // Chỉ các trang chính; trang con mở từ bên trong trang cha (như Google Sites).
+  const list = buildPageTree(pages.data ?? [], { onlyVisible: true, hideOrphans: true });
   return (
     <div className="ln-page ln-apps">
       <header className="ln-row ln-apps__head">
@@ -25,10 +26,10 @@ export default function LtiApps() {
       ) : (
         <div className="ln-apps__list">
           {list.length ? <h2 className="ln-h2">Thầy cô giao</h2> : null}
-          {list.map((p) => (
+          {list.map(({ page: p, children }) => (
             <Card key={p.id} className="ln-apps__card">
               <div className="ln-apps__icon" aria-hidden><Icon name={p.kind === 'lti' ? 'puzzle' : 'book'} size={34} /></div>
-              <div className="ln-apps__text"><h3 className="ln-h2">{p.title}</h3>{p.description ? <p>{p.description}</p> : null}</div>
+              <div className="ln-apps__text"><h3 className="ln-h2">{p.title}</h3>{p.description ? <p>{p.description}</p> : null}{children.length ? <p className="ln-apps__sub">{children.length} trang bên trong</p> : null}</div>
               <Button size="lg" onClick={() => go(`/trang/${p.id}`)} data-testid={`page-open-${p.id}`}>Mở</Button>
             </Card>
           ))}

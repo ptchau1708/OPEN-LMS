@@ -5,7 +5,7 @@ import type { AccountSlip } from '@openedu/contracts';
 import { generateStudentAccounts, parseNameList, useBulkCreateStudents, useClasses, useDataSource, useResetPassword, useSchoolUsers, useStudents } from '@openedu/data';
 import { Avatar, Btn, Dialog, Empty, ErrorNote, Field, Loading, PageHead, Seg } from '../components/common';
 import { SlipSheet } from './admin/Admin';
-import { canPersistTeams, defaultTeams, persistTeams, TEAM_COLORS, teamsFor, useTeamsStore, type TeamDef } from '../lib/teams';
+import { canPersistTeams, defaultTeams, MAX_TEAMS, MIN_TEAMS, persistTeams, TEAM_COLORS, teamsFor, useTeamsStore, type TeamDef } from '../lib/teams';
 import { cx } from '../lib/format';
 
 export default function Classes({ user }: { user: Profile }) {
@@ -20,6 +20,7 @@ export default function Classes({ user }: { user: Profile }) {
   const [teams, setTeams] = useState<TeamDef[]>([]);
   const [brush, setBrush] = useState<string | null>(null);
   const [msg, setMsg] = useState('');
+  const [picked, setPicked] = useState<Set<string>>(new Set());
   const persist = canPersistTeams(ds);
   const bulk = useBulkCreateStudents();
   const reset = useResetPassword();
@@ -38,6 +39,7 @@ export default function Classes({ user }: { user: Profile }) {
     setTeams(padded);
     setBrush(padded[0]?.id ?? null);
     setMsg('');
+    setPicked(new Set());
     // chỉ nạp lại khi đổi lớp
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cls?.id]);
@@ -49,12 +51,25 @@ export default function Classes({ user }: { user: Profile }) {
     const cur = teamOf[sid];
     edit(teams.map((t) => ({ ...t, studentIds: t.studentIds.filter((x) => x !== sid).concat(t.id === brush && cur?.id !== brush ? [sid] : []) })));
   };
-  const count = Math.min(4, Math.max(2, teams.length));
+  const count = Math.min(MAX_TEAMS, Math.max(MIN_TEAMS, teams.length));
   const setCount = (n: number) => {
     if (!cls) return;
-    if (n <= teams.length) edit(teams.slice(0, n));
-    else edit([...teams, ...defaultTeams(n, `t-${cls.id}-y`).slice(teams.length)]);
+    if (n <= teams.length) { edit(teams.slice(0, n)); if (brush && !teams.slice(0, n).some((t) => t.id === brush)) setBrush(teams[0]?.id ?? null); }
+    else {
+      const used = new Set(teams.map((t) => t.id));
+      const extra = defaultTeams(n, `t-${cls.id}-y`).slice(teams.length).map((t, k) => (used.has(t.id) ? { ...t, id: `${t.id}-${Date.now()}-${k}` } : t));
+      edit([...teams, ...extra]);
+    }
   };
+  /** Chọn nhiều em rồi xếp cùng lúc vào một tổ (hoặc bỏ khỏi tổ). */
+  const togglePick = (sid: string) => setPicked((p) => { const n = new Set(p); if (n.has(sid)) n.delete(sid); else n.add(sid); return n; });
+  const moveMany = (teamId: string | null) => {
+    const ids = picked;
+    edit(teams.map((t) => ({ ...t, studentIds: t.studentIds.filter((x) => !ids.has(x)).concat(t.id === teamId ? Array.from(ids) : []) })));
+    setPicked(new Set());
+  };
+  const roster = students.data ?? [];
+  const unassigned = roster.filter((s) => !teamOf[s.id]).map((s) => s.id);
   const autoSplit = () => {
     const ids = (students.data ?? []).map((s) => s.id);
     edit(teams.map((t, i) => ({ ...t, studentIds: ids.filter((_, j) => j % teams.length === i) })));
@@ -81,7 +96,27 @@ export default function Classes({ user }: { user: Profile }) {
       {cls ? (
         <div className="tc-classes">
           <section className="tc-card">
-            <header className="tc-card__head"><h2>Lớp {cls.name} · {students.data?.length ?? cls.studentIds.length} học sinh</h2></header>
+            <header className="tc-card__head">
+              <h2>Lớp {cls.name} · {students.data?.length ?? cls.studentIds.length} học sinh</h2>
+              {roster.length ? (
+                <span className="tc-row tc-small">
+                  <label className="tc-row"><input type="checkbox" checked={picked.size > 0 && picked.size === roster.length} ref={(el) => { if (el) el.indeterminate = picked.size > 0 && picked.size < roster.length; }} onChange={(e) => setPicked(e.target.checked ? new Set(roster.map((x) => x.id)) : new Set())} data-testid="roster-pick-all" /> Chọn tất cả</label>
+                  {unassigned.length ? <Btn size="sm" kind="ghost" onClick={() => setPicked(new Set(unassigned))}>Chọn {unassigned.length} em chưa có tổ</Btn> : null}
+                </span>
+              ) : null}
+            </header>
+            {picked.size > 0 && (
+              <div className="tc-movebar" data-testid="team-movebar">
+                <strong>Đã chọn {picked.size} em · xếp vào:</strong>
+                <div className="tc-movebar__teams">
+                  {teams.map((t) => <button key={t.id} type="button" className="tc-movebar__team" style={{ background: t.color }} onClick={() => moveMany(t.id)}>{t.name}</button>)}
+                </div>
+                <span className="tc-row">
+                  <Btn size="sm" onClick={() => moveMany(null)}>Bỏ khỏi tổ</Btn>
+                  <Btn size="sm" kind="ghost" onClick={() => setPicked(new Set())}>Bỏ chọn</Btn>
+                </span>
+              </div>
+            )}
             <ErrorNote error={reset.error} />
             {students.isLoading ? <Loading /> : !(students.data ?? []).length ? (
               <p className="tc-muted" style={{ padding: '0 16px 16px' }}>Lớp chưa có học sinh. Bấm <strong>Thêm học sinh</strong> rồi dán danh sách họ tên để tạo tài khoản và in phiếu.</p>
@@ -90,7 +125,8 @@ export default function Classes({ user }: { user: Profile }) {
                 {(students.data ?? []).map((s) => {
                   const t = teamOf[s.id];
                   return (
-                    <li key={s.id}>
+                    <li key={s.id} className={cx(picked.has(s.id) && 'is-picked')}>
+                      <input type="checkbox" className="tc-rosterpick" checked={picked.has(s.id)} onChange={() => togglePick(s.id)} aria-label={`Chọn ${s.name}`} />
                       <button type="button" className={cx('tc-rostercard', brush && 'is-brush')} onClick={() => tap(s.id)} style={t ? { borderColor: t.color } : undefined} title={brush ? 'Chạm để xếp vào tổ đang chọn' : undefined}>
                         <Avatar mascot={s.avatarMascot} color={s.avatarColor} size={44} />
                         <span><strong>{s.name}</strong><small className="tc-muted">{s.username} · bạn {MASCOT_BY_ID[s.avatarMascot]?.name}</small></span>
@@ -108,9 +144,13 @@ export default function Classes({ user }: { user: Profile }) {
           <section className="tc-card tc-stack">
             <header className="tc-card__head">
               <h2>Tổ thi đua</h2>
-              <Seg label="Số tổ" value={count} onChange={setCount} options={[2, 3, 4].map((n) => ({ value: n, label: `${n} tổ` }))} />
+              <label className="tc-row tc-small">Số tổ
+                <select className="tc-input tc-input--sm" value={count} onChange={(e) => setCount(Number(e.target.value))} aria-label="Số tổ" data-testid="team-count">
+                  {Array.from({ length: MAX_TEAMS - MIN_TEAMS + 1 }, (_, i) => i + MIN_TEAMS).map((n) => <option key={n} value={n}>{n} tổ</option>)}
+                </select>
+              </label>
             </header>
-            <p className="tc-muted tc-small">Chọn một tổ rồi chạm vào học sinh để xếp vào (chạm lần nữa để bỏ ra).</p>
+            <p className="tc-muted tc-small">Chọn một tổ rồi chạm vào học sinh để xếp vào (chạm lần nữa để bỏ ra). Muốn xếp nhiều em một lúc: tích ô bên trái tên các em rồi chọn tổ ở thanh phía trên danh sách.</p>
             {teams.map((t, i) => (
               <div key={t.id} className={cx('tc-teamed', brush === t.id && 'is-brush')} style={{ borderLeftColor: t.color }}>
                 <div className="tc-row">

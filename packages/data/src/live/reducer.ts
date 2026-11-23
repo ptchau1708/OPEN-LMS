@@ -3,6 +3,7 @@
  * Máy GV áp dụng lệnh rồi đẩy toàn bộ trạng thái mới lên relay / Supabase Realtime.
  */
 import type { Item, Lesson, LiveCommand, LiveState, LiveTeam } from '@openedu/contracts';
+import { applyGains, emptyGame } from './game';
 
 /** updatedAt luôn tăng ngặt (kể cả hai lệnh trong cùng một mili giây) để máy khác so sánh được. */
 function nextStamp(prev: string | undefined, now: Date): string {
@@ -27,6 +28,7 @@ export function applyLiveCommand(state: LiveState, cmd: LiveCommand, now: Date =
       s.phase = 'slide';
       delete s.activeItemId;
       delete s.timerEndsAt;
+      if (state.game) s.game = { ...state.game, board: false };
       break;
     }
     case 'open': {
@@ -36,6 +38,10 @@ export function applyLiveCommand(state: LiveState, cmd: LiveCommand, now: Date =
       s.locked = false;
       if (cmd.seconds && cmd.seconds > 0) s.timerEndsAt = new Date(now.getTime() + cmd.seconds * 1000).toISOString();
       else delete s.timerEndsAt;
+      if (state.game) {
+        const { lastGain: _l, ...g } = state.game;
+        s.game = { ...g, board: false, openedAt: now.toISOString() };
+      }
       break;
     }
     case 'close': {
@@ -76,6 +82,43 @@ export function applyLiveCommand(state: LiveState, cmd: LiveCommand, now: Date =
     case 'assign-team': {
       if (!state.teams.some((t) => t.id === cmd.teamId)) return state;
       s.participants = state.participants.map((p) => (p.userId === cmd.userId ? { ...p, teamId: cmd.teamId } : p));
+      break;
+    }
+    case 'game-setup': {
+      const g = cmd.game;
+      if (!g || (g.mode !== 'class' && g.mode !== 'self' && g.mode !== 'paper')) return state;
+      s.game = emptyGame(g.mode, g.seconds, g.cards);
+      break;
+    }
+    case 'game-tally': {
+      if (!state.game || !Array.isArray(cmd.gains)) return state;
+      const next = applyGains(state.game, cmd.gains, cmd.slideIndex);
+      if (next === state.game) return state;
+      s.game = next;
+      break;
+    }
+    case 'game-board': {
+      if (!state.game) return state;
+      s.game = { ...state.game, board: !!cmd.show };
+      break;
+    }
+    case 'game-start': {
+      if (!state.game) return state;
+      s.game = { ...state.game, startedAt: now.toISOString(), ...(cmd.endsAt ? { endsAt: cmd.endsAt } : {}) };
+      if (!cmd.endsAt) delete s.game.endsAt;
+      s.phase = 'slide';
+      s.locked = false;
+      break;
+    }
+    case 'paper-answer': {
+      if (!state.game || state.game.mode !== 'paper') return state;
+      const k = String(cmd.slideIndex);
+      const cur = { ...(state.game.paper?.[k] ?? {}) };
+      for (const [u, v] of Object.entries(cmd.answers ?? {})) {
+        if (v === null) delete cur[u];
+        else if (v === 'A' || v === 'B' || v === 'C' || v === 'D') cur[u] = v;
+      }
+      s.game = { ...state.game, paper: { ...(state.game.paper ?? {}), [k]: cur } };
       break;
     }
     case 'end': {

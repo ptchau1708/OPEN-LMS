@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 export type IconName = 'home' | 'book' | 'play' | 'gift' | 'user' | 'speaker' | 'star' | 'close' | 'back' | 'next' | 'check' | 'retry'
   | 'lock' | 'tv' | 'pencil' | 'mic' | 'stop' | 'clock' | 'trophy' | 'map' | 'passport' | 'team' | 'plus' | 'trash' | 'eye'
-  | 'settings' | 'upload' | 'image' | 'video' | 'puzzle' | 'wheel' | 'hint' | 'flame' | 'tower' | 'qr' | 'parent' | 'menu' | 'drag';
+  | 'settings' | 'upload' | 'image' | 'video' | 'puzzle' | 'wheel' | 'hint' | 'flame' | 'tower' | 'qr' | 'parent' | 'menu' | 'drag' | 'camera' | 'print';
 
 export interface IconProps {
   name: IconName;
@@ -62,6 +62,8 @@ const ICONS: Record<IconName, Def> = {
   eye: 'M2.5 12C5 7.2 8.3 5 12 5s7 2.2 9.5 7c-2.5 4.8-5.8 7-9.5 7s-7-2.2-9.5-7z' + C(12, 12, 3),
   settings: gear(),
   upload: 'M12 15V4.5M7.5 9 12 4.5 16.5 9M4 14.5V19a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19v-4.5',
+  camera: R(3, 7, 18, 13, 2.5) + C(12, 13.5, 3.6) + 'M8.5 7l1.5-2.5h4L15.5 7',
+  print: R(3, 9, 18, 8, 2) + 'M7 9V4h10v5M7 14h10v6H7z',
   image: R(3, 4, 18, 16, 2.5) + C(8.5, 9.5, 1.8) + 'M3.5 17.5l5-5 4 4 2.5-2.5 5.5 5',
   video: R(3, 6, 12.5, 12, 2.5) + 'M15.5 10.5 21 7.5v9l-5.5-3z',
   puzzle: 'M4 7.5h4.5a2.5 2.5 0 1 1 4.5 0H17V12a2.5 2.5 0 1 1 0 4.5v4H4z',

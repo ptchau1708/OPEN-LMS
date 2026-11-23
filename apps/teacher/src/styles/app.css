@@ -652,3 +652,29 @@ textarea.tc-input { resize: vertical; line-height: 1.5; }
 .br-cardwrap__share { position: absolute; right: 8px; bottom: 8px; }
 .br-cardwrap__share .tc-btn { background: var(--p-surface); }
 .br-share { text-decoration: none; gap: 6px; }
+
+/* Lớp học: chọn nhiều học sinh để xếp tổ */
+.tc-rosterpick { position: absolute; top: 10px; left: 10px; z-index: 2; width: 18px; height: 18px; cursor: pointer; }
+.tc-roster li .tc-rostercard { padding-left: 34px; }
+.tc-roster li.is-picked .tc-rostercard { background: var(--tc-accent-soft, #eef0ff); outline: 2px solid var(--tc-accent, #5b4ff5); }
+.tc-movebar { position: sticky; top: 8px; z-index: 5; margin: 0 0 10px; padding: 10px 12px; border-radius: 12px; border: 2px solid var(--tc-accent, #5b4ff5); background: var(--tc-surface, #fff); display: flex; flex-direction: column; gap: 8px; }
+.tc-movebar__teams { display: flex; flex-wrap: wrap; gap: 6px; }
+.tc-movebar__team { border: 0; color: #fff; font-weight: 700; padding: 6px 12px; border-radius: 999px; cursor: pointer; text-shadow: 0 1px 1px rgb(0 0 0 / 25%); }
+.tc-movebar__team:hover { filter: brightness(1.08); }
+
+/* Ngân hàng câu hỏi: chọn nhiều câu để giao */
+.tc-qbbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 8px; padding: 8px 12px; border-radius: 12px; background: var(--tc-surface, #fff); border: 1px solid var(--tc-line, #e4e4ef); position: sticky; top: 8px; z-index: 4; }
+.tc-qbrow { display: flex; align-items: stretch; }
+.tc-qbrow__pick { margin: 0 4px 0 12px; align-self: center; width: 18px; height: 18px; flex: none; cursor: pointer; }
+.tc-qbrow > .tc-listrow { flex: 1; min-width: 0; }
+.tc-qbrow.is-picked { background: var(--tc-accent-soft, #eef0ff); }
+.tc-qbpicked { max-height: 220px; overflow: auto; margin: 0; padding-left: 20px; }
+
+/* Báo cáo bài giao */
+.tc-chip--bad { background: #fde8ea; color: #b42335; border-color: #f6c2c9; }
+.tc-bad { color: #b42335; }
+.tc-table--compact th, .tc-table--compact td { padding: 6px 8px; font-size: 13px; }
+.tc-table tr.is-active > td { background: var(--tc-accent-soft, #eef0ff); }
+.tc-qstats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.tc-qstats li { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 6px 10px; border: 1px solid var(--tc-line, #e4e4ef); border-radius: 10px; overflow: hidden; font-size: 13px; }
+.tc-qstats__bar { position: absolute; inset: auto 0 0 0; height: 3px; background: linear-gradient(90deg, #22a06b var(--p), #f0d4d8 var(--p)); }
