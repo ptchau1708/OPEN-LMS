@@ -3,25 +3,28 @@
  * Danh mục kĩ năng (yêu cầu cần đạt) — nguồn sự thật cho gắn thẻ câu hỏi, tính mức thành thạo, tìm lỗ hổng kiến thức.
  *
  * - Toán lớp 1–5: CT GDPT 2018, mỗi gạch đầu dòng "Yêu cầu cần đạt" là một kĩ năng (skills-toan.ts).
- * - Môn khác: kĩ năng TẠM (provisional) sinh từ ngân hàng câu hỏi mẫu (skills-provisional.ts).
+ * - Môn khác: kĩ năng TẠM (provisional) sinh từ ngân hàng câu hỏi mẫu (skills-provisional.ts)
+ *   + kĩ năng theo chủ đề CT GDPT 2018, tóm lược yêu cầu cần đạt (skills-ct2018.ts, mạch 'CHU-DE').
  * - Quan niệm sai: skills-misconceptions.ts.
  *
  * Mã: <Môn><lớp>.<chủ đề>.<slug>, vd 'T4.PS.RUT-GON' (T = Toán), 'TV1.TAM.XEP-CAU' (tạm).
  */
 import type { Grade } from './items.ts';
 import { MISCONCEPTION_LIST } from './skills-misconceptions.ts';
+import { CT2018_SKILLS } from './skills-ct2018.ts';
 import { PROVISIONAL_SKILLS } from './skills-provisional.ts';
 import { TOAN_SKILLS } from './skills-toan.ts';
 import type { SubjectId } from './subjects.ts';
 
-/** Mạch kiến thức. TAM-THOI: kĩ năng tạm của môn chưa có danh mục chính thức. */
-export type Strand = 'SO-PHEP-TINH' | 'HINH-DO-LUONG' | 'THONG-KE-XAC-SUAT' | 'TAM-THOI';
+/** Mạch kiến thức. TAM-THOI: kĩ năng tạm sinh từ câu hỏi mẫu. CHU-DE: theo chủ đề CT GDPT 2018 (môn ngoài Toán). */
+export type Strand = 'SO-PHEP-TINH' | 'HINH-DO-LUONG' | 'THONG-KE-XAC-SUAT' | 'TAM-THOI' | 'CHU-DE';
 
 export const STRAND_LABEL: Record<Strand, string> = {
   'SO-PHEP-TINH': 'Số và phép tính',
   'HINH-DO-LUONG': 'Hình học và đo lường',
   'THONG-KE-XAC-SUAT': 'Một số yếu tố thống kê và xác suất',
   'TAM-THOI': 'Tạm thời',
+  'CHU-DE': 'Theo chủ đề CT 2018',
 };
 
 export interface Skill {
@@ -54,7 +57,7 @@ export interface Misconception {
   rootSkill?: string;
 }
 
-export const SKILLS: Skill[] = [...TOAN_SKILLS, ...PROVISIONAL_SKILLS];
+export const SKILLS: Skill[] = [...TOAN_SKILLS, ...PROVISIONAL_SKILLS, ...CT2018_SKILLS];
 
 export const SKILL_BY_CODE: Record<string, Skill> = Object.fromEntries(SKILLS.map((s) => [s.code, s]));
 

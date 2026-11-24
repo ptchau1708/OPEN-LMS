@@ -678,3 +678,7 @@ textarea.tc-input { resize: vertical; line-height: 1.5; }
 .tc-qstats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .tc-qstats li { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 6px 10px; border: 1px solid var(--tc-line, #e4e4ef); border-radius: 10px; overflow: hidden; font-size: 13px; }
 .tc-qstats__bar { position: absolute; inset: auto 0 0 0; height: 3px; background: linear-gradient(90deg, #22a06b var(--p), #f0d4d8 var(--p)); }
+/* Chọn môn hiện trên bản đồ kiến thức */
+.tc-hmpick { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 16px; }
+.tc-hmpick li { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px; border: 1px solid var(--line, #e5e7eb); border-radius: 10px; }
+.tc-hmpick small { padding-left: 26px; font-size: 12px; }

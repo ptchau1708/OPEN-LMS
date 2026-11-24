@@ -9,6 +9,7 @@ export * from './component-api';
 export * from './skills';
 export * from './skills-toan';
 export * from './skills-provisional';
+export * from './skills-ct2018';
 export * from './skills-misconceptions';
 export * from './mastery';
 export * from './profile';

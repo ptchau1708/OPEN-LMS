@@ -1,9 +1,17 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { MISCONCEPTIONS, SKILLS, SKILL_BY_CODE, prereqClosure, skillsFor, type AnyResponse, type Item, type ScoreResult } from '@openedu/contracts';
+import { CT2018_SKILLS, MISCONCEPTIONS, SKILLS, SKILL_BY_CODE, prereqClosure, skillsFor, subjectsForGrade, type AnyResponse, type Item, type ScoreResult } from '@openedu/contracts';
 import { buildSeed, SEED_ITEMS, TOAN45_ITEMS, syntheticCorrectResponse } from '../seed';
 import { detectMisconceptions, normalizeAnswer } from '../mastery';
 
 describe('danh mục kĩ năng', () => {
+  it('mọi môn của mọi lớp (CT GDPT 2018) đều có kĩ năng', () => {
+    for (const g of [1, 2, 3, 4, 5] as const) for (const subj of subjectsForGrade(g)) {
+      expect(skillsFor(subj, g).length, `${subj} lớp ${g}`).toBeGreaterThan(0);
+    }
+    expect(CT2018_SKILLS.every((s) => s.strand === 'CHU-DE' && s.provisional)).toBe(true);
+    expect(skillsFor('khoa-hoc', 4).map((s) => s.topic)).toEqual(expect.arrayContaining(['Chất', 'Năng lượng', 'Nấm']));
+  });
+
   it('mã duy nhất, đúng định dạng, kĩ năng nền tồn tại, tên ngắn ≤ 6 từ', () => {
     expect(new Set(SKILLS.map((s) => s.code)).size).toBe(SKILLS.length);
     for (const s of SKILLS) {

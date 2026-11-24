@@ -1,18 +1,13 @@
 import { useMemo, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router';
-import { MASTERY_LEVEL_LABEL, MISCONCEPTIONS, SKILLS, SKILL_BY_CODE, STRAND_LABEL, SUBJECTS, subjectsForGrade, type ClassHeatmap, type GapGroup, type HeatmapCell, type MascotId, type Profile, type SubjectId } from '@openedu/contracts';
+import { MASTERY_LEVEL_LABEL, MISCONCEPTIONS, SKILL_BY_CODE, STRAND_LABEL, SUBJECTS, subjectsForGrade, type ClassHeatmap, type GapGroup, type HeatmapCell, type MascotId, type Profile, type SubjectId } from '@openedu/contracts';
 import { useClasses, useClassHeatmap, useGapGroups, useItemsByIds, useRemediationSets, useSkillMastery, useStudentProfile } from '@openedu/data';
-import { Avatar, Btn, Empty, ErrorNote, Loading, PageHead, Seg } from '../components/common';
+import { Avatar, Btn, Dialog, Empty, ErrorNote, Loading, PageHead, Seg } from '../components/common';
 import { cx, relTime, shorten } from '../lib/format';
 import { LevelLegend, LevelSwatch, pct } from '../lib/mastery';
 import { useRemediate } from '../lib/remediate';
+import { SUBJECTS_WITH_SKILLS, defaultMapSubjects, useMapSubjects } from '../lib/subjectPrefs';
 
-/** Môn có bản đồ kiến thức: môn của lớp (CT GDPT 2018) đã có danh mục yêu cầu cần đạt. */
-const HAS_SKILLS = new Set(SKILLS.map((s) => s.subject));
-const subjectOptsFor = (grade: number): SubjectId[] => {
-  const list = subjectsForGrade(grade).filter((s) => HAS_SKILLS.has(s));
-  return list.length ? list : ['toan', 'tieng-viet'];
-};
 const EMPTY: HeatmapCell = { level: 'chua-hoc', p: 0, attempts: 0 };
 
 /** /kien-thuc → bản đồ của lớp đầu tiên. */
@@ -29,14 +24,16 @@ export default function Heatmap({ user }: { user: Profile }) {
   const { classId = '' } = useParams();
   const nav = useNavigate();
   const classes = useClasses(user.role === 'admin' ? undefined : user.id);
-  const [picked, setSubject] = useState<SubjectId>('toan');
+  const [picking, setPicking] = useState(false);
   const [sort, setSort] = useState<'gaps' | 'name'>('gaps');
   const [onlyData, setOnlyData] = useState(true);
   const [open, setOpen] = useState<{ sid: string; code: string } | null>(null);
   const [tip, setTip] = useState<{ code: string; x: number; y: number } | null>(null);
   const cls = classes.data?.find((c) => c.id === classId);
-  const subjOpts = cls ? subjectOptsFor(cls.grade) : [picked];
-  const subject = subjOpts.includes(picked) ? picked : subjOpts[0]!;
+  const mapSubj = useMapSubjects(user.id, classId, cls?.grade);
+  const subjOpts = mapSubj.subjects;
+  const subject: SubjectId = mapSubj.current ?? 'toan';
+  const setSubject = mapSubj.setCurrent;
   const hm = useClassHeatmap(classId, subject);
   const groups = useGapGroups(classId, subject);
   const data = hm.data;
@@ -74,8 +71,16 @@ export default function Heatmap({ user }: { user: Profile }) {
     <div className="tc-page tc-page--wide">
       <PageHead title={`Bản đồ kiến thức${cls ? ` — Lớp ${cls.name}` : ''}`} sub="Mỗi ô: một em × một yêu cầu cần đạt. Bấm ô để xem bằng chứng, gốc rễ và cách hỗ trợ." actions={<>
         {(classes.data?.length ?? 0) > 1 ? <Seg label="Chọn lớp" value={classId} onChange={(v) => nav(`/lop/${v}/ban-do-kien-thuc`)} options={(classes.data ?? []).map((c) => ({ value: c.id, label: `Lớp ${c.name}` }))} /> : null}
-        <Seg label="Môn" value={subject} onChange={(v) => { setSubject(v); setOpen(null); }} options={subjOpts.map((s) => ({ value: s, label: SUBJECTS[s].name }))} />
+        {subjOpts.length > 5 ? (
+          <select className="tc-input" aria-label="Môn" value={subject} onChange={(e) => { setSubject(e.target.value as SubjectId); setOpen(null); }} data-testid="hm-subject">
+            {subjOpts.map((s) => <option key={s} value={s}>{SUBJECTS[s].name}</option>)}
+          </select>
+        ) : subjOpts.length > 1 ? (
+          <Seg label="Môn" value={subject} onChange={(v) => { setSubject(v); setOpen(null); }} options={subjOpts.map((s) => ({ value: s, label: SUBJECTS[s].name }))} />
+        ) : subjOpts.length === 1 ? <span className="tc-chip" data-testid="hm-subject-one">{SUBJECTS[subject].name}</span> : null}
+        {cls ? <Btn icon="settings" onClick={() => setPicking(true)} title="Chọn các môn hiện trên bản đồ của lớp này" data-testid="hm-pick-open">Chọn môn</Btn> : null}
       </>} />
+      {picking && cls ? <MapSubjectPicker grade={cls.grade} className={cls.name} value={subjOpts} custom={mapSubj.custom} synced={mapSubj.synced} onClose={() => setPicking(false)} onSave={(list) => { mapSubj.setSubjects(list); setOpen(null); setPicking(false); }} /> : null}
 
       <div className="tc-hmbar">
         <LevelLegend />
@@ -85,7 +90,7 @@ export default function Heatmap({ user }: { user: Profile }) {
       </div>
 
       <ErrorNote error={hm.error} onRetry={() => void hm.refetch()} />
-      {hm.isLoading ? <Loading /> : !data || !data.students.length ? <Empty icon="team" title="Lớp chưa có học sinh" /> : !shown ? <Empty icon="map" title="Chưa có dữ liệu kĩ năng cho môn này">{onlyData ? 'Chưa em nào làm câu hỏi có gắn kĩ năng của môn này.' : null}</Empty> : (
+      {hm.isLoading ? <Loading /> : !data || !data.students.length ? <Empty icon="team" title="Lớp chưa có học sinh" /> : !data.skills.length ? <Empty icon="map" title={`${SUBJECTS[subject].name} chưa có danh mục kĩ năng`}>OPEN-EDU chưa có danh mục yêu cầu cần đạt của môn này ở lớp {cls?.grade ?? ''}. Bản đồ sẽ có cột khi câu hỏi của môn được gắn mã kĩ năng.</Empty> : !shown ? <Empty icon="map" title="Chưa có dữ liệu kĩ năng cho môn này">{onlyData ? 'Chưa em nào làm câu hỏi có gắn kĩ năng của môn này.' : null}</Empty> : (
         <section className="tc-card tc-card--flush">
           <div className="tc-hm-scroll" onScroll={() => setTip(null)}>
             <table className="tc-hm">
@@ -284,5 +289,40 @@ function CellPanel({ user, hm, sid, code, onClose }: { user: Profile; hm: ClassH
         </section>
       </div>
     </aside>
+  );
+}
+
+/** Hộp chọn môn hiện trên bản đồ của một lớp (lưu theo GV + lớp, trên trình duyệt này). */
+function MapSubjectPicker({ grade, className, value, custom, synced, onClose, onSave }: { grade: number; className: string; value: SubjectId[]; custom: boolean; synced: boolean; onClose: () => void; onSave: (list: SubjectId[] | null) => void }) {
+  const all = subjectsForGrade(grade);
+  const [sel, setSel] = useState<Set<SubjectId>>(() => new Set(value.filter((s) => all.includes(s))));
+  const toggle = (s: SubjectId) => setSel((x) => { const n = new Set(x); if (n.has(s)) n.delete(s); else n.add(s); return n; });
+  return (
+    <Dialog open onClose={onClose} title={`Môn hiện trên bản đồ — Lớp ${className}`} footer={<>
+      <Btn kind="ghost" onClick={() => onSave(null)} disabled={!custom} title="Về mặc định: các môn của lớp đã có danh mục kĩ năng">Về mặc định</Btn>
+      <span className="tc-ebar__spacer" />
+      <Btn onClick={onClose}>Hủy</Btn>
+      <Btn kind="primary" disabled={!sel.size} onClick={() => onSave(all.filter((s) => sel.has(s)))} data-testid="hm-pick-save">Lưu ({sel.size} môn)</Btn>
+    </>}>
+      <div className="tc-stack">
+        <p className="tc-small tc-muted">Thầy cô dạy môn nào thì tích môn đó. Lựa chọn lưu riêng cho từng lớp{synced ? ', theo tài khoản của thầy cô — máy nào đăng nhập cũng thấy' : ' trên trình duyệt này'}. Mặc định: {defaultMapSubjects(grade).map((s) => SUBJECTS[s].name).join(', ')}.</p>
+        <div className="tc-row tc-wrap">
+          <Btn size="sm" kind="ghost" onClick={() => setSel(new Set(all))}>Chọn tất cả</Btn>
+          <Btn size="sm" kind="ghost" onClick={() => setSel(new Set())}>Bỏ chọn hết</Btn>
+        </div>
+        <ul className="tc-hmpick" aria-label={`Môn học lớp ${grade} (CT GDPT 2018)`}>
+          {all.map((s) => (
+            <li key={s}>
+              <label className="tc-switch">
+                <input type="checkbox" checked={sel.has(s)} onChange={() => toggle(s)} />
+                <span>{SUBJECTS[s].name}{SUBJECTS[s].elective?.includes(grade) ? ' (tự chọn)' : ''}</span>
+              </label>
+              {!SUBJECTS_WITH_SKILLS.has(s) ? <small className="tc-muted">chưa có danh mục kĩ năng</small> : null}
+            </li>
+          ))}
+        </ul>
+        {!sel.size ? <p className="tc-small tc-warn">Chọn ít nhất một môn.</p> : null}
+      </div>
+    </Dialog>
   );
 }

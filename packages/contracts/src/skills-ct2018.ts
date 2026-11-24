@@ -1,0 +1,632 @@
+/**
+ * Kĩ năng theo CHỦ ĐỀ / MẠCH NỘI DUNG của Chương trình GDPT 2018 (Thông tư 32/2018) cho các môn ngoài Toán:
+ * Tiếng Việt, Tiếng Anh, Đạo đức, Tự nhiên và Xã hội, Lịch sử và Địa lí, Khoa học, Tin học, Công nghệ,
+ * Giáo dục thể chất, Âm nhạc, Mĩ thuật, Hoạt động trải nghiệm.
+ *
+ * - Mỗi kĩ năng là một nội dung / bài học của chủ đề, mô tả TÓM LƯỢC theo yêu cầu cần đạt (KHÔNG phải nguyên văn)
+ *   → `provisional: true`. Tổ chuyên môn đối chiếu với văn bản chương trình rồi sửa `text` (giữ nguyên `code` để
+ *   không mất lịch sử luyện tập).
+ * - Mã: <MÔN><lớp>.<CHỦ-ĐỀ>.<SLUG>, vd 'KH4.NL.ANH-SANG', 'DD5.KT.SU-DUNG-TIEN'.
+ * File THUẦN DỮ LIỆU (chỉ `import type`) để tools/gen-skills-sql.mjs nạp trực tiếp.
+ */
+import type { Grade } from './items';
+import type { Skill } from './skills';
+import type { SubjectId } from './subjects';
+
+/** [slug, tên ngắn (≤ 6 từ), mô tả] */
+type K = [string, string, string];
+/** [môn, lớp, mã chủ đề, tên chủ đề, kĩ năng] */
+type Block = [SubjectId, Grade, string, string, K[]];
+
+const PREFIX: Partial<Record<SubjectId, string>> = {
+  'tieng-viet': 'TV', 'tieng-anh': 'TA', 'dao-duc': 'DD', tnxh: 'TNXH', 'lich-su-dia-li': 'LSDL', 'khoa-hoc': 'KH',
+  'tin-hoc': 'TH', 'cong-nghe': 'CN', gdtc: 'GDTC', 'am-nhac': 'AN', 'mi-thuat': 'MT', hdtn: 'HDTN',
+};
+
+const B: Block[] = [
+  // ───────────────────────── TIẾNG VIỆT ─────────────────────────
+  ['tieng-viet', 1, 'DOC', 'Đọc', [
+    ['DOC-AM-VAN', 'Đọc đúng âm, vần, tiếng', 'Đọc đúng các âm, vần, tiếng, từ; ghép âm, vần thành tiếng'],
+    ['DOC-TRON-DOAN', 'Đọc trơn đoạn văn ngắn', 'Đọc trơn câu, đoạn văn ngắn; biết ngắt hơi ở dấu câu'],
+    ['DOC-HIEU', 'Đọc hiểu văn bản ngắn', 'Trả lời được câu hỏi đơn giản về chi tiết, nhân vật trong văn bản ngắn'],
+  ]],
+  ['tieng-viet', 1, 'VIET', 'Viết', [
+    ['VIET-CHU-THUONG', 'Viết chữ thường đúng mẫu', 'Viết đúng chữ viết thường, chữ số; đúng tư thế, cách cầm bút'],
+    ['CHINH-TA', 'Nghe – viết chính tả', 'Nhìn – viết, nghe – viết đoạn ngắn; viết đúng các tiếng có vần khó'],
+    ['VIET-CAU', 'Viết câu ngắn', 'Điền từ, viết câu ngắn về bản thân hoặc theo tranh'],
+  ]],
+  ['tieng-viet', 1, 'NN', 'Nói và nghe', [
+    ['NOI-CAU', 'Nói rõ ràng, đủ câu', 'Nói rõ ràng thành câu; chào hỏi, cảm ơn, xin lỗi đúng lúc'],
+    ['KE-THEO-TRANH', 'Kể chuyện theo tranh', 'Nghe hiểu câu chuyện ngắn, kể lại theo tranh minh hoạ'],
+  ]],
+  ['tieng-viet', 1, 'KT', 'Kiến thức tiếng Việt', [
+    ['DAU-CAU', 'Dấu chấm, dấu chấm hỏi', 'Nhận biết và dùng dấu chấm, dấu chấm hỏi; viết hoa chữ đầu câu'],
+  ]],
+  ['tieng-viet', 2, 'DOC', 'Đọc', [
+    ['DOC-LUU-LOAT', 'Đọc lưu loát đoạn văn', 'Đọc đúng, rõ ràng, tốc độ khoảng 60–70 tiếng/phút; ngắt nghỉ đúng'],
+    ['DOC-HIEU-ND', 'Hiểu nội dung bài đọc', 'Nêu được chi tiết, nhân vật, nội dung chính của văn bản'],
+    ['DOC-VB-THONG-TIN', 'Đọc văn bản thông tin', 'Đọc hiểu văn bản thông tin ngắn (thời khoá biểu, hướng dẫn, mục lục)'],
+  ]],
+  ['tieng-viet', 2, 'VIET', 'Viết', [
+    ['VIET-CHU-HOA', 'Viết chữ hoa', 'Viết đúng chữ hoa cỡ vừa và cỡ nhỏ, câu ứng dụng'],
+    ['VIET-DOAN-KE', 'Viết đoạn kể, tả ngắn', 'Viết đoạn 4–5 câu kể một sự việc hoặc tả đồ vật, con vật'],
+  ]],
+  ['tieng-viet', 2, 'NN', 'Nói và nghe', [
+    ['KE-LAI-CHUYEN', 'Kể lại câu chuyện', 'Kể lại được đoạn hoặc toàn bộ câu chuyện đã nghe, đã đọc'],
+  ]],
+  ['tieng-viet', 2, 'KT', 'Kiến thức tiếng Việt', [
+    ['TU-LOAI', 'Từ chỉ sự vật, hoạt động', 'Nhận biết từ chỉ sự vật, hoạt động, đặc điểm'],
+    ['KIEU-CAU', 'Câu giới thiệu, nêu hoạt động', 'Nhận biết, đặt câu giới thiệu, câu nêu hoạt động, câu nêu đặc điểm'],
+    ['DAU-PHAY', 'Dấu phẩy, dấu chấm than', 'Dùng đúng dấu chấm, dấu phẩy, dấu chấm hỏi, dấu chấm than'],
+  ]],
+  ['tieng-viet', 3, 'DOC', 'Đọc', [
+    ['DOC-DIEN-CAM', 'Đọc đúng, có ngữ điệu', 'Đọc đúng, tốc độ khoảng 70–80 tiếng/phút; thể hiện ngữ điệu phù hợp'],
+    ['DOC-HIEU-Y-CHINH', 'Tìm ý chính của bài', 'Nêu được ý chính của từng đoạn, nội dung bài; liên hệ bản thân'],
+    ['DOC-HINH-ANH', 'Cảm nhận hình ảnh đẹp', 'Nhận biết hình ảnh, câu văn hay trong bài thơ, bài văn'],
+  ]],
+  ['tieng-viet', 3, 'VIET', 'Viết', [
+    ['VIET-DOAN-CAM-XUC', 'Viết đoạn nêu cảm xúc', 'Viết đoạn văn nêu tình cảm, cảm xúc về người, sự việc'],
+    ['VIET-DOAN-TA', 'Viết đoạn tả đồ vật', 'Viết đoạn văn ngắn tả đồ vật, miêu tả đặc điểm nổi bật'],
+    ['VIET-THU', 'Viết thư, thông báo ngắn', 'Viết thư ngắn, tin nhắn, thông báo, đơn theo mẫu'],
+  ]],
+  ['tieng-viet', 3, 'NN', 'Nói và nghe', [
+    ['TRAO-DOI', 'Trao đổi, thảo luận nhóm', 'Nói rõ ý kiến, lắng nghe và hỏi lại khi trao đổi trong nhóm'],
+  ]],
+  ['tieng-viet', 3, 'KT', 'Kiến thức tiếng Việt', [
+    ['SO-SANH', 'Biện pháp so sánh', 'Nhận biết và dùng biện pháp so sánh trong câu'],
+    ['CAU-KE-HOI-CAM', 'Câu kể, hỏi, cảm, khiến', 'Nhận biết câu kể, câu hỏi, câu cảm, câu khiến'],
+    ['DAU-HAI-CHAM', 'Dấu hai chấm, gạch ngang', 'Dùng đúng dấu hai chấm, dấu gạch ngang, dấu ngoặc kép'],
+  ]],
+  ['tieng-viet', 4, 'DOC', 'Đọc', [
+    ['DOC-DIEN-CAM', 'Đọc diễn cảm', 'Đọc diễn cảm, tốc độ khoảng 80–90 tiếng/phút; nhấn giọng từ ngữ gợi tả'],
+    ['DOC-CHU-DE', 'Nêu chủ đề văn bản', 'Nêu được chủ đề, bài học rút ra từ văn bản; nhận xét nhân vật'],
+  ]],
+  ['tieng-viet', 4, 'VIET', 'Viết', [
+    ['VAN-KE-CHUYEN', 'Viết bài văn kể chuyện', 'Viết bài văn kể lại câu chuyện đã đọc, đã nghe có mở bài, thân bài, kết bài'],
+    ['VAN-TA-CAY-CON-VAT', 'Tả cây cối, con vật', 'Viết bài văn miêu tả con vật, cây cối theo trình tự hợp lí'],
+    ['DOAN-NEU-Y-KIEN', 'Viết đoạn nêu ý kiến', 'Viết đoạn văn nêu lí do thích hoặc không thích một câu chuyện, nhân vật'],
+  ]],
+  ['tieng-viet', 4, 'NN', 'Nói và nghe', [
+    ['GIOI-THIEU', 'Giới thiệu, thuyết trình ngắn', 'Giới thiệu về một sự vật, hoạt động; nói có hình ảnh minh hoạ'],
+  ]],
+  ['tieng-viet', 4, 'KT', 'Kiến thức tiếng Việt', [
+    ['DT-DT-TT', 'Danh từ, động từ, tính từ', 'Nhận biết và sử dụng danh từ, động từ, tính từ'],
+    ['CHU-VI-NGU', 'Chủ ngữ, vị ngữ', 'Xác định chủ ngữ, vị ngữ trong câu'],
+    ['TRANG-NGU', 'Trạng ngữ của câu', 'Nhận biết và thêm trạng ngữ chỉ thời gian, nơi chốn, nguyên nhân'],
+    ['NHAN-HOA', 'Biện pháp nhân hoá', 'Nhận biết và dùng biện pháp nhân hoá'],
+  ]],
+  ['tieng-viet', 5, 'DOC', 'Đọc', [
+    ['DOC-DIEN-CAM', 'Đọc diễn cảm văn bản', 'Đọc diễn cảm văn bản văn học, tốc độ khoảng 90–100 tiếng/phút'],
+    ['DOC-HIEU-SAU', 'Hiểu ý nghĩa, thông điệp', 'Nêu chủ đề, thông điệp; nhận xét chi tiết, hình ảnh, ngôn ngữ'],
+    ['DOC-VB-TT', 'Đọc hiểu văn bản thông tin', 'Đọc hiểu văn bản thông tin; nhận biết số liệu, hình ảnh minh hoạ'],
+  ]],
+  ['tieng-viet', 5, 'VIET', 'Viết', [
+    ['VAN-TA-NGUOI', 'Viết bài văn tả người', 'Viết bài văn tả người: ngoại hình, tính tình, hoạt động; có cảm xúc'],
+    ['VAN-TA-CANH', 'Viết bài văn tả phong cảnh', 'Viết bài văn tả phong cảnh theo trình tự thời gian hoặc không gian'],
+    ['VAN-KE-SANG-TAO', 'Kể chuyện sáng tạo', 'Viết bài văn kể chuyện sáng tạo (thay đổi kết thúc, nhập vai nhân vật)'],
+    ['BAO-CAO', 'Viết báo cáo, chương trình', 'Viết báo cáo công việc, chương trình hoạt động, đoạn nêu ý kiến'],
+  ]],
+  ['tieng-viet', 5, 'NN', 'Nói và nghe', [
+    ['THUYET-TRINH', 'Thuyết trình, tranh luận', 'Thuyết trình về một vấn đề; trình bày ý kiến có lí lẽ, dẫn chứng'],
+  ]],
+  ['tieng-viet', 5, 'KT', 'Kiến thức tiếng Việt', [
+    ['DAI-TU-KET-TU', 'Đại từ, kết từ', 'Nhận biết và dùng đại từ, kết từ'],
+    ['CAU-GHEP', 'Câu ghép', 'Nhận biết câu ghép; nối các vế câu bằng kết từ, cặp kết từ'],
+    ['TU-DA-NGHIA', 'Từ đa nghĩa, đồng âm', 'Phân biệt từ đa nghĩa, từ đồng âm, từ đồng nghĩa'],
+    ['DIEP-TU', 'Điệp từ, điệp ngữ', 'Nhận biết tác dụng của điệp từ, điệp ngữ; liên kết câu'],
+  ]],
+
+  // ───────────────────────── TIẾNG ANH ─────────────────────────
+  ['tieng-anh', 1, 'NGHE-NOI', 'Nghe và nói (tự chọn)', [
+    ['ALPHABET', 'Chữ cái và âm', 'Nhận biết chữ cái và âm tương ứng (phonics) qua bài hát, trò chơi'],
+    ['CLASSROOM', 'Hiểu chỉ dẫn lớp học', 'Nghe hiểu và làm theo chỉ dẫn đơn giản: stand up, sit down, open your book'],
+    ['VOCAB-TOPICS', 'Từ vựng chủ đề gần gũi', 'Nhận biết từ chỉ màu sắc, số đếm, đồ vật, con vật quen thuộc'],
+  ]],
+  ['tieng-anh', 2, 'NGHE-NOI', 'Nghe và nói (tự chọn)', [
+    ['PHONICS', 'Ghép âm đơn giản', 'Nhận biết âm đầu, ghép âm đọc từ đơn giản'],
+    ['ASK-ANSWER', 'Hỏi – đáp đơn giản', 'Hỏi và trả lời câu đơn giản: What is this? How old are you?'],
+    ['SONG-CHANT', 'Hát, chant theo chủ đề', 'Hát, chant theo chủ đề gia đình, đồ chơi, thức ăn'],
+  ]],
+  ['tieng-anh', 3, 'NGHE', 'Nghe', [
+    ['LISTEN-WORDS', 'Nghe hiểu từ, câu ngắn', 'Nghe hiểu từ, câu đơn giản về bản thân, bạn bè, trường lớp, gia đình'],
+  ]],
+  ['tieng-anh', 3, 'NOI', 'Nói', [
+    ['INTRODUCE', 'Giới thiệu bản thân, bạn', 'Giới thiệu tên, tuổi, bạn bè; hỏi – đáp về đồ dùng, màu sắc'],
+    ['FAMILY', 'Nói về gia đình', 'Hỏi – đáp về thành viên trong gia đình: Who is this? This is my…'],
+  ]],
+  ['tieng-anh', 3, 'DOC', 'Đọc', [
+    ['READ-SENTENCES', 'Đọc hiểu câu ngắn', 'Đọc hiểu câu, đoạn rất ngắn về chủ đề quen thuộc'],
+  ]],
+  ['tieng-anh', 3, 'VIET', 'Viết', [
+    ['WRITE-WORDS', 'Viết từ, câu theo mẫu', 'Viết từ và câu đơn giản theo mẫu'],
+  ]],
+  ['tieng-anh', 4, 'NGHE', 'Nghe', [
+    ['LISTEN-DIALOGUE', 'Nghe hiểu hội thoại ngắn', 'Nghe hiểu hội thoại ngắn về thời gian, ngày tháng, thời tiết, nghề nghiệp'],
+  ]],
+  ['tieng-anh', 4, 'NOI', 'Nói', [
+    ['TIME-DATE', 'Hỏi giờ, ngày tháng', 'Hỏi – đáp về giờ, ngày trong tuần, ngày sinh'],
+    ['ABILITY', 'Nói về khả năng (can)', 'Nói về những việc mình có thể làm: I can swim / I can’t…'],
+    ['JOBS-PLACES', 'Nghề nghiệp, nơi làm việc', 'Hỏi – đáp về nghề nghiệp và nơi làm việc của người thân'],
+  ]],
+  ['tieng-anh', 4, 'DOC', 'Đọc', [
+    ['READ-PARAGRAPH', 'Đọc hiểu đoạn văn ngắn', 'Đọc hiểu đoạn văn ngắn, trả lời câu hỏi đúng/sai'],
+  ]],
+  ['tieng-anh', 4, 'VIET', 'Viết', [
+    ['WRITE-SHORT', 'Viết đoạn ngắn về bản thân', 'Viết đoạn 3–5 câu về bản thân, gia đình, sở thích'],
+  ]],
+  ['tieng-anh', 5, 'NGHE', 'Nghe', [
+    ['LISTEN-STORY', 'Nghe hiểu câu chuyện ngắn', 'Nghe hiểu thông tin chính trong đoạn hội thoại, câu chuyện ngắn'],
+  ]],
+  ['tieng-anh', 5, 'NOI', 'Nói', [
+    ['DAILY-ROUTINE', 'Nói về hoạt động hằng ngày', 'Hỏi – đáp về hoạt động hằng ngày, tần suất (always, usually…)'],
+    ['PAST-SIMPLE', 'Kể việc đã làm', 'Nói về sự việc đã xảy ra (thì quá khứ đơn): kì nghỉ, ngày hôm qua'],
+    ['FUTURE-PLANS', 'Nói về dự định', 'Nói về dự định, kế hoạch (will, be going to)'],
+    ['ADDRESS-DIRECTIONS', 'Địa chỉ và chỉ đường', 'Hỏi – đáp về địa chỉ, chỉ đường đơn giản'],
+  ]],
+  ['tieng-anh', 5, 'DOC', 'Đọc', [
+    ['READ-TEXT', 'Đọc hiểu bài đọc', 'Đọc hiểu đoạn văn khoảng 60–80 từ; tìm thông tin cụ thể'],
+  ]],
+  ['tieng-anh', 5, 'VIET', 'Viết', [
+    ['WRITE-PARAGRAPH', 'Viết đoạn văn, thư ngắn', 'Viết đoạn văn, thư, email ngắn khoảng 30–40 từ theo gợi ý'],
+  ]],
+
+  // ───────────────────────── ĐẠO ĐỨC ─────────────────────────
+  ['dao-duc', 1, 'DD', 'Giáo dục đạo đức', [
+    ['YEU-THUONG-GIA-DINH', 'Yêu thương gia đình', 'Nêu được biểu hiện của sự yêu thương gia đình; thể hiện bằng lời nói, việc làm phù hợp'],
+    ['QUAN-TAM-NGUOI-THAN', 'Quan tâm, chăm sóc người thân', 'Biết quan tâm, chăm sóc ông bà, cha mẹ, anh chị em bằng việc làm phù hợp lứa tuổi'],
+    ['TU-GIAC', 'Tự giác làm việc của mình', 'Tự giác làm việc của mình ở nhà, ở trường'],
+    ['THAT-THA', 'Thật thà', 'Nêu được biểu hiện của thật thà; không nói dối, nhận lỗi khi làm sai'],
+  ]],
+  ['dao-duc', 1, 'KNS', 'Kĩ năng sống', [
+    ['SINH-HOAT-NEN-NEP', 'Sinh hoạt nền nếp', 'Thực hiện sinh hoạt nền nếp: giờ giấc, ngăn nắp, gọn gàng'],
+    ['TU-CHAM-SOC', 'Tự chăm sóc bản thân', 'Biết tự chăm sóc bản thân: vệ sinh cá nhân, ăn mặc phù hợp'],
+    ['PHONG-TRANH-TAI-NAN', 'Phòng tránh tai nạn, thương tích', 'Nhận biết và phòng tránh tai nạn, thương tích thường gặp'],
+  ]],
+  ['dao-duc', 1, 'PL', 'Giáo dục pháp luật', [
+    ['NOI-QUY-TRUONG', 'Thực hiện nội quy trường, lớp', 'Nêu được và thực hiện đúng nội quy trường, lớp'],
+  ]],
+  ['dao-duc', 2, 'DD', 'Giáo dục đạo đức', [
+    ['QUE-HUONG', 'Quê hương em', 'Nêu được địa chỉ quê hương; thể hiện tình yêu quê hương bằng việc làm phù hợp'],
+    ['KINH-TRONG-THAY-CO', 'Kính thầy cô, quý bạn', 'Thể hiện sự kính trọng thầy cô, yêu quý bạn bè bằng lời nói, việc làm'],
+    ['QUY-TRONG-THOI-GIAN', 'Quý trọng thời gian', 'Biết sử dụng thời gian hợp lí, làm việc đúng giờ'],
+    ['NHAN-LOI-SUA-LOI', 'Nhận lỗi và sửa lỗi', 'Biết nhận lỗi và sửa lỗi khi mắc lỗi'],
+    ['BAO-QUAN-DO-DUNG', 'Bảo quản đồ dùng', 'Biết bảo quản đồ dùng cá nhân và gia đình'],
+  ]],
+  ['dao-duc', 2, 'KNS', 'Kĩ năng sống', [
+    ['THE-HIEN-CAM-XUC', 'Thể hiện cảm xúc bản thân', 'Nhận biết cảm xúc tích cực, tiêu cực; kiểm soát cảm xúc phù hợp'],
+    ['TIM-KIEM-HO-TRO', 'Tìm kiếm sự hỗ trợ', 'Biết tìm kiếm sự hỗ trợ khi ở trường, ở nhà, nơi công cộng'],
+  ]],
+  ['dao-duc', 2, 'PL', 'Giáo dục pháp luật', [
+    ['NOI-CONG-CONG', 'Quy định nơi công cộng', 'Nêu được và thực hiện quy định nơi công cộng'],
+  ]],
+  ['dao-duc', 3, 'DD', 'Giáo dục đạo đức', [
+    ['YEU-TO-QUOC', 'Em yêu Tổ quốc Việt Nam', 'Nhận biết Quốc kì, Quốc ca; thể hiện tình yêu Tổ quốc bằng việc làm phù hợp'],
+    ['HANG-XOM', 'Quan tâm hàng xóm láng giềng', 'Biết quan tâm, giúp đỡ hàng xóm láng giềng'],
+    ['HAM-HOC-HOI', 'Ham học hỏi', 'Nêu được biểu hiện của ham học hỏi; tích cực tìm tòi, học hỏi'],
+    ['GIU-LOI-HUA', 'Giữ lời hứa', 'Biết giữ lời hứa; nêu được vì sao phải giữ lời hứa'],
+    ['HOAN-THANH-NHIEM-VU', 'Tích cực hoàn thành nhiệm vụ', 'Tích cực hoàn thành nhiệm vụ ở lớp, ở nhà'],
+  ]],
+  ['dao-duc', 3, 'KNS', 'Kĩ năng sống', [
+    ['KHAM-PHA-BAN-THAN', 'Khám phá bản thân', 'Nhận biết điểm mạnh, điểm yếu của bản thân; rèn luyện để phát triển'],
+    ['BAT-HOA-BAN-BE', 'Xử lí bất hoà bạn bè', 'Nhận biết bất hoà với bạn bè; biết cách xử lí đơn giản'],
+  ]],
+  ['dao-duc', 3, 'PL', 'Giáo dục pháp luật', [
+    ['AN-TOAN-GIAO-THONG', 'Tuân thủ an toàn giao thông', 'Nhận biết một số biển báo; tuân thủ quy tắc an toàn giao thông'],
+  ]],
+  ['dao-duc', 4, 'DD', 'Giáo dục đạo đức', [
+    ['BIET-ON-NGUOI-LAO-DONG', 'Biết ơn người lao động', 'Thể hiện lòng biết ơn người lao động bằng lời nói, việc làm cụ thể'],
+    ['CAM-THONG-GIUP-DO', 'Giúp đỡ người gặp khó khăn', 'Biết cảm thông, giúp đỡ người gặp khó khăn'],
+    ['YEU-LAO-DONG', 'Yêu lao động', 'Nêu được ý nghĩa của lao động; tích cực tham gia lao động vừa sức'],
+    ['TON-TRONG-TAI-SAN', 'Tôn trọng tài sản người khác', 'Tôn trọng, không xâm phạm tài sản của người khác'],
+    ['BAO-VE-CUA-CONG', 'Bảo vệ của công', 'Biết giữ gìn, bảo vệ của công; nhắc nhở bạn cùng thực hiện'],
+  ]],
+  ['dao-duc', 4, 'KNS', 'Kĩ năng sống', [
+    ['QUAN-HE-BAN-BE', 'Thiết lập, duy trì tình bạn', 'Biết cách thiết lập và duy trì quan hệ bạn bè'],
+  ]],
+  ['dao-duc', 4, 'PL', 'Giáo dục pháp luật', [
+    ['QUYEN-BON-PHAN-TRE-EM', 'Quyền và bổn phận trẻ em', 'Nêu được một số quyền và bổn phận cơ bản của trẻ em; thực hiện bổn phận'],
+  ]],
+  ['dao-duc', 5, 'DD', 'Giáo dục đạo đức', [
+    ['BIET-ON-NGUOI-CO-CONG', 'Biết ơn người có công', 'Thể hiện lòng biết ơn những người có công với quê hương, đất nước'],
+    ['TON-TRONG-KHAC-BIET', 'Tôn trọng sự khác biệt', 'Tôn trọng sự khác biệt về hoàn cảnh, ngoại hình, văn hoá của người khác'],
+    ['VUOT-KHO-KHAN', 'Vượt qua khó khăn', 'Nêu được biểu hiện của vượt khó; biết vượt qua khó khăn trong học tập, cuộc sống'],
+    ['BAO-VE-CAI-DUNG', 'Bảo vệ cái đúng, cái tốt', 'Biết bảo vệ cái đúng, cái tốt; không đồng tình với cái sai'],
+    ['BAO-VE-MOI-TRUONG', 'Bảo vệ môi trường sống', 'Tham gia hoạt động bảo vệ môi trường sống phù hợp lứa tuổi'],
+  ]],
+  ['dao-duc', 5, 'KNS', 'Kĩ năng sống', [
+    ['LAP-KE-HOACH', 'Lập kế hoạch cá nhân', 'Lập và thực hiện kế hoạch cá nhân đơn giản'],
+    ['PHONG-TRANH-XAM-HAI', 'Phòng, tránh xâm hại', 'Nhận biết nguy cơ bị xâm hại; biết cách phòng tránh và tìm sự giúp đỡ'],
+  ]],
+  ['dao-duc', 5, 'KT', 'Giáo dục kinh tế', [
+    ['SU-DUNG-TIEN', 'Sử dụng tiền hợp lí', 'Nêu được vì sao phải sử dụng tiền hợp lí; chi tiêu, tiết kiệm phù hợp'],
+  ]],
+
+  // ───────────────────────── TỰ NHIÊN VÀ XÃ HỘI ─────────────────────────
+  ['tnxh', 1, 'GD', 'Gia đình', [
+    ['THANH-VIEN', 'Thành viên và việc nhà', 'Giới thiệu thành viên gia đình; chia sẻ việc nhà phù hợp'],
+    ['NHA-O-AN-TOAN', 'Nhà ở và an toàn', 'Nêu được đặc điểm nhà ở; nhận biết đồ dùng có thể gây nguy hiểm'],
+  ]],
+  ['tnxh', 1, 'TRUONG', 'Trường học', [
+    ['LOP-TRUONG', 'Lớp học, trường học', 'Kể được tên các khu vực, thành viên và hoạt động ở trường'],
+    ['AN-TOAN-TRUONG', 'An toàn khi ở trường', 'Nhận biết tình huống nguy hiểm, giữ an toàn khi vui chơi ở trường'],
+  ]],
+  ['tnxh', 1, 'CD', 'Cộng đồng địa phương', [
+    ['NOI-EM-SONG', 'Nơi em sống', 'Mô tả cảnh vật, công việc của người dân nơi em sống'],
+    ['DI-BO-AN-TOAN', 'Đi bộ an toàn', 'Nhận biết tín hiệu đèn, biển báo; đi bộ an toàn trên đường'],
+  ]],
+  ['tnxh', 1, 'TVDV', 'Thực vật và động vật', [
+    ['BO-PHAN-CAY', 'Các bộ phận của cây', 'Chỉ và nói tên các bộ phận bên ngoài của cây'],
+    ['BO-PHAN-CON-VAT', 'Các bộ phận của con vật', 'Chỉ và nói tên các bộ phận bên ngoài của con vật'],
+  ]],
+  ['tnxh', 1, 'CNSK', 'Con người và sức khoẻ', [
+    ['CO-THE', 'Các bộ phận cơ thể', 'Nêu tên các bộ phận bên ngoài của cơ thể; phân biệt bạn trai, bạn gái'],
+    ['AN-UONG', 'Ăn uống hằng ngày', 'Kể tên thức ăn, đồ uống có lợi; ăn uống đủ bữa, hợp vệ sinh'],
+    ['VAN-DONG-NGHI-NGOI', 'Vận động và nghỉ ngơi', 'Biết vận động, nghỉ ngơi hợp lí'],
+    ['GIU-AN-TOAN-CO-THE', 'Giữ an toàn cơ thể', 'Nhận biết vùng riêng tư; nói “không” và báo người lớn khi bị đụng chạm'],
+  ]],
+  ['tnxh', 1, 'TDBT', 'Trái Đất và bầu trời', [
+    ['BAU-TROI', 'Bầu trời ngày và đêm', 'Mô tả bầu trời ban ngày, ban đêm (Mặt Trời, Mặt Trăng, sao)'],
+    ['THOI-TIET', 'Thời tiết', 'Nhận biết các hiện tượng thời tiết: nắng, mưa, gió; ăn mặc phù hợp'],
+  ]],
+  ['tnxh', 2, 'GD', 'Gia đình', [
+    ['THE-HE', 'Các thế hệ trong gia đình', 'Nêu được các thế hệ trong gia đình'],
+    ['NGHE-NGHIEP', 'Nghề nghiệp của người thân', 'Kể tên nghề nghiệp của người thân và ích lợi của nghề'],
+    ['NGO-DOC', 'Phòng tránh ngộ độc', 'Nêu nguyên nhân và cách phòng tránh ngộ độc khi ở nhà'],
+  ]],
+  ['tnxh', 2, 'TRUONG', 'Trường học', [
+    ['SU-KIEN-TRUONG', 'Sự kiện ở trường', 'Kể về một số sự kiện ở trường; tham gia tích cực'],
+    ['VE-SINH-TRUONG', 'Giữ vệ sinh trường học', 'Giữ vệ sinh trường lớp, sử dụng nhà vệ sinh đúng cách'],
+  ]],
+  ['tnxh', 2, 'CD', 'Cộng đồng địa phương', [
+    ['MUA-BAN', 'Hoạt động mua bán', 'Nêu được hoạt động mua bán hàng hoá ở địa phương'],
+    ['GIAO-THONG', 'Đường và phương tiện giao thông', 'Kể tên loại đường, phương tiện giao thông; đi đúng quy định'],
+  ]],
+  ['tnxh', 2, 'TVDV', 'Thực vật và động vật', [
+    ['BAO-VE-TV-DV', 'Bảo vệ thực vật, động vật', 'Nêu sự cần thiết và việc làm bảo vệ môi trường sống của thực vật, động vật'],
+  ]],
+  ['tnxh', 2, 'CNSK', 'Con người và sức khoẻ', [
+    ['CQ-VAN-DONG', 'Cơ quan vận động', 'Chỉ vị trí xương, cơ; biết bảo vệ cơ quan vận động'],
+    ['CQ-HO-HAP', 'Cơ quan hô hấp', 'Chỉ vị trí cơ quan hô hấp; thở đúng cách, phòng bệnh hô hấp'],
+    ['CQ-BAI-TIET', 'Cơ quan bài tiết nước tiểu', 'Chỉ vị trí cơ quan bài tiết nước tiểu; uống đủ nước, không nhịn tiểu'],
+  ]],
+  ['tnxh', 2, 'TDBT', 'Trái Đất và bầu trời', [
+    ['CAC-MUA', 'Các mùa trong năm', 'Nêu đặc điểm các mùa; mặc phù hợp theo mùa'],
+    ['THIEN-TAI', 'Thiên tai và phòng tránh', 'Nhận biết một số thiên tai; cách phòng tránh, ứng phó'],
+  ]],
+  ['tnxh', 3, 'GD', 'Gia đình', [
+    ['HO-NOI-NGOAI', 'Họ nội, họ ngoại', 'Vẽ sơ đồ, giới thiệu họ nội, họ ngoại'],
+    ['PHONG-CHAY', 'Phòng cháy khi ở nhà', 'Nêu nguyên nhân gây cháy; cách phòng cháy và thoát hiểm'],
+  ]],
+  ['tnxh', 3, 'TRUONG', 'Trường học', [
+    ['KET-NOI-XA-HOI', 'Hoạt động kết nối xã hội', 'Kể hoạt động kết nối trường với xã hội; truyền thống nhà trường'],
+  ]],
+  ['tnxh', 3, 'CD', 'Cộng đồng địa phương', [
+    ['SAN-XUAT', 'Hoạt động sản xuất', 'Nêu hoạt động sản xuất nông nghiệp, công nghiệp, thủ công ở địa phương'],
+    ['DI-TICH', 'Di tích, cảnh quan', 'Giới thiệu một di tích lịch sử, văn hoá hoặc cảnh quan địa phương'],
+  ]],
+  ['tnxh', 3, 'TVDV', 'Thực vật và động vật', [
+    ['PHAN-LOAI-TV-DV', 'Phân loại thực vật, động vật', 'So sánh, phân loại thực vật, động vật theo đặc điểm'],
+    ['CHUC-NANG-BO-PHAN', 'Chức năng bộ phận của cây', 'Nêu chức năng rễ, thân, lá, hoa, quả của thực vật'],
+  ]],
+  ['tnxh', 3, 'CNSK', 'Con người và sức khoẻ', [
+    ['CQ-TIEU-HOA', 'Cơ quan tiêu hoá', 'Chỉ vị trí và nêu chức năng cơ quan tiêu hoá'],
+    ['CQ-TUAN-HOAN', 'Cơ quan tuần hoàn', 'Chỉ vị trí và nêu chức năng cơ quan tuần hoàn'],
+    ['CQ-THAN-KINH', 'Cơ quan thần kinh', 'Chỉ vị trí và nêu chức năng cơ quan thần kinh'],
+    ['CHAT-CO-HAI', 'Tránh chất có hại', 'Nêu tác hại của thuốc lá, rượu bia; từ chối sử dụng'],
+  ]],
+  ['tnxh', 3, 'TDBT', 'Trái Đất và bầu trời', [
+    ['PHUONG-HUONG', 'Xác định phương hướng', 'Xác định phương hướng dựa vào Mặt Trời'],
+    ['QUA-DIA-CAU', 'Trái Đất, quả địa cầu', 'Chỉ trên quả địa cầu: cực, xích đạo, các đới khí hậu'],
+    ['HE-MAT-TROI', 'Trái Đất trong hệ Mặt Trời', 'Nêu Trái Đất trong hệ Mặt Trời; ngày, đêm'],
+  ]],
+
+  // ───────────────────────── LỊCH SỬ VÀ ĐỊA LÍ ─────────────────────────
+  ['lich-su-dia-li', 4, 'PT', 'Phương tiện học tập', [
+    ['BAN-DO-LUOC-DO', 'Đọc bản đồ, lược đồ', 'Đọc được tên, kí hiệu, phương hướng trên bản đồ, lược đồ'],
+    ['TRANH-ANH-BIEU-DO', 'Khai thác tranh ảnh, biểu đồ', 'Khai thác thông tin từ tranh ảnh, biểu đồ, sơ đồ'],
+  ]],
+  ['lich-su-dia-li', 4, 'DP', 'Địa phương em', [
+    ['TU-NHIEN-DP', 'Thiên nhiên địa phương', 'Xác định vị trí, nêu đặc điểm tự nhiên của tỉnh, thành phố'],
+    ['VAN-HOA-DP', 'Lịch sử, văn hoá địa phương', 'Kể một nhân vật, di tích hoặc nét văn hoá tiêu biểu của địa phương'],
+  ]],
+  ['lich-su-dia-li', 4, 'TDMN', 'Trung du và miền núi Bắc Bộ', [
+    ['THIEN-NHIEN-TDMN', 'Thiên nhiên vùng núi Bắc Bộ', 'Mô tả địa hình, khí hậu, sông ngòi; dãy Hoàng Liên Sơn, đỉnh Phan-xi-păng'],
+    ['SAN-XUAT-TDMN', 'Dân cư, sản xuất miền núi', 'Nêu đặc điểm dân cư, hoạt động sản xuất (ruộng bậc thang, chè, khoáng sản)'],
+    ['DEN-HUNG', 'Đền Hùng, Giỗ Tổ', 'Kể về Đền Hùng và lễ Giỗ Tổ Hùng Vương'],
+  ]],
+  ['lich-su-dia-li', 4, 'DBBB', 'Đồng bằng Bắc Bộ', [
+    ['SONG-HONG', 'Sông Hồng và đê điều', 'Mô tả đồng bằng, sông Hồng; vai trò của hệ thống đê'],
+    ['THANG-LONG', 'Thăng Long – Hà Nội', 'Kể một số nét về lịch sử Thăng Long – Hà Nội'],
+    ['VAN-MIEU', 'Văn Miếu – Quốc Tử Giám', 'Giới thiệu Văn Miếu – Quốc Tử Giám và truyền thống hiếu học'],
+  ]],
+  ['lich-su-dia-li', 4, 'DHMT', 'Duyên hải miền Trung', [
+    ['THIEN-NHIEN-MT', 'Thiên nhiên duyên hải miền Trung', 'Mô tả đồng bằng nhỏ hẹp, bãi biển; thiên tai và cách ứng phó'],
+    ['CO-DO-HUE', 'Cố đô Huế', 'Giới thiệu Cố đô Huế – di sản văn hoá thế giới'],
+    ['HOI-AN', 'Phố cổ Hội An', 'Giới thiệu Phố cổ Hội An'],
+  ]],
+  ['lich-su-dia-li', 4, 'TN', 'Tây Nguyên', [
+    ['CAO-NGUYEN', 'Cao nguyên, đất đỏ ba dan', 'Mô tả các cao nguyên, đất đỏ ba dan, hai mùa mưa – khô'],
+    ['CONG-CHIENG', 'Văn hoá Cồng chiêng', 'Giới thiệu Không gian văn hoá Cồng chiêng Tây Nguyên'],
+  ]],
+  ['lich-su-dia-li', 4, 'NB', 'Nam Bộ', [
+    ['SONG-ME-CONG', 'Sông Mê Công, kênh rạch', 'Mô tả đồng bằng, sông Mê Công, kênh rạch; hoạt động sản xuất'],
+    ['TP-HCM', 'Thành phố Hồ Chí Minh', 'Nêu một số nét về Thành phố Hồ Chí Minh'],
+    ['CU-CHI', 'Địa đạo Củ Chi', 'Kể về Địa đạo Củ Chi trong kháng chiến'],
+  ]],
+  ['lich-su-dia-li', 5, 'VN', 'Đất nước và con người Việt Nam', [
+    ['VI-TRI-LANH-THO', 'Vị trí, lãnh thổ Việt Nam', 'Xác định vị trí địa lí, phạm vi lãnh thổ Việt Nam trên bản đồ'],
+    ['THIEN-NHIEN-VN', 'Thiên nhiên Việt Nam', 'Nêu đặc điểm địa hình, khí hậu, sông ngòi Việt Nam'],
+    ['BIEN-DAO', 'Biển, đảo Việt Nam', 'Xác định vùng biển, một số đảo, quần đảo; ý thức bảo vệ chủ quyền'],
+    ['DAN-CU-DAN-TOC', 'Dân cư, dân tộc', 'Nêu đặc điểm dân cư, các dân tộc Việt Nam'],
+  ]],
+  ['lich-su-dia-li', 5, 'QG', 'Những quốc gia đầu tiên', [
+    ['VAN-LANG-AU-LAC', 'Văn Lang – Âu Lạc', 'Nêu nét chính về nhà nước Văn Lang, Âu Lạc'],
+    ['PHU-NAM-CHAMPA', 'Phù Nam, Champa', 'Nêu nét chính về vương quốc Phù Nam, Champa'],
+  ]],
+  ['lich-su-dia-li', 5, 'XDBV', 'Xây dựng và bảo vệ đất nước', [
+    ['DAU-TRANH-DOC-LAP', 'Đấu tranh giành độc lập', 'Kể về Hai Bà Trưng, Ngô Quyền và chiến thắng Bạch Đằng'],
+    ['LY-TRAN', 'Triều Lý, triều Trần', 'Nêu sự kiện dời đô Thăng Long; kháng chiến chống Mông – Nguyên'],
+    ['LE-LOI', 'Khởi nghĩa Lam Sơn', 'Kể về Lê Lợi và khởi nghĩa Lam Sơn'],
+    ['CMT8', 'Cách mạng tháng Tám', 'Nêu ý nghĩa Cách mạng tháng Tám năm 1945 và Tuyên ngôn Độc lập'],
+    ['DIEN-BIEN-PHU', 'Chiến dịch Điện Biên Phủ', 'Kể diễn biến chính, ý nghĩa chiến dịch Điện Biên Phủ 1954'],
+    ['THONG-NHAT', 'Thống nhất đất nước 1975', 'Nêu ý nghĩa Chiến dịch Hồ Chí Minh, thống nhất đất nước'],
+    ['DOI-MOI', 'Công cuộc Đổi mới', 'Nêu một số thành tựu của công cuộc Đổi mới'],
+  ]],
+  ['lich-su-dia-li', 5, 'LG', 'Các nước láng giềng', [
+    ['LANG-GIENG', 'Trung Quốc, Lào, Cam-pu-chia', 'Nêu vị trí, nét văn hoá tiêu biểu của các nước láng giềng'],
+    ['ASEAN', 'Hiệp hội ASEAN', 'Kể tên các nước thành viên ASEAN; quan hệ của Việt Nam'],
+  ]],
+  ['lich-su-dia-li', 5, 'TG', 'Tìm hiểu thế giới', [
+    ['CHAU-LUC', 'Châu lục và đại dương', 'Xác định các châu lục, đại dương trên bản đồ thế giới'],
+    ['VAN-MINH', 'Một số nền văn minh', 'Nêu thành tựu văn minh Ai Cập, Hy Lạp – La Mã'],
+    ['THE-GIOI-XANH', 'Thế giới xanh, sạch, đẹp', 'Nêu vấn đề môi trường toàn cầu; việc làm góp phần bảo vệ'],
+  ]],
+
+  // ───────────────────────── KHOA HỌC ─────────────────────────
+  ['khoa-hoc', 4, 'CHAT', 'Chất', [
+    ['NUOC', 'Tính chất, vai trò của nước', 'Nêu tính chất, vai trò của nước; vòng tuần hoàn của nước; bảo vệ nguồn nước'],
+    ['LAM-SACH-NUOC', 'Làm sạch nước', 'Nêu cách làm sạch nước; sử dụng nước tiết kiệm'],
+    ['KHONG-KHI', 'Không khí', 'Nêu thành phần, tính chất, vai trò của không khí; bảo vệ bầu không khí'],
+  ]],
+  ['khoa-hoc', 4, 'NL', 'Năng lượng', [
+    ['ANH-SANG', 'Ánh sáng và bóng tối', 'Nhận biết vật cho / không cho ánh sáng truyền qua; bóng của vật; bảo vệ mắt'],
+    ['AM-THANH', 'Âm thanh', 'Nêu nguồn âm, sự lan truyền âm thanh; phòng chống tiếng ồn'],
+    ['NHIET', 'Nhiệt và vật dẫn nhiệt', 'Nhận biết vật nóng hơn / lạnh hơn, vật dẫn nhiệt tốt / kém; dùng nhiệt kế'],
+  ]],
+  ['khoa-hoc', 4, 'TVDV', 'Thực vật và động vật', [
+    ['NHU-CAU-THUC-VAT', 'Nhu cầu sống của thực vật', 'Nêu nhu cầu nước, ánh sáng, không khí, chất khoáng của thực vật'],
+    ['NHU-CAU-DONG-VAT', 'Nhu cầu sống của động vật', 'Nêu nhu cầu thức ăn, nước, không khí, ánh sáng của động vật'],
+    ['CHAM-SOC', 'Chăm sóc cây trồng, vật nuôi', 'Vận dụng chăm sóc cây trồng, vật nuôi ở gia đình'],
+  ]],
+  ['khoa-hoc', 4, 'NAM', 'Nấm', [
+    ['NAM-AN-NAM-MOC', 'Nấm ăn, nấm men, nấm mốc', 'Nhận biết nấm ăn, nấm men; tác hại của nấm mốc, nấm độc'],
+    ['BAO-QUAN-THUC-PHAM', 'Bảo quản thực phẩm', 'Nêu cách bảo quản thực phẩm tránh nấm mốc'],
+  ]],
+  ['khoa-hoc', 4, 'CNSK', 'Con người và sức khoẻ', [
+    ['NHOM-DINH-DUONG', 'Các nhóm chất dinh dưỡng', 'Kể tên các nhóm chất dinh dưỡng và vai trò'],
+    ['AN-CAN-BANG', 'Chế độ ăn cân bằng', 'Lựa chọn bữa ăn cân bằng, thực phẩm an toàn'],
+    ['BENH-DINH-DUONG', 'Bệnh liên quan dinh dưỡng', 'Nêu dấu hiệu, cách phòng bệnh thiếu chất, thừa cân béo phì'],
+    ['DUOI-NUOC', 'Phòng tránh đuối nước', 'Nêu nguy cơ và cách phòng tránh đuối nước'],
+  ]],
+  ['khoa-hoc', 4, 'SVMT', 'Sinh vật và môi trường', [
+    ['CHUOI-THUC-AN', 'Chuỗi thức ăn', 'Vẽ sơ đồ, nêu ví dụ chuỗi thức ăn trong tự nhiên'],
+  ]],
+  ['khoa-hoc', 5, 'CHAT', 'Chất', [
+    ['DAT', 'Đất và bảo vệ đất', 'Nêu thành phần, vai trò của đất; nguyên nhân, cách chống xói mòn, ô nhiễm đất'],
+    ['HON-HOP-DUNG-DICH', 'Hỗn hợp và dung dịch', 'Phân biệt hỗn hợp, dung dịch; cách tách chất'],
+    ['BIEN-DOI-CHAT', 'Sự biến đổi của chất', 'Nhận biết biến đổi trạng thái và biến đổi tạo chất mới'],
+  ]],
+  ['khoa-hoc', 5, 'NL', 'Năng lượng', [
+    ['VAI-TRO-NANG-LUONG', 'Vai trò của năng lượng', 'Nêu vai trò của năng lượng; năng lượng chất đốt'],
+    ['NL-TAI-TAO', 'Năng lượng mặt trời, gió, nước', 'Nêu ứng dụng năng lượng mặt trời, gió, nước chảy'],
+    ['MACH-DIEN', 'Mạch điện đơn giản', 'Lắp mạch điện đơn giản; nhận biết vật dẫn điện, cách điện'],
+    ['DIEN-AN-TOAN', 'Sử dụng điện an toàn', 'Sử dụng năng lượng điện an toàn, tiết kiệm'],
+  ]],
+  ['khoa-hoc', 5, 'TVDV', 'Thực vật và động vật', [
+    ['SINH-SAN-THUC-VAT', 'Sinh sản của thực vật', 'Nêu sự sinh sản của thực vật có hoa; cây con mọc từ hạt, từ bộ phận'],
+    ['VONG-DOI-DONG-VAT', 'Vòng đời của động vật', 'Mô tả sự lớn lên, vòng đời một số động vật'],
+  ]],
+  ['khoa-hoc', 5, 'VK', 'Vi khuẩn', [
+    ['VI-KHUAN', 'Vi khuẩn có ích, có hại', 'Nêu ví dụ vi khuẩn có ích, có hại; ứng dụng trong chế biến'],
+    ['BENH-VI-KHUAN', 'Bệnh do vi khuẩn', 'Nêu một số bệnh do vi khuẩn và cách phòng tránh'],
+  ]],
+  ['khoa-hoc', 5, 'CNSK', 'Con người và sức khoẻ', [
+    ['SINH-SAN-NGUOI', 'Sự sinh sản ở người', 'Nêu vai trò của sự sinh sản ở người'],
+    ['GIAI-DOAN-PHAT-TRIEN', 'Các giai đoạn phát triển', 'Nêu đặc điểm các giai đoạn phát triển; tuổi dậy thì'],
+    ['CHAM-SOC-DAY-THI', 'Sức khoẻ tuổi dậy thì', 'Giữ vệ sinh, chăm sóc sức khoẻ tuổi dậy thì'],
+    ['PHONG-TRANH-XAM-HAI', 'Phòng tránh bị xâm hại', 'Nhận biết nguy cơ, nói “không” và tìm người tin cậy giúp đỡ'],
+  ]],
+  ['khoa-hoc', 5, 'SVMT', 'Sinh vật và môi trường', [
+    ['VAI-TRO-MOI-TRUONG', 'Vai trò của môi trường', 'Nêu vai trò của môi trường đối với sinh vật'],
+    ['TAC-DONG-CON-NGUOI', 'Con người tác động môi trường', 'Nêu tác động của con người; việc làm bảo vệ môi trường'],
+  ]],
+
+  // ───────────────────────── TIN HỌC ─────────────────────────
+  ['tin-hoc', 3, 'A', 'Máy tính và em', [
+    ['THONG-TIN', 'Thông tin và xử lí', 'Nhận biết thông tin dạng chữ, hình ảnh, âm thanh; xử lí thông tin đơn giản'],
+    ['BO-PHAN-MAY-TINH', 'Các bộ phận máy tính', 'Nêu tên, chức năng màn hình, thân máy, bàn phím, chuột'],
+    ['TU-THE-AN-TOAN', 'Tư thế, an toàn khi dùng', 'Ngồi đúng tư thế, sử dụng máy tính an toàn'],
+    ['CHUOT-BAN-PHIM', 'Sử dụng chuột, bàn phím', 'Thực hiện thao tác chuột; gõ phím ở hàng cơ sở'],
+  ]],
+  ['tin-hoc', 3, 'B', 'Mạng máy tính và Internet', [
+    ['TRANG-WEB', 'Thông tin trên trang web', 'Nhận biết thông tin trên trang web; mở liên kết'],
+  ]],
+  ['tin-hoc', 3, 'C', 'Lưu trữ, tìm kiếm thông tin', [
+    ['SAP-XEP-DE-TIM', 'Sắp xếp để dễ tìm', 'Nêu ví dụ sắp xếp đồ vật, thông tin để dễ tìm'],
+    ['THU-MUC', 'Làm quen thư mục', 'Nhận biết thư mục, tệp trên máy tính'],
+  ]],
+  ['tin-hoc', 3, 'D', 'Đạo đức, pháp luật, văn hoá số', [
+    ['BAO-VE-THONG-TIN', 'Bảo vệ thông tin cá nhân', 'Không chia sẻ thông tin cá nhân, gia đình khi chưa được phép'],
+  ]],
+  ['tin-hoc', 3, 'E', 'Ứng dụng tin học', [
+    ['TRINH-CHIEU', 'Tạo trang trình chiếu', 'Tạo trang trình chiếu đơn giản có chữ, hình ảnh'],
+    ['PHAN-MEM-HOC-TAP', 'Dùng phần mềm học tập', 'Sử dụng phần mềm học tập, luyện gõ phím'],
+  ]],
+  ['tin-hoc', 3, 'F', 'Giải quyết vấn đề với máy tính', [
+    ['THEO-BUOC', 'Làm việc theo các bước', 'Mô tả công việc theo các bước; nhận biết việc máy tính trợ giúp'],
+  ]],
+  ['tin-hoc', 4, 'A', 'Máy tính và em', [
+    ['PHAN-CUNG-MEM', 'Phần cứng, phần mềm', 'Phân biệt phần cứng, phần mềm; sử dụng thiết bị đúng cách'],
+    ['GO-10-NGON', 'Gõ bàn phím đúng cách', 'Gõ bàn phím bằng 10 ngón đúng vị trí'],
+  ]],
+  ['tin-hoc', 4, 'B', 'Mạng máy tính và Internet', [
+    ['TIM-KIEM-WEB', 'Tìm kiếm thông tin trên web', 'Dùng máy tìm kiếm với từ khoá phù hợp'],
+  ]],
+  ['tin-hoc', 4, 'C', 'Lưu trữ, tìm kiếm thông tin', [
+    ['THAO-TAC-TEP', 'Thao tác thư mục và tệp', 'Tạo, đổi tên, sao chép, xoá thư mục và tệp'],
+  ]],
+  ['tin-hoc', 4, 'D', 'Đạo đức, pháp luật, văn hoá số', [
+    ['BAN-QUYEN', 'Bản quyền phần mềm', 'Nêu ví dụ vi phạm bản quyền; dùng phần mềm hợp pháp'],
+  ]],
+  ['tin-hoc', 4, 'E', 'Ứng dụng tin học', [
+    ['SOAN-THAO', 'Soạn thảo văn bản', 'Soạn thảo, định dạng chữ, đoạn; chèn hình ảnh'],
+    ['TRINH-CHIEU-HIEU-UNG', 'Trình chiếu có hiệu ứng', 'Tạo bài trình chiếu có hiệu ứng chuyển trang'],
+  ]],
+  ['tin-hoc', 4, 'F', 'Giải quyết vấn đề với máy tính', [
+    ['SCRATCH-LAM-QUEN', 'Làm quen Scratch', 'Tạo chương trình Scratch: nhân vật, sân khấu, sự kiện, chuyển động'],
+  ]],
+  ['tin-hoc', 5, 'A', 'Máy tính và em', [
+    ['MAY-TINH-LAM-GI', 'Máy tính giúp gì cho em', 'Nêu ví dụ máy tính hỗ trợ học tập, sáng tạo'],
+  ]],
+  ['tin-hoc', 5, 'B', 'Mạng máy tính và Internet', [
+    ['DANH-GIA-THONG-TIN', 'Đánh giá thông tin tìm được', 'Tìm kiếm, chọn lọc thông tin phù hợp, đáng tin cậy'],
+  ]],
+  ['tin-hoc', 5, 'C', 'Lưu trữ, tìm kiếm thông tin', [
+    ['CAY-THU-MUC', 'Tổ chức cây thư mục', 'Tổ chức cây thư mục hợp lí; tìm tệp trong máy tính'],
+  ]],
+  ['tin-hoc', 5, 'D', 'Đạo đức, pháp luật, văn hoá số', [
+    ['BAN-QUYEN-NOI-DUNG', 'Bản quyền nội dung số', 'Tôn trọng bản quyền nội dung; ghi nguồn khi sử dụng'],
+  ]],
+  ['tin-hoc', 5, 'E', 'Ứng dụng tin học', [
+    ['VAN-BAN-NANG-CAO', 'Soạn văn bản có bảng', 'Tạo bảng, định dạng trang, chèn hình trong văn bản'],
+    ['DO-HOA', 'Tạo sản phẩm đồ hoạ', 'Dùng phần mềm đồ hoạ tạo sản phẩm (thiệp, áp phích)'],
+  ]],
+  ['tin-hoc', 5, 'F', 'Giải quyết vấn đề với máy tính', [
+    ['LAP', 'Cấu trúc lặp', 'Sử dụng cấu trúc lặp trong chương trình Scratch'],
+    ['RE-NHANH', 'Cấu trúc rẽ nhánh', 'Sử dụng cấu trúc rẽ nhánh (nếu… thì…)'],
+    ['BIEN', 'Sử dụng biến', 'Tạo và sử dụng biến (đếm điểm, thời gian)'],
+    ['GO-LOI', 'Chạy thử và sửa lỗi', 'Chạy thử, tìm và sửa lỗi chương trình'],
+  ]],
+
+  // ───────────────────────── CÔNG NGHỆ ─────────────────────────
+  ['cong-nghe', 3, 'CNDS', 'Công nghệ và đời sống', [
+    ['TU-NHIEN-CONG-NGHE', 'Tự nhiên và công nghệ', 'Phân biệt đối tượng tự nhiên và sản phẩm công nghệ'],
+    ['DEN-HOC', 'Sử dụng đèn học', 'Nêu bộ phận và sử dụng đèn học đúng cách, an toàn'],
+    ['QUAT-DIEN', 'Sử dụng quạt điện', 'Nêu bộ phận và sử dụng quạt điện đúng cách, an toàn'],
+    ['MAY-THU-THANH-HINH', 'Máy thu thanh, thu hình', 'Sử dụng máy thu thanh, máy thu hình (ti vi) phù hợp'],
+    ['AN-TOAN-CONG-NGHE', 'An toàn với công nghệ', 'Nhận biết tình huống mất an toàn với thiết bị công nghệ trong gia đình'],
+  ]],
+  ['cong-nghe', 3, 'TCKT', 'Thủ công kĩ thuật', [
+    ['DO-DUNG-HOC-TAP', 'Làm đồ dùng học tập', 'Làm đồ dùng học tập đơn giản từ vật liệu dễ kiếm'],
+    ['BIEN-BAO', 'Làm biển báo giao thông', 'Làm mô hình biển báo giao thông'],
+    ['DO-CHOI', 'Làm đồ chơi', 'Làm đồ chơi đơn giản; sử dụng dụng cụ an toàn'],
+  ]],
+  ['cong-nghe', 4, 'CNDS', 'Công nghệ và đời sống', [
+    ['HOA-CAY-CANH', 'Hoa và cây cảnh', 'Nêu lợi ích; nhận biết một số loại hoa, cây cảnh phổ biến'],
+    ['GIEO-HAT', 'Gieo hạt, trồng cây con', 'Gieo hạt và trồng cây con trong chậu đúng quy trình'],
+    ['TRONG-CHAM-SOC-HOA', 'Trồng, chăm sóc hoa', 'Trồng và chăm sóc hoa trong chậu'],
+  ]],
+  ['cong-nghe', 4, 'TCKT', 'Thủ công kĩ thuật', [
+    ['LAP-GHEP-MO-HINH', 'Lắp ghép mô hình kĩ thuật', 'Nhận biết chi tiết bộ lắp ghép; lắp mô hình theo hướng dẫn'],
+    ['DO-CHOI-DAN-GIAN', 'Làm đồ chơi dân gian', 'Làm đồ chơi dân gian (chong chóng, diều…) đơn giản'],
+  ]],
+  ['cong-nghe', 5, 'CNDS', 'Công nghệ và đời sống', [
+    ['VAI-TRO-CONG-NGHE', 'Vai trò của công nghệ', 'Nêu vai trò, lợi ích và tác hại khi dùng sản phẩm công nghệ'],
+    ['NHA-SANG-CHE', 'Nhà sáng chế', 'Kể về một số nhà sáng chế và sáng chế tiêu biểu'],
+    ['THIET-KE', 'Tìm hiểu thiết kế', 'Nêu các bước thiết kế; phác thảo ý tưởng sản phẩm'],
+    ['DIEN-THOAI', 'Sử dụng điện thoại', 'Sử dụng điện thoại gọi, nhắn tin; số khẩn cấp 111, 113, 114, 115'],
+    ['TU-LANH', 'Sử dụng tủ lạnh', 'Sử dụng tủ lạnh đúng cách, an toàn, tiết kiệm'],
+  ]],
+  ['cong-nghe', 5, 'TCKT', 'Thủ công kĩ thuật', [
+    ['XE-DIEN', 'Mô hình xe điện chạy pin', 'Lắp ráp mô hình xe điện chạy bằng pin'],
+    ['DIEN-MAT-TROI', 'Mô hình điện mặt trời', 'Lắp ráp mô hình điện mặt trời'],
+    ['DIEN-GIO', 'Mô hình máy phát điện gió', 'Lắp ráp mô hình máy phát điện gió'],
+  ]],
+
+  // ───────────────────────── GIÁO DỤC THỂ CHẤT ─────────────────────────
+  ...([1, 2, 3, 4, 5] as Grade[]).flatMap((g): Block[] => [
+    ['gdtc', g, 'VDCB', 'Vận động cơ bản', [
+      ['DOI-HINH', 'Đội hình đội ngũ', g <= 2 ? 'Tập hợp hàng dọc, hàng ngang; dóng hàng, điểm số; quay phải, quay trái' : 'Tập hợp, biến đổi đội hình; đi đều, đổi chân khi đi sai nhịp'],
+      ['BAI-THE-DUC', 'Bài tập thể dục', `Thực hiện đúng các động tác của bài thể dục lớp ${g}`],
+      ['KI-NANG-VAN-DONG', 'Tư thế, kĩ năng vận động', g <= 2 ? 'Thực hiện tư thế cơ bản của đầu, tay, chân; đi, chạy, bật nhảy đúng' : g === 3 ? 'Thực hiện bài tập với dây, với bóng; chạy, nhảy, ném đúng kĩ thuật' : 'Bật nhảy, chạy cự li ngắn, ném bóng, nhảy dây đúng kĩ thuật'],
+    ]],
+    ['gdtc', g, 'TTTC', 'Thể thao tự chọn', [
+      ['THE-THAO-TU-CHON', 'Môn thể thao tự chọn', 'Thực hiện kĩ thuật cơ bản của một môn thể thao tự chọn (bóng đá, bóng rổ, cờ vua, bơi, võ…)'],
+      ['TRO-CHOI-VAN-DONG', 'Trò chơi vận động', 'Tham gia trò chơi vận động, đúng luật, đoàn kết'],
+    ]],
+    ['gdtc', g, 'VSAT', 'Vệ sinh và an toàn', [
+      ['VE-SINH-AN-TOAN', 'Vệ sinh, an toàn tập luyện', g <= 3 ? 'Giữ vệ sinh cá nhân, sân tập; an toàn khi tập luyện' : 'Tự tập ở nhà, theo dõi sức khoẻ; phòng tránh chấn thương khi tập'],
+    ]],
+  ]),
+
+  // ───────────────────────── ÂM NHẠC ─────────────────────────
+  ...([1, 2, 3, 4, 5] as Grade[]).flatMap((g): Block[] => [
+    ['am-nhac', g, 'HAT', 'Hát', [
+      ['HAT-DUNG', 'Hát đúng giai điệu, lời', g <= 2 ? 'Hát đúng cao độ, trường độ, thuộc lời bài hát' : 'Hát rõ lời, đúng sắc thái; hát kết hợp gõ đệm, vận động'],
+    ]],
+    ['am-nhac', g, 'NGHE', 'Nghe nhạc', [
+      ['NGHE-CAM-NHAN', 'Nghe và cảm nhận âm nhạc', 'Nghe bản nhạc, bài hát; nêu cảm nhận, vận động theo nhạc'],
+    ]],
+    ['am-nhac', g, 'DOC', 'Đọc nhạc', [
+      ['DOC-NHAC', 'Đọc nhạc', g <= 2 ? 'Đọc đúng tên nốt Đô, Rê, Mi, Son, La theo kí hiệu bàn tay' : 'Đọc đúng tên nốt, cao độ, trường độ bài đọc nhạc ngắn'],
+    ]],
+    ['am-nhac', g, 'NC', 'Nhạc cụ', [
+      ['NHAC-CU', 'Sử dụng nhạc cụ', g <= 2 ? 'Gõ đệm bằng nhạc cụ gõ theo phách, nhịp' : 'Chơi nhạc cụ thể hiện tiết tấu, giai điệu đơn giản'],
+    ]],
+    ...(g >= 3 ? [['am-nhac', g, 'LT', 'Lí thuyết âm nhạc', [
+      ['LI-THUYET', 'Kí hiệu âm nhạc', 'Nhận biết khuông nhạc, khoá Son, nốt nhạc, hình nốt'],
+    ]] as Block] : []),
+    ['am-nhac', g, 'TT', 'Thường thức âm nhạc', [
+      ['THUONG-THUC', 'Thường thức âm nhạc', 'Kể về nhạc sĩ, nhạc cụ hoặc câu chuyện âm nhạc đã học'],
+    ]],
+  ]),
+
+  // ───────────────────────── MĨ THUẬT ─────────────────────────
+  ...([1, 2, 3, 4, 5] as Grade[]).flatMap((g): Block[] => [
+    ['mi-thuat', g, 'YT', 'Yếu tố và nguyên lí tạo hình', [
+      ['YEU-TO-TAO-HINH', 'Yếu tố tạo hình', ['', 'Nhận biết và sử dụng chấm, nét, hình, màu', 'Sử dụng màu cơ bản, màu thứ cấp; hình và khối', 'Thể hiện đậm nhạt, khối, không gian đơn giản', 'Thể hiện tỉ lệ, không gian, đậm nhạt', 'Vận dụng nguyên lí cân bằng, nhịp điệu, tương phản'][g]!],
+    ]],
+    ['mi-thuat', g, 'TH', 'Mĩ thuật tạo hình', [
+      ['VE-TRANH', 'Vẽ tranh theo chủ đề', 'Vẽ tranh thể hiện chủ đề thiên nhiên, gia đình, nhà trường, xã hội'],
+      ['NAN-XE-DAN', 'Nặn, xé dán, in', 'Tạo sản phẩm bằng nặn, xé dán, in, cắt ghép vật liệu'],
+    ]],
+    ['mi-thuat', g, 'UD', 'Mĩ thuật ứng dụng', [
+      ['THIET-KE-DO-DUNG', 'Trang trí đồ dùng', 'Tạo sản phẩm ứng dụng: thiệp, bìa sách, đồ dùng học tập, đồ chơi'],
+    ]],
+    ['mi-thuat', g, 'DG', 'Thảo luận và đánh giá', [
+      ['NHAN-XET-SAN-PHAM', 'Giới thiệu, nhận xét sản phẩm', 'Giới thiệu, nhận xét sản phẩm của mình và của bạn'],
+    ]],
+  ]),
+
+  // ───────────────────────── HOẠT ĐỘNG TRẢI NGHIỆM ─────────────────────────
+  ...([1, 2, 3, 4, 5] as Grade[]).flatMap((g): Block[] => [
+    ['hdtn', g, 'BT', 'Hướng vào bản thân', [
+      ['KHAM-PHA-BAN-THAN', 'Khám phá bản thân', g <= 2 ? 'Nhận biết sở thích, khả năng, cảm xúc của bản thân' : 'Nêu điểm mạnh, điểm yếu; điều chỉnh cảm xúc, suy nghĩ'],
+      ['REN-LUYEN-BAN-THAN', 'Rèn luyện bản thân', g <= 2 ? 'Tự phục vụ, giữ vệ sinh, sắp xếp đồ dùng cá nhân' : 'Sắp xếp thời gian, chi tiêu, tự bảo vệ bản thân'],
+    ]],
+    ['hdtn', g, 'XH', 'Hướng đến xã hội', [
+      ['GIA-DINH-BAN-BE', 'Gia đình, bạn bè, thầy cô', 'Thể hiện tình cảm, quan tâm, hợp tác với người thân, bạn bè, thầy cô'],
+      ['CONG-DONG', 'Tham gia hoạt động cộng đồng', 'Tham gia hoạt động xã hội, nhân đạo phù hợp lứa tuổi'],
+    ]],
+    ['hdtn', g, 'TN', 'Hướng đến tự nhiên', [
+      ['TU-NHIEN-MOI-TRUONG', 'Tìm hiểu, bảo vệ thiên nhiên', 'Tìm hiểu cảnh quan thiên nhiên; tham gia bảo vệ môi trường'],
+    ]],
+    ['hdtn', g, 'HN', 'Hướng nghiệp', [
+      ['NGHE-NGHIEP', 'Tìm hiểu nghề nghiệp', g <= 2 ? 'Kể tên nghề nghiệp của người thân, ở địa phương' : 'Nêu đặc điểm, ý nghĩa một số nghề; ước mơ nghề nghiệp'],
+    ]],
+  ]),
+];
+
+export const CT2018_SKILLS: Skill[] = B.flatMap(([subject, grade, topicCode, topic, ks]) =>
+  ks.map(([slug, short, text]) => ({
+    code: `${PREFIX[subject] ?? 'X'}${grade}.${topicCode}.${slug}`,
+    subject,
+    grade,
+    strand: 'CHU-DE' as const,
+    topic,
+    text,
+    short,
+    prereqs: [],
+    provisional: true,
+  })),
+);

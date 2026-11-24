@@ -42,3 +42,4 @@ export * from './behaviorStats';
 export { newPasswordProblem, isSystemEmail, NO_REAL_EMAIL_TEXT, PASSWORD_MIN, PASSWORD_MAX } from './password';
 export { handoffTo, consumeHandoff, handoffUrl, readHandoffHash, packSession, unpackSession, HANDOFF_KEY, type PackedSession } from './handoff';
 export * from './discuss';
+export * from './prefs';

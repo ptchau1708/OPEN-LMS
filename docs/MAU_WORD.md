@@ -48,7 +48,20 @@ Mã: `packages/data/src/import/typedBlock.ts`, `wordTemplate.ts`. Kiểm thử: 
 - Sửa câu hỏi / bài giảng có sẵn: môn đang có được giữ, hiện nhãn "(không thuộc lớp N)" để GV tự quyết.
 - Bước soát khi nhập: câu có môn không thuộc lớp được nhắc (không chặn lưu).
 - Tiếng Anh lớp 1–2 hiện nhãn "(tự chọn)" và không có ô điểm KTĐK.
-- Bản đồ kiến thức của lớp chỉ hiện các môn của lớp đã có danh mục kĩ năng; bản đồ khối và ma trận đề chỉ hiện môn có KTĐK của khối.
+- **Bản đồ kiến thức của lớp — nút "Chọn môn"**: mỗi GV tự tích các môn mình dạy (trong các môn của lớp theo CT 2018).
+  Lưu theo tài khoản GV + lớp, **đồng bộ giữa các máy** qua bảng `v2.user_prefs` (SQL 18, `packages/data/src/prefs`);
+  chưa chạy SQL 18 / bản demo → lưu trên trình duyệt. Nhớ cả môn xem lần trước.
+  Mặc định: các môn GVCN thường dạy (lớp 1–2: TV, Toán, TN&XH · lớp 3: + Tiếng Anh · lớp 4–5: TV, Toán, TA, LS&ĐL, Khoa học).
+  Trên 5 môn → ô chọn dạng danh sách. Kiểm thử: `e2e/ban-do-mon.spec.ts`, `supabase/tests/database/user_prefs_skills.test.sql`.
+
+## Danh mục kĩ năng các môn (SQL 18)
+- Toán: yêu cầu cần đạt nguyên văn (`skills-toan.ts`).
+- 12 môn còn lại: **386 kĩ năng theo chủ đề / mạch nội dung CT GDPT 2018** (`packages/contracts/src/skills-ct2018.ts`, mạch `CHU-DE`),
+  mô tả **tóm lược** yêu cầu cần đạt — đánh dấu `provisional` ("kĩ năng tạm"). Tổ chuyên môn đối chiếu văn bản chương trình rồi sửa
+  `text` / `short` (GIỮ `code`), chạy `node tools/gen-sql18.mjs` và `node tools/gen-skills-sql.mjs` để sinh lại SQL.
+- Mã: `<MÔN><lớp>.<CHỦ-ĐỀ>.<SLUG>` — TV, TA, DD, TNXH, LSDL, KH, TH (Tin học), CN, GDTC, AN (Âm nhạc), MT, HDTN. Ví dụ `KH4.NL.ANH-SANG`.
+- Gắn vào câu hỏi qua cột / dòng "Mã kĩ năng" khi nhập Word/Excel, hoặc ô Kĩ năng khi soạn câu.
+- Bản đồ khối và ma trận đề chỉ hiện môn có KTĐK của khối.
 
 Nhận xét TT27 liệt kê mọi môn của lớp; ô điểm kiểm tra định kì chỉ ở các môn có KTĐK của lớp đó.
 Muốn ẩn một môn trường không dạy: đặt `retired: true` cho môn đó trong `subjects.ts` (dữ liệu cũ vẫn đọc được).
