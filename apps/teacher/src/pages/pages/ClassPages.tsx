@@ -14,6 +14,23 @@ import { Btn, ConfirmBar, Dialog, Empty, ErrorNote, Field, Loading, PageHead } f
 import { ClassPicker, useClassPick } from '../../lib/assess';
 import { learnerBase } from '../admin/util';
 import './pages.css';
+import { discussionEmbedToken, useDiscussions } from '@openedu/data';
+
+/** Chèn một phòng thảo luận vào trang: thêm dòng [[thao-luan:…]] — HS thấy nút “Vào thảo luận”. */
+function InsertDiscussion({ classId, onPick }: { classId: string; onPick: (token: string) => void }) {
+  const q = useDiscussions(classId || undefined);
+  const list = (q.data ?? []).filter((d) => !d.archived);
+  if (!list.length) return null;
+  return (
+    <label className="tc-row tc-wrap tc-small">
+      <span>Chèn phòng thảo luận:</span>
+      <select className="tc-input tc-input--sm" value="" onChange={(e) => { const d = list.find((x) => x.id === e.target.value); if (d) onPick(discussionEmbedToken(d)); }} data-testid="pg-insert-discussion">
+        <option value="">— chọn phòng —</option>
+        {list.map((d) => <option key={d.id} value={d.id}>{d.kind === 'chat' ? '💬 ' : ''}{d.title}</option>)}
+      </select>
+    </label>
+  );
+}
 
 interface Draft { id?: string; kind: ClassPageKind; title: string; description: string; url: string; openIn: 'iframe' | 'window'; hidden: boolean; parentId: string | null; body: string; appId: string | null }
 const empty = (kind: ClassPageKind = 'section', parentId: string | null = null): Draft => ({ kind, title: '', description: '', url: '', openIn: 'iframe', hidden: false, parentId, body: '', appId: null });
@@ -200,6 +217,7 @@ export default function ClassPages({ user }: { user: Profile }) {
             <Field label={edit.kind === 'section' ? 'Nội dung trang' : 'Lời dẫn (hiện phía trên trang)'} help="Viết như bình thường; xuống dòng để tách đoạn. Dòng bắt đầu bằng “- ” thành gạch đầu dòng.">
               <textarea className="tc-input" rows={edit.kind === 'section' ? 8 : 3} maxLength={20000} value={edit.body} onChange={(e) => setEdit({ ...edit, body: e.target.value })} data-testid="pg-body" />
             </Field>
+            <InsertDiscussion classId={classId} onPick={(tok) => setEdit({ ...edit, body: `${edit.body.trimEnd()}${edit.body.trim() ? '\n\n' : ''}${tok}\n` })} />
             <Field label="Mô tả ngắn (hiện trên thẻ trang)"><input className="tc-input" value={edit.description} maxLength={500} onChange={(e) => setEdit({ ...edit, description: e.target.value })} /></Field>
             <label className="tc-row"><input type="checkbox" checked={edit.hidden} onChange={(e) => setEdit({ ...edit, hidden: e.target.checked })} /> <span>Tạm ẩn với học sinh (ẩn cả các trang con)</span></label>
           </div>

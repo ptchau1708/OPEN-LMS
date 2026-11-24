@@ -54,7 +54,7 @@ test('GV: duyệt bài chờ, ẩn bài có từ chưa phù hợp, tạo phòng 
   await expect(page.getByTestId('dc-card').filter({ hasText: 'Cô khen cả lớp' })).toBeVisible();
   // Khóa phòng
   await page.getByTestId('dc-lock').click();
-  await expect(page.getByTestId('dc-lock')).toHaveText(/Mở khóa/);
+  await expect(page.getByTestId('dc-open-15')).toBeVisible();
   // Xuất Excel
   const dl = page.waitForEvent('download');
   await page.getByTestId('dc-export').click();
@@ -72,5 +72,87 @@ test('GV: duyệt bài chờ, ẩn bài có từ chưa phù hợp, tạo phòng 
   await expect(page.getByRole('tab', { name: /Hình ảnh/ })).toBeVisible();
   await page.getByRole('button', { name: 'Xem dạng cột' }).click();
   await expect(page.locator('.tc-dcol')).toHaveCount(3);
+  w.expectClean();
+});
+
+test('TV: bảng ý tưởng chữ to, mã QR, ẩn tên, xem dạng cột', async ({ page }) => {
+  const w = watchErrors(page);
+  await teacherLogin(page, 'cothu');
+  await spaGo(page, '/thao-luan/dc-c-4a/tv');
+  await expect(page.getByTestId('dc-tv')).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Quét để vào phòng thảo luận' })).toBeVisible();
+  const cards = page.getByTestId('dc-card');
+  await expect(cards.filter({ hasText: 'nhặt rác' })).toBeVisible();
+  await expect(cards.filter({ hasText: 'Bạn ấy ngu' })).toHaveCount(0); // bài chờ duyệt không lên TV
+  await page.getByTestId('tv-hide-names').check();
+  await expect(cards.filter({ hasText: 'nhặt rác' })).toContainText('Một bạn');
+  await page.getByLabel('Dạng cột').check();
+  await expect(page.locator('.tc-dcol')).toHaveCount(3);
+  w.expectClean();
+});
+
+test('HS trò chuyện nhóm theo tổ: thấy tin của cô, nhắn, trả lời nhanh; không thấy nhóm khác', async ({ page }) => {
+  const w = watchErrors(page);
+  await learnerLogin(page);
+  await page.getByTestId('home-discuss').click();
+  await page.locator('.ln-dhome__card').filter({ hasText: 'Trò chuyện nhóm' }).getByTestId('dc-enter').click();
+  await expect(page.getByText('Nhóm Tổ Mặt Trời')).toBeVisible();
+  await expect(page.getByRole('tab', { name: /Tổ Cầu Vồng/ })).toHaveCount(0);
+  await expect(page.getByTestId('chat-msg').filter({ hasText: 'mỗi bạn nói một ý' })).toBeVisible();
+  await page.getByTestId('chat-input').fill('Tổ mình vẽ thùng rác phân loại nhé!');
+  await page.getByTestId('chat-send').click();
+  await expect(page.getByTestId('chat-msg').filter({ hasText: 'thùng rác phân loại' })).toHaveClass(/is-mine/);
+  await expect(page.getByTestId('chat-input')).toHaveValue('');
+  await page.getByRole('button', { name: 'Mình làm phần này nhé!' }).click();
+  await expect(page.getByTestId('chat-msg').filter({ hasText: 'Mình làm phần này nhé!' })).toBeVisible();
+  await page.getByTestId('chat-input').fill('đồ ngu');
+  await page.getByTestId('chat-send').click();
+  await expect(page.getByTestId('chat-msg').filter({ hasText: 'đồ ngu' })).toContainText('chờ cô xem');
+  w.expectClean();
+});
+
+test('GV trò chuyện nhóm: xem mọi nhóm, nhắn vào nhóm, khóa rồi mở 15 phút, khen tin nhắn vào Thi đua', async ({ page }) => {
+  const w = watchErrors(page);
+  await teacherLogin(page, 'cothu');
+  await spaGo(page, '/thao-luan');
+  await page.getByTestId('dc-open').filter({ hasText: 'Trò chuyện nhóm' }).click();
+  const panes = page.getByTestId('chat-pane');
+  await expect(panes).toHaveCount(2);
+  const first = panes.first();
+  await first.getByRole('textbox').fill('Cô ghé nhóm mình nè!');
+  await first.getByRole('button', { name: 'Gửi' }).click();
+  await expect(first.locator('.tc-msg').filter({ hasText: 'Cô ghé nhóm' })).toBeVisible();
+  // Khen tin nhắn của HS → Thi đua
+  await first.getByTestId('dc-praise').first().click();
+  await page.getByRole('menuitem', { name: /Hăng hái phát biểu/ }).click();
+  await expect(first.getByText('+1 Hăng hái phát biểu')).toBeVisible();
+  // Khóa → mở 15 phút
+  await page.getByTestId('dc-lock').click();
+  await page.getByTestId('dc-open-15').click();
+  await expect(page.getByTestId('dc-lock')).toBeVisible();
+  await expect(page.getByText(/đóng/).first()).toBeVisible();
+  // Tạo phòng trò chuyện mới theo tổ: mặc định đang khóa
+  await spaGo(page, '/thao-luan');
+  await page.getByTestId('dc-new-chat').click();
+  await page.getByTestId('dc-save').click();
+  await expect(page.getByTestId('dc-open-15')).toBeVisible();
+  w.expectClean();
+});
+
+test('Khen bài trên bảng vào Thi đua; chèn phòng thảo luận vào Trang học', async ({ page }) => {
+  const w = watchErrors(page);
+  await teacherLogin(page, 'cothu');
+  await spaGo(page, '/thao-luan/dc-c-4a');
+  const card = page.getByTestId('dc-card').filter({ hasText: 'tắt điện' });
+  await card.getByTestId('dc-praise').click();
+  await page.getByRole('menuitem', { name: /Giúp đỡ bạn/ }).click();
+  await expect(card.getByText('+2 Giúp đỡ bạn')).toBeVisible();
+  await spaGo(page, '/thi-dua/thong-ke');
+  await expect(page.getByText(/Thảo luận: Em làm gì/).first()).toBeVisible();
+  // Trang học: chèn phòng thảo luận vào nội dung trang
+  await spaGo(page, '/trang-hoc');
+  await page.getByRole('button', { name: /Thêm trang/ }).first().click();
+  await page.getByTestId('pg-insert-discussion').selectOption({ label: 'Em làm gì để bảo vệ môi trường?' });
+  await expect(page.getByTestId('pg-body')).toHaveValue(/\[\[thao-luan:dc-c-4a\|Em làm gì để bảo vệ môi trường\?\]\]/);
   w.expectClean();
 });

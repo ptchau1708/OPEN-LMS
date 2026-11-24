@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { SUBJECT_LIST, type Grade, type Item, type ItemBase, type SubjectId } from '@openedu/contracts';
+import { type Grade, type Item, type ItemBase, type SubjectId, subjectInGrade, subjectLabelFor, subjectOptionsFor } from '@openedu/contracts';
 import { useDataSource, useItems } from '@openedu/data';
 import { Btn, Dialog, Empty } from '../../components/common';
 import { ItemPreview, ItemStudio, TypeBadge } from '../../components/items';
@@ -152,9 +152,9 @@ export function ReviewScreen({ lib, drafts, onClose, onBack, onSaved }: { lib: I
           <div className="tc-qb-bulk tc-card tc-card--flat">
             <span className="tc-small"><strong>Đặt cho {selectedPending.length} câu đã chọn:</strong></span>
             <select className="tc-input tc-input--sm" aria-label="Môn cho các câu đã chọn" value={bulk.subject} onChange={(e) => setBulk({ ...bulk, subject: e.target.value as SubjectId | '', skills: [] })}>
-              <option value="">Môn…</option>{SUBJECT_LIST.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              <option value="">Môn…</option>{subjectOptionsFor(bulk.grade, [bulk.subject]).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
-            <select className="tc-input tc-input--sm" aria-label="Lớp cho các câu đã chọn" value={bulk.grade} onChange={(e) => setBulk({ ...bulk, grade: Number(e.target.value) as Grade | 0, skills: [] })}>
+            <select className="tc-input tc-input--sm" aria-label="Lớp cho các câu đã chọn" value={bulk.grade} onChange={(e) => { const g = Number(e.target.value) as Grade | 0; setBulk({ ...bulk, grade: g, skills: [], ...(g && bulk.subject && !subjectInGrade(bulk.subject, g) ? { subject: '' as const } : {}) }); }}>
               <option value={0}>Lớp…</option>{[1, 2, 3, 4, 5].map((g) => <option key={g} value={g}>Lớp {g}</option>)}
             </select>
             <select className="tc-input tc-input--sm" aria-label="Mức độ cho các câu đã chọn" value={bulk.difficulty ?? ''} onChange={(e) => setBulk({ ...bulk, difficulty: e.target.value as ItemBase['difficulty'] | '' })}>
@@ -202,7 +202,7 @@ export function ReviewScreen({ lib, drafts, onClose, onBack, onSaved }: { lib: I
                         <InlineEditor item={r.d.item} lib={lib} onChange={(it) => setItem(r.d.rowId, it)} />
                         <div className="tc-qb-row__meta">
                           <select className="tc-input tc-input--sm" aria-label="Môn" value={r.d.item.subject} onChange={(e) => setItem(r.d.rowId, { ...r.d.item, subject: e.target.value as SubjectId, skills: [] } as Item)}>
-                            {SUBJECT_LIST.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                            {subjectOptionsFor(r.d.item.grade, [r.d.item.subject]).map((s) => <option key={s.id} value={s.id}>{subjectLabelFor(s.id, r.d.item.grade)}</option>)}
                           </select>
                           <select className="tc-input tc-input--sm" aria-label="Lớp" value={r.d.item.grade} onChange={(e) => setItem(r.d.rowId, { ...r.d.item, grade: Number(e.target.value) as Grade } as Item)}>
                             {[1, 2, 3, 4, 5].map((g) => <option key={g} value={g}>Lớp {g}</option>)}

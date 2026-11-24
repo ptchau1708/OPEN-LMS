@@ -54,3 +54,30 @@
 .ln-dcard__edit { display: flex; flex-direction: column; gap: 6px; }
 .ln-row { display: flex; gap: 8px; }
 .ln-count { margin-left: 8px; padding: 0 8px; border-radius: 999px; background: var(--k-try, #e8485f); color: #fff; font-size: .8em; }
+
+/* kiểu cột (tab cạnh nhau) */
+.ln-dcolsw { display: flex; align-items: center; gap: 6px; margin: 4px 12px; font-weight: 700; color: var(--k-sub); }
+.ln-dcols { display: flex; gap: 12px; overflow-x: auto; padding: 4px 12px 32px; align-items: flex-start; }
+.ln-dcol { --tab: #2f6fd1; flex: 0 0 280px; display: flex; flex-direction: column; gap: 10px; padding: 10px; border-radius: 18px; background: var(--k-bg); border-top: 6px solid var(--tab); }
+.ln-dcol h2 { margin: 0; font-size: 1.1rem; color: var(--tab); }
+.ln-dcol .ln-dcard { margin: 0; }
+.ln-dkind { margin: 2px 0; font-weight: 700; color: var(--k-info, #2f7bf6); }
+
+/* trò chuyện nhóm */
+.ln-chatpage { display: flex; flex-direction: column; height: 100dvh; box-sizing: border-box; }
+.ln-chat__prompt, .ln-chat__room { margin: 4px 12px; font-weight: 700; }
+.ln-chat__list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+.ln-chat__empty { margin: auto; color: var(--k-sub); font-weight: 700; text-align: center; }
+.ln-msg { display: flex; align-items: flex-end; gap: 8px; max-width: 88%; }
+.ln-msg.is-mine { align-self: flex-end; }
+.ln-msg__bubble { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: 18px 18px 18px 6px; background: var(--k-card); box-shadow: 0 2px 0 var(--k-line); }
+.ln-msg.is-mine .ln-msg__bubble { border-radius: 18px 18px 6px 18px; background: var(--k-info-soft, #e3edff); }
+.ln-msg.is-teacher .ln-msg__bubble { box-shadow: inset 0 0 0 2px var(--k-info, #2f7bf6); }
+.ln-msg.is-pending .ln-msg__bubble { box-shadow: inset 0 0 0 2px #e8b400; opacity: .85; }
+.ln-msg__who { font-size: .85rem; font-weight: 800; color: var(--k-sub); }
+.ln-msg__body { font-size: 1.15rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ln-msg__meta { display: flex; gap: 6px; align-items: center; font-size: .75rem; color: var(--k-sub); }
+.ln-chat__compose { flex: none; display: flex; flex-direction: column; gap: 6px; padding: 8px 12px 12px; background: var(--k-card); box-shadow: 0 -3px 0 var(--k-line); }
+.ln-chat__form { display: flex; gap: 6px; align-items: center; }
+.ln-chat__input { flex: 1; min-width: 0; }
+

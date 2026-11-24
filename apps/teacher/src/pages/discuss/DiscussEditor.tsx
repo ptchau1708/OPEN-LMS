@@ -47,17 +47,18 @@ export function DiscussEditor({ value, cls, roster, onClose, onSaved }: {
   });
 
   return (
-    <Dialog open wide title={'id' in d && d.id ? 'Sửa phòng thảo luận' : 'Tạo phòng thảo luận'} onClose={onClose} footer={<>
+    <Dialog open wide title={`${'id' in d && d.id ? 'Sửa' : 'Tạo'} ${d.kind === 'chat' ? 'phòng trò chuyện nhóm' : 'bảng thảo luận'}`} onClose={onClose} footer={<>
       {problem ? <span className="tc-small tc-warn">{problem}</span> : null}
       <Btn onClick={onClose}>Hủy</Btn>
       <Btn kind="primary" icon="check" disabled={!!problem || save.isPending} onClick={() => save.mutate(d, { onSuccess: onSaved })} data-testid="dc-save">{save.isPending ? 'Đang lưu…' : 'Lưu'}</Btn>
     </>}>
       <div className="tc-stack tc-dceditor">
         <Field label="Tên phòng (chủ đề)"><input className="tc-input" value={d.title} onChange={(e) => set({ title: e.target.value })} placeholder="Vd: Em làm gì để bảo vệ môi trường?" data-testid="dc-title" /></Field>
+        {d.kind === 'chat' ? <p className="tc-alert tc-alert--info"><span>Mỗi nhóm (phòng nhỏ) nhắn tin với nhau, GV xem được mọi nhóm. Phòng mới tạo đang <b>khóa</b>: khi bắt đầu hoạt động nhóm, bấm <b>Mở 15 phút</b> trên trang phòng.</span></p> : null}
         <Field label="Lời dẫn / câu hỏi cho học sinh"><textarea className="tc-input" rows={3} value={d.prompt} onChange={(e) => set({ prompt: e.target.value })} placeholder="Các em kể một việc… Có thể chụp ảnh gửi kèm." /></Field>
         <div className="tc-row tc-wrap">
           <Seg label="Duyệt bài" value={d.moderation} onChange={(v) => set({ moderation: v })} options={[{ value: 'pre', label: 'Duyệt trước khi hiện' }, { value: 'post', label: 'Hiện ngay (GV ẩn sau)' }]} />
-          <label className="tc-row tc-small"><input type="checkbox" checked={d.hideOthers} onChange={(e) => set({ hideOthers: e.target.checked })} /> Em chỉ thấy bài bạn sau khi đã đăng bài</label>
+          {d.kind !== 'chat' ? <label className="tc-row tc-small"><input type="checkbox" checked={d.hideOthers} onChange={(e) => set({ hideOthers: e.target.checked })} /> Em chỉ thấy bài bạn sau khi đã đăng bài</label> : null}
           <label className="tc-row tc-small"><input type="checkbox" checked={d.pinned} onChange={(e) => set({ pinned: e.target.checked })} /> Ghim lên đầu</label>
           {'id' in d && d.id ? <label className="tc-row tc-small"><input type="checkbox" checked={d.archived} onChange={(e) => set({ archived: e.target.checked })} /> Lưu trữ (HS không thấy nữa)</label> : null}
         </div>
@@ -68,9 +69,9 @@ export function DiscussEditor({ value, cls, roster, onClose, onSaved }: {
 
         <section className="tc-card tc-card--flat tc-stack">
           <div className="tc-row tc-wrap">
-            <h3 className="tc-h3" style={{ margin: 0 }}>Phòng nhỏ ({d.rooms.length}/{DISCUSSION_MAX_ROOMS})</h3>
+            <h3 className="tc-h3" style={{ margin: 0 }}>{d.kind === 'chat' ? 'Nhóm' : 'Phòng nhỏ'} ({d.rooms.length}/{DISCUSSION_MAX_ROOMS})</h3>
             <span className="tc-ebar__spacer" />
-            {teams.length ? <Btn size="sm" onClick={() => set({ rooms: roomsFromTeams(teams) })} data-testid="dc-rooms-teams">Chia theo {teams.length} tổ của lớp</Btn> : null}
+            {teams.length ? <Btn size="sm" onClick={() => set({ rooms: d.kind === 'chat' ? roomsFromTeams(teams).slice(1) : roomsFromTeams(teams) })} data-testid="dc-rooms-teams">Chia theo {teams.length} tổ của lớp</Btn> : null}
             <Btn size="sm" icon="plus" disabled={d.rooms.length >= DISCUSSION_MAX_ROOMS} onClick={addRoom} data-testid="dc-room-add">Thêm phòng nhỏ</Btn>
           </div>
           <p className="tc-small tc-muted">Phòng không chọn thành viên thì cả lớp vào được. Mỗi phòng nhỏ có đủ các tab bên dưới. GV thấy mọi phòng.</p>
@@ -95,7 +96,7 @@ export function DiscussEditor({ value, cls, roster, onClose, onSaved }: {
           </ul>
         </section>
 
-        <section className="tc-card tc-card--flat tc-stack">
+        {d.kind !== 'chat' ? <section className="tc-card tc-card--flat tc-stack">
           <div className="tc-row tc-wrap">
             <h3 className="tc-h3" style={{ margin: 0 }}>Tab đăng bài ({d.tabs.length}/{DISCUSSION_MAX_TABS})</h3>
             <span className="tc-ebar__spacer" />
@@ -114,7 +115,7 @@ export function DiscussEditor({ value, cls, roster, onClose, onSaved }: {
             ))}
           </ul>
           <p className="tc-small tc-muted">Bỏ tab đã có bài thì các bài đó tạm ẩn khỏi bảng (không mất) — thêm lại tab cùng tên để hiện lại.</p>
-        </section>
+        </section> : null}
         <ErrorNote error={save.error} />
       </div>
     </Dialog>

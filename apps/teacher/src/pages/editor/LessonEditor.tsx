@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { SUBJECT_LIST, uid, type AnyResponse, type ContentPackage, type Grade, type Item, type Lesson, type Profile, type Slide, type SlideLayout, type SubjectId } from '@openedu/contracts';
+import { uid, type AnyResponse, type ContentPackage, type Grade, type Item, type Lesson, type Profile, type Slide, type SlideLayout, type SubjectId, subjectLabelFor, subjectOptionsFor } from '@openedu/contracts';
 import { scoreItem } from '@openedu/activity-engine';
 import { SelfPacedPlayer, SlideView, lessonMascot, resolveSlideItem } from '@openedu/lesson-player';
 import { Icon, KidShell } from '@openedu/ui';
@@ -187,7 +187,7 @@ export default function LessonEditor({ user }: { user: Profile }) {
         <Link to="/bai-giang" className="tc-btn tc-btn--ghost tc-btn--icon" aria-label="Về danh sách bài giảng"><Icon name="back" size={20} /></Link>
         <input className="tc-ebar__title" value={draft.title} onChange={(e) => update((l) => ({ ...l, title: e.target.value }))} aria-label="Tên bài giảng" />
         <select className="tc-input tc-input--sm" value={draft.subject} onChange={(e) => update((l) => ({ ...l, subject: e.target.value as SubjectId }))} aria-label="Môn">
-          {SUBJECT_LIST.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          {subjectOptionsFor(draft.grade, [draft.subject]).map((s) => <option key={s.id} value={s.id}>{subjectLabelFor(s.id, draft.grade)}</option>)}
         </select>
         <select className="tc-input tc-input--sm" value={draft.grade} onChange={(e) => update((l) => ({ ...l, grade: Number(e.target.value) as Grade }))} aria-label="Lớp">
           {[1, 2, 3, 4, 5].map((g) => <option key={g} value={g}>Lớp {g}</option>)}

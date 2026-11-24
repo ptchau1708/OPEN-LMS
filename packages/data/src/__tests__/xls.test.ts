@@ -130,7 +130,7 @@ describe('recognizeVnEdu', () => {
     expect(book?.className).toBe('5A1');
     expect(book?.sheets.map((s) => [s.label, s.subjectId ?? null, s.skip ?? null])).toEqual([
       ['TIẾNG VIỆT', 'tieng-viet', null],
-      ['ĐẠO ĐỨC', null, 'no-subject'],
+      ['ĐẠO ĐỨC', 'dao-duc', null],
       ['ÂM NHẠC', 'am-nhac', null],
     ]);
     // Nhận xét | KT CK2 | XL CK2 — bỏ 2 cột "Sau thi lại".
@@ -154,7 +154,7 @@ describe('recognizeVnEdu', () => {
 
   it('môn, kì, điểm theo TT27', () => {
     expect(vneduSubject('NGOẠI NGỮ 1')).toBe('tieng-anh');
-    expect(vneduSubject('LỊCH SỬ VÀ ĐỊA LÍ')).toBeUndefined();
+    expect(vneduSubject('LỊCH SỬ VÀ ĐỊA LÍ')).toBe('lich-su-dia-li');
     expect(vneduTerm('HỌC KỲ 1 - GIỮA KỲ 1')).toBe('GK1');
     expect(vneduTerm('HỌC KỲ 2 - CUỐI KỲ 2')).toBe('CN');
     expect([tt27Score(8.5), tt27Score(6.4), tt27Score(0.2), tt27Score(10.4)]).toEqual([9, 6, 1, 10]);

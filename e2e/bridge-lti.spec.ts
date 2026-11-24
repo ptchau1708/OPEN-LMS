@@ -35,7 +35,8 @@ test('xuất / nhập: sổ điểm VnEdu (.xls) được nhận ra, điền nh�
   await expect(box).toContainText('Sổ điểm 3 môn');
   await expect(box).toContainText('lớp 4A');
   await expect(box.getByRole('row', { name: /TIẾNG VIỆT/ })).toContainText('6/6');
-  await expect(box.getByRole('row', { name: /ĐẠO ĐỨC/ })).toContainText('OPEN-EDU chưa có môn này');
+  // CT GDPT 2018: Đạo đức đã có trong OPEN-EDU (SQL 17)
+  await expect(box.getByRole('row', { name: /ĐẠO ĐỨC/ })).not.toContainText('OPEN-EDU chưa có môn này');
   await expect(page.getByTestId('br-vn-filled')).not.toHaveText('Sẽ điền 0 ô');
   const dl = page.waitForEvent('download');
   await page.getByTestId('br-vn-download').click();

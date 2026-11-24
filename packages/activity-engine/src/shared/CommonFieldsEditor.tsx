@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Choice, Grade, Item, ItemBase } from '@openedu/contracts';
-import { SUBJECT_LIST } from '@openedu/contracts';
+import { subjectLabelFor, subjectOptionsFor } from '@openedu/contracts';
 import { Media } from '@openedu/ui';
 import { blankIds } from './text';
 import '../styles.css';
@@ -364,7 +364,7 @@ export function CommonFieldsEditor({ item, onChange }: { item: Item; onChange: (
         </div>
         <EdField label="Môn học">
           <select className="ae-ed-select" value={item.subject} onChange={(e) => up({ subject: e.target.value as Item['subject'] })}>
-            {SUBJECT_LIST.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            {subjectOptionsFor(item.grade, [item.subject]).map((s) => <option key={s.id} value={s.id}>{subjectLabelFor(s.id, item.grade)}</option>)}
           </select>
         </EdField>
         <EdField label="Mức độ">

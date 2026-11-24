@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { SUBJECT_LIST, type Grade, type ItemBase, type ItemType, type SubjectId } from '@openedu/contracts';
+import { fitSubjectToGrade, subjectLabelFor, subjectOptionsFor, type Grade, type ItemBase, type ItemType, type SubjectId } from '@openedu/contracts';
 import { useDataSource, useItems } from '@openedu/data';
 import type { DraftItem } from '@openedu/data/import';
 import { Btn, Dialog, ErrorNote, Field, Loading, Seg } from '../../components/common';
@@ -53,9 +53,9 @@ export function QuickAddDialog({ open, onClose, initial, onSaved }: { open: bool
           <div className="tc-qb-defaults">
             <span className="tc-small"><strong>Câu hỏi thuộc</strong></span>
             <select className="tc-input tc-input--sm" aria-label="Môn mặc định" value={def.subject} onChange={(e) => setDef({ ...def, subject: e.target.value as SubjectId })}>
-              {SUBJECT_LIST.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              {subjectOptionsFor(def.grade, [def.subject]).map((s) => <option key={s.id} value={s.id}>{subjectLabelFor(s.id, def.grade)}</option>)}
             </select>
-            <Seg label="Lớp mặc định" value={def.grade} onChange={(g) => setDef({ ...def, grade: g })} options={[1, 2, 3, 4, 5].map((g) => ({ value: g as Grade, label: `Lớp ${g}` }))} />
+            <Seg label="Lớp mặc định" value={def.grade} onChange={(g) => setDef({ ...def, grade: g, subject: fitSubjectToGrade(def.subject, g) })} options={[1, 2, 3, 4, 5].map((g) => ({ value: g as Grade, label: `Lớp ${g}` }))} />
             <span className="tc-muted tc-small">— dùng khi tệp / văn bản không ghi môn, lớp. Sửa từng câu được ở bước soát.</span>
           </div>
           <div className="tc-tabs tc-qb-tabs" role="tablist" aria-label="Cách thêm câu hỏi">
@@ -128,7 +128,7 @@ function FilePane({ lib, def, onDrafts }: PaneProps) {
           onDrop={(e) => { e.preventDefault(); void handle(e.dataTransfer.files[0]); }}
         >
           <strong>{busy ? 'Đang đọc tệp…' : 'Chọn hoặc kéo thả tệp vào đây'}</strong>
-          <span className="tc-muted tc-small">Excel .xlsx (theo mẫu) hoặc Word .docx (đề kiểm tra dạng chữ)</span>
+          <span className="tc-muted tc-small">Excel .xlsx (theo mẫu) hoặc Word .docx (đề kiểm tra dạng chữ, hoặc theo mẫu Word đủ các dạng)</span>
           <input ref={input} type="file" accept=".xlsx,.docx,.xls,.doc" data-testid="qb-file" onChange={(e) => void handle(e.target.files?.[0])} disabled={busy} />
         </label>
         <ErrorNote error={err} />
@@ -139,6 +139,8 @@ function FilePane({ lib, def, onDrafts }: PaneProps) {
         <Btn icon="upload" onClick={() => downloadBytes(lib.buildTemplateXlsx(), 'mau-ngan-hang-cau-hoi.xlsx', XLSX_MIME)} data-testid="qb-template">Tải mẫu Excel</Btn>
         <h3>Tệp Word</h3>
         <p className="tc-small">Đề viết "Câu 1:", lựa chọn "A.", "B."… Đáp án ghi "Đáp án: B", bảng đáp án cuối đề, hoặc <b>tô đậm / gạch chân</b> lựa chọn đúng.</p>
+        <p className="tc-small">Thêm dòng <b>"Dạng: …"</b> dưới mỗi câu để soạn <b>đủ 16 dạng</b>: nối cặp, sắp xếp, kéo thả, phân loại, điền vào đoạn văn, chọn trong câu, nghe và chọn, que tính, đồng hồ, ghi âm đọc to, vẽ và tô, thăm dò… Mẫu có ví dụ từng dạng.</p>
+        <Btn icon="upload" onClick={() => downloadBytes(lib.buildWordTemplateDocx(), 'mau-cau-hoi-word.docx', lib.DOCX_MIME)} data-testid="qb-template-word">Tải mẫu Word (đủ các dạng)</Btn>
       </div>
     </div>
   );

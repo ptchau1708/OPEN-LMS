@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { EXAM_LEVELS, SUBJECTS, TT27_TERM_LABEL, cellKey, skillsFor, type ExamLevel, type ExamMatrix, type Grade, type MatrixCell, type SubjectId, type Tt27TermId } from '@openedu/contracts';
+import { EXAM_LEVELS, SUBJECTS, fitSubjectToGrade, subjectsForGrade, TT27_TERM_LABEL, cellKey, skillsFor, type ExamLevel, type ExamMatrix, type Grade, type MatrixCell, type SubjectId, type Tt27TermId } from '@openedu/contracts';
 import { defaultRows, itemLevel, itemQType, matrixTotals, skillLabel, useDeleteMatrix, useExamMatrices, useItems, useSaveMatrix, validateMatrix } from '@openedu/data';
 import { Btn, ConfirmBar, Dialog, ErrorNote, Field, Loading, PageHead } from '../../components/common';
 import { ExamTabs, LevelTag, fmtPoints } from './shared';
 
-const SUBJ: SubjectId[] = ['toan', 'tieng-viet', 'tieng-anh', 'khoa-hoc', 'tnxh'];
 const GRADES: Grade[] = [1, 2, 3, 4, 5];
 const TERMS: Tt27TermId[] = ['GK1', 'CK1', 'GK2', 'CN'];
 const POINTS = [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3];
@@ -79,8 +78,8 @@ export default function MatrixEditor() {
       {msg ? <div className={`tc-alert ${msg.startsWith('Đã') ? 'tc-alert--ok' : 'tc-alert--warn'}`} role="status">{msg}</div> : null}
       <section className="tc-card ex-form">
         <Field label="Tên ma trận"><input className="tc-input" value={m.title} placeholder="Toán 4 – Cuối học kì I" onChange={(e) => set({ title: e.target.value })} /></Field>
-        <Field label="Môn"><select className="tc-input" value={m.subject} onChange={(e) => changeScope(e.target.value as SubjectId, m.grade)}>{SUBJ.map((s) => <option key={s} value={s}>{SUBJECTS[s]?.name ?? s}</option>)}</select></Field>
-        <Field label="Lớp"><select className="tc-input" value={m.grade} onChange={(e) => changeScope(m.subject, Number(e.target.value) as Grade)}>{GRADES.map((g) => <option key={g} value={g}>Lớp {g}</option>)}</select></Field>
+        <Field label="Môn"><select className="tc-input" value={m.subject} onChange={(e) => changeScope(e.target.value as SubjectId, m.grade)}>{[...new Set([...subjectsForGrade(m.grade, { periodic: true }), m.subject])].map((s) => <option key={s} value={s}>{SUBJECTS[s]?.name ?? s}</option>)}</select></Field>
+        <Field label="Lớp"><select className="tc-input" value={m.grade} onChange={(e) => { const g = Number(e.target.value) as Grade; changeScope(fitSubjectToGrade(m.subject, g, { periodic: true }), g); }}>{GRADES.map((g) => <option key={g} value={g}>Lớp {g}</option>)}</select></Field>
         <Field label="Kì kiểm tra"><select className="tc-input" value={m.termId ?? ''} onChange={(e) => set({ termId: (e.target.value || undefined) as Tt27TermId | undefined })}><option value="">(không gắn kì)</option>{TERMS.map((t) => <option key={t} value={t}>{TT27_TERM_LABEL[t]}</option>)}</select></Field>
         <Field label="Thời gian (phút)"><input className="tc-input tc-input--num" inputMode="numeric" value={m.durationMin} onChange={(e) => set({ durationMin: Math.max(5, Math.min(180, num(e.target.value, 180))) })} /></Field>
       </section>

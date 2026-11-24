@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
-import { SUBJECTS, TT27_TERM_LABEL, type Grade, type Profile, type SubjectId, type Tt27TermId } from '@openedu/contracts';
+import { SUBJECTS, subjectsForGrade, TT27_TERM_LABEL, type Grade, type Profile, type SubjectId, type Tt27TermId } from '@openedu/contracts';
 import { csvFileName, downloadText, schoolReportCsv, toCsv, toTsv, tt27Rows, useClasses, useSchoolOverview, useSchoolSettings, useStudents, useTt27, vnWeekStart } from '@openedu/data';
 import { Btn, Empty, ErrorNote, Field, Loading, PageHead, Seg } from '../../components/common';
 import { Kpi, Meter, pct } from './util';
@@ -8,7 +8,7 @@ import '../../styles/admin.css';
 
 type RangeKey = 'tuan' | '7' | '30';
 const RANGE_LABEL: Record<RangeKey, string> = { tuan: 'Tuần này', '7': '7 ngày', '30': '30 ngày' };
-const TT27_SUBJECTS = (g: Grade): SubjectId[] => (g <= 2 ? ['toan', 'tieng-viet', 'tnxh'] : g === 3 ? ['toan', 'tieng-viet', 'tieng-anh', 'tnxh'] : ['toan', 'tieng-viet', 'tieng-anh', 'khoa-hoc']);
+const TT27_SUBJECTS = (g: Grade): SubjectId[] => subjectsForGrade(g);
 
 function rangeOf(k: RangeKey): { from: string } {
   const now = Date.now();

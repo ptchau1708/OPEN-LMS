@@ -6,19 +6,33 @@
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { LtiPlatformStorage, buildPageTree, isEmbeddable, launchStartUrl, pagePath, useClassPage, useClassPages, useEmbedSites, useLtiIssuer, useLtiTools, type ClassPage, type PageNode } from '@openedu/data';
+import { LtiPlatformStorage, buildPageTree, parseDiscussionEmbed, isEmbeddable, launchStartUrl, pagePath, useClassPage, useClassPages, useEmbedSites, useLtiIssuer, useLtiTools, type ClassPage, type PageNode } from '@openedu/data';
 import { Button, Icon } from '@openedu/ui';
 import { EmptyState, LoadingScreen } from '../../components/Common';
 import { useMe } from '../../lib/util';
 import '../../styles/connect.css';
 
-/** Chữ của trang: tách đoạn theo dòng trống, dòng "- " thành gạch đầu dòng. */
+/** Phòng thảo luận GV chèn vào trang ([[thao-luan:id|Tên]]). */
+function DiscussionLink({ id, title }: { id: string; title: string }) {
+  const nav = useNavigate();
+  return (
+    <div className="ln-pagedisc">
+      <span aria-hidden="true">💬</span>
+      <strong>{title}</strong>
+      <Button size="md" onClick={() => nav(`/thao-luan/${id}`)} data-testid="page-discussion">Vào thảo luận</Button>
+    </div>
+  );
+}
+
+/** Chữ của trang: tách đoạn theo dòng trống, dòng "- " thành gạch đầu dòng, dòng [[thao-luan:…]] thành nút vào phòng. */
 function Body({ text }: { text: string }) {
   const blocks = text.trim().split(/\n\s*\n/).filter(Boolean);
   if (!blocks.length) return null;
   return (
     <div className="ln-pagebody" data-testid="page-body">
       {blocks.map((b, i) => {
+        const embed = parseDiscussionEmbed(b);
+        if (embed) return <DiscussionLink key={i} id={embed.id} title={embed.title} />;
         const lines = b.split('\n');
         if (lines.every((l) => /^\s*[-•]\s+/.test(l))) return <ul key={i}>{lines.map((l, j) => <li key={j}>{l.replace(/^\s*[-•]\s+/, '')}</li>)}</ul>;
         return <p key={i}>{lines.map((l, j) => <span key={j}>{j ? <br /> : null}{l}</span>)}</p>;

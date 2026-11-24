@@ -53,3 +53,7 @@
   .ln-pageview { position: relative; }
 }
 @media (min-width: 761px) { .ln-pageview__toc { display: none !important; } }
+
+/* Trang học: nút vào phòng thảo luận */
+.ln-pagedisc { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 12px 0; padding: 12px 14px; border-radius: 16px; background: var(--k-info-soft, #e3edff); font-size: 1.1rem; }
+.ln-pagedisc strong { flex: 1; }

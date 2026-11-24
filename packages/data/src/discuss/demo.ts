@@ -3,13 +3,13 @@ import type { DataSource, Profile } from '@openedu/contracts';
 import { DEMO_CLASSES, DEMO_GUARDIANS, DEMO_USERS } from '../seed/users';
 import { createDefaultStorage, readJson, writeJson, type KVStorage } from '../storage';
 import { compressWorkImage } from '../workImage';
-import { DEFAULT_BLOCK_WORDS, DISCUSSION_RATE_PER_MIN, discussionProblem, discussionState, flagText, roomsFromTeams, TAB_COLORS } from './rules';
+import { CHAT_TAB, DEFAULT_BLOCK_WORDS, DISCUSSION_RATE_PER_MIN, discussionProblem, discussionState, flagText, roomsFromTeams, TAB_COLORS } from './rules';
 import type {
   Discussion, DiscussionInput, DiscussionPost, DiscussionReaction, DiscussionStats, DiscussionWord, DiscussSource, NewDiscussionPost,
 } from './types';
 
 interface StoredPost extends Omit<DiscussionPost, 'author' | 'reactions' | 'mine' | 'reports'> { reactions: { userId: string; kind: DiscussionReaction }[]; reports: { userId: string; reason: string; resolved: boolean }[] }
-interface Store { v: 1; discussions: Discussion[]; posts: StoredPost[]; words: DiscussionWord[] }
+interface Store { v: 2; discussions: Discussion[]; posts: StoredPost[]; words: DiscussionWord[] }
 interface DemoKv { schoolKv(): Promise<{ storage: KVStorage; now: () => Date }> }
 
 const rid = (p: string) => `${p}-${Math.random().toString(36).slice(2, 10)}`;
@@ -27,7 +27,7 @@ function seed(now: Date): Store {
   };
   for (const cls of DEMO_CLASSES.filter((c) => c.id === 'c-2a' || c.id === 'c-4a')) {
     const d: Discussion = {
-      id: `dc-${cls.id}`, classId: cls.id, title: 'Em làm gì để bảo vệ môi trường?',
+      id: `dc-${cls.id}`, classId: cls.id, kind: 'board', title: 'Em làm gì để bảo vệ môi trường?',
       prompt: 'Mỗi em kể một việc em đã làm hoặc sẽ làm để giữ trường lớp, nhà mình sạch đẹp. Có thể chụp ảnh gửi kèm nhé!',
       moderation: cls.grade >= 4 ? 'post' : 'pre', hideOthers: false, opensAt: null, closesAt: null, locked: false, pinned: true, archived: false,
       rooms: roomsFromTeams(cls.teams), tabs: [{ id: 'y-kien', name: 'Ý kiến', color: TAB_COLORS[0] }, { id: 'cau-hoi', name: 'Câu hỏi', color: TAB_COLORS[1] }, { id: 'hinh-anh', name: 'Hình ảnh', color: TAB_COLORS[2] }],
@@ -44,20 +44,34 @@ function seed(now: Date): Store {
     mk(d, 'chung', 'y-kien', s2, 'Bạn ấy ngu thật', 'pending', 30, { flagged: true });
     const team = d.rooms[1];
     if (team) mk(d, team.id, 'y-kien', team.members[0], 'Tổ mình làm áp phích “Ngày không rác” nhé!', 'visible', 90);
+    // Phòng trò chuyện nhóm theo tổ (đang mở cho bản demo).
+    const c: Discussion = {
+      id: `ch-${cls.id}`, classId: cls.id, kind: 'chat', title: 'Trò chuyện nhóm: chuẩn bị áp phích', prompt: 'Mỗi tổ bàn: áp phích vẽ gì, ai làm phần nào?',
+      moderation: 'post', hideOthers: false, opensAt: null, closesAt: null, locked: false, pinned: false, archived: false,
+      rooms: roomsFromTeams(cls.teams).slice(1), tabs: [{ ...CHAT_TAB }], createdBy: cls.teacherId, createdAt: iso(120), updatedAt: iso(120),
+    };
+    if (c.rooms.length) {
+      discussions.push(c);
+      const r0 = c.rooms[0];
+      mk(c, r0.id, 'chat', cls.teacherId, 'Các tổ bắt đầu bàn nhé, mỗi bạn nói một ý!', 'visible', 20);
+      if (r0.members[1]) mk(c, r0.id, 'chat', r0.members[1], 'Tổ mình vẽ cây xanh đi!', 'visible', 10);
+    }
   }
-  return { v: 1, discussions, posts, words: DEFAULT_BLOCK_WORDS.map((w) => ({ id: rid('w'), classId: null, word: w })) };
+  return { v: 2, discussions, posts, words: DEFAULT_BLOCK_WORDS.map((w) => ({ id: rid('w'), classId: null, word: w })) };
 }
 
 export class DemoDiscussSource implements DiscussSource {
-  constructor(private ds: DataSource) {}
+  /** `shared`: dùng chung một kho cho nhiều máy giả lập (kiểm thử hai HS cùng lúc). */
+  constructor(private ds: DataSource, private shared?: KVStorage) {}
   private async kv() {
+    if (this.shared) return { storage: this.shared, now: () => new Date() };
     const d = this.ds as unknown as Partial<DemoKv>;
     return typeof d.schoolKv === 'function' ? d.schoolKv() : { storage: createDefaultStorage(), now: () => new Date() };
   }
   private async load() {
     const { storage, now } = await this.kv();
     let s = readJson<Store | null>(storage, 'discuss', null);
-    if (!s || s.v !== 1) { s = seed(now()); writeJson(storage, 'discuss', s); }
+    if (!s || s.v !== 2) { s = seed(now()); writeJson(storage, 'discuss', s); }
     const st = s;
     return { s: st, save: () => writeJson(storage, 'discuss', st), now: now() };
   }

@@ -29,10 +29,13 @@ import { EXTRACT_BODY_MAX_BYTES, handleExtract, type LlmFile } from './extract.t
 type Task = 'generate_items' | 'lesson_outline' | 'encourage' | 'hint' | 'extract_items';
 type Provider = 'openrouter' | 'gemini' | 'fallback';
 
-const SUBJECT_IDS: readonly SubjectId[] = ['toan', 'tieng-viet', 'tieng-anh', 'tnxh', 'khoa-hoc', 'mi-thuat', 'am-nhac', 'khac'];
+const SUBJECT_IDS: readonly SubjectId[] = [
+  'toan', 'tieng-viet', 'tieng-anh', 'dao-duc', 'lich-su-dia-li', 'khoa-hoc', 'tin-hoc', 'cong-nghe', 'gdtc', 'am-nhac', 'mi-thuat', 'hdtn', 'tnxh', 'khac',
+];
 const SUBJECT_NAMES: Record<SubjectId, string> = {
-  toan: 'Toán', 'tieng-viet': 'Tiếng Việt', 'tieng-anh': 'Tiếng Anh', tnxh: 'Tự nhiên và Xã hội',
-  'khoa-hoc': 'Khoa học', 'mi-thuat': 'Mĩ thuật', 'am-nhac': 'Âm nhạc', khac: 'Khác',
+  toan: 'Toán', 'tieng-viet': 'Tiếng Việt', 'tieng-anh': 'Tiếng Anh', 'dao-duc': 'Đạo đức', 'lich-su-dia-li': 'Lịch sử và Địa lí',
+  'khoa-hoc': 'Khoa học', 'tin-hoc': 'Tin học', 'cong-nghe': 'Công nghệ', gdtc: 'Giáo dục thể chất', 'am-nhac': 'Âm nhạc',
+  'mi-thuat': 'Mĩ thuật', hdtn: 'Hoạt động trải nghiệm', tnxh: 'Tự nhiên và Xã hội', khac: 'Khác',
 };
 const GENERATABLE: readonly ItemType[] = [
   'MCQ', 'MCQ_MULTIPLE', 'SHORT_ANSWER', 'MATCHING', 'ORDERING', 'SENTENCE_SCRAMBLE', 'FILL_IN_PASSAGE', 'WORD_CLASSIFY',

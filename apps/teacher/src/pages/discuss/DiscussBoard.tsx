@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import type { MascotId, Profile } from '@openedu/contracts';
 import {
-  bridge, CARD_COLORS, discussionState, groupPosts, participation, slugId, STATE_LABEL, useAddDiscussionWord, useClass, useDiscussion, useDiscussionPosts,
+  bridge, CARD_COLORS, discussionEmbedToken, discussionState, groupPosts, openForMinutes, participation, slugId, STATE_LABEL, useAddDiscussionWord, useClass, useDiscussion, useDiscussionPosts,
   useDiscussionWords, useModeratePosts, usePostDiscussion, useReactPost, useRemoveDiscussionWord, useSaveDiscussion,
   type DiscussionPost, type DiscussionReaction,
 } from '@openedu/data';
@@ -10,13 +10,15 @@ import { Icon } from '@openedu/ui';
 import { Avatar, Btn, Dialog, Empty, ErrorNote, Loading, PageHead } from '../../components/common';
 import { useRoster } from '../../lib/assess';
 import { cx, fmtDateTime, relTime } from '../../lib/format';
+import { ChatPanes } from './ChatPanes';
 import { DiscussEditor } from './DiscussEditor';
+import { PraiseButton } from './Praise';
 
 const STATUS: Record<DiscussionPost['status'], string> = { pending: 'Chờ duyệt', visible: 'Đã hiện', hidden: 'Đã ẩn', removed: 'HS đã gỡ' };
 const RX: { kind: DiscussionReaction; icon: string; label: string }[] = [{ kind: 'heart', icon: '❤️', label: 'Thả tim' }, { kind: 'star', icon: '⭐', label: 'Khen' }, { kind: 'like', icon: '👍', label: 'Thích' }];
 
-export function PostCard({ p, replies, onModerate, onReact, onReply, hideName, big }: {
-  p: DiscussionPost; replies: DiscussionPost[]; hideName?: boolean; big?: boolean;
+export function PostCard({ p, replies, onModerate, onReact, onReply, hideName, big, praise }: {
+  p: DiscussionPost; replies: DiscussionPost[]; hideName?: boolean; big?: boolean; praise?: ReactNode;
   onModerate?: (ids: string[], status: 'visible' | 'hidden' | 'pending') => void; onReact?: (id: string, k: DiscussionReaction) => void; onReply?: (p: DiscussionPost) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -37,6 +39,7 @@ export function PostCard({ p, replies, onModerate, onReact, onReply, hideName, b
         {RX.map((r) => <button key={r.kind} type="button" className={cx('tc-rx', p.mine[r.kind] && 'is-on')} aria-pressed={p.mine[r.kind]} aria-label={r.label} disabled={!onReact || p.status !== 'visible'} onClick={() => onReact?.(p.id, r.kind)}>{r.icon} {p.reactions[r.kind] || ''}</button>)}
         {replies.length || onReply ? <button type="button" className="tc-rx" onClick={() => setOpen((v) => !v)} aria-expanded={open}>💬 {replies.length || ''}</button> : null}
         <span className="tc-ebar__spacer" />
+        {praise && p.status === 'visible' ? praise : null}
         {onModerate && p.status === 'pending' ? <Btn size="sm" kind="primary" icon="check" onClick={() => onModerate([p.id], 'visible')} data-testid="dc-approve">Duyệt</Btn> : null}
         {onModerate && p.status !== 'hidden' && p.status !== 'removed' ? <Btn size="sm" kind="ghost" icon="eye" onClick={() => onModerate([p.id], 'hidden')}>Ẩn</Btn> : null}
         {onModerate && p.status === 'hidden' ? <Btn size="sm" kind="ghost" onClick={() => onModerate([p.id], 'visible')}>Hiện lại</Btn> : null}
@@ -64,7 +67,7 @@ export default function DiscussBoard({ user }: { user: Profile }) {
   const d = dq.data;
   const cls = useClass(d?.classId).data ?? undefined;
   const { roster } = useRoster(cls);
-  const posts = useDiscussionPosts(id);
+  const posts = useDiscussionPosts(id, { fast: dq.data?.kind === 'chat' });
   const moderate = useModeratePosts();
   const react = useReactPost();
   const send = usePostDiscussion();
@@ -74,7 +77,8 @@ export default function DiscussBoard({ user }: { user: Profile }) {
   const [cols, setCols] = useState(false);
   const [edit, setEdit] = useState(false);
   const [words, setWords] = useState(false);
-  const [show, setShow] = useState<null | { hideNames: boolean }>(null);
+  const [toast, setToast] = useState('');
+  useEffect(() => { if (!toast) return; const t = window.setTimeout(() => setToast(''), 2500); return () => window.clearTimeout(t); }, [toast]);
   const [body, setBody] = useState('');
   const [color, setColor] = useState<string | null>(null);
   const [replyTo, setReplyTo] = useState<DiscussionPost | null>(null);
@@ -111,21 +115,27 @@ export default function DiscussBoard({ user }: { user: Profile }) {
 
   const cards = (list: DiscussionPost[], big?: boolean, hideName?: boolean) => list.filter((p) => p.status !== 'removed' && (!big || p.status === 'visible')).map((p) => (
     <PostCard key={p.id} p={p} replies={(replies[p.id] ?? []).filter((r) => !big || r.status === 'visible')} big={big} hideName={hideName}
-      {...(big ? {} : { onModerate: mod, onReact, onReply: (x: DiscussionPost) => { setReplyTo(x); setBody(''); } })} />
+      {...(big ? {} : { onModerate: mod, onReact, onReply: (x: DiscussionPost) => { setReplyTo(x); setBody(''); }, praise: <PraiseButton post={p} classId={d.classId} title={d.title} user={user} /> })} />
   ));
 
   return (
     <div className="tc-page tc-page--wide tc-dboard">
       <PageHead title={d.title} sub={<>
         <span className={cx('tc-chip', st === 'open' ? 'tc-chip--ok' : 'tc-chip--warn')}>{STATE_LABEL[st]}</span>{' '}
-        Lớp {cls?.name} · {d.moderation === 'pre' ? 'Duyệt trước khi hiện' : 'Hiện ngay'}{d.hideOthers ? ' · HS thấy bài bạn sau khi đăng' : ''}
+        {d.kind === 'chat' ? 'Trò chuyện nhóm · ' : ''}Lớp {cls?.name} · {d.moderation === 'pre' ? 'Duyệt trước khi hiện' : 'Hiện ngay'}{d.hideOthers ? ' · HS thấy bài bạn sau khi đăng' : ''}
         {d.opensAt || d.closesAt ? ` · ${d.opensAt ? `mở ${fmtDateTime(d.opensAt)}` : ''}${d.closesAt ? ` – đóng ${fmtDateTime(d.closesAt)}` : ''}` : ''}
       </>} actions={<>
         <Link className="tc-btn" to={`/thao-luan?lop=${d.classId}`}><Icon name="back" size={16} /> Danh sách</Link>
-        <Btn icon="lock" onClick={() => saveD.mutate({ ...d, locked: !d.locked })} data-testid="dc-lock">{d.locked ? 'Mở khóa' : 'Khóa ngay'}</Btn>
+        {st === 'open' ? <Btn icon="lock" onClick={() => saveD.mutate({ ...d, locked: true })} data-testid="dc-lock">Khóa ngay</Btn> : (
+          <span className="tc-row tc-wrap tc-dopen" role="group" aria-label="Mở phòng">
+            {[10, 15, 30].map((m) => <Btn key={m} size="sm" kind={m === 15 ? 'primary' : 'default'} onClick={() => saveD.mutate(openForMinutes(d, m))} data-testid={`dc-open-${m}`}>Mở {m} phút</Btn>)}
+            <Btn size="sm" onClick={() => saveD.mutate({ ...d, locked: false, opensAt: null, closesAt: null })} data-testid="dc-unlock">Mở không hẹn giờ</Btn>
+          </span>
+        )}
         <Btn icon="pencil" onClick={() => setEdit(true)}>Sửa phòng</Btn>
-        <Btn icon="tv" onClick={() => setShow({ hideNames: false })}>Trình chiếu</Btn>
+        <Link className="tc-btn" to={`/thao-luan/${d.id}/tv`} target="_blank" data-testid="dc-tv"><Icon name="tv" size={16} /> Mở trên TV</Link>
         <Btn icon="upload" onClick={exportXlsx} data-testid="dc-export">Xuất Excel</Btn>
+        <Btn kind="ghost" onClick={() => { void navigator.clipboard?.writeText(discussionEmbedToken(d)).catch(() => undefined); setToast('Đã chép mã chèn. Vào Trang học → sửa trang → dán vào phần chữ (hoặc bấm “Chèn phòng thảo luận”).'); }} data-testid="dc-embed">Chèn vào Trang học</Btn>
         <Btn kind="ghost" onClick={() => setWords(true)}>Từ cần chặn</Btn>
       </>} />
       {d.prompt ? <div className="tc-card tc-dprompt"><p>{d.prompt}</p></div> : null}
@@ -138,6 +148,7 @@ export default function DiscussBoard({ user }: { user: Profile }) {
         </div>
       ) : null}
 
+      {d.kind === 'chat' ? <ChatPanes d={d} posts={all} user={user} onModerate={mod} /> : <>
       {d.rooms.length > 1 ? (
         <div className="tc-drooms" role="tablist" aria-label="Phòng nhỏ">
           {d.rooms.map((r) => (
@@ -185,21 +196,10 @@ export default function DiscussBoard({ user }: { user: Profile }) {
         <div className="tc-dgrid">{cards(byTab[tabId] ?? [])}</div>
       ) : <Empty icon="pencil" title="Chưa có bài trong tab này">Bài học sinh đăng sẽ hiện ở đây ngay khi có.</Empty>}
 
+      </>}
       {edit && cls ? <DiscussEditor value={d} cls={cls} roster={roster} onClose={() => setEdit(false)} onSaved={() => setEdit(false)} /> : null}
       {words ? <WordsDialog classId={d.classId} user={user} onClose={() => setWords(false)} /> : null}
-      {show ? (
-        <div className="tc-dshow" role="dialog" aria-label="Trình chiếu bảng thảo luận">
-          <header className="tc-row tc-wrap">
-            <h2>{d.title}</h2>
-            <span className="tc-muted">{d.rooms.find((r) => r.id === roomId)?.name}{cols ? '' : ` · ${d.tabs.find((t) => t.id === tabId)?.name}`}</span>
-            <span className="tc-ebar__spacer" />
-            <label className="tc-row tc-small"><input type="checkbox" checked={show.hideNames} onChange={(e) => setShow({ hideNames: e.target.checked })} /> Ẩn tên</label>
-            <Btn icon="close" onClick={() => setShow(null)}>Đóng</Btn>
-          </header>
-          {cols ? <div className="tc-dcols">{d.tabs.map((t) => <section key={t.id} className="tc-dcol" style={{ ['--tab' as string]: t.color }}><h3>{t.name}</h3>{cards(byTab[t.id] ?? [], true, show.hideNames)}</section>)}</div>
-            : <div className="tc-dgrid">{cards(byTab[tabId] ?? [], true, show.hideNames)}</div>}
-        </div>
-      ) : null}
+      {toast ? <div className="tc-toast" role="status">{toast}</div> : null}
     </div>
   );
 }

@@ -23,10 +23,11 @@ export function useDiscussion(id?: string) {
   return useQuery({ queryKey: ['discuss', 'one', id], queryFn: async () => (await src()).getDiscussion(id as string), enabled: !!id });
 }
 /** Bài của một phòng: tự cập nhật khi có thay đổi (Realtime / bản demo), dự phòng tải lại 20 giây một lần. */
-export function useDiscussionPosts(id?: string) {
+export function useDiscussionPosts(id?: string, opts: { fast?: boolean } = {}) {
   const src = useSrc();
   const qc = useQueryClient();
-  const q = useQuery({ queryKey: ['discuss', 'posts', id], queryFn: async () => (await src()).listPosts(id as string), enabled: !!id, refetchInterval: 20_000 });
+  // Trò chuyện: dự phòng tải lại 4 giây một lần (Realtime vẫn là đường chính).
+  const q = useQuery({ queryKey: ['discuss', 'posts', id], queryFn: async () => (await src()).listPosts(id as string), enabled: !!id, refetchInterval: opts.fast ? 4_000 : 20_000 });
   useEffect(() => {
     if (!id) return;
     let off: (() => void) | undefined;
@@ -36,7 +37,7 @@ export function useDiscussionPosts(id?: string) {
       if (dead) return;
       off = s.subscribe(id, () => {
         clearTimeout(t);
-        t = setTimeout(() => void qc.invalidateQueries({ queryKey: ['discuss'] }), 300);
+        t = setTimeout(() => void qc.invalidateQueries({ queryKey: ['discuss'] }), 150);
       });
     });
     return () => { dead = true; clearTimeout(t); off?.(); };

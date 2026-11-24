@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { AnyResponse, Item, ScoreResult } from '@openedu/contracts';
 import { DemoDataSource } from '../demo/DemoDataSource';
 import { DemoDiscussSource } from '../discuss/demo';
-import { discussionProblem, discussionState, flagText, groupPosts, newDiscussion, participation, roomsFromTeams, slugId } from '../discuss';
+import { discussionEmbedToken, discussionProblem, discussionState, flagText, groupPosts, newChat, newDiscussion, openForMinutes, parseDiscussionEmbed, participation, roomsFromTeams, slugId } from '../discuss';
 import { MemoryStorage } from '../storage';
 
 const NOW = new Date('2026-11-23T09:00:00+07:00');
@@ -77,5 +77,49 @@ describe('thảo luận — bản demo', () => {
     expect((await src.post({ discussionId: d.id, roomId: 'chung', tabId: 'y-kien', body: 'Em tắt vòi nước' })).status).toBe('visible');
     const bad = await src.post({ discussionId: d.id, roomId: 'chung', tabId: 'y-kien', body: 'bạn ngu thế' });
     expect([bad.status, bad.flagged]).toEqual(['pending', true]);
+  });
+});
+
+describe('trò chuyện nhóm (SQL 16)', () => {
+  it('phòng theo tổ, mở N phút, mã chèn Trang học', () => {
+    const c = newChat('c', [{ id: 'a', name: 'Tổ 1', studentIds: ['u1'] }, { id: 'b', name: 'Tổ 2', studentIds: ['u2'] }]);
+    expect([c.kind, c.locked, c.moderation, c.tabs.map((t) => t.id), c.rooms.map((r) => r.name)]).toEqual(['chat', true, 'post', ['chat'], ['Tổ 1', 'Tổ 2']]);
+    expect(newChat('c', []).rooms.map((r) => r.id)).toEqual(['chung']);
+    const o = openForMinutes(c, 15, NOW);
+    expect(o.locked).toBe(false);
+    expect(Date.parse(o.closesAt!) - Date.parse(o.opensAt!)).toBe(15 * 60_000);
+    expect(discussionState(o, new Date(NOW.getTime() + 16 * 60_000))).toBe('closed');
+    const tok = discussionEmbedToken({ id: 'dc-1', title: 'Bảo vệ [môi] trường' });
+    expect(parseDiscussionEmbed(tok)).toEqual({ id: 'dc-1', title: 'Bảo vệ  môi  trường' });
+    expect(parseDiscussionEmbed('chữ thường')).toBeNull();
+  });
+
+  it('hai HS cùng lúc: An nghe thay đổi, Chi (cùng tổ) nhắn → An nhận ngay; tổ khác không thấy', async () => {
+    const shared = new MemoryStorage();
+    const dsA = demo();
+    const dsB = demo();
+    const dsC = demo();
+    const a = new DemoDiscussSource(dsA, shared);
+    const b = new DemoDiscussSource(dsB, shared);
+    const c = new DemoDiscussSource(dsC, shared);
+    await dsA.signIn('an2a1', '123456');
+    await dsB.signIn('chi2a3', '123456');
+    const chat = (await a.listDiscussions('c-2a')).find((x) => x.kind === 'chat')!;
+    const roomA = chat.rooms.find((r) => r.members.includes('u-an2a1'))!;
+    expect(roomA.members).toContain('u-chi2a3');
+    let pinged = 0;
+    const off = a.subscribe(chat.id, () => { pinged++; });
+    await a.post({ discussionId: chat.id, roomId: roomA.id, tabId: 'chat', body: 'Chào tổ mình!' });
+    const before = pinged;
+    await b.post({ discussionId: chat.id, roomId: roomA.id, tabId: 'chat', body: 'Chào An!' });
+    expect(pinged).toBeGreaterThan(before);
+    expect((await a.listPosts(chat.id)).some((p) => p.body === 'Chào An!' && p.status === 'visible')).toBe(true);
+    off();
+    // HS tổ khác không thấy tin của tổ An
+    const other = chat.rooms.find((r) => !r.members.includes('u-an2a1'))!;
+    const outsider = other.members.find((m) => m !== 'u-an2a1')!;
+    const u = (await import('../seed/users')).DEMO_USERS.find((x) => x.id === outsider)!;
+    await dsC.signIn(u.username ?? '', '123456');
+    expect((await c.listPosts(chat.id)).some((p) => p.body === 'Chào tổ mình!')).toBe(false);
   });
 });

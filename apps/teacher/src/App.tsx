@@ -17,6 +17,7 @@ const LiveControl = lazy(() => import('./pages/LiveControl'));
 const PaperCards = lazy(() => import('./pages/live/PaperCards'));
 const DiscussList = lazy(() => import('./pages/discuss/DiscussList'));
 const DiscussBoard = lazy(() => import('./pages/discuss/DiscussBoard'));
+const DiscussTv = lazy(() => import('./pages/discuss/DiscussTv'));
 const Heatmap = lazy(() => import('./pages/Heatmap'));
 const KnowledgeRedirect = lazy(() => import('./pages/Heatmap').then((m) => ({ default: m.KnowledgeRedirect })));
 const StudentProfile = lazy(() => import('./pages/StudentProfile'));
@@ -62,6 +63,7 @@ export function App() {
   return (
     <Routes>
       <Route path="lti/auth" element={<Suspense fallback={<Loading />}><TeacherLtiAuth /></Suspense>} />
+      <Route path="thao-luan/:id/tv" element={<Suspense fallback={<Loading />}><DiscussTv /></Suspense>} />
       <Route element={<Layout user={user} />}>
         <Route index element={<Dashboard user={user} />} />
         <Route path="bai-giang" element={<Lessons user={user} />} />

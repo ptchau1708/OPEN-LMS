@@ -7,3 +7,5 @@ export { readXlsx, writeXlsx, xmlEscape, xmlUnescape, colName, colIndex, XLSX_MI
 export { docxToText, DOCX_MAX_BYTES, type DocxTextResult } from './docx';
 export * from './template';
 export * from './ai';
+export { parseTypedBlock, parseTypedKind, isTypedBlock, TYPED_KIND_LABEL, type TypedKind } from './typedBlock';
+export { buildWordTemplateDocx, WORD_TEMPLATE_EXAMPLES, DOCX_MIME } from './wordTemplate';

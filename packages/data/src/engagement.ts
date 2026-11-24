@@ -302,6 +302,10 @@ export function suggestTt27(input: SuggestTt27Input): Tt27Suggestion {
     'tinh-toan': rateFromLevel(subjects.toan?.level),
   };
   if (subjects['khoa-hoc'] || subjects.tnxh) comp['khoa-hoc'] = rateFromLevel((subjects['khoa-hoc'] ?? subjects.tnxh)?.level);
+  if (subjects['tin-hoc']) comp['tin-hoc'] = rateFromLevel(subjects['tin-hoc'].level);
+  if (subjects['cong-nghe']) comp['cong-nghe'] = rateFromLevel(subjects['cong-nghe'].level);
+  if (subjects['mi-thuat'] || subjects['am-nhac']) comp['tham-mi'] = rateFromLevel((subjects['mi-thuat'] ?? subjects['am-nhac'])?.level);
+  if (subjects.gdtc) comp['the-chat'] = rateFromLevel(subjects.gdtc.level);
 
   const name = student.name.split(' ').slice(-1)[0] || student.name;
   const tLevels = Object.values(subjects).filter((s) => s?.level === 'T').length;

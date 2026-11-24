@@ -3,7 +3,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(30);
+select plan(33);
 
 insert into auth.users (id, email, raw_user_meta_data) values
   ('000000f1-0000-0000-0000-000000000001', 'tl-gv@test.local', '{"role":"teacher","name":"Cô Thu"}'),
@@ -85,6 +85,16 @@ update v2.discussions set locked = true where id = '00000000-0000-0000-0000-0000
 select set_config('request.jwt.claims', '{"sub":"000000f2-0000-0000-0000-000000000001","role":"authenticated"}', true);
 select throws_ok($$ select v2.post_discussion('00000000-0000-0000-0000-0000000000d1', 'chung', 'y-kien', null, 'còn mở không') $$, '42501', 'Phòng thảo luận đang khóa.', 'phòng khóa thì HS không đăng');
 select lives_ok($$ select v2.remove_my_discussion_post((select id from v2.discussion_posts where body = 'Em sẽ nhặt rác')) $$, 'HS gỡ bài của mình');
+
+-- Trò chuyện nhóm (SQL 16): phòng kind 'chat', tin nhắn theo tổ.
+select set_config('request.jwt.claims', '{"sub":"000000f1-0000-0000-0000-000000000001","role":"authenticated"}', true);
+select lives_ok($$ insert into v2.discussions (id, class_id, title, kind, moderation, rooms, tabs, created_by) values
+  ('00000000-0000-0000-0000-0000000000d2', 'tl-4a', 'Trò chuyện nhóm', 'chat', 'post',
+   '[{"id":"to1","name":"Tổ 1","members":["000000f2-0000-0000-0000-000000000001"]},{"id":"to2","name":"Tổ 2","members":["000000f2-0000-0000-0000-000000000002"]}]',
+   '[{"id":"chat","name":"Trò chuyện","color":"#2f6fd1"}]', auth.uid()) $$, 'GV tạo phòng trò chuyện nhóm');
+select throws_ok($$ update v2.discussions set kind = 'khac' where id = '00000000-0000-0000-0000-0000000000d2' $$, '23514', null, 'kind chỉ là board | chat');
+select set_config('request.jwt.claims', '{"sub":"000000f2-0000-0000-0000-000000000002","role":"authenticated"}', true);
+select is((select status from v2.post_discussion('00000000-0000-0000-0000-0000000000d2', 'to2', 'chat', null, 'Tổ 2 chào cả nhà')), 'visible', 'tin nhắn hiện ngay trong tổ của em');
 
 reset role;
 select * from finish();

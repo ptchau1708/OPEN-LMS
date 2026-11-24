@@ -1,5 +1,5 @@
 /** Luật thuần của Phòng thảo luận (dùng cho bản demo, giao diện và kiểm thử). */
-import type { Discussion, DiscussionInput, DiscussionPost, DiscussionRoom, DiscussionTab } from './types';
+import type { Discussion, DiscussionInput, DiscussionKind, DiscussionPost, DiscussionRoom } from './types';
 
 export const DISCUSSION_BODY_MAX = 1000;
 export const DISCUSSION_MAX_IMAGES = 3;
@@ -18,12 +18,41 @@ export function defaultModeration(grade: number | undefined): 'pre' | 'post' {
   return (grade ?? 1) >= 4 ? 'post' : 'pre';
 }
 
-export function newDiscussion(classId: string, grade?: number): DiscussionInput {
+export const CHAT_TAB = { id: 'chat', name: 'Trò chuyện', color: TAB_COLORS[0] };
+
+export function newDiscussion(classId: string, grade?: number, kind: DiscussionKind = 'board'): DiscussionInput {
+  if (kind === 'chat') return newChat(classId, []);
   return {
-    classId, title: '', prompt: '', moderation: defaultModeration(grade), hideOthers: false, opensAt: null, closesAt: null,
+    classId, kind: 'board', title: '', prompt: '', moderation: defaultModeration(grade), hideOthers: false, opensAt: null, closesAt: null,
     locked: false, pinned: false, archived: false, rooms: [{ ...COMMON_ROOM }],
     tabs: [{ id: 'y-kien', name: 'Ý kiến', color: TAB_COLORS[0] }, { id: 'cau-hoi', name: 'Câu hỏi', color: TAB_COLORS[1] }],
   };
+}
+
+/**
+ * Phòng trò chuyện nhóm: một phòng nhỏ mỗi tổ (không có tổ → "Cả lớp"), một tab "Trò chuyện", tin nhắn hiện ngay
+ * (tin có từ chưa phù hợp vẫn chờ duyệt), mặc định khóa — GV bấm "Mở 15 phút" khi bắt đầu hoạt động nhóm.
+ */
+export function newChat(classId: string, teams: { id: string; name: string; studentIds: string[] }[]): DiscussionInput {
+  const rooms = roomsFromTeams(teams);
+  return {
+    classId, kind: 'chat', title: 'Trò chuyện nhóm', prompt: '', moderation: 'post', hideOthers: false, opensAt: null, closesAt: null,
+    locked: true, pinned: false, archived: false, rooms: rooms.length > 1 ? rooms.slice(1) : rooms, tabs: [{ ...CHAT_TAB }],
+  };
+}
+
+/** Mở ngay trong `minutes` phút (mở khóa, đặt giờ đóng). */
+export function openForMinutes<T extends Pick<Discussion, 'locked' | 'opensAt' | 'closesAt'>>(d: T, minutes: number, now = new Date()): T {
+  return { ...d, locked: false, opensAt: now.toISOString(), closesAt: new Date(now.getTime() + minutes * 60_000).toISOString() };
+}
+
+/* ---------- Chèn phòng thảo luận vào Trang học: một dòng [[thao-luan:<id>|Tên phòng]] ---------- */
+export function discussionEmbedToken(d: Pick<Discussion, 'id' | 'title'>): string {
+  return `[[thao-luan:${d.id}|${d.title.replace(/[[\]|\n]/g, ' ').trim()}]]`;
+}
+export function parseDiscussionEmbed(line: string): { id: string; title: string } | null {
+  const m = /^\s*\[\[thao-luan:([A-Za-z0-9-]{1,64})(?:\|([^\]]*))?\]\]\s*$/.exec(line);
+  return m ? { id: m[1], title: (m[2] ?? '').trim() || 'Phòng thảo luận' } : null;
 }
 
 export function slugId(name: string, taken: string[], prefix = 't'): string {

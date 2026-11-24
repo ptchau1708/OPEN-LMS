@@ -62,6 +62,14 @@ const SUBJECT_OF: [RegExp, SubjectId][] = [
   [/^(mi thuat|my thuat)$/, 'mi-thuat'],
   [/^am nhac$/, 'am-nhac'],
   [/^tu nhien va xa hoi$/, 'tnxh'],
+  [/^(lich su va dia (li|ly)|lich su dia (li|ly))$/, 'lich-su-dia-li'],
+  [/^(tin hoc|tin hoc va cong nghe( tin hoc)?)$/, 'tin-hoc'],
+  [/^(cong nghe|tin hoc va cong nghe cong nghe)$/, 'cong-nghe'],
+  [/^dao duc$/, 'dao-duc'],
+  [/^(giao duc the chat|the duc)$/, 'gdtc'],
+  [/^hoat dong trai nghiem$/, 'hdtn'],
+  [/^nghe thuat am nhac$/, 'am-nhac'],
+  [/^nghe thuat mi thuat$|^nghe thuat my thuat$/, 'mi-thuat'],
 ];
 
 export function vneduSubject(label: string): SubjectId | undefined {

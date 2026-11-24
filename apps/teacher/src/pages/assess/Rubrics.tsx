@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
-import { SKILLS, SKILL_BY_CODE, SUBJECTS, type Grade, type Profile, type Rubric, type RubricCriterion, type SubjectId } from '@openedu/contracts';
+import { SKILLS, SKILL_BY_CODE, SUBJECT_LIST, SUBJECTS, fitSubjectToGrade, subjectLabelFor, subjectOptionsFor, type Grade, type Profile, type Rubric, type RubricCriterion, type SubjectId } from '@openedu/contracts';
 import { Icon } from '@openedu/ui';
 import { criteriaMax, fmtScore, matchesSearch, useDeleteRubric, useRubrics, useSaveRubric } from '@openedu/data';
 import { Btn, ConfirmBar, Dialog, Empty, ErrorNote, Field, Loading, PageHead, Seg, SubjectDot } from '../../components/common';
 
-const SUBJ: SubjectId[] = ['toan', 'tieng-viet', 'tieng-anh', 'tnxh', 'khoa-hoc'];
+const SUBJ: SubjectId[] = SUBJECT_LIST.map((s) => s.id);
 const GRADES: Grade[] = [1, 2, 3, 4, 5];
 let seq = 0;
 const nid = (p: string) => `${p}-${Date.now().toString(36)}${(seq++).toString(36)}`;
@@ -78,8 +78,8 @@ export function RubricEditor({ initial, onClose, onSaved }: { initial: Rubric; o
       <div className="tc-stack">
         <Field label="Tên bộ tiêu chí"><input className="tc-input" value={r.title} onChange={(e) => set({ title: e.target.value })} placeholder="vd: Giải bài toán có lời văn" /></Field>
         <div className="tc-row tc-wrap">
-          <Field label="Môn"><select className="tc-input" value={r.subject} onChange={(e) => set({ subject: e.target.value as SubjectId })}>{SUBJ.map((s) => <option key={s} value={s}>{SUBJECTS[s].name}</option>)}</select></Field>
-          <Field label="Lớp"><select className="tc-input" value={r.grade} onChange={(e) => set({ grade: Number(e.target.value) as Grade })}>{GRADES.map((g) => <option key={g} value={g}>Lớp {g}</option>)}</select></Field>
+          <Field label="Môn"><select className="tc-input" value={r.subject} onChange={(e) => set({ subject: e.target.value as SubjectId })}>{subjectOptionsFor(r.grade, [r.subject]).map((s) => <option key={s.id} value={s.id}>{subjectLabelFor(s.id, r.grade)}</option>)}</select></Field>
+          <Field label="Lớp"><select className="tc-input" value={r.grade} onChange={(e) => { const g = Number(e.target.value) as Grade; const sub = fitSubjectToGrade(r.subject, g); set(sub === r.subject ? { grade: g } : { grade: g, subject: sub, skills: [] }); }}>{GRADES.map((g) => <option key={g} value={g}>Lớp {g}</option>)}</select></Field>
           <Field label="Thang điểm"><input className="tc-input tc-input--num" type="number" min={1} max={100} value={r.maxScore} onChange={(e) => set({ maxScore: Math.max(1, Number(e.target.value) || 10) })} /></Field>
         </div>
 

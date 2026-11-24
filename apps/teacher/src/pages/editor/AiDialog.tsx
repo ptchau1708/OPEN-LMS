@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { SUBJECT_LIST, type Grade, type Lesson, type SubjectId } from '@openedu/contracts';
+import { fitSubjectToGrade, subjectLabelFor, subjectOptionsFor, type Grade, type Lesson, type SubjectId } from '@openedu/contracts';
 import { useDataSource } from '@openedu/data';
 import { Btn, Dialog, ErrorNote, Field, Seg } from '../../components/common';
 import { aiDraft, type DraftResult } from '../../lib/aiDraft';
@@ -48,8 +48,8 @@ export function AiDialog({ open, onClose, lesson, onApply }: { open: boolean; on
             <textarea className="tc-input" rows={10} value={text} onChange={(e) => setText(e.target.value)} placeholder={'Ví dụ:\nCon vật sống ở nhiều nơi khác nhau.\n\nCá, tôm, cua sống dưới nước…\n\nTrâu, bò, gà sống trên cạn…'} />
           </Field>
           <div className="tc-row tc-wrap">
-            <Field label="Môn"><select className="tc-input" value={subject} onChange={(e) => setSubject(e.target.value as SubjectId)}>{SUBJECT_LIST.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
-            <div className="tc-field"><span className="tc-field__label">Lớp</span><Seg label="Lớp" value={grade} onChange={setGrade} options={[1, 2, 3, 4, 5].map((g) => ({ value: g as Grade, label: String(g) }))} /></div>
+            <Field label="Môn"><select className="tc-input" value={subject} onChange={(e) => setSubject(e.target.value as SubjectId)}>{subjectOptionsFor(grade, [subject]).map((s) => <option key={s.id} value={s.id}>{subjectLabelFor(s.id, grade)}</option>)}</select></Field>
+            <div className="tc-field"><span className="tc-field__label">Lớp</span><Seg label="Lớp" value={grade} onChange={(g) => { setGrade(g); setSubject((s) => fitSubjectToGrade(s, g)); }} options={[1, 2, 3, 4, 5].map((g) => ({ value: g as Grade, label: String(g) }))} /></div>
             <div className="tc-field"><span className="tc-field__label">Đưa vào bài</span><Seg label="Cách thêm" value={mode} onChange={setMode} options={[{ value: 'append', label: 'Thêm vào cuối' }, { value: 'replace', label: 'Thay toàn bộ slide' }]} /></div>
           </div>
           <ErrorNote error={err} />

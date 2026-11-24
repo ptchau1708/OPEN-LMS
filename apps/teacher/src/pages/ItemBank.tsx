@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { uid, type Lesson, type Profile } from '@openedu/contracts';
-import { ACTIVITY_TYPES, SUBJECT_LIST, SUBJECTS, type Grade, type Item, type ItemType, type SubjectId } from '@openedu/contracts';
+import { uid, type Lesson, type Profile, subjectInGrade, subjectOptionsFor } from '@openedu/contracts';
+import { ACTIVITY_TYPES, SUBJECTS, type Grade, type Item, type ItemType, type SubjectId } from '@openedu/contracts';
 import { useCurrentUser, useDataSource, useDeleteItem, useItems, useLessons, useSaveItem, useSaveLesson } from '@openedu/data';
 import { Btn, ConfirmBar, Dialog, Empty, ErrorNote, Field, Loading, PageHead } from '../components/common';
 import { SampleContent } from './admin/Admin';
@@ -105,8 +105,8 @@ export default function ItemBank() {
       {toast ? <div className={cx('tc-alert tc-bank__toast', toast.error ? 'tc-alert--error' : 'tc-alert--ok')} role="status"><span>{toast.text}</span><Btn size="sm" kind="ghost" icon="close" aria-label="Đóng thông báo" onClick={() => setToast(null)} /></div> : null}
       <div className="tc-filters tc-card tc-card--flat">
         <input className="tc-input tc-filters__search" placeholder="Tìm theo đề bài, kĩ năng, thẻ…" value={search} onChange={(e) => setSearch(e.target.value)} />
-        <select className="tc-input" value={subject} onChange={(e) => setSubject(e.target.value as SubjectId | '')} aria-label="Môn"><option value="">Mọi môn</option>{SUBJECT_LIST.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
-        <select className="tc-input" value={grade} onChange={(e) => setGrade(Number(e.target.value) as Grade | 0)} aria-label="Lớp"><option value={0}>Mọi lớp</option>{[1, 2, 3, 4, 5].map((g) => <option key={g} value={g}>Lớp {g}</option>)}</select>
+        <select className="tc-input" value={subject} onChange={(e) => setSubject(e.target.value as SubjectId | '')} aria-label="Môn"><option value="">Mọi môn</option>{subjectOptionsFor(grade, [subject]).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
+        <select className="tc-input" value={grade} onChange={(e) => { const g = Number(e.target.value) as Grade | 0; setGrade(g); if (g && subject && !subjectInGrade(subject, g)) setSubject(''); }} aria-label="Lớp"><option value={0}>Mọi lớp</option>{[1, 2, 3, 4, 5].map((g) => <option key={g} value={g}>Lớp {g}</option>)}</select>
         <select className="tc-input" value={type} onChange={(e) => setType(e.target.value as ItemType | '')} aria-label="Dạng"><option value="">Mọi dạng</option>{ACTIVITY_TYPES.map((t) => <option key={t.type} value={t.type}>{t.label}{t.isNew ? ' (mới)' : ''}</option>)}</select>
         <span className="tc-muted tc-small">{q.data ? `${q.data.length} câu` : ''}</span>
       </div>

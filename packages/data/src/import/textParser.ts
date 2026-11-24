@@ -13,6 +13,7 @@
  */
 import type { Item, ItemBase } from '@openedu/contracts';
 import { promptKey } from './dedupe';
+import { isTypedBlock, parseTypedBlock } from './typedBlock';
 import { DEFAULT_IMPORT, makeMcq, makeShort, makeTrueFalse, newRowId, type DraftItem, type DraftSource, type ImportDefaults } from './types';
 
 export interface ParseTextResult {
@@ -503,13 +504,20 @@ export function parseQuestionText(text: string, defaults: ImportDefaults = DEFAU
     const drafts: DraftItem[] = [];
     for (const b of blocks) {
       try {
+        // Câu có dòng "Dạng: …" (mẫu Word đủ 16 dạng) → bộ đọc theo dạng.
+        if (isTypedBlock(b.lines)) {
+          drafts.push(parseTypedBlock(b.lines, defaults, source, b.num !== null ? answers.get(b.num) : undefined));
+          continue;
+        }
         drafts.push(...parseBlock(b, answers, defaults, source, numbered));
       } catch {
         const raw = b.lines.join('\n').trim();
         if (raw) drafts.push(draft(makeShort(raw, [], defaults), source, raw, { review: 'Không đọc được đoạn này' }));
       }
     }
-    const pre = preamble.filter((l) => l && !HAS_DOTS.test(l) && !ANSWER_HEADING.test(l)).join('\n').trim();
+    // Phần hướng dẫn ở đầu tệp mẫu Word ("MẪU NHẬP CÂU HỎI…") không phải bài đọc.
+    const isGuide = preamble.some((l) => /^mẫu nhập câu hỏi/i.test(l));
+    const pre = isGuide ? '' : preamble.filter((l) => l && !HAS_DOTS.test(l) && !ANSWER_HEADING.test(l)).join('\n').trim();
     return { drafts, ...(pre.length >= 120 ? { preamble: pre } : {}), answerTableCount: answers.size };
   } catch {
     const raw = String(text ?? '').trim();

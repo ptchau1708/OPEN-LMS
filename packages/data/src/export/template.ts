@@ -129,6 +129,12 @@ const SUBJECT_WORDS: [SubjectId, RegExp][] = [
   ['khoa-hoc', /\bkhoa hoc\b/],
   ['mi-thuat', /\bmi thuat\b|\bmy thuat\b/],
   ['am-nhac', /\bam nhac\b/],
+  ['lich-su-dia-li', /\blich su\b|\bdia (li|ly)\b|\blsdl\b/],
+  ['tin-hoc', /\btin hoc\b/],
+  ['cong-nghe', /\bcong nghe\b/],
+  ['dao-duc', /\bdao duc\b/],
+  ['gdtc', /\bthe chat\b|\bthe duc\b|\bgdtc\b/],
+  ['hdtn', /\btrai nghiem\b|\bhdtn\b/],
 ];
 
 /** Đoán trường phù hợp với nhãn cột (GV luôn xem lại). Chỉ gợi ý trường có trong danh mục. */

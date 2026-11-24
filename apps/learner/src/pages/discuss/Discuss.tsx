@@ -8,7 +8,9 @@ import {
 } from '@openedu/data';
 import { Button, Card, Icon, sfx } from '@openedu/ui';
 import { Avatar, EmptyState, ErrorState, LoadingScreen, TopBack } from '../../components/Common';
+import { useSpeech } from '../../lib/speech';
 import { useMe } from '../../lib/util';
+import { ChatRoom } from './ChatRoom';
 import '../../styles/discuss.css';
 
 const RX: { kind: DiscussionReaction; icon: string; label: string }[] = [{ kind: 'heart', icon: '❤️', label: 'Thả tim' }, { kind: 'star', icon: '⭐', label: 'Khen' }, { kind: 'like', icon: '👍', label: 'Thích' }];
@@ -35,7 +37,8 @@ export function DiscussHome() {
               return (
                 <Card key={d.id} className="ln-dhome__card">
                   <div className="ln-dhome__text">
-                    <h2 className="ln-h2">{d.pinned ? '📌 ' : ''}{d.title}</h2>
+                    <h2 className="ln-h2">{d.pinned ? '📌 ' : ''}{d.kind === 'chat' ? '💬 ' : ''}{d.title}</h2>
+                    {d.kind === 'chat' ? <p className="ln-dkind">Trò chuyện nhóm cùng tổ</p> : null}
                     {d.prompt ? <p>{d.prompt.slice(0, 120)}{d.prompt.length > 120 ? '…' : ''}</p> : null}
                     <span className={`ln-dstate is-${st}`}>{STATE_LABEL[st]}</span>
                   </div>
@@ -111,29 +114,6 @@ function Card2({ p, replies, meId, canPost, onReply }: { p: DiscussionPost; repl
   );
 }
 
-/** Nhận giọng nói → chữ (Chrome / Android). Không có thì ẩn nút. */
-type SR = { lang: string; interimResults: boolean; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; start(): void; stop(): void };
-function useSpeech(onText: (t: string) => void) {
-  const Ctor = (typeof window !== 'undefined' ? (window as unknown as { SpeechRecognition?: new () => SR; webkitSpeechRecognition?: new () => SR }) : {});
-  const C = Ctor.SpeechRecognition ?? Ctor.webkitSpeechRecognition;
-  const [on, setOn] = useState(false);
-  const ref = useRef<SR | null>(null);
-  const cb = useRef(onText);
-  cb.current = onText;
-  const toggle = () => {
-    if (!C) return;
-    if (on) { ref.current?.stop(); return; }
-    const r = new C();
-    r.lang = 'vi-VN';
-    r.interimResults = false;
-    r.onresult = (e) => { const t = Array.from(e.results).map((x) => x[0]?.transcript ?? '').join(' '); if (t) cb.current(t); };
-    r.onend = () => setOn(false);
-    ref.current = r;
-    try { r.start(); setOn(true); } catch { setOn(false); }
-  };
-  return { supported: !!C, on, toggle };
-}
-
 export default function DiscussRoom() {
   const { id = '' } = useParams();
   const me = useMe();
@@ -150,6 +130,7 @@ export default function DiscussRoom() {
   const [files, setFiles] = useState<File[]>([]);
   const [replyTo, setReplyTo] = useState<DiscussionPost | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  const [cols, setCols] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const boxRef = useRef<HTMLTextAreaElement>(null);
   const speech = useSpeech((t) => setBody((b) => (b ? `${b} ${t}` : t)));
@@ -157,6 +138,7 @@ export default function DiscussRoom() {
 
   if (dq.isPending) return <LoadingScreen />;
   if (!d) return <ErrorState title="Không tìm thấy phòng" message={(dq.error as Error | null)?.message} onRetry={() => nav('/thao-luan')} />;
+  if (d.kind === 'chat') return <ChatRoom d={d} />;
   const roomId = myRooms.some((r) => r.id === room) ? room : myRooms[0]?.id ?? '';
   const tabId = d.tabs.some((t) => t.id === tab) ? tab : d.tabs[0]?.id ?? '';
   const st = discussionState(d);
@@ -217,7 +199,17 @@ export default function DiscussRoom() {
       ) : null}
 
       {d.hideOthers && !iPosted ? <p className="ln-dhint">Em đăng bài của mình trước, rồi sẽ thấy bài của các bạn nhé!</p> : null}
-      {posts.isPending ? <LoadingScreen /> : list.length ? (
+      {d.tabs.length > 1 ? <label className="ln-dcolsw"><input type="checkbox" checked={cols} onChange={(e) => setCols(e.target.checked)} /> Xem các tab cạnh nhau</label> : null}
+      {cols ? (
+        <div className="ln-dcols">
+          {d.tabs.map((t) => (
+            <section key={t.id} className="ln-dcol" style={{ ['--tab' as string]: t.color }}>
+              <h2>{t.name}</h2>
+              {(byTab[t.id] ?? []).filter((p) => p.status !== 'removed' && p.status !== 'hidden').map((p) => <Card2 key={p.id} p={p} replies={(replies[p.id] ?? []).filter((r) => r.status !== 'removed' && r.status !== 'hidden')} meId={me.id} canPost={canPost} onReply={(x) => { setReplyTo(x); boxRef.current?.focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />)}
+            </section>
+          ))}
+        </div>
+      ) : posts.isPending ? <LoadingScreen /> : list.length ? (
         <div className="ln-dgrid">{list.map((p) => <Card2 key={p.id} p={p} replies={(replies[p.id] ?? []).filter((r) => r.status !== 'removed' && r.status !== 'hidden')} meId={me.id} canPost={canPost} onReply={(x) => { setReplyTo(x); boxRef.current?.focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />)}</div>
       ) : <EmptyState title="Chưa có bài nào" text={canPost ? 'Em là người đầu tiên đăng bài nhé!' : 'Tab này chưa có bài.'} />}
     </div>

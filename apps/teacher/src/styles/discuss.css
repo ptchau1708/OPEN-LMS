@@ -50,3 +50,44 @@
 .tc-dshow .tc-dgrid { columns: 360px; margin-top: 16px; }
 .tc-dcard.is-big { font-size: 1.35rem; }
 .tc-dcard.is-big .tc-dcard__imgs img { max-height: 360px; }
+
+/* khen → thi đua */
+.tc-praise { position: relative; display: inline-flex; }
+.tc-praise__menu { position: absolute; right: 0; bottom: calc(100% + 4px); z-index: 30; display: flex; flex-direction: column; min-width: 220px; padding: 6px; border-radius: 10px; background: #fff; border: 1px solid #d8dde6; box-shadow: 0 8px 24px rgba(20, 30, 50, .18); }
+.tc-praise__menu button { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border: 0; border-radius: 6px; background: none; font: inherit; text-align: left; cursor: pointer; }
+.tc-praise__menu button:hover, .tc-praise__menu button:focus-visible { background: #eef4fd; }
+.tc-praise__menu button b { margin-left: auto; color: #1f8a4c; }
+.tc-dopen { gap: 4px; }
+
+/* trò chuyện nhóm */
+.tc-chatgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.tc-chatgrid.is-one { grid-template-columns: 1fr; }
+.tc-chat { display: flex; flex-direction: column; height: 460px; border: 1px solid #d8dde6; border-radius: 12px; background: #fff; overflow: hidden; }
+.tc-chatgrid.is-one .tc-chat { height: min(70vh, 720px); }
+.tc-chat__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px; background: #f1f4f9; border-bottom: 1px solid #e1e6ee; }
+.tc-chat__list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 10px; }
+.tc-msg { align-self: flex-start; max-width: 85%; padding: 6px 10px; border-radius: 12px 12px 12px 4px; background: #f1f4f9; }
+.tc-msg.is-teacher { align-self: flex-end; border-radius: 12px 12px 4px 12px; background: #e3edff; }
+.tc-msg.is-pending { border: 2px dashed #d9a400; }
+.tc-msg.is-hidden { opacity: .5; text-decoration: line-through; }
+.tc-msg__who { font-size: .8rem; font-weight: 700; color: #475066; display: flex; gap: 6px; align-items: center; }
+.tc-msg__who small { font-weight: 400; color: #8590a3; }
+.tc-msg__body { white-space: pre-wrap; overflow-wrap: anywhere; }
+.tc-msg__act { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 2px; }
+.tc-chat__send { display: flex; gap: 6px; padding: 8px; border-top: 1px solid #e1e6ee; }
+.tc-chat__send .tc-input { flex: 1; }
+.tc-chat.is-big { height: auto; min-height: 40vh; }
+.tc-chat.is-big .tc-msg { font-size: 1.4rem; }
+
+/* TV */
+.tc-dtv { min-height: 100vh; padding: 20px 28px 40px; background: #f6f3ff; box-sizing: border-box; }
+.tc-dtv__head { display: flex; gap: 20px; align-items: flex-start; }
+.tc-dtv__title { flex: 1; }
+.tc-dtv__title h1 { margin: 0 0 6px; font-size: clamp(1.8rem, 3.4vw, 3rem); }
+.tc-dtv__title p { margin: 0 0 8px; font-size: clamp(1.1rem, 1.8vw, 1.6rem); white-space: pre-wrap; }
+.tc-dtv__qr { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; background: #fff; border-radius: 12px; }
+.tc-dtv__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 12px 0 16px; }
+.tc-dtv .tc-dgrid { columns: 340px; }
+.tc-chatgrid.is-tv { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+.tc-praise.is-inline { flex-direction: column; align-items: flex-start; }
+.tc-praise.is-inline .tc-praise__menu { position: static; box-shadow: none; margin-top: 4px; }

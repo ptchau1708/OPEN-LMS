@@ -1,13 +1,18 @@
 import { useMemo, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router';
-import { MASTERY_LEVEL_LABEL, MISCONCEPTIONS, SKILL_BY_CODE, STRAND_LABEL, SUBJECTS, type ClassHeatmap, type GapGroup, type HeatmapCell, type MascotId, type Profile, type SubjectId } from '@openedu/contracts';
+import { MASTERY_LEVEL_LABEL, MISCONCEPTIONS, SKILLS, SKILL_BY_CODE, STRAND_LABEL, SUBJECTS, subjectsForGrade, type ClassHeatmap, type GapGroup, type HeatmapCell, type MascotId, type Profile, type SubjectId } from '@openedu/contracts';
 import { useClasses, useClassHeatmap, useGapGroups, useItemsByIds, useRemediationSets, useSkillMastery, useStudentProfile } from '@openedu/data';
 import { Avatar, Btn, Empty, ErrorNote, Loading, PageHead, Seg } from '../components/common';
 import { cx, relTime, shorten } from '../lib/format';
 import { LevelLegend, LevelSwatch, pct } from '../lib/mastery';
 import { useRemediate } from '../lib/remediate';
 
-const SUBJECT_OPTS: SubjectId[] = ['toan', 'tieng-viet', 'tieng-anh', 'tnxh'];
+/** Môn có bản đồ kiến thức: môn của lớp (CT GDPT 2018) đã có danh mục yêu cầu cần đạt. */
+const HAS_SKILLS = new Set(SKILLS.map((s) => s.subject));
+const subjectOptsFor = (grade: number): SubjectId[] => {
+  const list = subjectsForGrade(grade).filter((s) => HAS_SKILLS.has(s));
+  return list.length ? list : ['toan', 'tieng-viet'];
+};
 const EMPTY: HeatmapCell = { level: 'chua-hoc', p: 0, attempts: 0 };
 
 /** /kien-thuc → bản đồ của lớp đầu tiên. */
@@ -24,14 +29,16 @@ export default function Heatmap({ user }: { user: Profile }) {
   const { classId = '' } = useParams();
   const nav = useNavigate();
   const classes = useClasses(user.role === 'admin' ? undefined : user.id);
-  const [subject, setSubject] = useState<SubjectId>('toan');
+  const [picked, setSubject] = useState<SubjectId>('toan');
   const [sort, setSort] = useState<'gaps' | 'name'>('gaps');
   const [onlyData, setOnlyData] = useState(true);
   const [open, setOpen] = useState<{ sid: string; code: string } | null>(null);
   const [tip, setTip] = useState<{ code: string; x: number; y: number } | null>(null);
+  const cls = classes.data?.find((c) => c.id === classId);
+  const subjOpts = cls ? subjectOptsFor(cls.grade) : [picked];
+  const subject = subjOpts.includes(picked) ? picked : subjOpts[0]!;
   const hm = useClassHeatmap(classId, subject);
   const groups = useGapGroups(classId, subject);
-  const cls = classes.data?.find((c) => c.id === classId);
   const data = hm.data;
 
   const cols = useMemo(() => {
@@ -67,7 +74,7 @@ export default function Heatmap({ user }: { user: Profile }) {
     <div className="tc-page tc-page--wide">
       <PageHead title={`Bản đồ kiến thức${cls ? ` — Lớp ${cls.name}` : ''}`} sub="Mỗi ô: một em × một yêu cầu cần đạt. Bấm ô để xem bằng chứng, gốc rễ và cách hỗ trợ." actions={<>
         {(classes.data?.length ?? 0) > 1 ? <Seg label="Chọn lớp" value={classId} onChange={(v) => nav(`/lop/${v}/ban-do-kien-thuc`)} options={(classes.data ?? []).map((c) => ({ value: c.id, label: `Lớp ${c.name}` }))} /> : null}
-        <Seg label="Môn" value={subject} onChange={(v) => { setSubject(v); setOpen(null); }} options={SUBJECT_OPTS.map((s) => ({ value: s, label: SUBJECTS[s].name }))} />
+        <Seg label="Môn" value={subject} onChange={(v) => { setSubject(v); setOpen(null); }} options={subjOpts.map((s) => ({ value: s, label: SUBJECTS[s].name }))} />
       </>} />
 
       <div className="tc-hmbar">

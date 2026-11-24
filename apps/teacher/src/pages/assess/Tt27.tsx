@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { SUBJECTS, TT27_COMPETENCY_LABEL, TT27_LEVEL_LABEL, TT27_QUALITY_LABEL, TT27_RATING_LABEL, TT27_TERM_LABEL, schoolYearOf, type Grade, type Profile, type SubjectId, type Tt27Competency, type Tt27Evaluation, type Tt27Level, type Tt27Quality, type Tt27Rating, type Tt27SubjectResult, type Tt27TermId } from '@openedu/contracts';
+import { SUBJECTS, isPeriodicAt, subjectsForGrade, TT27_COMPETENCY_LABEL, TT27_LEVEL_LABEL, TT27_QUALITY_LABEL, TT27_RATING_LABEL, TT27_TERM_LABEL, schoolYearOf, type Grade, type Profile, type SubjectId, type Tt27Competency, type Tt27Evaluation, type Tt27Level, type Tt27Quality, type Tt27Rating, type Tt27SubjectResult, type Tt27TermId } from '@openedu/contracts';
 import { useSaveTt27, useSuggestTt27, useTt27 } from '@openedu/data';
 import { Avatar, Btn, Dialog, Empty, ErrorNote, Field, Loading, PageHead, Seg } from '../../components/common';
 import { ClassPicker, useClassPick, useRoster } from '../../lib/assess';
@@ -10,7 +10,8 @@ const LEVELS: Tt27Level[] = ['T', 'H', 'C'];
 const RATINGS: Tt27Rating[] = ['T', 'Đ', 'C'];
 const QUALITIES = Object.keys(TT27_QUALITY_LABEL) as Tt27Quality[];
 const COMPETENCIES = Object.keys(TT27_COMPETENCY_LABEL) as Tt27Competency[];
-const subjectsFor = (g: Grade): SubjectId[] => (g <= 2 ? ['toan', 'tieng-viet', 'tnxh'] : g === 3 ? ['toan', 'tieng-viet', 'tieng-anh', 'tnxh'] : ['toan', 'tieng-viet', 'tieng-anh', 'khoa-hoc']);
+/** Môn được nhận xét theo TT27: mọi môn của lớp theo CT GDPT 2018 (môn đã ẩn không hiện). */
+const subjectsFor = (g: Grade): SubjectId[] => subjectsForGrade(g);
 
 function blank(studentId: string, classId: string, termId: Tt27TermId, schoolYear: string): Tt27Evaluation {
   return { studentId, classId, termId, schoolYear, subjects: {}, qualities: Object.fromEntries(QUALITIES.map((q) => [q, 'Đ'])) as Tt27Evaluation['qualities'], competencies: {}, generalComment: '', status: 'draft' };
@@ -158,7 +159,7 @@ export default function Tt27({ user }: { user: Profile }) {
         <div className="tc-row tc-noprint"><Btn icon="back" onClick={() => setPrint(false)}>Quay lại chỉnh sửa</Btn><Btn kind="primary" onClick={() => window.print()}>In</Btn></div>
         <h1>Bảng tổng hợp đánh giá — Lớp {cls.name} — {TT27_TERM_LABEL[termId]} — năm học {schoolYear}</h1>
         <table className="tc-table tc-printtable">
-          <thead><tr><th>TT</th><th>Họ tên</th>{subjects.map((s) => <th key={s}>{SUBJECTS[s].name}</th>)}<th>Phẩm chất</th><th>Năng lực</th></tr></thead>
+          <thead><tr><th>TT</th><th>Họ tên</th>{subjects.map((s) => <th key={s} title={SUBJECTS[s].name}>{SUBJECTS[s].short}</th>)}<th>Phẩm chất</th><th>Năng lực</th></tr></thead>
           <tbody>
             {roster.map((s, i) => {
               const e = evalOf(s.id);
@@ -259,7 +260,7 @@ export default function Tt27({ user }: { user: Profile }) {
               </div>
             </div>
             <div className="tc-row tc-wrap">
-              {subjects.map((subj) => (
+              {subjects.filter((x) => isPeriodicAt(x, cls?.grade ?? 4)).map((subj) => (
                 <Field key={subj} label={`Điểm KTĐK ${SUBJECTS[subj].name}`}><input className="tc-input tc-input--num" type="number" min={0} max={10} step={0.5} value={de.subjects[subj]?.score ?? ''} onChange={(ev) => setSubj(det.id, subj, { score: ev.target.value === '' ? undefined : Math.max(0, Math.min(10, Number(ev.target.value))) })} /></Field>
               ))}
             </div>

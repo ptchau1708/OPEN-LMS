@@ -1,7 +1,7 @@
 import { lazy, Suspense, useMemo, useState, type CSSProperties } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useQueries } from '@tanstack/react-query';
-import { SUBJECT_LIST, SUBJECTS, type Lesson, type LessonProgress, type SubjectId } from '@openedu/contracts';
+import { SUBJECTS, type Lesson, type LessonProgress, type SubjectId } from '@openedu/contracts';
 import { qk, useAssignments, useCourses, useDataSource, useLessons, usePassport, useWallet } from '@openedu/data';
 import { Button, Icon, Mascot, ProgressBar, Sheet, StarCount, StarShape, SubjectBadge, sfx } from '@openedu/ui';
 import { AppTabs, EmptyState, ErrorState, LoadingScreen } from '../components/Common';
@@ -43,7 +43,7 @@ export default function Learn() {
     return { map, byId };
   }, [courses.data, lessons.data, assigns.data, me.grade]);
 
-  const subjects = SUBJECT_LIST.filter((s) => (bySubject.map[s.id] ?? []).length > 0);
+  const subjects = Object.values(SUBJECTS).filter((s) => (bySubject.map[s.id] ?? []).length > 0);
   const want = params.get('mon') as SubjectId | null;
   const subject = subjects.find((s) => s.id === want) ?? subjects[0];
   const ids = subject ? bySubject.map[subject.id] ?? [] : [];

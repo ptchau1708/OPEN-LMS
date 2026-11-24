@@ -1,20 +1,21 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { MASTERY_LEVEL_LABEL, SUBJECTS, type Grade, type Profile, type SubjectId } from '@openedu/contracts';
+import { MASTERY_LEVEL_LABEL, SUBJECTS, fitSubjectToGrade, subjectsForGrade, type Grade, type Profile, type SubjectId } from '@openedu/contracts';
 import { useClasses, useGradeHeatmap } from '@openedu/data';
 import { Btn, Empty, ErrorNote, Loading, PageHead, Seg } from '../../components/common';
 import { cx } from '../../lib/format';
 import { levelOfP, pct } from './util';
 import '../../styles/admin.css';
 
-const SUBJ: SubjectId[] = ['toan', 'tieng-viet', 'tieng-anh', 'tnxh', 'khoa-hoc'];
 
 export default function GradeMap({ user }: { user: Profile }) {
   const classes = useClasses(user.role === 'admin' ? undefined : user.id).data ?? [];
   const grades = [...new Set(classes.map((c) => c.grade))].sort() as Grade[];
   const [grade, setGrade] = useState<Grade | null>(null);
-  const [subject, setSubject] = useState<SubjectId>('toan');
+  const [picked, setSubject] = useState<SubjectId>('toan');
   const g = grade ?? grades.find((x) => x === 4) ?? grades[0];
+  const subjList = g ? subjectsForGrade(g, { periodic: true }) : subjectsForGrade(4, { periodic: true });
+  const subject = g ? fitSubjectToGrade(picked, g, { periodic: true }) : picked;
   const q = useGradeHeatmap(g, subject);
   const hm = q.data;
   const [onlyWeak, setOnlyWeak] = useState(false);
@@ -25,7 +26,7 @@ export default function GradeMap({ user }: { user: Profile }) {
       <PageHead title="Bản đồ kĩ năng theo khối" sub="Gộp bản đồ kiến thức của các lớp cùng khối: mỗi ô là mức thành thạo trung bình của lớp ở một kĩ năng." actions={<Link className="tc-btn tc-btn--ghost" to="/bao-cao"><span>← Báo cáo</span></Link>} />
       <div className="tc-row tc-wrap">
         {grades.length > 0 && <Seg label="Khối" value={g as Grade} onChange={(v) => setGrade(v)} options={grades.map((x) => ({ value: x, label: `Khối ${x}` }))} />}
-        <Seg label="Môn" value={subject} onChange={setSubject} options={SUBJ.map((s) => ({ value: s, label: SUBJECTS[s].name }))} />
+        <Seg label="Môn" value={subject} onChange={setSubject} options={subjList.map((s) => ({ value: s, label: SUBJECTS[s].name }))} />
         <Btn size="sm" kind={onlyWeak ? 'primary' : 'default'} onClick={() => setOnlyWeak((v) => !v)}>Chỉ kĩ năng cả khối còn yếu</Btn>
       </div>
       <ErrorNote error={q.error} onRetry={() => void q.refetch()} />

@@ -2,6 +2,8 @@
 export type DiscussionModeration = 'pre' | 'post';
 export type DiscussionPostStatus = 'pending' | 'visible' | 'hidden' | 'removed';
 export type DiscussionReaction = 'heart' | 'star' | 'like';
+/** board: bảng thảo luận kiểu Padlet · chat: trò chuyện nhóm theo tổ (SQL 16). */
+export type DiscussionKind = 'board' | 'chat';
 
 /** Phòng nhỏ: members rỗng = cả lớp vào được. */
 export interface DiscussionRoom { id: string; name: string; members: string[] }
@@ -11,6 +13,7 @@ export interface DiscussionTab { id: string; name: string; color: string }
 export interface Discussion {
   id: string;
   classId: string;
+  kind: DiscussionKind;
   title: string;
   /** Lời dẫn / câu hỏi của GV. */
   prompt: string;

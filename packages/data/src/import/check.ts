@@ -1,5 +1,5 @@
 /** Kiểm tra một câu đã đủ để lưu chưa (thuần). */
-import type { Choice, Item } from '@openedu/contracts';
+import { SUBJECTS, subjectInGrade, type Choice, type Item } from '@openedu/contracts';
 import type { DraftItem, DraftStatus } from './types';
 
 const hasText = (c: Choice): boolean => !!(c.text && c.text.trim()) || !!c.image;
@@ -79,5 +79,12 @@ export function draftStatus(d: Pick<DraftItem, 'item' | 'review'>): DraftStatus 
 /** Lí do hiển thị cho GV. */
 export function draftReasons(d: Pick<DraftItem, 'item' | 'review' | 'notes'>): string[] {
   const c = checkItem(d.item);
-  return [...(d.review ? [d.review] : []), ...c.problems, ...(c.missingAnswer ? ['Chưa có đáp án đúng'] : []), ...d.notes];
+  const offGrade = subjectGradeWarning(d.item);
+  return [...(d.review ? [d.review] : []), ...c.problems, ...(c.missingAnswer ? ['Chưa có đáp án đúng'] : []), ...(offGrade ? [offGrade] : []), ...d.notes];
+}
+
+/** Nhắc nhẹ (không chặn lưu) khi môn không có trong chương trình lớp đã chọn, vd "Khoa học" ở lớp 2. */
+export function subjectGradeWarning(item: Pick<Item, 'subject' | 'grade'>): string | null {
+  if (!item.subject || !item.grade || subjectInGrade(item.subject, item.grade)) return null;
+  return `Môn ${SUBJECTS[item.subject]?.name ?? item.subject} không có ở lớp ${item.grade} (CT GDPT 2018) — kiểm tra lại môn hoặc lớp`;
 }

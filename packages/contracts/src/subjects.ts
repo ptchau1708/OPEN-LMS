@@ -1,27 +1,134 @@
 import type { MascotId } from './mascots';
 
-export type SubjectId = 'toan' | 'tieng-viet' | 'tieng-anh' | 'tnxh' | 'khoa-hoc' | 'mi-thuat' | 'am-nhac' | 'khac';
+/**
+ * Môn học cấp tiểu học theo Chương trình GDPT 2018 (Thông tư 32/2018), đúng thứ tự trong chương trình, + "Khác".
+ * - `grades`: các lớp có môn này:
+ *     Tiếng Việt, Toán, Đạo đức, GDTC, Âm nhạc, Mĩ thuật, HĐTN: lớp 1–5
+ *     Tự nhiên và Xã hội: lớp 1–3 · Lịch sử và Địa lí, Khoa học: lớp 4–5 · Tin học, Công nghệ: lớp 3–5
+ *     Tiếng Anh (Ngoại ngữ 1): bắt buộc lớp 3–5, tự chọn lớp 1–2 (`elective`).
+ * - `periodic`: có bài kiểm tra định kì theo Thông tư 27/2020 (Tiếng Việt, Toán, Ngoại ngữ 1, Lịch sử và Địa lí,
+ *   Khoa học, Tin học và Công nghệ) — chỉ ở lớp môn đó là bắt buộc.
+ * - Tin học và Công nghệ (lớp 3–5) tách làm hai môn "Tin học", "Công nghệ" để soạn câu hỏi riêng từng phần.
+ * - `retired`: ẩn khỏi các ô chọn (nếu trường không dùng) nhưng câu hỏi / bài cũ vẫn đọc được. Hiện không môn nào bị ẩn.
+ */
+export type SubjectId =
+  | 'toan'
+  | 'tieng-viet'
+  | 'tieng-anh'
+  | 'dao-duc'
+  | 'tnxh'
+  | 'lich-su-dia-li'
+  | 'khoa-hoc'
+  | 'tin-hoc'
+  | 'cong-nghe'
+  | 'gdtc'
+  | 'am-nhac'
+  | 'mi-thuat'
+  | 'hdtn'
+  | 'khac';
 
 export interface SubjectMeta {
   id: SubjectId;
   name: string;
+  /** Tên ngắn cho chỗ hẹp (thẻ, cột bảng). */
+  short: string;
   /** Tên biến CSS màu trong tokens.css, vd var(--k-math). */
   colorVar: string;
   /** Màu hex dự phòng (dùng trong SVG, canvas). */
   color: string;
   /** Linh vật dẫn đường của môn. */
   mascot: MascotId;
+  /** Các lớp học môn này (CT GDPT 2018), kể cả lớp học tự chọn. */
+  grades: readonly number[];
+  /** Các lớp mà môn này là môn tự chọn (không có kiểm tra định kì). */
+  elective?: readonly number[];
+  /** Có bài kiểm tra định kì (TT27) ở các lớp môn này bắt buộc. */
+  periodic?: boolean;
+  /** Ẩn khỏi ô chọn; dữ liệu cũ vẫn dùng được. */
+  retired?: boolean;
 }
 
+const ALL = [1, 2, 3, 4, 5] as const;
 export const SUBJECTS: Record<SubjectId, SubjectMeta> = {
-  toan: { id: 'toan', name: 'Toán', colorVar: '--k-math', color: '#2f7bf6', mascot: 'shiba' },
-  'tieng-viet': { id: 'tieng-viet', name: 'Tiếng Việt', colorVar: '--k-viet', color: '#ff8a3d', mascot: 'nghe' },
-  'tieng-anh': { id: 'tieng-anh', name: 'Tiếng Anh', colorVar: '--k-eng', color: '#8b5cf6', mascot: 'kiwi' },
-  tnxh: { id: 'tnxh', name: 'Tự nhiên và Xã hội', colorVar: '--k-nat', color: '#20a974', mascot: 'koala' },
-  'khoa-hoc': { id: 'khoa-hoc', name: 'Khoa học', colorVar: '--k-sci', color: '#0ea5a4', mascot: 'capybara' },
-  'mi-thuat': { id: 'mi-thuat', name: 'Mĩ thuật', colorVar: '--k-art', color: '#ff5d8f', mascot: 'cong' },
-  'am-nhac': { id: 'am-nhac', name: 'Âm nhạc', colorVar: '--k-music', color: '#e8485f', mascot: 'ga' },
-  khac: { id: 'khac', name: 'Khác', colorVar: '--k-other', color: '#64748b', mascot: 'panda' },
+  'tieng-viet': { id: 'tieng-viet', name: 'Tiếng Việt', short: 'TV', colorVar: '--k-viet', color: '#ff8a3d', mascot: 'nghe', grades: ALL, periodic: true },
+  toan: { id: 'toan', name: 'Toán', short: 'Toán', colorVar: '--k-math', color: '#2f7bf6', mascot: 'shiba', grades: ALL, periodic: true },
+  'tieng-anh': { id: 'tieng-anh', name: 'Tiếng Anh', short: 'TA', colorVar: '--k-eng', color: '#8b5cf6', mascot: 'kiwi', grades: ALL, elective: [1, 2], periodic: true },
+  'dao-duc': { id: 'dao-duc', name: 'Đạo đức', short: 'ĐĐ', colorVar: '--k-ethic', color: '#d97706', mascot: 'voi', grades: ALL },
+  tnxh: { id: 'tnxh', name: 'Tự nhiên và Xã hội', short: 'TN&XH', colorVar: '--k-nat', color: '#20a974', mascot: 'koala', grades: [1, 2, 3] },
+  'lich-su-dia-li': { id: 'lich-su-dia-li', name: 'Lịch sử và Địa lí', short: 'LS&ĐL', colorVar: '--k-hist', color: '#b45309', mascot: 'ho', grades: [4, 5], periodic: true },
+  'khoa-hoc': { id: 'khoa-hoc', name: 'Khoa học', short: 'KH', colorVar: '--k-sci', color: '#0ea5a4', mascot: 'capybara', grades: [4, 5], periodic: true },
+  'tin-hoc': { id: 'tin-hoc', name: 'Tin học', short: 'Tin', colorVar: '--k-it', color: '#2563eb', mascot: 'panda', grades: [3, 4, 5], periodic: true },
+  'cong-nghe': { id: 'cong-nghe', name: 'Công nghệ', short: 'CN', colorVar: '--k-tech', color: '#4d7c0f', mascot: 'koala', grades: [3, 4, 5], periodic: true },
+  gdtc: { id: 'gdtc', name: 'Giáo dục thể chất', short: 'GDTC', colorVar: '--k-pe', color: '#dc2626', mascot: 'ho', grades: ALL },
+  'am-nhac': { id: 'am-nhac', name: 'Âm nhạc', short: 'ÂN', colorVar: '--k-music', color: '#e8485f', mascot: 'ga', grades: ALL },
+  'mi-thuat': { id: 'mi-thuat', name: 'Mĩ thuật', short: 'MT', colorVar: '--k-art', color: '#ff5d8f', mascot: 'cong', grades: ALL },
+  hdtn: { id: 'hdtn', name: 'Hoạt động trải nghiệm', short: 'HĐTN', colorVar: '--k-exp', color: '#16a34a', mascot: 'nghe', grades: ALL },
+  khac: { id: 'khac', name: 'Khác', short: 'Khác', colorVar: '--k-other', color: '#64748b', mascot: 'panda', grades: ALL },
 };
 
-export const SUBJECT_LIST: SubjectMeta[] = Object.values(SUBJECTS);
+/** Các môn đang dùng (hiện trong ô chọn), theo thứ tự CT GDPT 2018. */
+export const SUBJECT_LIST: SubjectMeta[] = Object.values(SUBJECTS).filter((s) => !s.retired);
+
+const metaOf = (id: string): SubjectMeta | undefined => (SUBJECTS as Record<string, SubjectMeta | undefined>)[id];
+
+/** Môn `id` có trong chương trình lớp `grade` không ("Khác" hợp với mọi lớp). */
+export function subjectInGrade(id: SubjectId | string, grade: number): boolean {
+  return !!metaOf(id)?.grades.includes(grade);
+}
+
+/** Môn `id` có kiểm tra định kì ở lớp `grade` không (môn tự chọn ở lớp đó thì không). */
+export function isPeriodicAt(id: SubjectId | string, grade: number): boolean {
+  const m = metaOf(id);
+  return !!m?.periodic && m.grades.includes(grade) && !m.elective?.includes(grade);
+}
+
+/** Môn học của một lớp (không gồm "Khác"). `periodic`: chỉ các môn có kiểm tra định kì ở lớp đó. */
+export function subjectsForGrade(grade: number, opts: { periodic?: boolean } = {}): SubjectId[] {
+  return SUBJECT_LIST.filter((s) => s.id !== 'khac' && s.grades.includes(grade) && (!opts.periodic || isPeriodicAt(s.id, grade))).map((s) => s.id);
+}
+
+/** Danh sách cho ô lọc: các môn đang dùng + môn đã ẩn nhưng còn dữ liệu (`present`). */
+export function subjectOptions(present: Iterable<SubjectId> = []): SubjectMeta[] {
+  const have = new Set(present);
+  return Object.values(SUBJECTS).filter((s) => !s.retired || have.has(s.id));
+}
+
+/**
+ * Danh sách cho ô chọn môn khi đã biết lớp: chỉ các môn của lớp đó (kèm "Khác"), theo CT GDPT 2018.
+ * `grade` rỗng / 0 → mọi môn. `present`: môn đang được chọn / đang có dữ liệu — luôn giữ lại để ô chọn không mất giá trị.
+ */
+export function subjectOptionsFor(grade: number | null | undefined, present: Iterable<SubjectId | ''> = []): SubjectMeta[] {
+  const have = new Set([...present].filter(Boolean) as SubjectId[]);
+  if (!grade) return subjectOptions(have);
+  return Object.values(SUBJECTS).filter((s) => (!s.retired && s.grades.includes(grade)) || have.has(s.id));
+}
+
+/** Nhãn môn trong ô chọn theo lớp: thêm "(tự chọn)" hoặc "(không thuộc lớp N)". */
+export function subjectLabelFor(id: SubjectId, grade: number | null | undefined): string {
+  const m = SUBJECTS[id];
+  if (!m) return id;
+  if (!grade) return m.name;
+  if (!m.grades.includes(grade)) return `${m.name} (không thuộc lớp ${grade})`;
+  return m.elective?.includes(grade) ? `${m.name} (tự chọn)` : m.name;
+}
+
+/** Môn hợp lệ cho lớp mới: giữ `current` nếu lớp đó có, nếu không lấy môn đầu tiên của lớp. */
+export function fitSubjectToGrade(current: SubjectId, grade: number, opts: { periodic?: boolean } = {}): SubjectId {
+  const list = subjectsForGrade(grade, opts);
+  if (opts.periodic ? isPeriodicAt(current, grade) : subjectInGrade(current, grade)) return current;
+  return list[0] ?? current;
+}
+
+/** Ghi chú lớp của môn cho tài liệu / mẫu nhập: "lớp 1–3", "lớp 1–5 (lớp 1–2 tự chọn)". */
+export function subjectGradeNote(id: SubjectId): string {
+  const m = SUBJECTS[id];
+  if (!m || id === 'khac') return 'mọi lớp';
+  const g = [...m.grades];
+  const range = (a: number[]) => (a.length === 1 ? `lớp ${a[0]}` : `lớp ${a[0]}–${a[a.length - 1]}`);
+  return range(g) + (m.elective?.length ? ` (${range([...m.elective])} tự chọn)` : '');
+}
+
+/** Tên môn an toàn (mã lạ → chính mã đó). */
+export function subjectName(id: string): string {
+  return metaOf(id)?.name ?? id;
+}

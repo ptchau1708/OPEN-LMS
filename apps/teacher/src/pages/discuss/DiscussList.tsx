@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import type { Profile } from '@openedu/contracts';
-import { discussionState, newDiscussion, STATE_LABEL, useDeleteDiscussion, useDiscussions, useDiscussionStats, type Discussion, type DiscussionInput } from '@openedu/data';
+import { discussionState, newChat, newDiscussion, STATE_LABEL, useDeleteDiscussion, useDiscussions, useDiscussionStats, type Discussion, type DiscussionInput } from '@openedu/data';
 import { Btn, ConfirmBar, Empty, ErrorNote, Loading, PageHead } from '../../components/common';
 import { ClassPicker, useClassPick, useRoster } from '../../lib/assess';
+import { teamsFor, useTeamsStore } from '../../lib/teams';
 import { cx, relTime } from '../../lib/format';
 import { DiscussEditor } from './DiscussEditor';
 
@@ -17,6 +18,7 @@ export default function DiscussList({ user }: { user: Profile }) {
   const nav = useNavigate();
   const [edit, setEdit] = useState<DiscussionInput | Discussion | null>(null);
   const [confirm, setConfirm] = useState<string | null>(null);
+  const localTeams = useTeamsStore((s) => s.byClass);
   const items = q.data ?? [];
   const live = items.filter((d) => !d.archived);
   const old = items.filter((d) => d.archived);
@@ -28,8 +30,8 @@ export default function DiscussList({ user }: { user: Profile }) {
     return (
       <li key={d.id} className="tc-dlist__row">
         <Link to={`/thao-luan/${d.id}`} className="tc-dlist__main" data-testid="dc-open">
-          <strong>{d.pinned ? '📌 ' : ''}{d.title}</strong>
-          <small className="tc-muted">{d.rooms.length > 1 ? `${d.rooms.length} phòng nhỏ · ` : ''}{d.tabs.map((t) => t.name).join(' · ')}{s?.lastAt ? ` · bài mới ${relTime(s.lastAt)}` : ''}</small>
+          <strong>{d.pinned ? '📌 ' : ''}{d.kind === 'chat' ? '💬 ' : ''}{d.title}</strong>
+          <small className="tc-muted">{d.kind === 'chat' ? `Trò chuyện nhóm · ${d.rooms.length} nhóm` : `${d.rooms.length > 1 ? `${d.rooms.length} phòng nhỏ · ` : ''}${d.tabs.map((t) => t.name).join(' · ')}`}{s?.lastAt ? ` · bài mới ${relTime(s.lastAt)}` : ''}</small>
         </Link>
         <span className={cx('tc-chip', st === 'open' ? 'tc-chip--ok' : '')}>{STATE_LABEL[st]}</span>
         <span className="tc-small">{s?.total ?? 0} bài</span>
@@ -44,9 +46,10 @@ export default function DiscussList({ user }: { user: Profile }) {
 
   return (
     <div className="tc-page tc-dlist">
-      <PageHead title="Phòng thảo luận" sub="Học sinh trao đổi theo chủ đề: chia phòng nhỏ theo tổ, đăng bài vào từng tab như Padlet. GV duyệt, ẩn bài, khóa phòng bất cứ lúc nào." actions={<>
+      <PageHead title="Phòng thảo luận" sub="Bảng thảo luận: HS đăng bài vào từng tab như Padlet, chia phòng nhỏ theo tổ. Trò chuyện nhóm: mỗi tổ nhắn tin trong giờ hoạt động nhóm. GV duyệt, ẩn, khóa bất cứ lúc nào." actions={<>
         <ClassPicker list={list} value={classId} onChange={setClassId} />
-        <Btn kind="primary" icon="plus" disabled={!cls} onClick={() => setEdit(newDiscussion(classId, cls?.grade))} data-testid="dc-new">Tạo phòng thảo luận</Btn>
+        <Btn icon="plus" disabled={!cls} onClick={() => cls && setEdit(newChat(classId, teamsFor(cls, localTeams)))} data-testid="dc-new-chat">Trò chuyện nhóm</Btn>
+        <Btn kind="primary" icon="plus" disabled={!cls} onClick={() => setEdit(newDiscussion(classId, cls?.grade))} data-testid="dc-new">Tạo bảng thảo luận</Btn>
       </>} />
       <ErrorNote error={q.error} onRetry={() => void q.refetch()} />
       {q.isLoading ? <Loading /> : !items.length ? (

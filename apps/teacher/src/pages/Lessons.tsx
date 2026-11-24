@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { SUBJECT_LIST, SUBJECTS, uid, type Grade, type Lesson, type Profile, type SubjectId } from '@openedu/contracts';
+import { SUBJECTS, uid, type Grade, type Lesson, type Profile, type SubjectId, fitSubjectToGrade, subjectInGrade, subjectLabelFor, subjectOptionsFor } from '@openedu/contracts';
 import { Mascot } from '@openedu/ui';
 import { useLessons, useSaveLesson } from '@openedu/data';
 import { Btn, Dialog, Empty, ErrorNote, Field, Loading, PageHead, Seg } from '../components/common';
@@ -28,10 +28,10 @@ export function CreateLessonDialog({ open, onClose, user }: { open: boolean; onC
         <Field label="Tên bài"><input className="tc-input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="vd: Phép cộng có nhớ trong phạm vi 100" /></Field>
         <Field label="Môn học">
           <select className="tc-input" value={subject} onChange={(e) => setSubject(e.target.value as SubjectId)}>
-            {SUBJECT_LIST.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            {subjectOptionsFor(grade, [subject]).map((s) => <option key={s.id} value={s.id}>{subjectLabelFor(s.id, grade)}</option>)}
           </select>
         </Field>
-        <div className="tc-field"><span className="tc-field__label">Lớp</span><Seg label="Lớp" value={grade} onChange={setGrade} options={[1, 2, 3, 4, 5].map((g) => ({ value: g as Grade, label: `Lớp ${g}` }))} /></div>
+        <div className="tc-field"><span className="tc-field__label">Lớp</span><Seg label="Lớp" value={grade} onChange={(g) => { setGrade(g); setSubject((s) => fitSubjectToGrade(s, g)); }} options={[1, 2, 3, 4, 5].map((g) => ({ value: g as Grade, label: `Lớp ${g}` }))} /></div>
         <ErrorNote error={save.error} />
       </form>
     </Dialog>
@@ -56,9 +56,9 @@ export function Lessons({ user }: { user: Profile }) {
         <input className="tc-input tc-filters__search" placeholder="Tìm bài giảng…" value={search} onChange={(e) => setSearch(e.target.value)} />
         <select className="tc-input" value={subject} onChange={(e) => setSubject(e.target.value as SubjectId | '')} aria-label="Môn">
           <option value="">Mọi môn</option>
-          {SUBJECT_LIST.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          {subjectOptionsFor(grade, [subject]).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
-        <select className="tc-input" value={grade} onChange={(e) => setGrade(Number(e.target.value) as Grade | 0)} aria-label="Lớp">
+        <select className="tc-input" value={grade} onChange={(e) => { const g = Number(e.target.value) as Grade | 0; setGrade(g); if (g && subject && !subjectInGrade(subject, g)) setSubject(''); }} aria-label="Lớp">
           <option value={0}>Mọi lớp</option>
           {[1, 2, 3, 4, 5].map((g) => <option key={g} value={g}>Lớp {g}</option>)}
         </select>

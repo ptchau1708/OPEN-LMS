@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ACTIVITY_TYPES, SUBJECT_LIST, SUBJECTS, uid, type AnyResponse, type Grade, type Item, type ItemType, type SubjectId } from '@openedu/contracts';
+import { ACTIVITY_TYPES, SUBJECTS, uid, type AnyResponse, type Grade, type Item, type ItemType, type SubjectId, subjectInGrade, subjectOptionsFor } from '@openedu/contracts';
 import { ActivityView, ItemEditor, sampleItem, scoreItem } from '@openedu/activity-engine';
 import { Icon, KidShell } from '@openedu/ui';
 import { useItems } from '@openedu/data';
@@ -104,9 +104,9 @@ export function ItemPickerDialog({ open, onClose, onPick, grade, subject }: { op
             <input className="tc-input" placeholder="Tìm theo đề bài, kĩ năng…" value={search} onChange={(e) => setSearch(e.target.value)} />
             <select className="tc-input" value={sub} onChange={(e) => setSub(e.target.value as SubjectId | '')}>
               <option value="">Mọi môn</option>
-              {SUBJECT_LIST.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              {subjectOptionsFor(gr, [sub]).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
-            <select className="tc-input" value={gr} onChange={(e) => setGr(Number(e.target.value) as Grade | 0)}>
+            <select className="tc-input" value={gr} onChange={(e) => { const g = Number(e.target.value) as Grade | 0; setGr(g); if (g && sub && !subjectInGrade(sub, g)) setSub(''); }}>
               <option value={0}>Mọi lớp</option>
               {[1, 2, 3, 4, 5].map((g) => <option key={g} value={g}>Lớp {g}</option>)}
             </select>

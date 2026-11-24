@@ -2,7 +2,7 @@
  * Mẫu Excel của ngân hàng câu hỏi: tải mẫu → điền → tải lên; xuất ngân hàng ra đúng mẫu này (sửa trong Excel rồi nhập lại).
  * Thuần (không đụng DOM). Cột — xem TEMPLATE_COLUMNS và docs/PHASE7_QUESTION_BANK.md.
  */
-import { SKILL_BY_CODE, SUBJECTS, SUBJECT_LIST, uid, type Choice, type Grade, type Item, type ItemBase, type SubjectId } from '@openedu/contracts';
+import { SKILL_BY_CODE, SUBJECTS, SUBJECT_LIST, subjectGradeNote, uid, type Choice, type Grade, type Item, type ItemBase, type SubjectId } from '@openedu/contracts';
 import { foldVietnamese } from '../text';
 import { resolveChoiceAnswer } from './textParser';
 import { DIFFICULTY_LABEL, isTrueFalse, letterId, makeMcq, makeShort, makeTrueFalse, newRowId, type DraftItem, type ImportDefaults } from './types';
@@ -74,10 +74,21 @@ export function parseDifficulty(v: string): ItemBase['difficulty'] | undefined {
 export function parseSubject(v: string): SubjectId | undefined {
   const f = fold(v);
   if (!f) return undefined;
-  const hit = SUBJECT_LIST.find((s) => s.id === f || fold(s.name) === f || fold(s.id) === f);
+  const hit = Object.values(SUBJECTS).find((s) => s.id === f || fold(s.name) === f || fold(s.id) === f);
   if (hit) return hit.id;
-  const alias: Record<string, SubjectId> = { 'tu nhien xa hoi': 'tnxh', 'tu nhien va xa hoi': 'tnxh', tnxh: 'tnxh', 'tieng viet': 'tieng-viet', tv: 'tieng-viet', 'tieng anh': 'tieng-anh', ta: 'tieng-anh', 'anh van': 'tieng-anh', 'my thuat': 'mi-thuat', 'khoa hoc': 'khoa-hoc', 'am nhac': 'am-nhac', nhac: 'am-nhac' };
-  return alias[f];
+  const alias: Record<string, SubjectId> = {
+    'tu nhien xa hoi': 'tnxh', 'tu nhien va xa hoi': 'tnxh', tnxh: 'tnxh', 'tn xh': 'tnxh', 'tn&xh': 'tnxh',
+    'tieng viet': 'tieng-viet', tv: 'tieng-viet', 'tieng anh': 'tieng-anh', ta: 'tieng-anh', 'anh van': 'tieng-anh', 'ngoai ngu': 'tieng-anh', 'ngoai ngu 1': 'tieng-anh',
+    'my thuat': 'mi-thuat', 'khoa hoc': 'khoa-hoc', kh: 'khoa-hoc', 'am nhac': 'am-nhac', nhac: 'am-nhac',
+    'dao duc': 'dao-duc', dd: 'dao-duc',
+    'lich su va dia li': 'lich-su-dia-li', 'lich su dia li': 'lich-su-dia-li', 'lich su & dia li': 'lich-su-dia-li', 'lich su va dia ly': 'lich-su-dia-li',
+    'lich su dia ly': 'lich-su-dia-li', 'ls&dl': 'lich-su-dia-li', 'ls dl': 'lich-su-dia-li', lsdl: 'lich-su-dia-li', 'lich su': 'lich-su-dia-li', 'dia li': 'lich-su-dia-li', 'dia ly': 'lich-su-dia-li',
+    'tin hoc': 'tin-hoc', tin: 'tin-hoc', 'tin hoc va cong nghe': 'tin-hoc', 'tin hoc & cong nghe': 'tin-hoc',
+    'cong nghe': 'cong-nghe', cn: 'cong-nghe',
+    'giao duc the chat': 'gdtc', gdtc: 'gdtc', 'the duc': 'gdtc',
+    'hoat dong trai nghiem': 'hdtn', hdtn: 'hdtn', 'trai nghiem': 'hdtn',
+  };
+  return alias[f] ?? alias[f.replace(/\s*&\s*/g, ' va ')];
 }
 
 export function parseGrade(v: string): Grade | undefined {
@@ -360,7 +371,7 @@ const GUIDE: XlsxCell[][] = [
   ['Gợi ý', 'Hiện khi học sinh làm chưa đúng. Không bắt buộc.'],
   ['Giải thích', 'Hiện sau khi nộp. Không bắt buộc.'],
   ['Mức độ', 'Nhận biết | Kết nối | Vận dụng (hoặc 1, 2, 3). Không bắt buộc.'],
-  ['Môn', `${SUBJECT_LIST.map((s) => s.name).join(' | ')}. Bỏ trống: dùng môn chọn lúc tải lên.`],
+  ['Môn', `${SUBJECT_LIST.map((s) => (s.id === 'khac' ? s.name : `${s.name} (${subjectGradeNote(s.id)})`)).join(' | ')}. Bỏ trống: dùng môn chọn lúc tải lên.`],
   ['Lớp', '1 đến 5. Bỏ trống: dùng lớp chọn lúc tải lên.'],
   ['Mã kĩ năng', 'Mã yêu cầu cần đạt, ví dụ T4.PS.RUT-GON; nhiều mã ngăn bằng dấu phẩy. Có thể bỏ trống rồi gắn ở màn hình soát.'],
   ['Đơn vị', 'Chỉ cho Điền đáp án: cm, kg, giờ… (hiện cạnh ô trả lời). Không bắt buộc.'],
