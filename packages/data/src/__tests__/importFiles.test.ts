@@ -344,3 +344,43 @@ describe('kiểm tra câu & bản mẫu demo', () => {
     expect(pdfLooksTextual(strToU8('hello'))).toBe(false);
   });
 });
+
+describe('danh mục kĩ năng ↔ Excel', () => {
+  it('xuất rồi đọc lại → không có gì thay đổi', async () => {
+    const { buildSkillsXlsx, planSkillsImport, readXlsx, SKILL_SHEET_NAME } = await import('../import');
+    const bytes = buildSkillsXlsx();
+    const back = readXlsx(bytes);
+    expect(back.sheetNames[0]).toBe(SKILL_SHEET_NAME);
+    const plan = planSkillsImport(bytes);
+    expect(plan.counts.same).toBeGreaterThan(600);
+    expect(plan.counts.add + plan.counts.edit + plan.counts.error + plan.counts.hide + plan.counts.show).toBe(0);
+  });
+  it('sửa chữ, thêm mới, ẩn, lỗi thiếu thông tin', async () => {
+    const { planSkillsRows } = await import('../import');
+    const { SKILL_BY_CODE } = await import('@openedu/contracts');
+    const k = SKILL_BY_CODE['T4.PS.RUT-GON']!;
+    const k2 = SKILL_BY_CODE['T3.DL.CHU-VI']!;
+    const plan = planSkillsRows([
+      ['Mã kĩ năng', 'Môn', 'Lớp', 'Mạch nội dung', 'Chủ đề', 'Tên ngắn', 'Yêu cầu cần đạt', 'Nguồn', 'Trạng thái'],
+      ['T4.PS.RUT-GON', 'Toán', 4, '', k.topic, 'Rút gọn phân số (sửa)', k.text, 'Gốc', 'Đang dùng'],
+      ['T3.DL.CHU-VI', 'Toán', 3, '', k2.topic, k2.short, k2.text, 'Gốc', 'Đã ẩn'],
+      ['', 'Khoa học', 4, '', 'Năng lượng', 'Tiết kiệm điện', 'Nêu được cách tiết kiệm điện ở nhà', '', ''],
+      ['', 'Khoa học', 2, '', 'Năng lượng', 'Sai lớp', 'Không học lớp 2', '', ''],
+      ['', 'Toán', '', '', '', 'Thiếu', '', '', ''],
+      ['', '', '', '', '', '', '', '', ''],
+    ]);
+    expect(plan.rows.map((r) => r.kind)).toEqual(['edit', 'hide', 'add', 'error', 'error']);
+    expect(plan.rows[2].code).toBe('KH4.GV.TIET-KIEM-DIEN');
+    expect(plan.rows[2].subject).toBe('khoa-hoc');
+    expect(plan.rows[3].message).toContain('không học ở lớp 2');
+    expect(plan.rows[4].message).toContain('lớp');
+  });
+  it('mẫu nhập câu hỏi có kèm trang Danh mục kĩ năng; mã trong mẫu đều có thật', async () => {
+    const { buildTemplateXlsx, readXlsx, importXlsx, SKILL_SHEET_NAME } = await import('../import');
+    const bytes = buildTemplateXlsx();
+    expect(readXlsx(bytes).sheetNames).toContain(SKILL_SHEET_NAME);
+    const r = importXlsx(bytes, { grade: 3, subject: 'toan' });
+    expect(r.drafts.filter((d) => d.item.skills?.length).length).toBe(3);
+    expect(r.drafts.flatMap((d) => d.notes).join(' ')).not.toContain('Kĩ năng không có');
+  });
+});

@@ -135,6 +135,7 @@ const SUBJECT_WORDS: [SubjectId, RegExp][] = [
   ['dao-duc', /\bdao duc\b/],
   ['gdtc', /\bthe chat\b|\bthe duc\b|\bgdtc\b/],
   ['hdtn', /\btrai nghiem\b|\bhdtn\b/],
+  ['tieng-dan-toc', /\bdan toc\b|\bkhmer\b|\bhmong\b|\bmong\b|\bcham\b|\bthai\b|\btay\b|\bjrai\b|\bbahnar\b|\bede\b/],
 ];
 
 /** Đoán trường phù hợp với nhãn cột (GV luôn xem lại). Chỉ gợi ý trường có trong danh mục. */

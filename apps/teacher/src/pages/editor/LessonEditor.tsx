@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { uid, type AnyResponse, type ContentPackage, type Grade, type Item, type Lesson, type Profile, type Slide, type SlideLayout, type SubjectId, subjectLabelFor, subjectOptionsFor } from '@openedu/contracts';
+import { uid, type AnyResponse, type ContentPackage, type Grade, type Item, type Lesson, type Profile, type Slide, type SlideLayout, type SubjectId } from '@openedu/contracts';
 import { scoreItem } from '@openedu/activity-engine';
 import { SelfPacedPlayer, SlideView, lessonMascot, resolveSlideItem } from '@openedu/lesson-player';
 import { Icon, KidShell } from '@openedu/ui';
+import { canEditLesson, copyLesson } from '../../lib/copyLesson';
 import { lessonItemIds, useClasses, useCreateLiveSession, useDeleteLesson, useItemsByIds, useLesson, usePackages, useSaveItem, useSaveLesson } from '@openedu/data';
 import { Btn, Dialog, Empty, ErrorNote, Loading, Seg } from '../../components/common';
 import { FramePreview } from '../../components/FramePreview';
@@ -14,6 +15,7 @@ import { PackageImportDialog } from './PackageImport';
 import { LessonPanel, SlidePanel } from './SlidePanel';
 import { SlideList } from './SlideList';
 import type { DraftResult } from '../../lib/aiDraft';
+import { SubjectOptions } from '../../components/SubjectOptions';
 
 type Device = 'phone' | 'tablet' | 'tv';
 const DEVICES: Record<Device, { w: number; h: number; label: string }> = {
@@ -77,10 +79,13 @@ export default function LessonEditor({ user }: { user: Profile }) {
     }
   }, [q.data]);
 
+  const readOnly = !!draft && !canEditLesson(draft, user);
+  const readOnlyRef = useRef(readOnly);
+  readOnlyRef.current = readOnly;
   const doSave = useCallback(async () => {
     window.clearTimeout(timer.current);
     const snap = draftRef.current;
-    if (!snap) return;
+    if (!snap || readOnlyRef.current) return;
     const v = version.current;
     setSave('saving');
     try {
@@ -116,7 +121,7 @@ export default function LessonEditor({ user }: { user: Profile }) {
   // Rời trình soạn: lưu nốt thay đổi.
   const saveRef = useRef(save);
   saveRef.current = save;
-  useEffect(() => () => { if (saveRef.current === 'dirty' && draftRef.current) void saveLesson.mutateAsync(draftRef.current).catch(() => undefined); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => { if (saveRef.current === 'dirty' && draftRef.current && !readOnlyRef.current) void saveLesson.mutateAsync(draftRef.current).catch(() => undefined); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const ids = useMemo(() => lessonItemIds(draft), [draft]);
   const itemsQ = useItemsByIds(ids);
@@ -179,7 +184,7 @@ export default function LessonEditor({ user }: { user: Profile }) {
   const pvItem = slide?.layout === 'activity' ? resolveSlideItem(slide, items) : undefined;
   const pvResult = pvItem && (pvReveal || pvValue !== undefined) ? scoreItem(pvItem, pvValue) : undefined;
   const dev = DEVICES[device];
-  const saveLabel = save === 'saving' ? 'Đang lưu…' : save === 'dirty' ? 'Chưa lưu' : save === 'error' ? 'Lỗi khi lưu' : savedAt ? `Đã lưu lúc ${fmtTime(savedAt)}` : 'Đã lưu';
+  const saveLabel = readOnly ? 'Chỉ xem (bài của người khác)' : save === 'saving' ? 'Đang lưu…' : save === 'dirty' ? 'Chưa lưu' : save === 'error' ? 'Lỗi khi lưu' : savedAt ? `Đã lưu lúc ${fmtTime(savedAt)}` : 'Đã lưu';
 
   return (
     <div className="tc-editor">
@@ -187,7 +192,7 @@ export default function LessonEditor({ user }: { user: Profile }) {
         <Link to="/bai-giang" className="tc-btn tc-btn--ghost tc-btn--icon" aria-label="Về danh sách bài giảng"><Icon name="back" size={20} /></Link>
         <input className="tc-ebar__title" value={draft.title} onChange={(e) => update((l) => ({ ...l, title: e.target.value }))} aria-label="Tên bài giảng" />
         <select className="tc-input tc-input--sm" value={draft.subject} onChange={(e) => update((l) => ({ ...l, subject: e.target.value as SubjectId }))} aria-label="Môn">
-          {subjectOptionsFor(draft.grade, [draft.subject]).map((s) => <option key={s.id} value={s.id}>{subjectLabelFor(s.id, draft.grade)}</option>)}
+          <SubjectOptions grade={draft.grade} present={[draft.subject]} />
         </select>
         <select className="tc-input tc-input--sm" value={draft.grade} onChange={(e) => update((l) => ({ ...l, grade: Number(e.target.value) as Grade }))} aria-label="Lớp">
           {[1, 2, 3, 4, 5].map((g) => <option key={g} value={g}>Lớp {g}</option>)}
@@ -202,6 +207,12 @@ export default function LessonEditor({ user }: { user: Profile }) {
         <Btn size="sm" icon="eye" title="Xem như học sinh" onClick={() => setStudentView(true)}>Xem như học sinh</Btn>
         <Btn size="sm" kind="primary" icon="tv" onClick={() => void present()} disabled={live.isPending}>{live.isPending ? 'Đang mở…' : 'Trình chiếu'}</Btn>
       </header>
+      {readOnly ? (
+        <div className="tc-alert tc-alert--warn" role="status" data-testid="lesson-readonly">
+          <span>Đây là bài giảng của thầy cô khác (hoặc bài mẫu) — thầy cô xem và trình chiếu được; muốn sửa, hãy <strong>nhân bản</strong> thành bài của mình.</span>
+          <Btn size="sm" kind="primary" icon="plus" disabled={saveLesson.isPending} onClick={() => draft && saveLesson.mutate(copyLesson(draft, user), { onSuccess: (l) => nav(`/bai-giang/${l.id}`) })} data-testid="lesson-duplicate">Nhân bản để sửa</Btn>
+        </div>
+      ) : null}
       {saveErr && save === 'error' ? <ErrorNote error={saveErr} onRetry={() => void doSave()} /> : null}
       {live.error ? <ErrorNote error={live.error} onRetry={() => void present()} /> : null}
 

@@ -2,9 +2,10 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = extensions, public;
 select plan(6);
--- Ngoại lệ DUY NHẤT: get_class_garden_tv (màn hình TV, tự kiểm tra khóa bí mật của lớp — garden_tv.test.sql).
-select is((select count(*)::int from pg_proc p where p.pronamespace = 'v2'::regnamespace and has_function_privilege('anon', p.oid, 'execute') and p.proname <> 'get_class_garden_tv'),
-  0, 'không hàm v2 nào gọi được khi chưa đăng nhập (trừ Vườn lớp TV có khóa)');
+-- Ngoại lệ: get_class_garden_tv (màn hình TV, tự kiểm tra khóa bí mật của lớp — garden_tv.test.sql),
+-- find_live_screen / live_screen (TV lớp trực tiếp, kiểm tra mã lớp, không kèm đáp án — live_screen.test.sql).
+select is((select count(*)::int from pg_proc p where p.pronamespace = 'v2'::regnamespace and has_function_privilege('anon', p.oid, 'execute') and p.proname not in ('get_class_garden_tv', 'find_live_screen', 'live_screen')),
+  0, 'không hàm v2 nào gọi được khi chưa đăng nhập (trừ màn hình TV: Vườn lớp có khóa, lớp trực tiếp theo mã)');
 select ok((select count(*) from pg_proc p where p.pronamespace = 'v2'::regnamespace and has_function_privilege('authenticated', p.oid, 'execute')) >= 100,
   'người đã đăng nhập vẫn giữ quyền gọi hàm');
 select is((select count(*)::int from pg_class c where c.relnamespace = 'v2'::regnamespace and c.relkind = 'r' and not c.relrowsecurity),

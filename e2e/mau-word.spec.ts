@@ -35,12 +35,12 @@ test('Môn học hiện theo lớp được chọn (CT GDPT 2018): bộ lọc ng
   const names = async () => (await subj.locator('option').allTextContents()).filter((t) => t !== 'Mọi môn');
 
   await grade.selectOption('1');
-  expect(await names()).toEqual(['Tiếng Việt', 'Toán', 'Tiếng Anh', 'Đạo đức', 'Tự nhiên và Xã hội', 'Giáo dục thể chất', 'Âm nhạc', 'Mĩ thuật', 'Hoạt động trải nghiệm', 'Khác']);
+  expect(await names()).toEqual(['Tiếng Việt', 'Toán', 'Tiếng Anh', 'Đạo đức', 'Tự nhiên và Xã hội', 'Giáo dục thể chất', 'Âm nhạc', 'Mĩ thuật', 'Hoạt động trải nghiệm', 'Tiếng dân tộc thiểu số', 'Khác']);
   await subj.selectOption({ label: 'Tự nhiên và Xã hội' });
   // lớp 4 không có TN&XH → ô môn trở về "Mọi môn"
   await grade.selectOption('4');
   await expect(subj).toHaveValue('');
-  expect(await names()).toEqual(['Tiếng Việt', 'Toán', 'Tiếng Anh', 'Đạo đức', 'Lịch sử và Địa lí', 'Khoa học', 'Tin học', 'Công nghệ', 'Giáo dục thể chất', 'Âm nhạc', 'Mĩ thuật', 'Hoạt động trải nghiệm', 'Khác']);
+  expect(await names()).toEqual(['Tiếng Việt', 'Toán', 'Tiếng Anh', 'Đạo đức', 'Lịch sử và Địa lí', 'Khoa học', 'Tin học', 'Công nghệ', 'Giáo dục thể chất', 'Âm nhạc', 'Mĩ thuật', 'Hoạt động trải nghiệm', 'Tiếng dân tộc thiểu số', 'Khác']);
   await grade.selectOption('3');
   expect(await names()).toContain('Tin học');
   expect(await names()).not.toContain('Khoa học');

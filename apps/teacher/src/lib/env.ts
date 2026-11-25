@@ -7,15 +7,16 @@ function env(name: string): string | undefined {
 function host(): string {
   return typeof location !== 'undefined' && location.hostname ? location.hostname : 'localhost';
 }
-/** Link mở màn hình lớp (TV) cho phiên. */
-export function presentUrl(sessionId: string): string {
+/** Link mở màn hình lớp (TV) cho phiên — kèm mã lớp để TV xem được khi chưa đăng nhập (SQL 21). */
+export function presentUrl(sessionId: string, pin?: string): string {
   const base = env('VITE_PRESENT_URL') ?? `http://${host()}:5175/`;
   try {
     const u = new URL(base);
     u.searchParams.set('s', sessionId);
+    if (pin) u.searchParams.set('p', pin);
     return u.toString();
   } catch {
-    return `${base}?s=${encodeURIComponent(sessionId)}`;
+    return `${base}?s=${encodeURIComponent(sessionId)}${pin ? `&p=${encodeURIComponent(pin)}` : ''}`;
   }
 }
 /** Địa chỉ app học sinh — cũng là trang đăng nhập chung. */

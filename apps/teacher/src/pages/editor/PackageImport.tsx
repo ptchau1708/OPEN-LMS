@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { uid, type ContentPackage, type PackageKind } from '@openedu/contracts';
-import { usePackages, useSavePackage } from '@openedu/data';
-import { Btn, Dialog, ErrorNote, Field } from '../../components/common';
+import { useDeletePackage, usePackages, useSavePackage } from '@openedu/data';
+import { Btn, ConfirmBar, Dialog, ErrorNote, Field } from '../../components/common';
 import { contentOrigin } from '../../lib/env';
 import { detectPackage, fmtBytes, slugify, type DetectedPackage } from '../../lib/pkgDetect';
 
@@ -9,6 +9,8 @@ const KIND_LABEL: Record<PackageKind, string> = { h5p: 'H5P', scorm12: 'SCORM 1.
 
 export function PackageImportDialog({ open, onClose, ownerId, onRegistered }: { open: boolean; onClose: () => void; ownerId: string; onRegistered?: (p: ContentPackage) => void }) {
   const pkgs = usePackages();
+  const delPkg = useDeletePackage();
+  const [askDel, setAskDel] = useState<string | null>(null);
   const save = useSavePackage();
   const [det, setDet] = useState<DetectedPackage | null>(null);
   const [fileName, setFileName] = useState('');
@@ -81,9 +83,15 @@ export function PackageImportDialog({ open, onClose, ownerId, onRegistered }: { 
           <h3 className="tc-h3">Gói đã có ({pkgs.data?.length ?? 0})</h3>
           <ul className="tc-list tc-list--plain">
             {(pkgs.data ?? []).map((p) => (
-              <li key={p.id} className="tc-pkgrow"><span className="tc-chip">{KIND_LABEL[p.kind]}</span><strong>{p.title}</strong><code className="tc-small tc-muted">{p.baseUrl}{p.entry}</code></li>
+              <li key={p.id} className="tc-pkgrow">
+                <span className="tc-chip">{KIND_LABEL[p.kind]}</span><strong>{p.title}</strong><code className="tc-small tc-muted">{p.baseUrl}{p.entry}</code>
+                {askDel === p.id
+                  ? <ConfirmBar text={`Xoá gói “${p.title}”? Bài giảng / bài đã giao đang dùng gói này sẽ không mở được nữa.`} busy={delPkg.isPending} onCancel={() => setAskDel(null)} onConfirm={() => delPkg.mutate(p.id, { onSuccess: () => setAskDel(null) })} />
+                  : <Btn size="sm" kind="ghost" icon="trash" aria-label={`Xoá gói ${p.title}`} onClick={() => setAskDel(p.id)} />}
+              </li>
             ))}
           </ul>
+          <ErrorNote error={delPkg.error} />
         </section>
       </div>
     </Dialog>

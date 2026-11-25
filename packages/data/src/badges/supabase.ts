@@ -51,6 +51,14 @@ export class SupabaseRewardsSource implements RewardsSource {
   async listTeacherBadges(classId: string): Promise<UserBadge[]> {
     return (await this.rpc<UserBadge[]>('list_teacher_badges', { p_class: classId }, 'Chưa tải được huy hiệu.')) ?? [];
   }
+  async revokeTeacherBadge(badgeId: string): Promise<void> {
+    try {
+      await this.rpc('revoke_teacher_badge', { p_id: badgeId }, 'Chưa thu hồi được huy hiệu.');
+    } catch (e) {
+      if (/revoke_teacher_badge|schema cache|does not exist/i.test((e as Error).message)) throw new Error('Cần chạy tệp SQL 19 trên Supabase để thu hồi huy hiệu.');
+      throw e;
+    }
+  }
   async getShop(_userId: string): Promise<ShopState> {
     return this.rpc('get_shop', {}, 'Chưa mở được cửa hàng.');
   }

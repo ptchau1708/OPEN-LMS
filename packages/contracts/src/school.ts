@@ -2,6 +2,7 @@
  * Phase 5 — tài khoản phụ huynh thật, mã liên kết, báo cáo trường, quản trị (docs/PHASE5_API.md).
  * Tách khỏi DataSource: app lấy `SchoolSource` qua `getSchoolSource()` / hook trong `@openedu/data`.
  */
+import type { SubjectOverrides } from './subjects';
 import type { Grade } from './items';
 import type { SubjectId } from './subjects';
 import type { StudentWorkEntry, Tt27Level } from './assess';
@@ -181,6 +182,8 @@ export interface SchoolSettings {
   termId: Tt27TermId;
   /** Hạn mức chấm AI / GV / ngày (Edge Function đọc AI_DAILY_LIMIT_GRADE; ở đây để hiển thị). */
   aiDailyQuota: number;
+  /** Môn học của trường: đổi tên, ẩn / hiện (SQL 19). Trống = theo CT GDPT 2018. */
+  subjects?: SubjectOverrides;
 }
 
 export interface SchoolUser {

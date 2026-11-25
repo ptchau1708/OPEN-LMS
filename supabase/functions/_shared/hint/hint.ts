@@ -450,7 +450,7 @@ const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n) + '…' : s
 const SUBJECT_NAMES: Record<string, string> = {
   toan: 'Toán', 'tieng-viet': 'Tiếng Việt', 'tieng-anh': 'Tiếng Anh', 'dao-duc': 'Đạo đức', 'lich-su-dia-li': 'Lịch sử và Địa lí',
   'khoa-hoc': 'Khoa học', 'tin-hoc': 'Tin học', 'cong-nghe': 'Công nghệ', gdtc: 'Giáo dục thể chất', 'am-nhac': 'Âm nhạc',
-  'mi-thuat': 'Mĩ thuật', hdtn: 'Hoạt động trải nghiệm', tnxh: 'Tự nhiên và Xã hội', khac: 'Khác',
+  'mi-thuat': 'Mĩ thuật', hdtn: 'Hoạt động trải nghiệm', tnxh: 'Tự nhiên và Xã hội', 'tieng-dan-toc': 'Tiếng dân tộc thiểu số', khac: 'Khác',
 };
 
 /** Không đánh chữ cái A/B/C: máy HS xáo thứ tự lựa chọn nên chữ cái ở đây không khớp với màn hình của em. */

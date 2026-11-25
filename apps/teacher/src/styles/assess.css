@@ -213,6 +213,8 @@
 .tc-bhrecent li { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
 .tc-bheditor { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .tc-bheditor li { display: flex; gap: 6px; align-items: center; }
+.tc-bheditor li.is-gone { opacity: .45; }
+.tc-bheditor li.is-gone input { text-decoration: line-through; }
 .tc-bheditor__icon { width: 52px !important; text-align: center; font-size: 18px; }
 @media (max-width: 1000px) { .tc-bh { grid-template-columns: minmax(0, 1fr); } .tc-bh__side { position: static; } }
 
@@ -315,3 +317,24 @@
 .tc-manual__level:focus-visible { outline: 3px solid #2f6fd1; outline-offset: 2px; }
 .tc-manual__score { width: 9rem; font-size: 1.15rem; }
 .tc-manual__crit summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+/* Ngân hàng nhận xét */
+.tc-bankchips { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 6px; }
+.tc-bankchip { font: inherit; font-size: 12px; text-align: left; max-width: 100%; padding: 4px 10px; border-radius: 999px; border: 1px dashed var(--p-line); background: var(--p-surface); color: inherit; cursor: pointer; }
+.tc-bankchip:hover, .tc-bankchip:focus-visible { border-style: solid; border-color: var(--p-accent, #4f46e5); }
+.tc-banklist { margin: 0 0 8px; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.tc-banklist li { display: flex; gap: 6px; align-items: flex-start; }
+.tc-banklist textarea { flex: 1; }
+.tc-banklist .tc-col { display: flex; flex-direction: column; }
+/* Gợi ý từ ngân hàng nhận xét (ô nhận xét TT27) */
+.tc-sugg { position: fixed; z-index: 1000; list-style: none; margin: 0; padding: 4px; max-height: 280px; overflow: auto; background: var(--p-surface); color: var(--p-ink); border: 1px solid var(--p-line); border-radius: 10px; box-shadow: 0 10px 30px rgba(15, 23, 42, .18); font-size: 13px; }
+.tc-sugg li { display: flex; gap: 8px; align-items: flex-start; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.tc-sugg li.is-hi, .tc-sugg li:hover { background: var(--tc-accent-soft, #eef2ff); }
+.tc-sugg .tc-sugg__head { cursor: default; font-size: 11px; color: var(--p-muted); padding: 2px 8px; }
+.tc-sugg .tc-sugg__head:hover { background: none; }
+.tc-sugg__text { flex: 1; line-height: 1.35; }
+.tc-sugg__meta { font-size: 11px; color: var(--p-muted); white-space: nowrap; }
+.tc-sugg__lv { display: inline-grid; place-items: center; min-width: 20px; height: 20px; border-radius: 6px; font-size: 11px; font-weight: 700; border: 1px solid currentColor; }
+.tc-banklist2 { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.tc-banklist2 li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--p-line); }
+.tc-banklist2 li:first-child { border-top: 0; }
+.tc-tt27hint { margin: 4px 0 8px; }

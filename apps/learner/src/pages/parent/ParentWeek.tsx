@@ -1,7 +1,7 @@
 /** Bản tin tuần (getParentDigest) + kết quả TT27 đã chốt + "Lời nhắn của cô" + bài viết đã duyệt. */
 import { useState } from 'react';
 import { SUBJECTS, TT27_COMPETENCY_LABEL, TT27_LEVEL_LABEL, TT27_QUALITY_LABEL, TT27_RATING_LABEL, TT27_TERM_LABEL, type ParentTt27, type Profile, type Tt27Competency, type Tt27Quality } from '@openedu/contracts';
-import { useParentDigest, vnWeekStart } from '@openedu/data';
+import { NOTE_CATEGORY_LABEL, useParentDigest, useStudentNotes, vnWeekStart } from '@openedu/data';
 import { Icon } from '@openedu/ui';
 
 const DAY = 86_400_000;
@@ -60,6 +60,7 @@ export function ParentWeek({ child }: { child: Profile }) {
         )}
       </section>
       {d?.tt27 ? <Tt27Card t={d.tt27} /> : null}
+      <TeacherNotes childId={child.id} />
     </>
   );
 }
@@ -88,6 +89,31 @@ function Tt27Card({ t }: { t: ParentTt27 }) {
           {t.competencies.map((x) => <span key={x.key} className="ln-pp-chip">{TT27_COMPETENCY_LABEL[x.key as Tt27Competency]}: {TT27_RATING_LABEL[x.rating]}</span>)}
         </div>
       )}
+    </section>
+  );
+}
+
+/** Ghi chép thầy cô cho phụ huynh xem (Thông tin bổ sung — chỉ những mục thầy cô đánh dấu chia sẻ). */
+function TeacherNotes({ childId }: { childId: string }) {
+  const q = useStudentNotes(childId);
+  const list = (q.data ?? []).filter((n) => n.shareParent).slice(0, 10);
+  if (!list.length) return null;
+  const ymd = (s: string) => (/^\d{4}-\d{2}-\d{2}$/.test(s) ? s.split('-').reverse().join('/') : s);
+  return (
+    <section className="ln-pp-card" aria-label="Thầy cô ghi chép">
+      <h2 className="ln-pp-h">Thầy cô ghi chép</h2>
+      <ul className="ln-pp-list">
+        {list.map((n) => (
+          <li key={n.id} className="ln-pp-row">
+            <span className="ln-pp-row__main">
+              <strong>{n.title}</strong>
+              <span className="ln-pp-muted">{NOTE_CATEGORY_LABEL[n.category]} · {ymd(n.date)}</span>
+              {Object.keys(n.fields).length ? <span className="ln-pp-muted">{Object.entries(n.fields).map(([k, v]) => `${k}: ${v}`).join(' · ')}</span> : null}
+              {n.body ? <span style={{ whiteSpace: 'pre-wrap' }}>{n.body}</span> : null}
+            </span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

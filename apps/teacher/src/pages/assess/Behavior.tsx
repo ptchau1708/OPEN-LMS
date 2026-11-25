@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import type { Behavior as BehaviorDef, Profile } from '@openedu/contracts';
 import { Icon } from '@openedu/ui';
-import { useBehaviorLogs, useBehaviors, useClassLeaderboard, useRecordBehavior, useSaveBehavior, useUndoBehavior } from '@openedu/data';
+import { useBehaviorLogs, useBehaviors, useClassLeaderboard, useDeleteBehavior, useRecordBehavior, useSaveBehavior, useUndoBehavior } from '@openedu/data';
 import { Avatar, Btn, Dialog, Empty, ErrorNote, Loading, PageHead } from '../../components/common';
 import { ClassPicker, useClassPick, useRoster } from '../../lib/assess';
 import { cx, relTime } from '../../lib/format';
@@ -45,16 +45,21 @@ function IconPick({ value, options, onChange }: { value: string; options: string
 
 function BehaviorEditor({ classId, list, onClose }: { classId: string; list: BehaviorDef[]; onClose: () => void }) {
   const save = useSaveBehavior();
+  const remove = useDeleteBehavior();
   const [rows, setRows] = useState<BehaviorDef[]>(list);
   const [changed, setChanged] = useState<Set<number>>(new Set());
+  /** Chỉ số các dòng sẽ xoá khi bấm Lưu. */
+  const [gone, setGone] = useState<Set<number>>(new Set());
+  const toggleGone = (i: number) => setGone((s) => { const n = new Set(s); if (n.has(i)) n.delete(i); else n.add(i); return n; });
   const upd = (i: number, p: Partial<BehaviorDef>) => { setRows((r) => r.map((x, j) => (j === i ? { ...x, ...p } : x))); setChanged((s) => new Set(s).add(i)); };
   const add = (positive: boolean) => {
     setRows((r) => [...r, positive ? { id: '', classId, label: '', points: 1, icon: '⭐', kind: 'positive' } : { id: '', classId, label: '', points: -1, icon: '⚠️', kind: 'needs-work' }]);
     setChanged((s) => new Set(s).add(rows.length));
   };
   const submit = async () => {
+    for (const i of Array.from(gone)) if (rows[i]!.id) await remove.mutateAsync({ classId, id: rows[i]!.id });
     for (const i of Array.from(changed)) {
-      if (!rows[i].label.trim()) continue;
+      if (gone.has(i) || !rows[i].label.trim()) continue;
       await save.mutateAsync({ ...rows[i], label: rows[i].label.trim(), classId, kind: rows[i].points >= 0 ? 'positive' : 'needs-work' });
     }
     onClose();
@@ -67,12 +72,13 @@ function BehaviorEditor({ classId, list, onClose }: { classId: string; list: Beh
         {idx.length ? (
           <ul className="tc-bheditor">
             {idx.map(({ b, i }) => (
-              <li key={b.id || `new${i}`}>
+              <li key={b.id || `new${i}`} className={gone.has(i) ? 'is-gone' : undefined}>
                 <IconPick value={b.icon} options={positive ? ICONS_POSITIVE : ICONS_NEEDS} onChange={(icon) => upd(i, { icon })} />
                 <input className="tc-input tc-input--sm tc-grow" aria-label="Tên hành vi" placeholder={positive ? 'vd: Hăng hái phát biểu' : 'vd: Quên đồ dùng học tập'} value={b.label} onChange={(e) => upd(i, { label: e.target.value })} />
                 <select className="tc-input tc-input--sm" aria-label="Điểm" value={b.points} onChange={(e) => upd(i, { points: Number(e.target.value) })}>
                   {(positive ? [1, 2, 3] : [-1, -2, -3]).map((n) => <option key={n} value={n}>{signed(n)}</option>)}
                 </select>
+                <Btn size="sm" kind="ghost" icon={gone.has(i) ? 'retry' : 'trash'} aria-label={gone.has(i) ? `Giữ lại ${b.label || 'hành vi'}` : `Xoá ${b.label || 'hành vi'}`} title={gone.has(i) ? 'Giữ lại' : 'Xoá (khi bấm Lưu)'} onClick={() => toggleGone(i)} data-testid="bh-delete" />
               </li>
             ))}
           </ul>
@@ -85,13 +91,14 @@ function BehaviorEditor({ classId, list, onClose }: { classId: string; list: Beh
     <Dialog open wide title="Danh sách hành vi thi đua" onClose={onClose} footer={<>
       <span className="tc-small tc-muted">Điểm dương cộng sao cho học sinh (1 sao/điểm). Bấm vào biểu tượng để đổi.</span>
       <Btn onClick={onClose}>Hủy</Btn>
-      <Btn kind="primary" disabled={save.isPending || !changed.size} onClick={() => void submit().catch(() => undefined)}>{save.isPending ? 'Đang lưu…' : 'Lưu'}</Btn>
+      <Btn kind="primary" disabled={save.isPending || remove.isPending || (!changed.size && !gone.size)} onClick={() => void submit().catch(() => undefined)}>{save.isPending ? 'Đang lưu…' : 'Lưu'}</Btn>
     </>}>
       <div className="tc-bhgroups">
         {group(true)}
         {group(false)}
       </div>
-      <ErrorNote error={save.error} />
+      {gone.size ? <p className="tc-small tc-warn">{gone.size} hành vi sẽ bị xoá khi bấm Lưu. Điểm đã ghi trước đây vẫn được giữ.</p> : null}
+      <ErrorNote error={save.error ?? remove.error} />
     </Dialog>
   );
 }
@@ -211,7 +218,7 @@ export default function BehaviorPage({ user }: { user: Profile }) {
               {!logs.data?.length ? <p className="tc-small tc-muted">Chưa có.</p> : (
                 <ul className="tc-bhrecent">{logs.data.map((l) => {
                   const b = bl.find((x) => x.id === l.behaviorId);
-                  return <li key={l.id}><span>{b?.icon}</span><span className="tc-grow">{roster.find((s) => s.id === l.studentId)?.name} · {b?.label ?? ''}</span><b className={l.points < 0 ? 'tc-warn' : 'tc-ok'}>{signed(l.points)}</b><small className="tc-muted">{relTime(l.at)}</small></li>;
+                  return <li key={l.id}><span>{b?.icon}</span><span className="tc-grow">{roster.find((s) => s.id === l.studentId)?.name} · {b?.label ?? 'hành vi đã xoá'}</span><b className={l.points < 0 ? 'tc-warn' : 'tc-ok'}>{signed(l.points)}</b><small className="tc-muted">{relTime(l.at)}</small></li>;
                 })}</ul>
               )}
             </section>

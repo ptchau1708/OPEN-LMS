@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { Item, LiveTeam, Profile } from '@openedu/contracts';
-import { Icon, Mascot, QrCode } from '@openedu/ui';
+import { Icon, Mascot } from '@openedu/ui';
 import { LiveResultsBar, computeLiveStats, lessonMascot, resolveSlideItem } from '@openedu/lesson-player';
 import { lessonItemIds, useAward, useClass, useItemsByIds, useLesson, useLiveChannel, usePackages } from '@openedu/data';
 import { Avatar, Btn, ConfirmBar, ErrorNote, Loading, Seg } from '../components/common';
@@ -10,6 +10,7 @@ import { cx, layoutMeta } from '../lib/format';
 import { learnerUrl, presentUrl } from '../lib/env';
 import { defaultTeams, teamsFor, useTeamsStore } from '../lib/teams';
 import { GameControl } from './live/GameControl';
+import { BigJoinQr, JoinCard } from './live/JoinQr';
 
 function useNow(on: boolean) {
   const [now, setNow] = useState(Date.now());
@@ -40,6 +41,8 @@ export default function LiveControl({ user }: { user: Profile }) {
   const [copied, setCopied] = useState(false);
   const [sendErr, setSendErr] = useState<unknown>(null);
   const [toast, setToast] = useState('');
+  const [bigQr, setBigQr] = useState(false);
+  const closeBigQr = useCallback(() => setBigQr(false), []);
   const teamMap = useRef<Record<string, string>>({});
 
   const send = (cmd: Parameters<NonNullable<typeof channel>['send']>[0]) => {
@@ -79,7 +82,7 @@ export default function LiveControl({ user }: { user: Profile }) {
   const online = participants.length ? participants : state.participants;
   const answeredIds = new Set(itemResponses.map((r) => r.userId));
   const left = state.timerEndsAt ? Math.max(0, Math.ceil((new Date(state.timerEndsAt).getTime() - now) / 1000)) : null;
-  const tvUrl = presentUrl(state.sessionId);
+  const tvUrl = presentUrl(state.sessionId, state.pin);
   const joinUrl = learnerUrl(state.pin);
   const ended = state.phase === 'ended';
   const go = (i: number) => void send({ type: 'go', slideIndex: i });
@@ -135,12 +138,8 @@ export default function LiveControl({ user }: { user: Profile }) {
       {error && status !== 'open' ? <ErrorNote error={new Error(error)} /> : null}
       <ErrorNote error={sendErr} />
 
-      {sheet === 'join' ? (
-        <section className="tc-card tc-joincard">
-          <QrCode value={joinUrl} size={168} title="Mã QR cho học sinh vào lớp" />
-          <div><strong>Học sinh quét mã để vào lớp</strong><p className="tc-muted tc-small">hoặc mở Góc học tập → “Vào lớp” và nhập mã <b>{state.pin}</b></p><code className="tc-small">{joinUrl}</code></div>
-        </section>
-      ) : null}
+      {sheet === 'join' ? <JoinCard pin={state.pin} joinUrl={joinUrl} onZoom={() => setBigQr(true)} title="Học sinh quét mã để vào lớp" /> : null}
+      {bigQr ? <BigJoinQr pin={state.pin} joinUrl={joinUrl} onClose={closeBigQr} /> : null}
 
       <section className="tc-card tc-live__people">
         <div className="tc-row"><Icon name="team" size={18} /><strong>{online.length}</strong><span className="tc-muted">học sinh đang trong lớp</span></div>

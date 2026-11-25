@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { MASTERY_LEVEL_LABEL, type MasteryLevel, type Profile } from '@openedu/contracts';
 import { foldVietnamese, useClasses, useClassHeatmap, useStudents } from '@openedu/data';
-import { Avatar, Empty, Loading, PageHead, Seg } from '../components/common';
+import { Avatar, Btn, Empty, Loading, PageHead, Seg } from '../components/common';
+import { NotesExcelImport } from '../components/NotesExcelImport';
 import { cx } from '../lib/format';
 import { countsByStudent, GROUP_BY_ID, GROUPS, groupOf, type GroupId } from '../lib/groups';
 import { LevelBar, Legend } from './Dashboard';
@@ -20,6 +21,8 @@ export default function Students({ user }: { user: Profile }) {
   const hm = useClassHeatmap(cls?.id);
   const [q, setQ] = useState('');
   const [group, setGroup] = useState<GroupId | 'all'>('all');
+  const [nx, setNx] = useState(false);
+  const [nxDone, setNxDone] = useState<number | null>(null);
 
   const counts = useMemo(() => countsByStudent(hm.data), [hm.data]);
   const rows = useMemo(() => (students.data ?? []).map((s) => {
@@ -38,7 +41,12 @@ export default function Students({ user }: { user: Profile }) {
   return (
     <div className="tc-page db-page">
       <PageHead title="Hồ sơ học sinh" sub="Mỗi em nắm được gì, cần hỗ trợ gì. Bấm vào một em để xem hồ sơ đầy đủ."
-        actions={list.length > 1 ? <Seg label="Chọn lớp" value={cls.id} onChange={(v) => setParams({ c: v })} options={list.map((c) => ({ value: c.id, label: `Lớp ${c.name}` }))} /> : undefined} />
+        actions={<>
+          {list.length > 1 ? <Seg label="Chọn lớp" value={cls.id} onChange={(v) => setParams({ c: v })} options={list.map((c) => ({ value: c.id, label: `Lớp ${c.name}` }))} /> : null}
+          <Btn icon="upload" disabled={!students.data?.length} onClick={() => { setNx(true); setNxDone(null); }} data-testid="nx-open">Nhập thông tin từ Excel</Btn>
+        </>} />
+      {nxDone !== null ? <div className="tc-alert tc-alert--ok" role="status"><span>Đã nhập {nxDone} ghi chép vào hồ sơ học sinh (mục Thông tin bổ sung).</span><Btn size="sm" kind="ghost" icon="close" aria-label="Đóng thông báo" onClick={() => setNxDone(null)} /></div> : null}
+      {nx && students.data ? <NotesExcelImport cls={cls} students={students.data} onClose={() => setNx(false)} onDone={(n) => { setNx(false); setNxDone(n); }} /> : null}
 
       <div className="st-bar">
         <input className="tc-input st-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tìm theo tên hoặc tên đăng nhập…" aria-label="Tìm học sinh" />

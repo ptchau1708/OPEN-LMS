@@ -35,10 +35,10 @@ import {
   serveJson,
 } from '../_shared/http.ts';
 import { adminClient, fromPgError, requireCaller } from '../_shared/supabase.ts';
-import { refreshMastery } from '../_shared/mastery-store.ts';
+import { knownSkillCodes, refreshMastery } from '../_shared/mastery-store.ts';
 import { handleExamFinalize } from './exam.ts';
 import { checkAnsweredAt, validClientEventId } from '../_shared/offline.ts';
-import { SKILL_BY_CODE, type SkillMastery } from '../_shared/scoring/contracts.ts';
+import type { SkillMastery } from '../_shared/scoring/contracts.ts';
 import {
   detectMisconceptions,
   evaluateRemediation,
@@ -55,7 +55,7 @@ async function handleRemediation(admin: Admin, userId: string, body: Record<stri
   const setId = requireString(body.setId, 'setId', 300);
   const parsed = parseRemediationSetId(setId);
   if (!parsed || parsed.userId !== userId) throw new HttpError(400, 'Bộ ôn tập không hợp lệ.', 'bad_request');
-  if (!SKILL_BY_CODE[parsed.skillCode]) throw new HttpError(400, 'Mã kĩ năng không có trong danh mục.', 'bad_request');
+  if (!(await knownSkillCodes(admin, [parsed.skillCode])).length) throw new HttpError(400, 'Mã kĩ năng không có trong danh mục.', 'bad_request');
   const rootSkill = optionalString(body.rootSkill, 'rootSkill');
   const itemIds = Array.isArray(body.itemIds) ? [...new Set(body.itemIds.filter((x): x is string => typeof x === 'string' && x.length <= 128))] : [];
   if (itemIds.length < 1 || itemIds.length > 10) throw new HttpError(400, 'Cần 1–10 câu hỏi trong bộ ôn tập.', 'bad_request');
@@ -75,7 +75,7 @@ async function handleRemediation(admin: Admin, userId: string, body: Record<stri
   for (const r of (data ?? []) as Record<string, unknown>[]) if (!latest.has(String(r.object_id))) latest.set(String(r.object_id), r.correct === true);
   const { correct, total, passed } = evaluateRemediation(itemIds.map((id) => ({ itemId: id, correct: latest.get(id) === true })));
 
-  const skills = [parsed.skillCode, ...(rootSkill && rootSkill !== parsed.skillCode && SKILL_BY_CODE[rootSkill] ? [rootSkill] : [])];
+  const skills = await knownSkillCodes(admin, [parsed.skillCode, ...(rootSkill && rootSkill !== parsed.skillCode ? [rootSkill] : [])]);
   const ins = await admin.from('learning_events').insert({
     user_id: userId,
     verb: 'completed',

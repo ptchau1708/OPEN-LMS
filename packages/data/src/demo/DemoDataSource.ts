@@ -517,6 +517,14 @@ export class DemoDataSource implements DataSource {
     return p ? this.resolvePackage(p) : null;
   }
 
+  async deletePackage(id: string): Promise<void> {
+    await this.ready();
+    this.requireStaff();
+    const map = this.get<Record<string, ContentPackage>>(K.packages, {});
+    delete map[id];
+    this.put(K.packages, map);
+  }
+
   async savePackage(pkg: ContentPackage): Promise<ContentPackage> {
     await this.ready();
     const map = this.get<Record<string, ContentPackage>>(K.packages, {});
@@ -553,6 +561,25 @@ export class DemoDataSource implements DataSource {
       delete all[key]!.completedAt;
       this.put(K.progress, all);
     }
+  }
+
+  async updateAssignment(a: Assignment): Promise<Assignment> {
+    await this.ready();
+    const list = this.get<Assignment[]>(K.assignments, []);
+    const i = list.findIndex((x) => x.id === a.id);
+    if (i < 0) throw new Error('Không tìm thấy bài đã giao.');
+    const old = list[i]!;
+    const next: Assignment = { ...old, title: a.title, studentIds: a.studentIds ?? [], openAt: a.openAt, ...(a.latePolicy ? { latePolicy: a.latePolicy } : {}) };
+    if (a.dueAt) next.dueAt = a.dueAt; else delete next.dueAt;
+    list[i] = next;
+    this.put(K.assignments, list);
+    return clone(next);
+  }
+
+  async deleteAssignment(id: string): Promise<void> {
+    await this.ready();
+    const list = this.get<Assignment[]>(K.assignments, []).filter((x) => x.id !== id).map((x) => (x.parentId === id ? (() => { const y = { ...x }; delete y.parentId; return y; })() : x));
+    this.put(K.assignments, list);
   }
 
   async createAssignment(a: Omit<Assignment, 'id'>): Promise<Assignment> {
@@ -1346,6 +1373,14 @@ export class DemoDataSource implements DataSource {
   async listBehaviors(classId: string): Promise<Behavior[]> {
     await this.ready();
     return clone(this.behaviorsOf(classId));
+  }
+
+  async deleteBehavior(classId: string, id: string): Promise<void> {
+    await this.ready();
+    this.requireStaff();
+    const all = this.get<Behavior[]>(K.behaviors, []);
+    if (!all.some((x) => x.classId === classId)) all.push(...defaultBehaviors(classId));
+    this.put(K.behaviors, all.filter((x) => !(x.classId === classId && x.id === id)));
   }
 
   async saveBehavior(b: Behavior): Promise<Behavior> {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { fitSubjectToGrade, subjectLabelFor, subjectOptionsFor, type Grade, type ItemBase, type ItemType, type SubjectId } from '@openedu/contracts';
+import { fitSubjectToGrade, skillShort, SUBJECTS, type Grade, type ItemBase, type ItemType, type SubjectId } from '@openedu/contracts';
 import { useDataSource, useItems } from '@openedu/data';
 import type { DraftItem } from '@openedu/data/import';
 import { Btn, Dialog, ErrorNote, Field, Loading, Seg } from '../../components/common';
@@ -8,6 +8,7 @@ import { downloadBytes, loadImportLib, readFileBytes, type ImportLib } from './l
 import { ReviewScreen } from './Review';
 import { SkillPicker } from './SkillPicker';
 import '../../styles/itembank.css';
+import { SubjectOptions } from '../../components/SubjectOptions';
 
 type Tab = 'file' | 'paste' | 'scan' | 'ai' | 'grid';
 const TABS: { id: Tab; label: string; hint: string }[] = [
@@ -44,7 +45,7 @@ export function QuickAddDialog({ open, onClose, initial, onSaved }: { open: bool
   const close = (): void => { setReview(null); setNotice([]); onClose(); };
   const toReview = (drafts: DraftItem[], notes: string[] = []): void => { setNotice(notes); setReview(drafts); };
 
-  if (review && lib) return <ReviewScreen lib={lib} drafts={review} onBack={() => setReview(null)} onClose={close} onSaved={onSaved} />;
+  if (review && lib) return <ReviewScreen lib={lib} drafts={review} notes={notice} onBack={() => setReview(null)} onClose={close} onSaved={onSaved} />;
 
   return (
     <Dialog open onClose={close} title="Thêm câu hỏi nhanh" full>
@@ -53,7 +54,7 @@ export function QuickAddDialog({ open, onClose, initial, onSaved }: { open: bool
           <div className="tc-qb-defaults">
             <span className="tc-small"><strong>Câu hỏi thuộc</strong></span>
             <select className="tc-input tc-input--sm" aria-label="Môn mặc định" value={def.subject} onChange={(e) => setDef({ ...def, subject: e.target.value as SubjectId })}>
-              {subjectOptionsFor(def.grade, [def.subject]).map((s) => <option key={s.id} value={s.id}>{subjectLabelFor(s.id, def.grade)}</option>)}
+              <SubjectOptions grade={def.grade} present={[def.subject]} />
             </select>
             <Seg label="Lớp mặc định" value={def.grade} onChange={(g) => setDef({ ...def, grade: g, subject: fitSubjectToGrade(def.subject, g) })} options={[1, 2, 3, 4, 5].map((g) => ({ value: g as Grade, label: `Lớp ${g}` }))} />
             <span className="tc-muted tc-small">— dùng khi tệp / văn bản không ghi môn, lớp. Sửa từng câu được ở bước soát.</span>
@@ -81,6 +82,19 @@ export function QuickAddDialog({ open, onClose, initial, onSaved }: { open: bool
 
 type PaneProps = { lib: ImportLib; def: Defaults; onDrafts: (d: DraftItem[], notes?: string[]) => void };
 
+type Detected = ReturnType<ImportLib['parseQuestionText']>['detected'];
+/** "Nhận ra từ đề: môn …, lớp …, kĩ năng …" — môn, lớp, kĩ năng đọc được ở đầu đề. */
+function detectedText(d: Detected): string {
+  if (!d) return '';
+  const parts = [
+    d.subject ? `môn ${SUBJECTS[d.subject]?.name ?? d.subject}` : '',
+    d.grade ? `lớp ${d.grade}` : '',
+    d.skills?.length ? `kĩ năng ${d.skills.map(skillShort).join(', ')}` : '',
+  ].filter(Boolean);
+  const unk = d.unknownSkills?.length ? ` Kĩ năng chưa có trong danh mục: ${d.unknownSkills.join(', ')}.` : '';
+  return parts.length ? `Nhận ra từ đề: ${parts.join(', ')} — áp cho các câu không ghi riêng.${unk}` : unk.trim();
+}
+
 /* ---------------- A1 + A2: tệp Excel / Word ---------------- */
 function FilePane({ lib, def, onDrafts }: PaneProps) {
   const bank = useItems();
@@ -103,6 +117,7 @@ function FilePane({ lib, def, onDrafts }: PaneProps) {
         const r = lib.parseQuestionText(t.text, def, 'docx');
         if (!r.drafts.length) throw new Error('Không thấy câu hỏi nào trong tệp Word này. Thầy cô thử chép chữ rồi dán vào ô "Dán văn bản" nhé.');
         const notes = [`Đọc ${r.drafts.length} câu từ "${f.name}".`];
+        if (r.detected) notes.push(detectedText(r.detected));
         if (t.marked) notes.push(`${t.marked} lựa chọn tô đậm / gạch chân / tô màu được hiểu là đáp án đúng.`);
         if (t.autoNumbered) notes.push('Tệp dùng đánh số tự động của Word — số câu hoặc chữ A, B, C có thể không đọc được; thầy cô soát kĩ nhé.');
         if (t.hasImages) notes.push('Hình ảnh trong tệp không được nhập.');
@@ -135,8 +150,11 @@ function FilePane({ lib, def, onDrafts }: PaneProps) {
       </div>
       <div className="tc-stack tc-qb-help">
         <h3>Mẫu Excel</h3>
-        <p className="tc-small">Mỗi dòng một câu: <b>Loại</b>, <b>Câu hỏi</b>, <b>A–F</b>, <b>Đáp án đúng</b>, Gợi ý, Giải thích, Mức độ, Môn, Lớp, Mã kĩ năng. Mẫu có sẵn 6 dòng ví dụ và trang "Hướng dẫn".</p>
-        <Btn icon="upload" onClick={() => downloadBytes(lib.buildTemplateXlsx(), 'mau-ngan-hang-cau-hoi.xlsx', XLSX_MIME)} data-testid="qb-template">Tải mẫu Excel</Btn>
+        <p className="tc-small">Mỗi dòng một câu: <b>Loại</b>, <b>Câu hỏi</b>, <b>A–F</b>, <b>Đáp án đúng</b>, Gợi ý, Giải thích, Mức độ, Môn, Lớp, <b>Mã kĩ năng</b>. Mẫu có sẵn 6 dòng ví dụ, trang "Hướng dẫn" và trang <b>"Danh mục kĩ năng"</b> (đủ mã kĩ năng các môn, lớp 1–5 — chép mã sang cột Mã kĩ năng, hoặc ghi đúng tên kĩ năng).</p>
+        <div className="tc-row tc-wrap">
+          <Btn icon="upload" onClick={() => downloadBytes(lib.buildTemplateXlsx(), 'mau-ngan-hang-cau-hoi.xlsx', XLSX_MIME)} data-testid="qb-template">Tải mẫu Excel</Btn>
+          <Btn kind="ghost" icon="upload" onClick={() => downloadBytes(lib.buildSkillsXlsx({ withHidden: false }), 'danh-muc-ki-nang.xlsx', XLSX_MIME)} data-testid="qb-skills-xlsx">Tải danh mục kĩ năng</Btn>
+        </div>
         <h3>Tệp Word</h3>
         <p className="tc-small">Đề viết "Câu 1:", lựa chọn "A.", "B."… Đáp án ghi "Đáp án: B", bảng đáp án cuối đề, hoặc <b>tô đậm / gạch chân</b> lựa chọn đúng.</p>
         <p className="tc-small">Thêm dòng <b>"Dạng: …"</b> dưới mỗi câu để soạn <b>đủ 16 dạng</b>: nối cặp, sắp xếp, kéo thả, phân loại, điền vào đoạn văn, chọn trong câu, nghe và chọn, que tính, đồng hồ, ghi âm đọc to, vẽ và tô, thăm dò… Mẫu có ví dụ từng dạng.</p>
@@ -168,7 +186,10 @@ function PastePane({ lib, def, onDrafts }: PaneProps) {
     if (res.preamble && withPassage) {
       drafts = drafts.map((d) => ({ ...d, item: { ...d.item, prompt: { ...d.item.prompt, text: `${res.preamble}\n\n${d.item.prompt.text}` } } as DraftItem['item'] }));
     }
-    onDrafts(drafts, res.answerTableCount ? [`Lấy ${res.answerTableCount} đáp án từ bảng đáp án cuối đề.`] : []);
+    onDrafts(drafts, [
+      ...(res.detected ? [detectedText(res.detected)] : []),
+      ...(res.answerTableCount ? [`Lấy ${res.answerTableCount} đáp án từ bảng đáp án cuối đề.`] : []),
+    ]);
   };
   return (
     <div className="tc-qb-cols">
@@ -181,6 +202,7 @@ function PastePane({ lib, def, onDrafts }: PaneProps) {
           {!text.trim() ? <Btn size="sm" kind="ghost" onClick={() => setText(SAMPLE)}>Dùng đề mẫu</Btn> : null}
           {res?.preamble ? <label className="tc-switch tc-small"><input type="checkbox" checked={withPassage} onChange={(e) => setWithPassage(e.target.checked)} /> Thêm đoạn bài đọc phía trên vào đề từng câu</label> : null}
         </div>
+        {res?.detected ? <p className="tc-small tc-qb-detected" role="status" data-testid="qb-detected">✓ {detectedText(res.detected)}</p> : null}
       </div>
       <div className="tc-stack tc-qb-help">
         <h3>Nhận ra được</h3>
@@ -191,6 +213,9 @@ function PastePane({ lib, def, onDrafts }: PaneProps) {
           <li>Câu không có lựa chọn → Điền đáp án (<code>Đáp số: 24 cm</code>)</li>
           <li>"Đúng ghi Đ, sai ghi S" → mỗi ý một câu Đúng – Sai</li>
           <li><code>Gợi ý:</code> và <code>Giải thích:</code></li>
+          <li>Môn, lớp ở đầu đề: tiêu đề <code>ĐỀ … MÔN TOÁN – LỚP 3</code>, <code>Toán 3</code> hoặc dòng <code>Môn: …</code> <code>Lớp: 5</code></li>
+          <li>Kĩ năng: dòng <code>Mã kĩ năng: …</code> ở đầu đề (cả đề) hoặc dưới từng câu — ghi mã hoặc đúng tên kĩ năng (<a href="/ki-nang" target="_blank" rel="noreferrer">xem danh mục</a>)</li>
+          <li>Dòng <code>Môn:</code> <code>Lớp:</code> <code>Mức độ:</code> dưới một câu → riêng câu đó</li>
         </ul>
         <p className="tc-small tc-muted">Đoạn không hiểu được vẫn giữ lại, đánh dấu "Cần xem lại".</p>
         {res ? (

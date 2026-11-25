@@ -396,8 +396,8 @@ export function parseTypedBlock(lines: string[], d0: ImportDefaults, source: Dra
   if (!item.prompt.text.trim() && kind !== 'FILL_IN_PASSAGE' && kind !== 'INLINE_DROPDOWN') review = review ?? 'Chưa có đề bài';
   if (difficulty) item.difficulty = difficulty;
   else if (d0.difficulty) item.difficulty = d0.difficulty;
-  const sk = F.skills ? parseSkills(F.skills) : { codes: [], unknown: [] };
-  if (sk.unknown.length) notes.push(`Mã kĩ năng không có trong danh mục: ${sk.unknown.join(', ')}`);
+  const sk = F.skills ? parseSkills(F.skills, { subject: d.subject, grade: d.grade }) : { codes: [], unknown: [] };
+  if (sk.unknown.length) notes.push(`Kĩ năng không có trong danh mục: ${sk.unknown.join(', ')}`);
   if (sk.codes.length) item.skills = sk.codes;
   else if (d0.skills?.length) item.skills = [...d0.skills];
   if (F.hint) item.hint = F.hint;

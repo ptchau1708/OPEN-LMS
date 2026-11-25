@@ -30,12 +30,12 @@ type Task = 'generate_items' | 'lesson_outline' | 'encourage' | 'hint' | 'extrac
 type Provider = 'openrouter' | 'gemini' | 'fallback';
 
 const SUBJECT_IDS: readonly SubjectId[] = [
-  'toan', 'tieng-viet', 'tieng-anh', 'dao-duc', 'lich-su-dia-li', 'khoa-hoc', 'tin-hoc', 'cong-nghe', 'gdtc', 'am-nhac', 'mi-thuat', 'hdtn', 'tnxh', 'khac',
+  'toan', 'tieng-viet', 'tieng-anh', 'dao-duc', 'lich-su-dia-li', 'khoa-hoc', 'tin-hoc', 'cong-nghe', 'gdtc', 'am-nhac', 'mi-thuat', 'hdtn', 'tnxh', 'tieng-dan-toc', 'khac',
 ];
 const SUBJECT_NAMES: Record<SubjectId, string> = {
   toan: 'Toán', 'tieng-viet': 'Tiếng Việt', 'tieng-anh': 'Tiếng Anh', 'dao-duc': 'Đạo đức', 'lich-su-dia-li': 'Lịch sử và Địa lí',
   'khoa-hoc': 'Khoa học', 'tin-hoc': 'Tin học', 'cong-nghe': 'Công nghệ', gdtc: 'Giáo dục thể chất', 'am-nhac': 'Âm nhạc',
-  'mi-thuat': 'Mĩ thuật', hdtn: 'Hoạt động trải nghiệm', tnxh: 'Tự nhiên và Xã hội', khac: 'Khác',
+  'mi-thuat': 'Mĩ thuật', hdtn: 'Hoạt động trải nghiệm', tnxh: 'Tự nhiên và Xã hội', 'tieng-dan-toc': 'Tiếng dân tộc thiểu số', khac: 'Khác',
 };
 const GENERATABLE: readonly ItemType[] = [
   'MCQ', 'MCQ_MULTIPLE', 'SHORT_ANSWER', 'MATCHING', 'ORDERING', 'SENTENCE_SCRAMBLE', 'FILL_IN_PASSAGE', 'WORD_CLASSIFY',

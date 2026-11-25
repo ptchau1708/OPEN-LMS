@@ -87,9 +87,9 @@ export function useGradeHeatmap(grade?: Grade, subject?: SubjectId) {
 }
 
 /* ---- quản trị ---- */
-export function useSchoolSettings() {
+export function useSchoolSettings(opts: { enabled?: boolean } = {}) {
   const s = useSchoolSource();
-  return useQuery({ queryKey: schoolKeys.settings, queryFn: () => s.getSchoolSettings() });
+  return useQuery({ queryKey: schoolKeys.settings, queryFn: () => s.getSchoolSettings(), enabled: opts.enabled ?? true });
 }
 export function useSaveSchoolSettings() {
   const s = useSchoolSource();

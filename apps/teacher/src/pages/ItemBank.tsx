@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { Icon } from '@openedu/ui';
 import { uid, type Lesson, type Profile, subjectInGrade, subjectOptionsFor } from '@openedu/contracts';
 import { ACTIVITY_TYPES, SUBJECTS, type Grade, type Item, type ItemType, type SubjectId } from '@openedu/contracts';
 import { useCurrentUser, useDataSource, useDeleteItem, useItems, useLessons, useSaveItem, useSaveLesson } from '@openedu/data';
@@ -60,6 +61,8 @@ export default function ItemBank() {
   const [picked, setPicked] = useState<string[]>([]);
   const [assign, setAssign] = useState(false);
   const [play, setPlay] = useState(false);
+  const [rowDel, setRowDel] = useState<string | null>(null);
+  const [bulkDel, setBulkDel] = useState<null | 'ask' | { done: number; total: number; failed: string[] }>(null);
   const me = useCurrentUser().data;
   const ds = useDataSource();
   const togglePick = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
@@ -86,6 +89,33 @@ export default function ItemBank() {
     setConfirm(false);
     setOpen({ item: { ...copy, id: uid('it'), prompt: { ...copy.prompt, text: `${copy.prompt.text} (bản sao)` } } as Item, mode: 'edit', isNew: true });
   };
+  /** Xoá nhiều câu đã chọn (lần lượt; câu không xoá được — của người khác — báo lại). */
+  const deleteMany = async (ids: string[]) => {
+    const failed: string[] = [];
+    const failedIds = new Set<string>();
+    let done = 0;
+    setBulkDel({ done, total: ids.length, failed });
+    for (const id of ids) {
+      try {
+        await del.mutateAsync(id);
+      } catch (e) {
+        failedIds.add(id);
+        failed.push(`“${shorten(list.find((x) => x.id === id)?.prompt.text ?? id, 50)}”: ${e instanceof Error ? e.message : String(e)}`);
+      }
+      done++;
+      setBulkDel({ done, total: ids.length, failed: [...failed] });
+    }
+    setPicked((p) => p.filter((id) => !ids.includes(id) || failedIds.has(id)));
+    if (open && ids.includes(open.item.id) && !failedIds.has(open.item.id)) setOpen(null);
+    setBulkDel(null);
+    setToast(failed.length
+      ? { text: `Đã xoá ${ids.length - failed.length}/${ids.length} câu. Không xoá được ${failed.length} câu — ${failed[0]}`, error: true }
+      : { text: `Đã xoá ${ids.length} câu.` });
+  };
+  const deleteOne = (it: Item) => del.mutate(it.id, {
+    onSuccess: () => { setRowDel(null); setPicked((p) => p.filter((x) => x !== it.id)); if (open?.item.id === it.id) setOpen(null); setToast({ text: 'Đã xoá câu hỏi.' }); },
+    onError: (e) => { setRowDel(null); setToast({ text: e instanceof Error ? e.message : String(e), error: true }); },
+  });
   const doExport = async () => {
     try {
       const r = await exportBankXlsx(list);
@@ -98,6 +128,7 @@ export default function ItemBank() {
   return (
     <div className={cx('tc-page tc-bank', open && 'has-drawer')}>
       <PageHead title="Ngân hàng câu hỏi" sub="Câu hỏi và hoạt động dùng chung cho bài giảng, luyện tập và lớp trực tiếp. Tích chọn các câu rồi bấm “Giao cho học sinh” (làm ở nhà) hoặc “Chơi trực tiếp” (thi đua trên lớp)." actions={<>
+        <Link className="tc-btn tc-btn--ghost" to="/ki-nang" title="Xem, thêm, sửa, xoá kĩ năng; xuất danh mục kĩ năng ra Excel" data-testid="qb-skills"><Icon name="puzzle" size={16} /><span>Danh mục kĩ năng</span></Link>
         <Btn icon="upload" onClick={() => void doExport()} disabled={!list.length} title="Xuất các câu đang hiện (theo bộ lọc) ra Excel, cùng mẫu với nhập">Xuất ra Excel</Btn>
         <Btn icon="plus" onClick={() => setQuick(true)} data-testid="qb-open">Thêm nhanh nhiều câu</Btn>
         <Btn kind="primary" icon="plus" onClick={() => setTypePick(true)}>Tạo hoạt động</Btn>
@@ -117,9 +148,20 @@ export default function ItemBank() {
             <strong className="tc-small">Đã chọn {picked.length} câu</strong>
             <Btn size="sm" kind="ghost" onClick={() => setPicked([])}>Bỏ chọn</Btn>
             <span className="tc-ebar__spacer" />
+            <Btn kind="danger" icon="trash" disabled={!!bulkDel} onClick={() => setBulkDel('ask')} data-testid="qb-del-picked">Xoá {picked.length} câu</Btn>
             <Btn icon="play" disabled={!me} onClick={() => setPlay(true)} data-testid="qb-play" title="Thi đua trực tiếp trên lớp: kiểu Kahoot, Quizizz hoặc thẻ giấy">Chơi trực tiếp</Btn>
             <Btn kind="primary" icon="check" disabled={!me} onClick={() => setAssign(true)} data-testid="qb-assign">Giao cho học sinh ({picked.length} câu)</Btn>
-          </> : <span className="tc-muted tc-small">Tích ô trước mỗi câu để chọn câu giao cho học sinh.</span>}
+          </> : <span className="tc-muted tc-small">Tích ô trước mỗi câu để chọn câu giao cho học sinh, chơi trực tiếp hoặc xoá nhiều câu.</span>}
+          {bulkDel === 'ask' ? (
+            <div className="tc-w100">
+              <ConfirmBar
+                text={`Xoá ${picked.length} câu đã chọn?${picked.some((id) => usage[id]) ? ` Có ${picked.filter((id) => usage[id]).length} câu đang dùng trong bài giảng — slide đó sẽ báo thiếu câu hỏi.` : ''} Không hoàn tác được.`}
+                confirmLabel={`Xoá ${picked.length} câu`}
+                onCancel={() => setBulkDel(null)}
+                onConfirm={() => void deleteMany([...picked])}
+              />
+            </div>
+          ) : bulkDel ? <span className="tc-small" role="status">Đang xoá {bulkDel.done}/{bulkDel.total}…</span> : null}
         </div>
       ) : null}
       {q.isLoading ? <Loading /> : !list.length ? (
@@ -139,6 +181,15 @@ export default function ItemBank() {
                 <span className="tc-listrow__main">{shorten(it.prompt.text, 120)}</span>
                 <span className="tc-muted tc-small tc-listrow__meta">{SUBJECTS[it.subject]?.name} · Lớp {it.grade}{usage[it.id] ? ` · ${usage[it.id].length} bài` : ''}</span>
               </button>
+              <span className="tc-qbrow__acts">
+                <Btn size="sm" kind="ghost" icon="pencil" title="Sửa câu này" aria-label={`Sửa câu: ${shorten(it.prompt.text, 50)}`} onClick={() => { setConfirm(false); setOpen({ item: it, mode: 'edit' }); }} data-testid="qb-row-edit" />
+                <Btn size="sm" kind="ghost" icon="trash" title="Xoá câu này" aria-label={`Xoá câu: ${shorten(it.prompt.text, 50)}`} onClick={() => setRowDel(rowDel === it.id ? null : it.id)} data-testid="qb-row-del" />
+              </span>
+              {rowDel === it.id ? (
+                <div className="tc-qbrow__confirm">
+                  <ConfirmBar text={usage[it.id] ? `Câu này đang dùng trong ${usage[it.id].length} bài giảng — xoá thì slide đó báo thiếu câu hỏi. Vẫn xoá?` : 'Xoá câu hỏi này? Không hoàn tác được.'} confirmLabel="Xoá" busy={del.isPending} onCancel={() => setRowDel(null)} onConfirm={() => deleteOne(it)} />
+                </div>
+              ) : null}
             </li>
           ))}
         </ul>

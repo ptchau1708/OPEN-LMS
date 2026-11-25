@@ -9,9 +9,22 @@ import { fromPgError, type AdminClient } from './supabase.ts';
 /** Ngày lấy sự kiện để tính lại mức thành thạo (trọng số độ mới bán rã 10 ngày → 180 ngày là đủ). */
 const MASTERY_WINDOW_DAYS = 180;
 
+/**
+ * Mã kĩ năng hợp lệ: có trong danh mục gốc, hoặc là kĩ năng thầy cô tự thêm (có trong v2.skills — danh mục mở, SQL 19).
+ */
+export async function knownSkillCodes(admin: AdminClient, skills: string[]): Promise<string[]> {
+  const uniq = [...new Set(skills)].filter((c) => typeof c === 'string' && c.length <= 80);
+  const unknown = uniq.filter((c) => !SKILL_BY_CODE[c]);
+  if (!unknown.length) return uniq;
+  const { data, error } = await admin.from('skills').select('code').in('code', unknown.slice(0, 200));
+  if (error) return uniq.filter((c) => SKILL_BY_CODE[c]);
+  const found = new Set(((data ?? []) as { code: string }[]).map((r) => r.code));
+  return uniq.filter((c) => SKILL_BY_CODE[c] || found.has(c));
+}
+
 /** Tính lại và lưu skill_mastery cho `skills` của HS. */
 export async function refreshMastery(admin: AdminClient, userId: string, skills: string[]): Promise<SkillMastery[]> {
-  const codes = [...new Set(skills)].filter((c) => SKILL_BY_CODE[c]);
+  const codes = await knownSkillCodes(admin, skills);
   if (!codes.length) return [];
   const since = new Date(Date.now() - MASTERY_WINDOW_DAYS * 86_400_000).toISOString();
   const { data, error } = await admin

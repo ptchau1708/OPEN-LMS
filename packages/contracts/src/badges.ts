@@ -269,6 +269,8 @@ export interface RewardsSource {
   markBadgesSeen(userId: string, ids: string[]): Promise<void>;
   grantTeacherBadge(input: GrantTeacherBadgeInput): Promise<UserBadge[]>;
   listTeacherBadges(classId: string): Promise<UserBadge[]>;
+  /** Thu hồi một "Huy hiệu của cô" đã tặng (tặng nhầm). Cần SQL 19 trên Supabase. */
+  revokeTeacherBadge(badgeId: string): Promise<void>;
   getShop(userId: string): Promise<ShopState>;
   buyItem(userId: string, itemId: string): Promise<ShopState>;
   equipItem(userId: string, slot: OutfitSlot, itemId: string | null): Promise<ShopState>;

@@ -27,6 +27,8 @@ export interface Discussion {
   archived: boolean;
   rooms: DiscussionRoom[];
   tabs: DiscussionTab[];
+  /** Phòng trò chuyện: câu trả lời nhanh GV đặt (≤ 12 câu). Trống = câu mặc định. Cần SQL 19 trên Supabase. */
+  quickReplies?: string[];
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;

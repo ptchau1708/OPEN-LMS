@@ -128,10 +128,16 @@ export interface DataSource {
   listCourses(filter?: { subject?: SubjectId; grade?: Grade }): Promise<Course[]>;
   listPackages(): Promise<ContentPackage[]>;
   getPackage(id: string): Promise<ContentPackage | null>;
+  /** Xoá gói khỏi danh sách (bài giảng đang dùng gói sẽ báo "không còn gói"). */
+  deletePackage(id: string): Promise<void>;
   savePackage(pkg: ContentPackage): Promise<ContentPackage>;
 
   /* ---- giao bài & học ---- */
   listAssignments(filter: { classId?: string; studentId?: string }): Promise<Assignment[]>;
+  /** Sửa bài đã giao (tên, học sinh, giờ mở, hạn nộp, nộp muộn). */
+  updateAssignment(a: Assignment): Promise<Assignment>;
+  /** Xoá bài đã giao (các lượt giao lại vẫn giữ, chỉ mất liên kết). */
+  deleteAssignment(id: string): Promise<void>;
   createAssignment(a: Omit<Assignment, 'id'>): Promise<Assignment>;
   getTodayTasks(userId: string): Promise<Task[]>;
   getProgress(userId: string, lessonId: string): Promise<LessonProgress | null>;
@@ -169,8 +175,10 @@ export interface DataSource {
 
   /* ---- trực tiếp ---- */
   createLiveSession(lessonId: string, classId?: string): Promise<LiveSessionInfo>;
-  findLiveSession(pin: string): Promise<LiveSessionInfo | null>;
-  openLiveChannel(sessionId: string, role: LiveRole): Promise<LiveChannel>;
+  /** screen: màn hình lớp (TV) tìm phiên — không tính là HS vào lớp, không cần đăng nhập (SQL 21). */
+  findLiveSession(pin: string, opts?: { screen?: boolean }): Promise<LiveSessionInfo | null>;
+  /** pin: TV không đăng nhập xem phiên bằng mã lớp (role 'screen'). */
+  openLiveChannel(sessionId: string, role: LiveRole, opts?: { pin?: string }): Promise<LiveChannel>;
 
   /* ---- hồ sơ học sinh, thành thạo kĩ năng, lỗ hổng & ôn tập (docs/STUDENT_PROFILE_API.md) ---- */
   /** Mức thành thạo mọi kĩ năng HS đã làm ít nhất 1 câu (kĩ năng vắng = chua-hoc). */
@@ -219,6 +227,8 @@ export interface DataSource {
   /** Hành vi của lớp (mặc định nếu lớp chưa có danh sách riêng). */
   listBehaviors(classId: string): Promise<Behavior[]>;
   saveBehavior(b: Behavior): Promise<Behavior>;
+  /** Xoá một hành vi khỏi danh sách của lớp (nhật kí điểm đã ghi vẫn giữ). */
+  deleteBehavior(classId: string, id: string): Promise<void>;
   listBehaviorLogs(filter: { classId?: string; studentId?: string; from?: string; to?: string; limit?: number }): Promise<BehaviorLog[]>;
   /** Ghi cho 1 hoặc nhiều HS; điểm dương cộng sao (1 sao / điểm). */
   recordBehavior(input: RecordBehaviorInput): Promise<BehaviorLog[]>;

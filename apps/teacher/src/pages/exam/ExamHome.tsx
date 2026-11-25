@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { SUBJECTS, TT27_TERM_LABEL, type Profile } from '@openedu/contracts';
-import { matrixTotals, useClasses, useExamMatrices, useExams } from '@openedu/data';
-import { Btn, Empty, ErrorNote, Loading, PageHead } from '../../components/common';
+import { matrixTotals, useClasses, useDeleteExam, useExamMatrices, useExams } from '@openedu/data';
+import { Btn, ConfirmBar, Empty, ErrorNote, Loading, PageHead } from '../../components/common';
 import { fmtDateTime } from '../../lib/format';
 import { ExamTabs, fmtPoints } from './shared';
 import { ShareClassroomButton } from '../bridge/ShareClassroom';
@@ -10,6 +11,8 @@ export default function ExamHome({ user }: { user: Profile }) {
   const nav = useNavigate();
   const mq = useExamMatrices();
   const eq = useExams();
+  const delExam = useDeleteExam();
+  const [askDel, setAskDel] = useState<string | null>(null);
   const classes = useClasses(user.role === 'admin' ? undefined : user.id);
   const className = (id: string) => classes.data?.find((c) => c.id === id)?.name ?? id;
   const now = Date.now();
@@ -48,6 +51,7 @@ export default function ExamHome({ user }: { user: Profile }) {
       </section>
       <section className="tc-card tc-card--flush">
         <div className="tc-card__head ex-pad"><h2 className="ex-h2">Đề đã ra</h2></div>
+        <ErrorNote error={delExam.error} />
         {eq.isLoading ? <Loading /> : eq.error ? <ErrorNote error={eq.error} /> : !eq.data?.length ? <Empty title="Chưa có đề nào">Bấm “Ra đề” ở một ma trận.</Empty> : (
           <div className="tc-tablewrap">
             <table className="tc-table">
@@ -67,7 +71,9 @@ export default function ExamHome({ user }: { user: Profile }) {
                           <Btn size="sm" onClick={() => nav(`/de-kiem-tra/${e.id}/sua`)}>Soạn</Btn>
                           {e.status === 'published' ? <ShareClassroomButton kind="exam" id={e.id} title={e.title} compact /> : null}
                           <Btn size="sm" kind="primary" onClick={() => nav(`/de-kiem-tra/${e.id}/ket-qua`)}>Kết quả</Btn>
+                          <Btn size="sm" kind="ghost" icon="trash" aria-label={`Xoá đề ${e.title}`} title="Xoá đề" onClick={() => setAskDel(e.id)} data-testid="exam-delete" />
                         </span>
+                        {askDel === e.id ? <ConfirmBar text={`Xoá đề “${e.title}”? Bài làm và kết quả của đề này cũng bị xoá.`} busy={delExam.isPending} onCancel={() => setAskDel(null)} onConfirm={() => delExam.mutate(e.id, { onSuccess: () => setAskDel(null) })} /> : null}
                       </td>
                     </tr>
                   );

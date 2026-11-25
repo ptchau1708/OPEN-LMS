@@ -9,29 +9,33 @@ const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'del', '0', 'ok'];
 export function Start() {
   const [params, setParams] = useSearchParams();
   const sid = params.get('s');
+  const pinParam = (params.get('p') ?? '').replace(/\D/g, '');
   const ctl = params.get('ctl') === '1';
-  if (sid) return <Session key={sid} sessionId={sid} ctl={ctl} onLeave={() => setParams(ctl ? { ctl: '1' } : {}, { replace: true })} />;
-  return <PinEntry onFound={(s) => setParams(ctl ? { s, ctl: '1' } : { s }, { replace: true })} />;
+  if (sid) return <Session key={sid} sessionId={sid} pin={pinParam.length === 6 ? pinParam : undefined} ctl={ctl} onLeave={() => setParams(ctl ? { ctl: '1' } : {}, { replace: true })} />;
+  return <PinEntry onFound={(s, p) => setParams(ctl ? { s, p, ctl: '1' } : { s, p }, { replace: true })} />;
 }
 
-function PinEntry({ onFound }: { onFound: (sessionId: string) => void }) {
+function PinEntry({ onFound }: { onFound: (sessionId: string, pin: string) => void }) {
   const [pin, setPin] = useState('');
   const [msg, setMsg] = useState<string | null>(null);
-  const find = useFindLiveSession();
+  const find = useFindLiveSession({ screen: true });
   const btns = useRef<(HTMLButtonElement | null)[]>([]);
 
   const submit = (p = pin) => {
     if (p.length !== 6 || find.isPending) return;
     setMsg(null);
     find.mutate(p, {
-      onSuccess: (info) => (info ? onFound(info.sessionId) : setMsg('Chưa thấy lớp nào có mã này. Thầy cô xem lại mã trên máy giáo viên nhé!')),
+      onSuccess: (info) => (info ? onFound(info.sessionId, info.pin || p) : setMsg('Chưa thấy lớp nào có mã này. Thầy cô xem lại mã trên máy giáo viên nhé!')),
       onError: (e) => setMsg(e instanceof Error ? e.message : 'Chưa kết nối được máy chủ lớp học. Thử lại nhé!'),
     });
   };
   const press = (k: string) => {
     if (k === 'ok') return submit();
     setMsg(null);
-    setPin((p) => (k === 'del' ? p.slice(0, -1) : p.length < 6 ? p + k : p));
+    const next = k === 'del' ? pin.slice(0, -1) : pin.length < 6 ? pin + k : pin;
+    setPin(next);
+    // Đủ 6 số → tự vào lớp (điều khiển TV không phải bấm thêm "Vào").
+    if (k !== 'del' && pin.length === 5 && next.length === 6) submit(next);
   };
 
   useEffect(() => {

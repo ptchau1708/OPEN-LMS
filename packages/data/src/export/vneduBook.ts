@@ -68,6 +68,7 @@ const SUBJECT_OF: [RegExp, SubjectId][] = [
   [/^dao duc$/, 'dao-duc'],
   [/^(giao duc the chat|the duc)$/, 'gdtc'],
   [/^hoat dong trai nghiem$/, 'hdtn'],
+  [/^tieng dan toc( thieu so)?\b/, 'tieng-dan-toc'],
   [/^nghe thuat am nhac$/, 'am-nhac'],
   [/^nghe thuat mi thuat$|^nghe thuat my thuat$/, 'mi-thuat'],
 ];

@@ -154,6 +154,20 @@ export class DemoRewardsSource implements RewardsSource {
     return store.badges.filter((b) => b.badgeId === TEACHER_BADGE_ID && !!cls?.studentIds.includes(b.userId)).sort((a, b) => b.earnedAt.localeCompare(a.earnedAt));
   }
 
+  async revokeTeacherBadge(badgeId: string): Promise<void> {
+    const me = await this.viewer();
+    if (!me || (me.role !== 'teacher' && me.role !== 'admin')) throw fail('Chỉ thầy cô mới thu hồi huy hiệu được.');
+    const { store, save } = await this.kv();
+    const b = store.badges.find((x) => x.id === badgeId && x.badgeId === TEACHER_BADGE_ID);
+    if (!b) throw fail('Không tìm thấy huy hiệu này.');
+    if (me.role !== 'admin' && b.grantedBy !== me.id) {
+      const classes = await this.ds.listClasses(me.id);
+      if (!classes.some((c) => c.studentIds.includes(b.userId))) throw fail('Thầy cô chỉ thu hồi huy hiệu của học sinh lớp mình.');
+    }
+    store.badges = store.badges.filter((x) => x.id !== badgeId);
+    save(store);
+  }
+
   /* ---------- cửa hàng ---------- */
   private async shopOf(userId: string, store: Store): Promise<ShopState> {
     const [w, pp] = await Promise.all([this.ds.getWallet(userId), this.ds.getPassport(userId)]);

@@ -2,9 +2,10 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { GRADE_FLAG_LABEL, MISCONCEPTIONS, SKILL_BY_CODE, TT27_LEVEL_LABEL, type GradeFinal, type Profile, type Rubric, type SubmissionDetail, type Tt27Level } from '@openedu/contracts';
 import { Icon } from '@openedu/ui';
-import { clamp, fmtScore, isTeacherGrade, LEVEL_DEFAULT_FEEDBACK, levelFor, suggestTotal, TEACHER_GRADER_LABEL, totalFromCriteria, useRequestAiGrade, useReviewGrade, useSubmission, useSubmissions, useWorkTasks } from '@openedu/data';
+import { clamp, fmtScore, isTeacherGrade, levelFor, suggestTotal, TEACHER_GRADER_LABEL, totalFromCriteria, useRequestAiGrade, useReviewGrade, useSubmission, useSubmissions, useWorkTasks } from '@openedu/data';
 import { Avatar, Btn, Empty, ErrorNote, Field, Loading, PageHead } from '../../components/common';
 import { ClassPicker, LevelBadge, MockBadge, QUEUE_TABS, StatusChip, useClassPick, useHotkeys, useRoster } from '../../lib/assess';
+import { BankChips, CommentBankDialog, useCommentBank } from '../../lib/commentBank';
 import { cx, relTime } from '../../lib/format';
 
 function useQueue(classId: string, tabId: string, taskId: string) {
@@ -298,7 +299,9 @@ export function ManualPanel({ d, user, onDone, onCancel, onAi }: { d: Submission
     if (rubric) setLevel(levelFor(totalFromCriteria(rubric.criteria.map((c) => next[c.id] ?? 0), rubric).total, max));
     return next;
   });
-  const fb = shownLevel ? LEVEL_DEFAULT_FEEDBACK[shownLevel] : null;
+  const cb = useCommentBank(user.id);
+  const [bankOpen, setBankOpen] = useState(false);
+  const fb = shownLevel ? { student: cb.first(shownLevel, 'student'), parent: cb.first(shownLevel, 'parent') } : null;
   const ready = !!shownLevel && score !== null;
   const save = () => {
     if (!ready) return;
@@ -359,9 +362,12 @@ export function ManualPanel({ d, user, onDone, onCancel, onAi }: { d: Submission
       ) : null}
 
       <Field label="Nhận xét cho học sinh"><textarea className="tc-input" rows={3} value={student} onChange={(e) => setStudent(e.target.value)} placeholder={fb?.student ?? 'Khen điều em làm tốt, rồi một bước tiếp theo.'} /></Field>
+      {shownLevel ? <BankChips label="Câu mẫu cho học sinh" list={cb.bank[shownLevel].student} onPick={(t) => setStudent((v) => (v.trim() ? `${v.trim()} ${t}` : t))} /> : null}
       <Field label="Lời nhắn cho phụ huynh"><textarea className="tc-input" rows={2} value={parent} onChange={(e) => setParent(e.target.value)} placeholder={fb?.parent ?? ''} /></Field>
+      {shownLevel ? <BankChips label="Câu mẫu cho phụ huynh" list={cb.bank[shownLevel].parent} onPick={(t) => setParent((v) => (v.trim() ? `${v.trim()} ${t}` : t))} /> : null}
       <Field label="Ghi chú riêng (chỉ thầy cô thấy)"><textarea className="tc-input tc-input--private" rows={2} value={teacher} onChange={(e) => setTeacher(e.target.value)} /></Field>
-      <p className="tc-small tc-muted">Bỏ trống nhận xét thì dùng câu mẫu theo mức (chữ mờ ở trên).</p>
+      <p className="tc-small tc-muted tc-row tc-wrap">Bỏ trống nhận xét thì dùng câu mẫu đầu tiên theo mức (chữ mờ ở trên). <Btn size="sm" kind="ghost" icon="pencil" onClick={() => setBankOpen(true)} data-testid="bank-open">Sửa mẫu nhận xét</Btn></p>
+      {bankOpen ? <CommentBankDialog userId={user.id} initialLevel={shownLevel ?? 'T'} onClose={() => setBankOpen(false)} /> : null}
 
       <ErrorNote error={review.error} />
       {redo ? (

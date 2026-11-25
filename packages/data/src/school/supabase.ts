@@ -214,6 +214,7 @@ export class SupabaseSchoolSource implements SchoolSource {
       schoolYear: String(d.schoolYear ?? `${y}-${y + 1}`),
       termId: (d.termId ?? 'GK1') as SchoolSettings['termId'],
       aiDailyQuota: num(d.aiDailyQuota ?? 200),
+      ...(d.subjects && typeof d.subjects === 'object' && !Array.isArray(d.subjects) ? { subjects: d.subjects as SchoolSettings['subjects'] } : {}),
     };
   }
   async getSchoolSettings(): Promise<SchoolSettings> {
@@ -224,7 +225,10 @@ export class SupabaseSchoolSource implements SchoolSource {
   }
   async saveSchoolSettings(s: SchoolSettings): Promise<SchoolSettings> {
     const r = await this.rpc<Row>('admin_save_settings', { p_data: s }, 'Chưa lưu được cài đặt');
-    return this.settingsOf(r);
+    const out = this.settingsOf(r);
+    // CSDL chưa chạy SQL 19: hàm cũ bỏ qua phần môn học → báo rõ thay vì im lặng.
+    if (s.subjects && Object.keys(s.subjects).length && !out.subjects) throw new Error('Đã lưu cài đặt chung, nhưng phần môn học cần chạy tệp SQL 19 trên Supabase trước.');
+    return out;
   }
   async listSchoolUsers(filter: { role?: Role; classId?: string } = {}): Promise<SchoolUser[]> {
     const rows = await this.rpc<Row[]>('admin_list_users', { p_role: filter.role ?? null, p_class: filter.classId ?? null }, 'Chưa tải được danh sách tài khoản');

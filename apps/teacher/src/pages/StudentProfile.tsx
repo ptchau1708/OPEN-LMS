@@ -11,6 +11,7 @@ import { LevelBar, LevelLegend, LevelSwatch, pct } from '../lib/mastery';
 import { useRemediate } from '../lib/remediate';
 import { DuelStatsBlock } from '../components/DuelStats';
 import { ExternalActivitiesCard } from '../components/ExternalActivities';
+import { StudentNotesCard } from '../components/StudentNotes';
 import { ProfileDash } from './ProfileDash';
 
 const KIND_LABEL: Record<TimelineKind, string> = { lesson: 'Bài giảng', practice: 'Luyện tập', arena: 'Leo tháp', live: 'Lớp trực tiếp', reward: 'Phần thưởng', remediation: 'Ôn tập', work: 'Bài làm', behavior: 'Thi đua' };
@@ -150,6 +151,7 @@ export default function StudentProfile({ user }: { user: Profile }) {
         <AttendanceSection p={p} />
       </div>
       <Tt27Section p={p} />
+      <StudentNotesCard studentId={studentId} studentName={s.name} parentView={parent} />
       <ExternalActivitiesCard studentId={studentId} />
       <section className="tc-card">
         <header className="tc-card__head"><h2>Bài giảng và bài được giao</h2></header>

@@ -13,7 +13,7 @@ test('Bản đồ kiến thức: GV tự chọn môn hiện cho lớp, nhớ sau
   // Cô dạy Toán + Khoa học + Tin học
   await page.getByTestId('hm-pick-open').click();
   const dlg = page.getByRole('dialog');
-  await expect(dlg.getByRole('checkbox')).toHaveCount(12);
+  await expect(dlg.getByRole('checkbox')).toHaveCount(13);
   await expect(dlg.getByText('Tự nhiên và Xã hội')).toHaveCount(0);
   await dlg.getByRole('button', { name: 'Bỏ chọn hết' }).click();
   await expect(dlg.getByTestId('hm-pick-save')).toBeDisabled();
@@ -36,7 +36,7 @@ test('Bản đồ kiến thức: GV tự chọn môn hiện cho lớp, nhớ sau
   await page.getByTestId('hm-pick-open').click();
   await dlg.getByRole('button', { name: 'Chọn tất cả' }).click();
   await dlg.getByTestId('hm-pick-save').click();
-  await expect(page.getByTestId('hm-subject').locator('option')).toHaveCount(12);
+  await expect(page.getByTestId('hm-subject').locator('option')).toHaveCount(13);
   await page.getByTestId('hm-pick-open').click();
   await dlg.getByRole('button', { name: 'Về mặc định' }).click();
   await expect(seg.getByRole('button')).toHaveText(DEF);

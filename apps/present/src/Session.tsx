@@ -1,11 +1,11 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AnyResponse, Item, LiveCommand, LiveState } from '@openedu/contracts';
 import { lessonItemIds, useItemsByIds, useLesson, useLiveChannel } from '@openedu/data';
-import { Icon, Mascot } from '@openedu/ui';
+import { Icon, Mascot, QrCode } from '@openedu/ui';
 import { Lobby } from './Lobby';
 import { Ended } from './Ended';
 import { Controls } from './Controls';
-import { slideItemId } from './util';
+import { formatPin, joinUrls, slideItemId } from './util';
 
 const Stage = lazy(() => import('./Stage'));
 const GameStage = lazy(() => import('./GameStage'));
@@ -15,12 +15,14 @@ export const BOARD_USER = 'bang-lop';
 
 export interface SessionProps {
   sessionId: string;
+  /** Mã lớp 6 số (link "Mở trên TV" hoặc nhập trên TV) — TV xem được khi chưa đăng nhập. */
+  pin?: string;
   ctl: boolean;
   onLeave: () => void;
 }
 
-export function Session({ sessionId, ctl, onLeave }: SessionProps) {
-  const view = useLiveChannel(sessionId, ctl ? 'teacher' : 'screen');
+export function Session({ sessionId, pin, ctl, onLeave }: SessionProps) {
+  const view = useLiveChannel(sessionId, ctl ? 'teacher' : 'screen', ctl ? null : pin);
   const { channel, status, error } = view;
   const raw = view.state;
   // Chế độ Supabase: state không kèm bài giảng/item → tải riêng.
@@ -61,15 +63,36 @@ export function Session({ sessionId, ctl, onLeave }: SessionProps) {
   useEffect(() => () => window.clearTimeout(sendTimer.current), []);
 
   const idle = useIdle(3000);
+  // Phóng to mã QR cho HS ngồi xa: bấm vào mã QR, hoặc phím Q (Esc để đóng).
+  const [bigQr, setBigQr] = useState(false);
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (e.altKey || e.ctrlKey || e.metaKey || (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))) return;
+      if (e.key === 'q' || e.key === 'Q') setBigQr((v) => !v);
+      else if (e.key === 'Escape') setBigQr(false);
+    };
+    window.addEventListener('keydown', on);
+    return () => window.removeEventListener('keydown', on);
+  }, []);
+  // Quá 8 giây chưa có trạng thái lớp → báo cách khắc phục thay vì quay mãi.
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (state) return;
+    const t = window.setTimeout(() => setSlow(true), 8000);
+    return () => window.clearTimeout(t);
+  }, [state]);
   const offline = status !== 'open';
 
   let body;
   if (!state) {
+    const stuck = status === 'error' || slow;
     body = (
       <div className="pr-center">
-        <Mascot id="nghe" mood={status === 'error' ? 'think' : 'happy'} size={200} animate className="pr-center__mascot" />
+        <Mascot id="nghe" mood={stuck ? 'think' : 'happy'} size={200} animate className="pr-center__mascot" />
         <h1 className="pr-center__h">{status === 'error' ? 'Chưa vào được lớp' : 'Đang mở lớp học…'}</h1>
-        {status === 'error' && <p className="pr-center__p">{error ?? 'Không tìm thấy lớp học trực tiếp này.'}</p>}
+        {status === 'error' ? <p className="pr-center__p">{error ?? 'Không tìm thấy lớp học trực tiếp này.'}</p>
+          : slow ? <p className="pr-center__p">{pin || ctl ? 'Lớp đang mở chậm. Thầy cô kiểm tra mạng, hoặc bấm “Nhập mã lớp khác” rồi nhập mã 6 số trên máy giáo viên.' : 'Link này thiếu mã lớp. Bấm “Nhập mã lớp khác” rồi nhập mã 6 số trên máy giáo viên, hoặc bấm lại “Mở trên TV”.'}</p> : null}
         <button type="button" className="pr-link" onClick={onLeave}>
           Nhập mã lớp khác
         </button>
@@ -94,8 +117,12 @@ export function Session({ sessionId, ctl, onLeave }: SessionProps) {
   }
 
   return (
-    <div className={`pr-app${idle ? ' is-idle' : ''}${ctl ? ' is-ctl' : ''}`}>
+    <div
+      className={`pr-app${idle ? ' is-idle' : ''}${ctl ? ' is-ctl' : ''}`}
+      onClick={(e) => { if ((e.target as HTMLElement).closest('.pr-join__qr, .pr-corner')) setBigQr(true); }}
+    >
       {body}
+      {bigQr && state ? <QrOverlay pin={state.pin} onClose={() => setBigQr(false)} /> : null}
       {state?.locked && state.phase !== 'ended' && (
         <div className="pr-locked" role="status">
           <Icon name="eye" size={32} /> Học sinh đang nhìn lên bảng
@@ -115,6 +142,22 @@ export function Session({ sessionId, ctl, onLeave }: SessionProps) {
           send={cmd}
         />
       )}
+    </div>
+  );
+}
+
+/** Mã QR toàn màn hình (HS ở cuối lớp quét được). */
+function QrOverlay({ pin, onClose }: { pin: string; onClose: () => void }) {
+  const { full, short } = joinUrls(pin);
+  return (
+    <div className="pr-qrbig" role="dialog" aria-label="Mã QR vào lớp (phóng to)" onClick={(e) => { e.stopPropagation(); onClose(); }} data-testid="tv-qr-big">
+      <QrCode value={full} size={900} className="pr-qrbig__qr" title="Quét mã để vào lớp" />
+      <div className="pr-qrbig__side">
+        <p className="pr-qrbig__l">Mã lớp</p>
+        <p className="pr-qrbig__pin">{formatPin(pin)}</p>
+        <p className="pr-qrbig__u">{short}</p>
+        <p className="pr-qrbig__hint">Bấm vào màn hình hoặc phím Esc để thu nhỏ</p>
+      </div>
     </div>
   );
 }

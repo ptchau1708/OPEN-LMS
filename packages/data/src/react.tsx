@@ -337,6 +337,12 @@ export function usePackage(id?: string) {
   return useQuery({ queryKey: qk.package(id), queryFn: () => ds.getPackage(id as string), enabled: !!id });
 }
 
+export function useDeletePackage() {
+  const ds = useDataSource();
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => ds.deletePackage(id), onSuccess: () => void qc.invalidateQueries({ queryKey: ['packages'] }) });
+}
+
 export function useSavePackage() {
   const ds = useDataSource();
   const qc = useQueryClient();
@@ -360,6 +366,30 @@ export function useCreateAssignment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (a: Omit<Assignment, 'id'>) => ds.createAssignment(a),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['assignments'] });
+      void qc.invalidateQueries({ queryKey: ['todayTasks'] });
+    },
+  });
+}
+
+export function useUpdateAssignment() {
+  const ds = useDataSource();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (a: Assignment) => ds.updateAssignment(a),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['assignments'] });
+      void qc.invalidateQueries({ queryKey: ['todayTasks'] });
+    },
+  });
+}
+
+export function useDeleteAssignment() {
+  const ds = useDataSource();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => ds.deleteAssignment(id),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['assignments'] });
       void qc.invalidateQueries({ queryKey: ['todayTasks'] });
@@ -713,6 +743,12 @@ export function useSaveBehavior() {
   return useMutation({ mutationFn: (b: Behavior) => ds.saveBehavior(b), onSuccess: (b) => void qc.invalidateQueries({ queryKey: qk.behaviors(b.classId) }) });
 }
 
+export function useDeleteBehavior() {
+  const ds = useDataSource();
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (v: { classId: string; id: string }) => ds.deleteBehavior(v.classId, v.id), onSuccess: (_r, v) => void qc.invalidateQueries({ queryKey: qk.behaviors(v.classId) }) });
+}
+
 export function useBehaviorLogs(filter: { classId?: string; studentId?: string; from?: string; to?: string; limit?: number }) {
   const ds = useDataSource();
   return useQuery({ queryKey: qk.behaviorLogs(filter), queryFn: () => ds.listBehaviorLogs(filter), enabled: !!(filter.classId || filter.studentId) });
@@ -766,9 +802,10 @@ export function useCreateLiveSession() {
 }
 
 /** Tìm lớp theo mã 6 số (bấm "Vào lớp"). Kết quả null = không có lớp với mã này. */
-export function useFindLiveSession() {
+export function useFindLiveSession(opts: { screen?: boolean } = {}) {
   const ds = useDataSource();
-  return useMutation({ mutationFn: (pin: string) => ds.findLiveSession(pin) });
+  const screen = !!opts.screen;
+  return useMutation({ mutationFn: (pin: string) => (screen ? ds.findLiveSession(pin, { screen: true }) : ds.findLiveSession(pin)) });
 }
 
 export interface LiveChannelView {
@@ -783,7 +820,7 @@ export interface LiveChannelView {
 }
 
 /** Mở kênh trực tiếp khi có sessionId; tự đóng khi đổi phiên / rời màn hình. */
-export function useLiveChannel(sessionId: string | null | undefined, role: LiveRole): LiveChannelView {
+export function useLiveChannel(sessionId: string | null | undefined, role: LiveRole, pin?: string | null): LiveChannelView {
   const ds = useDataSource();
   const [view, setView] = useState<LiveChannelView>({ channel: null, state: null, responses: [], participants: [], status: sessionId ? 'connecting' : 'closed', error: null });
 
@@ -797,7 +834,7 @@ export function useLiveChannel(sessionId: string | null | undefined, role: LiveR
     const offs: (() => void)[] = [];
     setView((v) => ({ ...v, channel: null, state: null, responses: [], status: 'connecting', error: null }));
 
-    ds.openLiveChannel(sessionId, role)
+    (pin ? ds.openLiveChannel(sessionId, role, { pin }) : ds.openLiveChannel(sessionId, role))
       .then((c) => {
         if (cancelled) {
           c.close();
@@ -840,7 +877,7 @@ export function useLiveChannel(sessionId: string | null | undefined, role: LiveR
       for (const off of offs) off();
       ch?.close();
     };
-  }, [ds, sessionId, role]);
+  }, [ds, sessionId, role, pin]);
 
   return view;
 }

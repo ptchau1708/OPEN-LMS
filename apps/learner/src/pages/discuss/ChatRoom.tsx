@@ -1,14 +1,13 @@
 /** Trò chuyện nhóm (HS): tin nhắn của nhóm em, nhắn bằng chữ hoặc giọng nói, tin có từ chưa phù hợp chờ cô xem. */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MascotId } from '@openedu/contracts';
-import { discussionState, roomsFor, STATE_LABEL, useDiscussionPosts, usePostDiscussion, useReportPost, type Discussion } from '@openedu/data';
+import { DEFAULT_QUICK_REPLIES, discussionState, roomsFor, STATE_LABEL, useDiscussionPosts, usePostDiscussion, useReportPost, type Discussion } from '@openedu/data';
 import { Button, Icon, sfx } from '@openedu/ui';
 import { Avatar, EmptyState, TopBack } from '../../components/Common';
 import { useSpeech } from '../../lib/speech';
 import { useMe } from '../../lib/util';
 
 const hhmm = (iso: string) => new Date(iso).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-const QUICK = ['Em đồng ý! 👍', 'Mình làm phần này nhé!', 'Bạn nói rõ hơn được không?', 'Hay quá! ❤️'];
 
 export function ChatRoom({ d }: { d: Discussion }) {
   const me = useMe();
@@ -68,7 +67,7 @@ export function ChatRoom({ d }: { d: Discussion }) {
           </div>
           {canSend ? (
             <div className="ln-chat__compose">
-              <div className="ln-dstarters">{QUICK.map((q) => <button key={q} type="button" className="ln-dstarter" onClick={() => go(q)} disabled={send.isPending}>{q}</button>)}</div>
+              <div className="ln-dstarters">{(d.quickReplies?.length ? d.quickReplies : DEFAULT_QUICK_REPLIES).map((q) => <button key={q} type="button" className="ln-dstarter" onClick={() => go(q)} disabled={send.isPending}>{q}</button>)}</div>
               <form className="ln-chat__form" onSubmit={(e) => { e.preventDefault(); go(text); }}>
                 {speech.supported ? <Button size="md" variant={speech.on ? 'primary' : 'secondary'} onClick={speech.toggle} aria-label={speech.on ? 'Đang nghe, bấm để dừng' : 'Nói'} icon={<Icon name="mic" size={22} />} /> : null}
                 <input className="ln-dtext ln-chat__input" value={text} maxLength={1000} onChange={(e) => setText(e.target.value)} placeholder="Nhắn cho nhóm…" aria-label="Tin nhắn" data-testid="chat-input" />

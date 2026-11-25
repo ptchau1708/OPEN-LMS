@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ClassInfo, Profile } from '@openedu/contracts';
 import {
-  COMMON_ROOM, discussionProblem, DISCUSSION_MAX_ROOMS, DISCUSSION_MAX_TABS, roomsFromTeams, slugId, TAB_COLORS, useSaveDiscussion,
+  COMMON_ROOM, DEFAULT_QUICK_REPLIES, discussionProblem, DISCUSSION_MAX_ROOMS, DISCUSSION_MAX_TABS, roomsFromTeams, slugId, TAB_COLORS, useSaveDiscussion,
   type Discussion, type DiscussionInput,
 } from '@openedu/data';
 import { Btn, Dialog, ErrorNote, Field, Seg } from '../../components/common';
@@ -95,6 +95,30 @@ export function DiscussEditor({ value, cls, roster, onClose, onSaved }: {
             ))}
           </ul>
         </section>
+
+        {d.kind === 'chat' ? (() => {
+          const qr = d.quickReplies?.length ? d.quickReplies : [...DEFAULT_QUICK_REPLIES];
+          const setQr = (list: string[]) => set({ quickReplies: list });
+          return (
+            <section className="tc-card tc-card--flat tc-stack" data-testid="dc-quick">
+              <div className="tc-row tc-wrap">
+                <h3 className="tc-h3" style={{ margin: 0 }}>Câu trả lời nhanh ({qr.length}/12)</h3>
+                <span className="tc-ebar__spacer" />
+                <Btn size="sm" icon="plus" disabled={qr.length >= 12} onClick={() => setQr([...qr, ''])} data-testid="dc-quick-add">Thêm câu</Btn>
+                {d.quickReplies?.length ? <Btn size="sm" kind="ghost" icon="retry" onClick={() => set({ quickReplies: [] })}>Về câu mặc định</Btn> : null}
+              </div>
+              <p className="tc-small tc-muted">Nút bấm nhanh dưới ô nhắn tin của học sinh — giúp các em chưa gõ nhanh vẫn tham gia được.</p>
+              <ul className="tc-dctabs">
+                {qr.map((t, i) => (
+                  <li key={i} className="tc-row">
+                    <input className="tc-input tc-input--sm tc-grow" maxLength={60} aria-label={`Câu trả lời nhanh ${i + 1}`} value={t} onChange={(e) => setQr(qr.map((x, j) => (j === i ? e.target.value : x)))} />
+                    <Btn size="sm" kind="ghost" icon="trash" aria-label={`Xoá câu trả lời nhanh ${i + 1}`} onClick={() => setQr(qr.filter((_, j) => j !== i))} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })() : null}
 
         {d.kind !== 'chat' ? <section className="tc-card tc-card--flat tc-stack">
           <div className="tc-row tc-wrap">

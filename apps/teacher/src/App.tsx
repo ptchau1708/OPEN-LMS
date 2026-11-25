@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
-import { useCurrentUser, useEmbedOriginsSync } from '@openedu/data';
+import { CatalogGate, useCurrentUser, useEmbedOriginsSync } from '@openedu/data';
 import { setEmbedOrigins } from '@openedu/lesson-player';
 import { Layout } from './components/Layout';
 import { Loading } from './components/common';
@@ -19,6 +19,7 @@ const DiscussList = lazy(() => import('./pages/discuss/DiscussList'));
 const DiscussBoard = lazy(() => import('./pages/discuss/DiscussBoard'));
 const DiscussTv = lazy(() => import('./pages/discuss/DiscussTv'));
 const Heatmap = lazy(() => import('./pages/Heatmap'));
+const SkillCatalog = lazy(() => import('./pages/SkillCatalog'));
 const KnowledgeRedirect = lazy(() => import('./pages/Heatmap').then((m) => ({ default: m.KnowledgeRedirect })));
 const StudentProfile = lazy(() => import('./pages/StudentProfile'));
 const Students = lazy(() => import('./pages/Students'));
@@ -61,6 +62,7 @@ export function App() {
   // Mật khẩu tạm do quản trị cấp → đổi trước khi vào (docs/MAT_KHAU.md).
   if (user.mustChangePassword) return <Suspense fallback={<Loading />}><ForcedChange user={user} /></Suspense>;
   return (
+    <CatalogGate>
     <Routes>
       <Route path="lti/auth" element={<Suspense fallback={<Loading />}><TeacherLtiAuth /></Suspense>} />
       <Route path="thao-luan/:id/tv" element={<Suspense fallback={<Loading />}><DiscussTv /></Suspense>} />
@@ -72,6 +74,7 @@ export function App() {
         <Route path="giao-bai" element={<Suspense fallback={<Loading />}><Assign user={user} /></Suspense>} />
         <Route path="lop" element={<Suspense fallback={<Loading />}><Classes user={user} /></Suspense>} />
         <Route path="kien-thuc" element={<Suspense fallback={<Loading />}><KnowledgeRedirect user={user} /></Suspense>} />
+        <Route path="ki-nang" element={<Suspense fallback={<Loading />}><SkillCatalog user={user} /></Suspense>} />
         <Route path="lop/:classId/ban-do-kien-thuc" element={<Suspense fallback={<Loading />}><Heatmap user={user} /></Suspense>} />
         <Route path="hoc-sinh" element={<Suspense fallback={<Loading />}><Students user={user} /></Suspense>} />
         <Route path="hoc-sinh/:studentId" element={<Suspense fallback={<Loading />}><StudentProfile user={user} /></Suspense>} />
@@ -110,5 +113,6 @@ export function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
+    </CatalogGate>
   );
 }

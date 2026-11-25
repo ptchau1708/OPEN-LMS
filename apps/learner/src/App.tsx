@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router';
 import type { Profile, Role } from '@openedu/contracts';
-import { handoffTo, useCurrentUser, useSignOut } from '@openedu/data';
+import { CatalogGate, handoffTo, useCurrentUser, useSignOut } from '@openedu/data';
 import { Button, Icon, KidShell, Mascot, setSoundEnabled } from '@openedu/ui';
 import { ErrorState, LoadingScreen, Toasts } from './components/Common';
 import { UnlockCelebration } from './components/UnlockCelebration';
@@ -51,6 +51,7 @@ export function App() {
     <KidShell bigText={s.bigText} reducedMotion={s.reducedMotion}>
       <Suspense fallback={null}><OfflineHost /></Suspense>
       <Suspense fallback={<LoadingScreen />}>
+        <CatalogGate enabled={!!me}>
         <Routes>
           <Route path="/dang-nhap" element={<Login />} />
           <Route path="/phu-huynh/lien-ket" element={<ParentLink />} />
@@ -88,6 +89,7 @@ export function App() {
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </CatalogGate>
       </Suspense>
       {!quiet && <UnlockCelebration />}
       {!quiet && me?.role === 'student' && <Suspense fallback={null}><BadgeWatcher /></Suspense>}

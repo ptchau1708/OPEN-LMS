@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { TT27_TERM_LABEL, type AccountSlip, type Grade, type SchoolSettings, type Tt27TermId } from '@openedu/contracts';
+import { builtinSubject, SUBJECTS, subjectGradeNote, TT27_TERM_LABEL, type AccountSlip, type Grade, type SchoolSettings, type SubjectId, type SubjectOverride, type SubjectOverrides, type Tt27TermId } from '@openedu/contracts';
 import {
   accountSlipRows, csvFileName, downloadText, generateStudentAccounts, importSampleContent, parseNameList, toCsv, useCurrentUser, useDataSource, useItems,
   type ImportProgress, type ImportReport,
@@ -192,10 +192,68 @@ export function AdminSettings() {
         <Field label="Hạn mức AI chấm bài / giáo viên / ngày" help="Để hiển thị trên báo cáo. Supabase: đặt cùng giá trị cho secret AI_DAILY_LIMIT_GRADE của Edge Function ai-grade.">
           <input className="tc-input tc-input--num" type="number" min={0} max={2000} value={f.aiDailyQuota} onChange={(e) => { setF({ ...f, aiDailyQuota: Number(e.target.value) }); setOk(false); }} />
         </Field>
-        <div className="tc-row"><Btn kind="primary" disabled={save.isPending} onClick={() => save.mutate(f, { onSuccess: () => setOk(true) })}>Lưu</Btn>{ok ? <span className="tc-chip tc-chip--ok">Đã lưu</span> : null}</div>
+        <div className="tc-row"><Btn kind="primary" disabled={save.isPending} onClick={() => save.mutate({ ...f, subjects: q.data?.subjects ?? f.subjects }, { onSuccess: () => setOk(true) })}>Lưu</Btn>{ok ? <span className="tc-chip tc-chip--ok">Đã lưu</span> : null}</div>
       </section>
+      <SubjectSettings />
       <SampleContent />
     </div>
+  );
+}
+
+/* ======================= Môn học của trường (danh mục mở) ======================= */
+export function SubjectSettings() {
+  const q = useSchoolSettings();
+  const save = useSaveSchoolSettings();
+  const [rows, setRows] = useState<SubjectOverrides>({});
+  const [ok, setOk] = useState(false);
+  useEffect(() => { if (q.data) setRows(q.data.subjects ?? {}); }, [q.data]);
+  const ids = Object.keys(SUBJECTS) as SubjectId[];
+  const upd = (id: SubjectId, p: SubjectOverride) => { setRows((r) => ({ ...r, [id]: { ...r[id], ...p } })); setOk(false); };
+  const reset = (id: SubjectId) => { setRows((r) => { const n = { ...r }; delete n[id]; return n; }); setOk(false); };
+  const clean = (): SubjectOverrides => {
+    const out: SubjectOverrides = {};
+    for (const id of ids) {
+      const o = rows[id];
+      if (!o) continue;
+      const b = builtinSubject(id)!;
+      const e: SubjectOverride = {};
+      if (o.name?.trim() && o.name.trim() !== b.name) e.name = o.name.trim();
+      if (o.short?.trim() && o.short.trim() !== b.short) e.short = o.short.trim();
+      if (o.hidden !== undefined && o.hidden !== !!b.retired) e.hidden = o.hidden;
+      if (Object.keys(e).length) out[id] = e;
+    }
+    return out;
+  };
+  if (!q.data) return null;
+  return (
+    <section className="tc-card tc-stack" data-testid="subject-settings">
+      <header className="tc-card__head"><h2 className="ad-h2">Môn học của trường</h2></header>
+      <p className="tc-muted tc-small">Mặc định theo CT GDPT 2018. Quản trị viên đổi được tên hiển thị (vd đổi “Khác” thành “Giáo dục địa phương”), tên ngắn, hoặc ẩn môn trường không dạy — áp dụng cho mọi tài khoản. Câu hỏi, bài giảng cũ của môn bị ẩn vẫn dùng được.</p>
+      <div className="tc-tablewrap">
+        <table className="tc-table">
+          <thead><tr><th>Môn (gốc)</th><th>Lớp</th><th>Tên hiển thị</th><th>Tên ngắn</th><th>Dùng</th><th /></tr></thead>
+          <tbody>
+            {ids.map((id) => {
+              const b = builtinSubject(id)!;
+              const o = rows[id] ?? {};
+              const hidden = o.hidden ?? !!b.retired;
+              return (
+                <tr key={id} className={hidden ? 'tc-muted' : undefined}>
+                  <td>{b.name}</td>
+                  <td className="tc-small">{subjectGradeNote(id)}</td>
+                  <td><input className="tc-input tc-input--sm" aria-label={`Tên hiển thị ${b.name}`} maxLength={40} value={o.name ?? b.name} onChange={(e) => upd(id, { name: e.target.value })} /></td>
+                  <td><input className="tc-input tc-input--sm" aria-label={`Tên ngắn ${b.name}`} maxLength={12} style={{ width: 90 }} value={o.short ?? b.short} onChange={(e) => upd(id, { short: e.target.value })} /></td>
+                  <td><label className="tc-switch"><input type="checkbox" aria-label={`Dùng môn ${b.name}`} checked={!hidden} onChange={(e) => upd(id, { hidden: !e.target.checked })} /></label></td>
+                  <td>{rows[id] ? <Btn size="sm" kind="ghost" icon="retry" onClick={() => reset(id)} aria-label={`Khôi phục ${b.name}`}>Gốc</Btn> : null}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <ErrorNote error={save.error} />
+      <div className="tc-row"><Btn kind="primary" disabled={save.isPending} onClick={() => save.mutate({ ...q.data!, subjects: clean() }, { onSuccess: () => setOk(true) })} data-testid="subject-save">Lưu môn học</Btn>{ok ? <span className="tc-chip tc-chip--ok">Đã lưu — mọi tài khoản thấy ngay khi mở lại trang</span> : null}</div>
+    </section>
   );
 }
 

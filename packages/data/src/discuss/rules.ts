@@ -7,6 +7,12 @@ export const DISCUSSION_MAX_ROOMS = 20;
 export const DISCUSSION_MAX_TABS = 12;
 export const DISCUSSION_RATE_PER_MIN = 10;
 export const COMMON_ROOM: DiscussionRoom = { id: 'chung', name: 'Cả lớp', members: [] };
+/** Câu trả lời nhanh đã làm sạch: bỏ dòng trống, ≤ 60 kí tự, ≤ 12 câu. */
+export const cleanQuickReplies = (list: readonly string[] | undefined): string[] => (list ?? []).map((x) => x.trim().slice(0, 60)).filter(Boolean).slice(0, 12);
+
+/** Câu trả lời nhanh mặc định của phòng trò chuyện (GV đổi được cho từng phòng). */
+export const DEFAULT_QUICK_REPLIES: readonly string[] = ['Em đồng ý! 👍', 'Mình làm phần này nhé!', 'Bạn nói rõ hơn được không?', 'Hay quá! ❤️'];
+
 export const TAB_COLORS = ['#2f6fd1', '#d89e00', '#1f8a4c', '#c43c7a', '#7a4fd1', '#e0662b', '#0f8f8f', '#64748b'];
 /** Màu thẻ kiểu Padlet (nền nhạt). */
 export const CARD_COLORS = ['#ffffff', '#fff4c2', '#dff3e4', '#e3edff', '#fde4ec', '#efe6ff', '#ffe7d6'];

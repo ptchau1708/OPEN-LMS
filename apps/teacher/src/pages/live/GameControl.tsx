@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import type { ClassInfo, Item, Lesson, LiveCommand, LiveGameMode, LiveResponse, Profile } from '@openedu/contracts';
 import { displayOptions, scoreItem } from '@openedu/activity-engine';
-import { Icon, QrCode } from '@openedu/ui';
+import { Icon } from '@openedu/ui';
 import {
   bridge, GAME_MODE_LABEL, gameLeaderboard, gamePlayers, gameQuestionSlides, gameResponseKey, gameTeamBoard, firstPerStudent, PAPER_LETTERS,
   paperCardsFor, paperFriendly, slideItemIdOf, tallyClassQuestion, tallyPaperQuestion, tallySelfResponses, useAward, type GameRankRow, type LiveChannelView,
@@ -12,6 +12,7 @@ import { useRoster } from '../../lib/assess';
 import { learnerUrl, presentUrl } from '../../lib/env';
 import { cx } from '../../lib/format';
 import { PaperScanner } from './PaperScanner';
+import { BigJoinQr, JoinCard } from './JoinQr';
 
 function useNow(on: boolean, ms = 250) {
   const [now, setNow] = useState(Date.now());
@@ -51,6 +52,8 @@ export function GameControl({ user, view, lesson, items, cls }: { user: Profile;
   const [toast, setToast] = useState('');
   const [ending, setEnding] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
+  const [bigQr, setBigQr] = useState(false);
+  const closeBigQr = useCallback(() => setBigQr(false), []);
   const [selfMinutes, setSelfMinutes] = useState(0);
   const [awarded, setAwarded] = useState(false);
   useEffect(() => { if (!toast) return; const t = window.setTimeout(() => setToast(''), 2200); return () => window.clearTimeout(t); }, [toast]);
@@ -171,7 +174,7 @@ export function GameControl({ user, view, lesson, items, cls }: { user: Profile;
   }, [now, game?.mode, game?.endsAt, phase, send]);
 
   if (!state) return null;
-  const tvUrl = presentUrl(state.sessionId);
+  const tvUrl = presentUrl(state.sessionId, state.pin);
   const joinUrl = learnerUrl(state.pin);
   const mode = game?.mode ?? setupMode ?? 'class';
   const ended = phase === 'ended';
@@ -224,7 +227,10 @@ export function GameControl({ user, view, lesson, items, cls }: { user: Profile;
           <span className={cx('tc-conn', `is-${status}`)}><i />{status === 'open' ? 'Đã kết nối' : status === 'connecting' ? 'Đang nối…' : status === 'error' ? 'Lỗi kết nối' : 'Đã đóng'}</span>
           <div className="tc-row tc-wrap">
             <a className="tc-btn tc-btn--default tc-btn--sm" href={tvUrl} target="_blank" rel="noreferrer"><Icon name="tv" size={16} /><span>Mở trên TV</span></a>
-            {mode !== 'paper' ? <Btn size="sm" icon="qr" onClick={() => setShowJoin((v) => !v)}>QR vào lớp</Btn> : <Link className="tc-btn tc-btn--sm" to={`/truc-tiep/the-giay${cls ? `?lop=${cls.id}` : ''}`} target="_blank"><Icon name="print" size={16} /><span>In thẻ</span></Link>}
+            {mode !== 'paper' ? <>
+              <Btn size="sm" icon="qr" onClick={() => setShowJoin((v) => !v)} data-testid="join-toggle">QR vào lớp</Btn>
+              <Btn size="sm" kind="primary" icon="qr" onClick={() => setBigQr(true)} data-testid="join-zoom-top">Phóng to QR</Btn>
+            </> : <Link className="tc-btn tc-btn--sm" to={`/truc-tiep/the-giay${cls ? `?lop=${cls.id}` : ''}`} target="_blank" data-testid="paper-print"><Icon name="print" size={16} /><span>In thẻ giấy</span></Link>}
           </div>
         </div>
       </header>
@@ -235,12 +241,8 @@ export function GameControl({ user, view, lesson, items, cls }: { user: Profile;
       </div>
       {error && status !== 'open' ? <ErrorNote error={new Error(error)} /> : null}
       <ErrorNote error={sendErr} />
-      {showJoin ? (
-        <section className="tc-card tc-joincard">
-          <QrCode value={joinUrl} size={168} title="Mã QR cho học sinh vào lớp" />
-          <div><strong>Học sinh quét mã để vào chơi</strong><p className="tc-muted tc-small">hoặc mở Góc học tập → “Vào lớp” và nhập mã <b>{state.pin}</b></p><code className="tc-small">{joinUrl}</code></div>
-        </section>
-      ) : null}
+      {showJoin ? <JoinCard pin={state.pin} joinUrl={joinUrl} onZoom={() => setBigQr(true)} /> : null}
+      {bigQr ? <BigJoinQr pin={state.pin} joinUrl={joinUrl} onClose={closeBigQr} /> : null}
       {!game ? <section className="tc-card"><p className="tc-muted">Đang chuẩn bị trò chơi…{mode === 'paper' && !rosterLoading && !roster.length ? ' Lớp chưa có học sinh để phát thẻ.' : ''}</p></section> : null}
 
       {game && ended ? (

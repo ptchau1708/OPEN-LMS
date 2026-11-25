@@ -1,7 +1,7 @@
 /**
  * Kĩ năng theo CHỦ ĐỀ / MẠCH NỘI DUNG của Chương trình GDPT 2018 (Thông tư 32/2018) cho các môn ngoài Toán:
  * Tiếng Việt, Tiếng Anh, Đạo đức, Tự nhiên và Xã hội, Lịch sử và Địa lí, Khoa học, Tin học, Công nghệ,
- * Giáo dục thể chất, Âm nhạc, Mĩ thuật, Hoạt động trải nghiệm.
+ * Giáo dục thể chất, Âm nhạc, Mĩ thuật, Hoạt động trải nghiệm, Tiếng dân tộc thiểu số (SQL 20).
  *
  * - Mỗi kĩ năng là một nội dung / bài học của chủ đề, mô tả TÓM LƯỢC theo yêu cầu cần đạt (KHÔNG phải nguyên văn)
  *   → `provisional: true`. Tổ chuyên môn đối chiếu với văn bản chương trình rồi sửa `text` (giữ nguyên `code` để
@@ -20,7 +20,7 @@ type Block = [SubjectId, Grade, string, string, K[]];
 
 const PREFIX: Partial<Record<SubjectId, string>> = {
   'tieng-viet': 'TV', 'tieng-anh': 'TA', 'dao-duc': 'DD', tnxh: 'TNXH', 'lich-su-dia-li': 'LSDL', 'khoa-hoc': 'KH',
-  'tin-hoc': 'TH', 'cong-nghe': 'CN', gdtc: 'GDTC', 'am-nhac': 'AN', 'mi-thuat': 'MT', hdtn: 'HDTN',
+  'tin-hoc': 'TH', 'cong-nghe': 'CN', gdtc: 'GDTC', 'am-nhac': 'AN', 'mi-thuat': 'MT', hdtn: 'HDTN', 'tieng-dan-toc': 'TDT',
 };
 
 const B: Block[] = [
@@ -595,6 +595,22 @@ const B: Block[] = [
     ]],
     ['mi-thuat', g, 'DG', 'Thảo luận và đánh giá', [
       ['NHAN-XET-SAN-PHAM', 'Giới thiệu, nhận xét sản phẩm', 'Giới thiệu, nhận xét sản phẩm của mình và của bạn'],
+    ]],
+  ]),
+
+  // ─────────────── TIẾNG DÂN TỘC THIỂU SỐ (môn tự chọn; mô tả chung — trường chỉnh theo thứ tiếng dạy) ───────────────
+  ...([1, 2, 3, 4, 5] as Grade[]).flatMap((g): Block[] => [
+    ['tieng-dan-toc', g, 'NN', 'Nghe và nói', [
+      ['NGHE-NOI', 'Nghe hiểu, nói câu đơn giản', g <= 2 ? 'Nghe hiểu và nói được từ, câu đơn giản về bản thân, gia đình bằng tiếng dân tộc' : 'Nghe hiểu ý chính; kể, trao đổi về chủ đề quen thuộc bằng tiếng dân tộc'],
+    ]],
+    ['tieng-dan-toc', g, 'DOC', 'Đọc', [
+      ['DOC', g <= 2 ? 'Đọc chữ cái, vần, tiếng' : 'Đọc hiểu đoạn văn ngắn', g <= 2 ? 'Đọc đúng chữ cái, vần, tiếng, từ ngữ của chữ viết dân tộc' : 'Đọc trôi chảy và hiểu nội dung đoạn văn, bài thơ ngắn'],
+    ]],
+    ['tieng-dan-toc', g, 'VIET', 'Viết', [
+      ['VIET', g <= 2 ? 'Viết chữ, từ đúng mẫu' : 'Viết câu, đoạn văn ngắn', g <= 2 ? 'Viết đúng chữ cái, từ ngữ theo mẫu chữ của dân tộc' : 'Viết câu, đoạn văn ngắn về chủ đề quen thuộc'],
+    ]],
+    ['tieng-dan-toc', g, 'VH', 'Văn hoá dân tộc', [
+      ['VAN-HOA', 'Hiểu văn hoá của dân tộc', 'Kể, giới thiệu được phong tục, lễ hội, bài hát, câu chuyện dân gian của dân tộc'],
     ]],
   ]),
 

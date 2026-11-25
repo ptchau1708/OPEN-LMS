@@ -1,17 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { SUBJECTS, isPeriodicAt, subjectsForGrade, TT27_COMPETENCY_LABEL, TT27_LEVEL_LABEL, TT27_QUALITY_LABEL, TT27_RATING_LABEL, TT27_TERM_LABEL, schoolYearOf, type Grade, type Profile, type SubjectId, type Tt27Competency, type Tt27Evaluation, type Tt27Level, type Tt27Quality, type Tt27Rating, type Tt27SubjectResult, type Tt27TermId } from '@openedu/contracts';
-import { useSaveTt27, useSuggestTt27, useTt27 } from '@openedu/data';
+import { bankable, useAddToBank, useCommentBankList, usePref, useSaveTt27, useSuggestTt27, useTt27, type BankAdd } from '@openedu/data';
 import { Avatar, Btn, Dialog, Empty, ErrorNote, Field, Loading, PageHead, Seg } from '../../components/common';
 import { ClassPicker, useClassPick, useRoster } from '../../lib/assess';
 import { cx } from '../../lib/format';
+import { BankProvider, CommentInput } from '../../components/CommentInput';
+import { TT27_GENERAL_SCOPE, Tt27BankDialog, Tt27ColumnsDialog, tt27Scope, useBankAuto } from './Tt27Bank';
 
 const TERMS: Tt27TermId[] = ['GK1', 'CK1', 'GK2', 'CN'];
 const LEVELS: Tt27Level[] = ['T', 'H', 'C'];
 const RATINGS: Tt27Rating[] = ['T', 'Đ', 'C'];
 const QUALITIES = Object.keys(TT27_QUALITY_LABEL) as Tt27Quality[];
 const COMPETENCIES = Object.keys(TT27_COMPETENCY_LABEL) as Tt27Competency[];
-/** Môn được nhận xét theo TT27: mọi môn của lớp theo CT GDPT 2018 (môn đã ẩn không hiện). */
+/** Môn được nhận xét theo TT27: mọi môn của lớp theo CT GDPT 2018 (môn đã ẩn ở cấp trường không hiện). */
 const subjectsFor = (g: Grade): SubjectId[] => subjectsForGrade(g);
+/** Mặc định hiện các môn bắt buộc của lớp; môn tự chọn (Tiếng dân tộc, Tiếng Anh lớp 1–2) GV tự bật. */
+const defaultCols = (g: Grade): SubjectId[] => subjectsForGrade(g, { compulsory: true });
 
 function blank(studentId: string, classId: string, termId: Tt27TermId, schoolYear: string): Tt27Evaluation {
   return { studentId, classId, termId, schoolYear, subjects: {}, qualities: Object.fromEntries(QUALITIES.map((q) => [q, 'Đ'])) as Tt27Evaluation['qualities'], competencies: {}, generalComment: '', status: 'draft' };
@@ -59,12 +63,12 @@ function BulkBar({ count, subjects, onLevel, onComment, onRatings, onGeneral, on
             </select>
           </label>
           <div className="tc-row"><span className="tc-small">Mức</span><Pick label="Mức cho các em đã chọn" opts={LEVELS} onChange={(v) => onLevel(subj, v)} title={(v) => `Đặt mức ${TT27_LEVEL_LABEL[v]} cho ${count} em`} /></div>
-          <textarea className="tc-input tc-input--sm" rows={2} placeholder="Nhận xét môn cho các em đã chọn…" value={text} onChange={(e) => setText(e.target.value)} aria-label="Nhận xét môn cho các em đã chọn" />
+          <CommentInput className="tc-input tc-input--sm" rows={2} placeholder="Nhận xét môn cho các em đã chọn… (bấm để chọn từ ngân hàng)" value={text} onChange={setText} scope={subj === 'all' ? TT27_GENERAL_SCOPE : tt27Scope(subj)} aria-label="Nhận xét môn cho các em đã chọn" />
           <Btn size="sm" disabled={!text.trim()} onClick={() => onComment(subj, text.trim(), mode)}>Áp dụng nhận xét môn</Btn>
         </div>
         <div className="tc-stack">
           <div className="tc-row"><span className="tc-small">Phẩm chất &amp; năng lực</span><Pick label="Phẩm chất và năng lực cho các em đã chọn" opts={RATINGS} onChange={onRatings} title={(v) => `Đặt tất cả phẩm chất, năng lực = ${TT27_RATING_LABEL[v]}`} /></div>
-          <textarea className="tc-input tc-input--sm" rows={2} placeholder="Nhận xét chung cho các em đã chọn…" value={general} onChange={(e) => setGeneral(e.target.value)} aria-label="Nhận xét chung cho các em đã chọn" />
+          <CommentInput className="tc-input tc-input--sm" rows={2} placeholder="Nhận xét chung cho các em đã chọn…" value={general} onChange={setGeneral} scope={TT27_GENERAL_SCOPE} aria-label="Nhận xét chung cho các em đã chọn" />
           <Btn size="sm" disabled={!general.trim()} onClick={() => onGeneral(general.trim(), mode)}>Áp dụng nhận xét chung</Btn>
           <label className="tc-row tc-small">
             <input type="checkbox" checked={mode === 'append'} onChange={(e) => setMode(e.target.checked ? 'append' : 'replace')} /> Thêm vào sau nhận xét đang có (không xóa)
@@ -91,11 +95,24 @@ export default function Tt27({ user }: { user: Profile }) {
   const [msg, setMsg] = useState<string | null>(null);
   const [print, setPrint] = useState(false);
   const [picked, setPicked] = useState<Set<string>>(new Set());
-  const subjects = subjectsFor(cls?.grade ?? 4);
+  const grade = cls?.grade ?? 4;
+  const allSubjects = subjectsFor(grade);
+  // Môn hiển thị: GV chọn theo lớp (lưu theo tài khoản); mặc định các môn bắt buộc.
+  const colPref = usePref<{ subjects?: SubjectId[] }>(user.id, classId ? `tt27-mon.${classId.toLowerCase()}` : null);
+  const chosen = colPref.value?.subjects?.filter((x) => allSubjects.includes(x));
+  const subjects = chosen?.length ? allSubjects.filter((x) => chosen.includes(x)) : defaultCols(grade);
+  const [colsOpen, setColsOpen] = useState(false);
+  const [bankOpen, setBankOpen] = useState(false);
+  const bankQ = useCommentBankList();
+  const addBank = useAddToBank();
+  const bankAuto = useBankAuto(user.id);
+  /** Nhận xét lúc tải về — để chỉ lưu câu MỚI / ĐÃ SỬA vào ngân hàng. */
+  const orig = useRef<Record<string, Record<string, string>>>({});
 
   useEffect(() => {
     const m: Record<string, Tt27Evaluation> = {};
     for (const e of q.data ?? []) m[e.studentId] = e;
+    orig.current = Object.fromEntries((q.data ?? []).map((e) => [e.studentId, { ...Object.fromEntries(Object.entries(e.subjects).map(([k, v]) => [k, v?.comment ?? ''])), _chung: e.generalComment ?? '' }]));
     setDrafts(m); setDirty(new Set()); setBasis({});
   }, [q.data]);
   useEffect(() => { setPicked(new Set()); }, [classId, termId]);
@@ -134,16 +151,38 @@ export default function Tt27({ user }: { user: Profile }) {
     setBusy(null);
     setMsg(`Đã soạn nháp cho ${ids.length} em từ dữ liệu. Thầy cô đọc, sửa rồi lưu nhé.`);
   };
+  /** Câu nhận xét mới / đã sửa của các em vừa lưu → ngân hàng (bỏ câu có tên riêng của em). */
+  const collectBank = (ids: string[]): BankAdd[] => {
+    const out: BankAdd[] = [];
+    for (const sid of ids) {
+      const e = evalOf(sid);
+      const name = roster.find((x) => x.id === sid)?.name;
+      const o = orig.current[sid] ?? {};
+      for (const [subj, r] of Object.entries(e.subjects)) {
+        const t = r?.comment?.trim();
+        if (t && t !== (o[subj] ?? '').trim() && bankable(t, name)) out.push({ scope: tt27Scope(subj as SubjectId), level: r!.level, text: t });
+      }
+      const g = e.generalComment?.trim();
+      if (g && g !== (o._chung ?? '').trim() && bankable(g, name)) out.push({ scope: TT27_GENERAL_SCOPE, text: g });
+      orig.current[sid] = { ...Object.fromEntries(Object.entries(e.subjects).map(([k, v]) => [k, v?.comment ?? ''])), _chung: e.generalComment ?? '' };
+    }
+    return out;
+  };
   const saveAll = async (status?: 'draft' | 'final') => {
     const ids = status === 'final' ? roster.map((s) => s.id).filter((id) => drafts[id] || dirty.has(id)) : Array.from(dirty);
     setMsg(null);
+    // Lấy câu mới TRƯỚC khi lưu (sau mỗi lần lưu dữ liệu được tải lại, câu vừa lưu sẽ thành "cũ").
+    const candidates = bankAuto.on ? ids.map((id) => ({ id, items: collectBank([id]) })) : [];
+    const done: string[] = [];
     for (let i = 0; i < ids.length; i++) {
       setBusy(`Đang lưu ${i + 1}/${ids.length}…`);
       const e = evalOf(ids[i]);
-      try { await save.mutateAsync({ ...e, ...(status ? { status } : {}), updatedBy: user.id }); } catch { break; }
+      try { await save.mutateAsync({ ...e, ...(status ? { status } : {}), updatedBy: user.id }); done.push(ids[i]); } catch { break; }
     }
     setBusy(null);
-    if (!save.error) setMsg(status === 'final' ? 'Đã chốt bản chính thức — phụ huynh và học sinh xem được.' : 'Đã lưu nháp.');
+    const fresh = candidates.filter((c) => done.includes(c.id)).flatMap((c) => c.items);
+    if (fresh.length) addBank.mutate(fresh);
+    if (!save.error) setMsg(`${status === 'final' ? 'Đã chốt bản chính thức — phụ huynh và học sinh xem được.' : 'Đã lưu nháp.'}${fresh.length ? ` ${fresh.length} câu nhận xét mới đã vào ngân hàng.` : ''}`);
   };
   const stats = useMemo(() => {
     const c = { final: 0, draft: 0, none: 0 };
@@ -183,6 +222,7 @@ export default function Tt27({ user }: { user: Profile }) {
   }
 
   return (
+    <BankProvider value={bankQ.data?.items ?? []}>
     <div className="tc-page tc-page--wide">
       <PageHead title="Nhận xét theo Thông tư 27" sub={`Năm học ${schoolYear}. Mức môn học T/H/C, phẩm chất và năng lực T/Đ/C. Bản chính thức mới hiện cho phụ huynh.`} actions={<>
         <ClassPicker list={list} value={classId} onChange={setClassId} />
@@ -194,12 +234,16 @@ export default function Tt27({ user }: { user: Profile }) {
         <span className="tc-chip">{stats.none} chưa có</span>
         {busy ? <span className="tc-small tc-muted" role="status">{busy}</span> : msg ? <span className="tc-small tc-ok" role="status">{msg}</span> : null}
         <span className="tc-ebar__spacer" />
+        <Btn icon="settings" onClick={() => setColsOpen(true)} title="Chọn môn hiện trên bảng" data-testid="tt27-cols">Môn hiển thị ({subjects.length}/{allSubjects.length})</Btn>
+        <Btn icon="book" onClick={() => setBankOpen(true)} data-testid="tt27-bank">Ngân hàng nhận xét{bankQ.data?.items.length ? ` (${bankQ.data.items.length})` : ''}</Btn>
+        <Btn icon="team" disabled={!roster.length} onClick={() => setPicked(new Set(roster.map((x) => x.id)))} title="Chọn cả lớp để nhập mức / nhận xét một lần (bỏ tích những em khác biệt)" data-testid="tt27-bulk-open">Nhập chung cho nhiều em</Btn>
         <Btn icon="hint" disabled={!!busy || !roster.length} onClick={() => { const open = roster.filter((s) => drafts[s.id]?.status !== 'final').map((s) => s.id); void suggestFor(open.length ? open : roster.map((s) => s.id)); }}>Gợi ý từ dữ liệu</Btn>
         <Btn icon="eye" onClick={() => setPrint(true)}>Xem bản in</Btn>
         <Btn disabled={!!busy || !dirty.size} onClick={() => void saveAll()}>Lưu nháp{dirty.size ? ` (${dirty.size})` : ''}</Btn>
         <Btn kind="primary" icon="check" disabled={!!busy} onClick={() => void saveAll('final')}>Chốt chính thức</Btn>
       </div>
-      <ErrorNote error={classes.error ?? q.error ?? save.error ?? suggest.error} onRetry={() => void q.refetch()} />
+      <ErrorNote error={classes.error ?? q.error ?? save.error ?? suggest.error ?? addBank.error} onRetry={() => void q.refetch()} />
+      {!picked.size && roster.length ? <p className="tc-small tc-muted tc-tt27hint">Mẹo: tích chọn các em ở cột đầu (hoặc bấm <b>Nhập chung cho nhiều em</b>) để đặt mức và nhận xét một lần; bấm vào ô nhận xét để chọn câu từ ngân hàng.</p> : null}
       {picked.size > 0 && (
         <BulkBar count={picked.size} subjects={subjects} busy={!!busy} onClear={() => setPicked(new Set())}
           onLevel={(subj, v) => bulk((sid) => (subj === 'all' ? subjects : [subj]).forEach((x) => setSubj(sid, x, { level: v })), `Đã đặt mức ${v}`)}
@@ -224,7 +268,7 @@ export default function Tt27({ user }: { user: Profile }) {
                       {subjects.map((subj) => (
                         <td key={subj} className="tc-tt27__cell">
                           <Pick label={`${s.name} · ${SUBJECTS[subj].name}`} value={e.subjects[subj]?.level} opts={LEVELS} onChange={(v) => setSubj(s.id, subj, { level: v })} title={(v) => TT27_LEVEL_LABEL[v]} />
-                          <textarea className="tc-input tc-input--sm" rows={2} aria-label={`Nhận xét ${SUBJECTS[subj].name} của ${s.name}`} placeholder="Nhận xét…" value={e.subjects[subj]?.comment ?? ''} onChange={(ev) => setSubj(s.id, subj, { comment: ev.target.value })} />
+                          <CommentInput className="tc-input tc-input--sm" rows={2} aria-label={`Nhận xét ${SUBJECTS[subj].name} của ${s.name}`} placeholder="Nhận xét…" value={e.subjects[subj]?.comment ?? ''} onChange={(v) => setSubj(s.id, subj, { comment: v })} scope={tt27Scope(subj)} level={e.subjects[subj]?.level} />
                         </td>
                       ))}
                       <td><Btn size="sm" onClick={() => setDetail(s.id)}>{qs.map((x) => `${x.n}${x.r}`).join(' · ')}</Btn></td>
@@ -264,10 +308,13 @@ export default function Tt27({ user }: { user: Profile }) {
                 <Field key={subj} label={`Điểm KTĐK ${SUBJECTS[subj].name}`}><input className="tc-input tc-input--num" type="number" min={0} max={10} step={0.5} value={de.subjects[subj]?.score ?? ''} onChange={(ev) => setSubj(det.id, subj, { score: ev.target.value === '' ? undefined : Math.max(0, Math.min(10, Number(ev.target.value))) })} /></Field>
               ))}
             </div>
-            <Field label="Nhận xét chung"><textarea className="tc-input" rows={3} value={de.generalComment} onChange={(ev) => edit(det.id, (e) => ({ ...e, generalComment: ev.target.value }))} /></Field>
+            <Field label="Nhận xét chung"><CommentInput className="tc-input" rows={3} value={de.generalComment} onChange={(v) => edit(det.id, (e) => ({ ...e, generalComment: v }))} scope={TT27_GENERAL_SCOPE} /></Field>
           </div>
         </Dialog>
       ) : null}
+      {colsOpen && cls ? <Tt27ColumnsDialog grade={grade} all={allSubjects} value={subjects} defaults={defaultCols(grade)} onClose={() => setColsOpen(false)} onSave={(v) => { colPref.set(v ? { subjects: v } : null); setColsOpen(false); }} /> : null}
+      {bankOpen ? <Tt27BankDialog userId={user.id} subjects={subjects} onClose={() => setBankOpen(false)} /> : null}
     </div>
+    </BankProvider>
   );
 }

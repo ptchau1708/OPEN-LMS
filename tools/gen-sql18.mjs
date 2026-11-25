@@ -12,7 +12,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'supabase', 'migrations', '20261124000004_v2_user_prefs_skills.sql');
-const { CT2018_SKILLS } = await import(pathToFileURL(path.join(ROOT, 'packages/contracts/src/skills-ct2018.ts')).href);
+const { CT2018_SKILLS: ALL_CT2018 } = await import(pathToFileURL(path.join(ROOT, 'packages/contracts/src/skills-ct2018.ts')).href);
+// Môn thêm sau SQL 18 (Tiếng dân tộc thiểu số) nằm ở SQL 20 — cần ràng buộc môn mới trước.
+const CT2018_SKILLS = ALL_CT2018.filter((s) => s.subject !== 'tieng-dan-toc');
 const q = (v) => `'${String(v).replace(/'/g, "''")}'`;
 
 const sql = `-- =============================================================================

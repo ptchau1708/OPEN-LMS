@@ -41,6 +41,14 @@ export function useGrantTeacherBadge() {
     onSuccess: (_d, v) => void qc.invalidateQueries({ queryKey: rewardKeys.teacherBadges(v.classId) }),
   });
 }
+export function useRevokeTeacherBadge() {
+  const rs = useRs();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (v: { id: string; classId: string }) => (await rs()).revokeTeacherBadge(v.id),
+    onSuccess: (_d, v) => { void qc.invalidateQueries({ queryKey: rewardKeys.teacherBadges(v.classId) }); void qc.invalidateQueries({ queryKey: ['rewards'] }); },
+  });
+}
 export function useTeacherBadges(classId?: string) {
   const rs = useRs();
   return useQuery({ queryKey: rewardKeys.teacherBadges(classId), queryFn: async () => (await rs()).listTeacherBadges(classId as string), enabled: !!classId });

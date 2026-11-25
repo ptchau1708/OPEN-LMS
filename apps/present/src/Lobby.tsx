@@ -43,8 +43,9 @@ export function Lobby({ state }: { state: LiveState }) {
               <span key={i} className={`pr-join__digit${i === 3 ? ' is-gap' : ''}`}>{d}</span>
             ))}
           </p>
-          <QrCode value={full} size={300} className="pr-join__qr" title="Quét mã để vào lớp" />
+          <QrCode value={full} size={420} className="pr-join__qr" title="Quét mã để vào lớp (bấm để phóng to)" />
           <p className="pr-join__url">{short}</p>
+          <p className="pr-join__zoom">Bấm vào mã QR (hoặc phím Q) để phóng to</p>
         </section>
         <section className="pr-room">
           <MascotBubble mascot={state.lesson?.mascot ?? 'nghe'} mood="wave" size={140} className="pr-room__bubble">

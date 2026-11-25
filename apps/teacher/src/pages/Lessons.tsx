@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { SUBJECTS, uid, type Grade, type Lesson, type Profile, type SubjectId, fitSubjectToGrade, subjectInGrade, subjectLabelFor, subjectOptionsFor } from '@openedu/contracts';
+import { SUBJECTS, uid, type Grade, type Lesson, type Profile, type SubjectId, fitSubjectToGrade, subjectInGrade, subjectOptionsFor } from '@openedu/contracts';
 import { Mascot } from '@openedu/ui';
 import { useLessons, useSaveLesson } from '@openedu/data';
 import { Btn, Dialog, Empty, ErrorNote, Field, Loading, PageHead, Seg } from '../components/common';
 import { relTime } from '../lib/format';
 import { ShareClassroomButton } from './bridge/ShareClassroom';
+import { copyLesson } from '../lib/copyLesson';
+import { SubjectOptions } from '../components/SubjectOptions';
 
 export function CreateLessonDialog({ open, onClose, user }: { open: boolean; onClose: () => void; user: Profile }) {
   const nav = useNavigate();
@@ -28,7 +30,7 @@ export function CreateLessonDialog({ open, onClose, user }: { open: boolean; onC
         <Field label="Tên bài"><input className="tc-input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="vd: Phép cộng có nhớ trong phạm vi 100" /></Field>
         <Field label="Môn học">
           <select className="tc-input" value={subject} onChange={(e) => setSubject(e.target.value as SubjectId)}>
-            {subjectOptionsFor(grade, [subject]).map((s) => <option key={s.id} value={s.id}>{subjectLabelFor(s.id, grade)}</option>)}
+            <SubjectOptions grade={grade} present={[subject]} />
           </select>
         </Field>
         <div className="tc-field"><span className="tc-field__label">Lớp</span><Seg label="Lớp" value={grade} onChange={(g) => { setGrade(g); setSubject((s) => fitSubjectToGrade(s, g)); }} options={[1, 2, 3, 4, 5].map((g) => ({ value: g as Grade, label: `Lớp ${g}` }))} /></div>
@@ -46,6 +48,8 @@ export function Lessons({ user }: { user: Profile }) {
   const [search, setSearch] = useState('');
   const [mine, setMine] = useState(user.role !== 'admin');
   const [creating, setCreating] = useState(false);
+  const copy = useSaveLesson();
+  const nav = useNavigate();
   useEffect(() => { if (params.get('tao')) { setCreating(true); setParams({}, { replace: true }); } }, [params, setParams]);
   const q = useLessons({ ...(subject ? { subject } : {}), ...(grade ? { grade } : {}), ...(status ? { status } : {}), ...(search.trim() ? { search: search.trim() } : {}), ...(mine ? { ownerId: user.id } : {}) });
 
@@ -85,6 +89,7 @@ export function Lessons({ user }: { user: Profile }) {
                 </span>
               </Link>
               {l.status === 'published' ? <span className="br-cardwrap__share"><ShareClassroomButton kind="lesson" id={l.id} title={l.title} compact /></span> : null}
+              <Btn size="sm" kind="ghost" icon="plus" className="br-cardwrap__copy" title="Nhân bản thành bài của tôi để sửa" aria-label={`Nhân bản ${l.title}`} disabled={copy.isPending} onClick={() => copy.mutate(copyLesson(l, user), { onSuccess: (n) => nav(`/bai-giang/${n.id}`) })} data-testid="lesson-copy">Nhân bản</Btn>
               </div>
             );
           })}

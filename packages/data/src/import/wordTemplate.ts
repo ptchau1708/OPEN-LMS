@@ -12,10 +12,10 @@ type Para = { text: string; kind?: 'title' | 'h' | 'q' | 'note' | 'body' };
 
 /** Ví dụ mỗi dạng một câu (đề tiểu học, CT GDPT 2018). Dùng cả cho kiểm thử: đọc lại phải ra đúng dạng. */
 export const WORD_TEMPLATE_EXAMPLES: { label: string; lines: string[] }[] = [
-  { label: 'Chọn 1 đáp án', lines: ['Câu 1: Số liền sau của 99 là:', 'Dạng: Chọn 1 đáp án', 'A. 98', 'B. 100', 'C. 101', 'D. 109', 'Đáp án: B', 'Giải thích: 99 + 1 = 100', 'Mức độ: Nhận biết', 'Môn: Toán', 'Lớp: 2'] },
+  { label: 'Chọn 1 đáp án', lines: ['Câu 1: Số liền sau của 99 là:', 'Dạng: Chọn 1 đáp án', 'A. 98', 'B. 100', 'C. 101', 'D. 109', 'Đáp án: B', 'Giải thích: 99 + 1 = 100', 'Mức độ: Nhận biết', 'Môn: Toán', 'Lớp: 2', 'Mã kĩ năng: T2.STN.LIEN-TRUOC-SAU'] },
   { label: 'Chọn nhiều đáp án', lines: ['Câu 2: Những việc nào giúp tiết kiệm nước?', 'Dạng: Chọn nhiều đáp án', 'A. Khóa vòi khi đánh răng', 'B. Để vòi chảy khi rửa tay', 'C. Dùng nước vo gạo tưới cây', 'D. Xả nước liên tục khi rửa rau', 'Đáp án: A, C', 'Môn: Khoa học', 'Lớp: 4'] },
   { label: 'Đúng – Sai', lines: ['Câu 3: Thủ đô của nước Việt Nam là Hà Nội.', 'Dạng: Đúng – Sai', 'Đáp án: Đúng', 'Môn: Lịch sử và Địa lí', 'Lớp: 4'] },
-  { label: 'Điền ngắn', lines: ['Câu 4: Một hình vuông có cạnh 6 cm. Chu vi hình vuông đó là bao nhiêu?', 'Dạng: Điền ngắn', 'Đáp án: 24', 'Đơn vị: cm', 'Gợi ý: Chu vi hình vuông = cạnh × 4', 'Môn: Toán', 'Lớp: 3'] },
+  { label: 'Điền ngắn', lines: ['Câu 4: Một hình vuông có cạnh 6 cm. Chu vi hình vuông đó là bao nhiêu?', 'Dạng: Điền ngắn', 'Đáp án: 24', 'Đơn vị: cm', 'Gợi ý: Chu vi hình vuông = cạnh × 4', 'Môn: Toán', 'Lớp: 3', 'Mã kĩ năng: T3.DL.CHU-VI'] },
   { label: 'Nối cặp', lines: ['Câu 5: Nối thiết bị với bộ phận máy tính tương ứng.', 'Dạng: Nối cặp', 'A. Bàn phím = Gõ chữ', 'B. Chuột = Di chuyển con trỏ', 'C. Màn hình = Hiện hình ảnh', 'Môn: Tin học', 'Lớp: 3'] },
   { label: 'Sắp xếp thứ tự', lines: ['Câu 6: Sắp xếp các bước trồng cây theo đúng thứ tự.', 'Dạng: Sắp xếp thứ tự', 'A. Đào hố', 'B. Đặt cây con vào hố', 'C. Lấp đất', 'D. Tưới nước', 'Ghi chú: ghi các thẻ theo ĐÚNG thứ tự, máy tự xáo trộn khi học sinh làm.', 'Môn: Công nghệ', 'Lớp: 3'] },
   { label: 'Kéo thả vào ô', lines: ['Câu 7: Kéo mỗi việc làm vào đúng ô.', 'Dạng: Kéo thả vào ô', 'Ô Nên làm: chào hỏi lễ phép, giúp đỡ bạn', 'Ô Không nên làm: nói tục, chen lấn xô đẩy', 'Môn: Đạo đức', 'Lớp: 2'] },
@@ -38,6 +38,7 @@ const GUIDE: Para[] = [
   { kind: 'note', text: 'Mỗi câu bắt đầu bằng "Câu 1:", "Câu 2:"… (gõ số bằng tay, KHÔNG dùng đánh số tự động của Word). Dòng ngay sau là "Dạng: <tên dạng>". Viết mỗi ý trên một dòng.' },
   { kind: 'note', text: 'Các dạng: Chọn 1 đáp án · Chọn nhiều đáp án · Đúng – Sai · Điền ngắn · Nối cặp · Sắp xếp thứ tự · Kéo thả vào ô · Sắp xếp câu · Phân loại từ · Điền vào đoạn văn · Chọn trong câu · Nghe và chọn · Chạm vào hình · Vẽ và tô · Ghi âm đọc to · Đồ dùng toán · Thăm dò ý kiến.' },
   { kind: 'note', text: 'Dòng dùng chung (không bắt buộc): Gợi ý: … · Giải thích: … · Mức độ: Nhận biết | Kết nối | Vận dụng · Môn: … · Lớp: 1–5 · Mã kĩ năng: … Bỏ trống Môn, Lớp thì dùng môn, lớp chọn lúc tải lên.' },
+  { kind: 'note', text: 'Cả đề cùng môn, lớp, kĩ năng: ghi một lần ở ĐẦU tệp (trước Câu 1), ví dụ "Môn: Lịch sử và Địa lí", "Lớp: 5", "Mã kĩ năng: LSDL5.XDBV.LY-TRAN" — hoặc tiêu đề kiểu "ĐỀ ÔN TẬP MÔN TOÁN – LỚP 3". Mã kĩ năng tra ở trang Danh mục kĩ năng (nút "Xuất Excel"); ghi đúng tên ngắn của kĩ năng cũng được.' },
   { kind: 'note', text: `Môn học theo lớp (CT GDPT 2018): ${SUBJECT_LIST.filter((s) => s.id !== 'khac').map((s) => `${s.name} (${subjectGradeNote(s.id)})`).join(' · ')} · Khác.` },
   { kind: 'note', text: 'Ghi nhớ: Nối cặp viết "vế trái = vế phải". Điền vào đoạn văn đặt từ đúng trong [ngoặc vuông], nhiều cách đúng ngăn bằng | . Chọn trong câu viết [lựa chọn 1|*lựa chọn đúng|lựa chọn 3] (dấu * trước lựa chọn đúng). Phân loại từ viết "Nhóm <tên>: từ 1, từ 2"; Kéo thả viết "Ô <tên>: thẻ 1, thẻ 2".' },
 ];

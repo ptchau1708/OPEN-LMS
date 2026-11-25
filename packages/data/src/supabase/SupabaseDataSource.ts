@@ -118,6 +118,7 @@ import {
   type Row,
 } from './mapping';
 import { SupabaseLiveChannel } from './SupabaseLiveChannel';
+import { SupabaseScreenChannel } from './SupabaseScreenChannel';
 
 const SUBMISSION_SELECT = '*, work_tasks(title, subject, rubric_id), ai_grades(data), grade_reviews(*), student:profiles!submissions_student_id_fkey(name)';
 const BUCKET = 'submissions';
@@ -449,8 +450,13 @@ export class SupabaseDataSource implements DataSource {
 
   async deleteItem(id: string): Promise<void> {
     const sb = await this.db();
-    const { error } = await sb.from('items').delete().eq('id', id);
+    const { data, error } = await sb.from('items').delete().eq('id', id).select('id');
     if (error) fail(error, 'Không xóa được câu hỏi');
+    // RLS chặn (câu của người khác / bộ mẫu chung) → không lỗi nhưng không xoá dòng nào.
+    if (Array.isArray(data) && data.length === 0) {
+      const { data: still } = await sb.from('items').select('id').eq('id', id).maybeSingle();
+      if (still) throw new Error('Thầy cô chỉ xoá được câu do mình tạo. Câu của thầy cô khác hoặc bộ câu mẫu chung: bấm “Nhân bản” để có bản riêng rồi sửa.');
+    }
   }
 
   async listCourses(filter: { subject?: SubjectId; grade?: Grade } = {}): Promise<Course[]> {
@@ -485,6 +491,12 @@ export class SupabaseDataSource implements DataSource {
     return fromPackage(data as Row);
   }
 
+  async deletePackage(id: string): Promise<void> {
+    const sb = await this.db();
+    const { error } = await sb.from('packages').delete().eq('id', id);
+    if (error) fail(error, 'Không xoá được gói (chỉ người tải lên hoặc quản trị viên xoá được)');
+  }
+
   /* ================= giao bài & học ================= */
   async listAssignments(filter: { classId?: string; studentId?: string }): Promise<Assignment[]> {
     const sb = await this.db();
@@ -507,6 +519,27 @@ export class SupabaseDataSource implements DataSource {
     const { data, error } = await q;
     if (error) fail(error, 'Không tải được bài được giao');
     return ((data ?? []) as Row[]).map(fromAssignment);
+  }
+
+  async updateAssignment(a: Assignment): Promise<Assignment> {
+    const sb = await this.db();
+    const row: Row = { title: a.title, student_ids: a.studentIds ?? [], open_at: a.openAt, due_at: a.dueAt ?? null };
+    if (a.latePolicy) row.late_policy = a.latePolicy;
+    let res = await sb.from('assignments').update(row).eq('id', a.id).select('*').maybeSingle();
+    // CSDL chưa có cột late_policy (chưa chạy SQL 13): sửa phần còn lại.
+    if (res.error && /late_policy/.test(res.error.message ?? '')) {
+      delete row.late_policy;
+      res = await sb.from('assignments').update(row).eq('id', a.id).select('*').maybeSingle();
+    }
+    if (res.error) fail(res.error, 'Không sửa được bài đã giao');
+    if (!res.data) throw new Error('Không sửa được: bài này không còn hoặc thầy cô không có quyền.');
+    return fromAssignment(res.data as Row);
+  }
+
+  async deleteAssignment(id: string): Promise<void> {
+    const sb = await this.db();
+    const { error } = await sb.from('assignments').delete().eq('id', id);
+    if (error) fail(error, 'Không xoá được bài đã giao');
   }
 
   async createAssignment(a: Omit<Assignment, 'id'>): Promise<Assignment> {
@@ -1174,6 +1207,18 @@ export class SupabaseDataSource implements DataSource {
     return fromBehavior(data as Row);
   }
 
+  async deleteBehavior(classId: string, id: string): Promise<void> {
+    const sb = await this.db();
+    const { count } = await sb.from('behaviors').select('id', { count: 'exact', head: true }).eq('class_id', classId);
+    if (!count) {
+      // Lớp đang dùng danh sách mặc định: chép về lớp trước rồi mới xoá.
+      const ins = await sb.from('behaviors').upsert(defaultBehaviors(classId).map((x, i) => ({ class_id: x.classId, id: x.id, label: x.label, points: x.points, icon: x.icon, kind: x.kind, position: i })));
+      if (ins.error) fail(ins.error, 'Chưa xoá được hành vi');
+    }
+    const { error } = await sb.from('behaviors').delete().eq('class_id', classId).eq('id', id);
+    if (error) fail(error, 'Chưa xoá được hành vi');
+  }
+
   async listBehaviorLogs(filter: { classId?: string; studentId?: string; from?: string; to?: string; limit?: number }): Promise<BehaviorLog[]> {
     const sb = await this.db();
     let q = sb.from('behavior_logs').select('*').order('at', { ascending: false }).limit(filter.limit ?? 500);
@@ -1249,17 +1294,33 @@ export class SupabaseDataSource implements DataSource {
     return info;
   }
 
-  async findLiveSession(pin: string): Promise<LiveSessionInfo | null> {
+  async findLiveSession(pin: string, opts: { screen?: boolean } = {}): Promise<LiveSessionInfo | null> {
     const clean = (pin ?? '').replace(/\D/g, '');
     if (clean.length !== 6) return null;
     const sb = await this.db();
+    if (opts.screen) {
+      // Màn hình lớp (TV): không cần đăng nhập, không tính là HS vào lớp (SQL 21).
+      const { data, error } = await sb.rpc('find_live_screen', { p_pin: clean });
+      if (!error) return fromLiveInfo((data as Row | null) ?? null);
+      const missing = error.code === 'PGRST202' || error.code === '42883' || /could not find the function/i.test(error.message ?? '');
+      if (!missing) fail(error, 'Chưa tìm được lớp học');
+      if (!(await this.getCurrentUser())) {
+        throw new Error('Máy chủ chưa cập nhật cho màn hình lớp. Quản trị trường chạy SQL 21 (21_man-hinh-lop-tv.sql) rồi thử lại nhé.');
+      }
+    }
     const { data, error } = await sb.rpc('find_live', { p_pin: clean });
     if (error) fail(error, 'Chưa tìm được lớp học');
     return fromLiveInfo((data as Row | null) ?? null);
   }
 
-  async openLiveChannel(sessionId: string, role: LiveRole): Promise<LiveChannel> {
+  async openLiveChannel(sessionId: string, role: LiveRole, opts: { pin?: string } = {}): Promise<LiveChannel> {
     const sb = await this.db();
+    if (role === 'screen' && (opts.pin ?? '').replace(/\D/g, '').length === 6) {
+      // TV xem bằng mã lớp — chạy được cả khi chưa đăng nhập (SQL 21).
+      const screen = new SupabaseScreenChannel(sb, sessionId, opts.pin!);
+      await screen.whenReady(4000);
+      return screen;
+    }
     const me = await this.getCurrentUser();
     const ch = new SupabaseLiveChannel(sb, sessionId, role, me);
     await ch.whenReady(4000);

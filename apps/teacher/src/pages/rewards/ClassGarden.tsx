@@ -3,9 +3,9 @@
  */
 import { useEffect, useState } from 'react';
 import { BADGE_CATEGORIES, PLANTS, TEACHER_BADGE_GLYPHS, type BadgeGlyph, type PlantKind, type Profile } from '@openedu/contracts';
-import { defaultGoalTarget, useClassGarden, useGardenTvKey, useGrantTeacherBadge, useSetGardenGoal, useTeacherBadges } from '@openedu/data';
+import { defaultGoalTarget, useClassGarden, useGardenTvKey, useGrantTeacherBadge, useRevokeTeacherBadge, useSetGardenGoal, useTeacherBadges } from '@openedu/data';
 import { BadgeArt, GardenScene, Icon, Plant } from '@openedu/ui';
-import { Btn, Empty, ErrorNote, Field, Loading, PageHead } from '../../components/common';
+import { Btn, ConfirmBar, Empty, ErrorNote, Field, Loading, PageHead } from '../../components/common';
 import { ClassPicker, useClassPick, useRoster } from '../../lib/assess';
 import { relTime } from '../../lib/format';
 import '@openedu/ui/rewards.css';
@@ -121,6 +121,9 @@ function TeacherBadges({ classId, cls }: { classId: string; cls: NonNullable<Ret
   const { roster } = useRoster(cls);
   const given = useTeacherBadges(classId);
   const grant = useGrantTeacherBadge();
+  const revoke = useRevokeTeacherBadge();
+  const [askRevoke, setAskRevoke] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
@@ -161,14 +164,20 @@ function TeacherBadges({ classId, cls }: { classId: string; cls: NonNullable<Ret
         })}>Tặng huy hiệu</Btn>
         {done && <span className="tc-chip tc-chip--ok">{done}</span>}
       </div>
-      <ErrorNote error={grant.error} />
+      <ErrorNote error={grant.error ?? revoke.error} />
       {(given.data ?? []).length > 0 && (
         <ul className="tc-tbadge__list">
-          {(given.data ?? []).slice(0, 12).map((b) => (
-            <li key={b.id}><BadgeArt glyph={b.glyph ?? 'heart'} color={PINK} tier={2} size={36} /><span><strong>{b.title}</strong> — {name(b.userId)}{b.note ? ` · “${b.note}”` : ''}</span><span className="tc-muted tc-small">{relTime(b.earnedAt)}{b.seen ? ' · em đã xem' : ''}</span></li>
+          {(given.data ?? []).slice(0, showAll ? undefined : 12).map((b) => (
+            <li key={b.id}>
+              <BadgeArt glyph={b.glyph ?? 'heart'} color={PINK} tier={2} size={36} /><span><strong>{b.title}</strong> — {name(b.userId)}{b.note ? ` · “${b.note}”` : ''}</span><span className="tc-muted tc-small">{relTime(b.earnedAt)}{b.seen ? ' · em đã xem' : ''}</span>
+              {askRevoke === b.id ? (
+                <ConfirmBar text={`Thu hồi “${b.title}” của ${name(b.userId)}?`} confirmLabel="Thu hồi" busy={revoke.isPending} onCancel={() => setAskRevoke(null)} onConfirm={() => revoke.mutate({ id: b.id, classId }, { onSuccess: () => setAskRevoke(null) })} />
+              ) : <Btn size="sm" kind="ghost" icon="trash" aria-label={`Thu hồi huy hiệu ${b.title} của ${name(b.userId)}`} title="Thu hồi (tặng nhầm)" onClick={() => setAskRevoke(b.id)} data-testid="tbadge-revoke" />}
+            </li>
           ))}
         </ul>
       )}
+      {(given.data ?? []).length > 12 && !showAll ? <Btn size="sm" kind="ghost" onClick={() => setShowAll(true)}>Xem tất cả {(given.data ?? []).length} huy hiệu đã tặng</Btn> : null}
     </section>
   );
 }

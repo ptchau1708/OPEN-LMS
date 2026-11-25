@@ -66,20 +66,20 @@ describe('Mẫu Word đủ các dạng', () => {
 
 describe('Môn học CT GDPT 2018', () => {
   it('đủ môn theo thứ tự Thông tư 32, có Tự nhiên và Xã hội', () => {
-    expect(SUBJECT_LIST.map((s) => s.name)).toEqual(['Tiếng Việt', 'Toán', 'Tiếng Anh', 'Đạo đức', 'Tự nhiên và Xã hội', 'Lịch sử và Địa lí', 'Khoa học', 'Tin học', 'Công nghệ', 'Giáo dục thể chất', 'Âm nhạc', 'Mĩ thuật', 'Hoạt động trải nghiệm', 'Khác']);
+    expect(SUBJECT_LIST.map((s) => s.name)).toEqual(['Tiếng Việt', 'Toán', 'Tiếng Anh', 'Đạo đức', 'Tự nhiên và Xã hội', 'Lịch sử và Địa lí', 'Khoa học', 'Tin học', 'Công nghệ', 'Giáo dục thể chất', 'Âm nhạc', 'Mĩ thuật', 'Hoạt động trải nghiệm', 'Tiếng dân tộc thiểu số', 'Khác']);
     expect(subjectOptions().some((s) => s.id === 'tnxh')).toBe(true);
     expect(['Lịch sử và Địa lí', 'LS&ĐL', 'Tin học', 'Công nghệ', 'GDTC', 'Hoạt động trải nghiệm', 'Đạo đức', 'TNXH'].map(parseSubject)).toEqual(['lich-su-dia-li', 'lich-su-dia-li', 'tin-hoc', 'cong-nghe', 'gdtc', 'hdtn', 'dao-duc', 'tnxh']);
   });
 
   it('môn hiện theo lớp được chọn', () => {
     const ids = (g: number) => subjectOptionsFor(g).map((s) => s.id);
-    expect(ids(1)).toEqual(['tieng-viet', 'toan', 'tieng-anh', 'dao-duc', 'tnxh', 'gdtc', 'am-nhac', 'mi-thuat', 'hdtn', 'khac']);
+    expect(ids(1)).toEqual(['tieng-viet', 'toan', 'tieng-anh', 'dao-duc', 'tnxh', 'gdtc', 'am-nhac', 'mi-thuat', 'hdtn', 'tieng-dan-toc', 'khac']);
     expect(ids(2)).toEqual(ids(1));
-    expect(ids(3)).toEqual(['tieng-viet', 'toan', 'tieng-anh', 'dao-duc', 'tnxh', 'tin-hoc', 'cong-nghe', 'gdtc', 'am-nhac', 'mi-thuat', 'hdtn', 'khac']);
-    expect(ids(4)).toEqual(['tieng-viet', 'toan', 'tieng-anh', 'dao-duc', 'lich-su-dia-li', 'khoa-hoc', 'tin-hoc', 'cong-nghe', 'gdtc', 'am-nhac', 'mi-thuat', 'hdtn', 'khac']);
+    expect(ids(3)).toEqual(['tieng-viet', 'toan', 'tieng-anh', 'dao-duc', 'tnxh', 'tin-hoc', 'cong-nghe', 'gdtc', 'am-nhac', 'mi-thuat', 'hdtn', 'tieng-dan-toc', 'khac']);
+    expect(ids(4)).toEqual(['tieng-viet', 'toan', 'tieng-anh', 'dao-duc', 'lich-su-dia-li', 'khoa-hoc', 'tin-hoc', 'cong-nghe', 'gdtc', 'am-nhac', 'mi-thuat', 'hdtn', 'tieng-dan-toc', 'khac']);
     expect(ids(5)).toEqual(ids(4));
     // chưa chọn lớp → mọi môn; môn đang chọn luôn được giữ lại
-    expect(subjectOptionsFor(0).length).toBe(14);
+    expect(subjectOptionsFor(0).length).toBe(15);
     expect(subjectOptionsFor(4, ['tnxh']).some((s) => s.id === 'tnxh')).toBe(true);
     expect(subjectLabelFor('tnxh', 4)).toBe('Tự nhiên và Xã hội (không thuộc lớp 4)');
     expect(subjectLabelFor('tieng-anh', 1)).toBe('Tiếng Anh (tự chọn)');

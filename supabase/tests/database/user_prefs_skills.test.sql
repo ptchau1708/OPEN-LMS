@@ -12,7 +12,7 @@ insert into auth.users (id, email, raw_user_meta_data) values
 select ok((select count(*) from v2.skills where strand = 'CHU-DE') > 300, 'có kĩ năng theo chủ đề CT 2018');
 select ok(exists (select 1 from v2.skills where subject = 'khoa-hoc' and grade = 4), 'có kĩ năng Khoa học lớp 4');
 select ok(exists (select 1 from v2.skills where subject = 'tin-hoc' and grade = 3), 'có kĩ năng Tin học lớp 3');
-select is((select count(distinct subject)::int from v2.skills where strand = 'CHU-DE'), 12, '12 môn ngoài Toán có kĩ năng');
+select is((select count(distinct subject)::int from v2.skills where strand = 'CHU-DE'), 13, '13 môn ngoài Toán có kĩ năng (gồm Tiếng dân tộc thiểu số — SQL 20)');
 select throws_ok($$ insert into v2.skills (code, subject, grade, strand, topic, text, short) values ('X1.A.B', 'toan', 1, 'LA', 't', 'mô tả', 'ngắn') $$, '23514', null, 'mạch lạ bị chặn');
 
 set local role authenticated;

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { type Grade, type Item, type ItemBase, type SubjectId, subjectInGrade, subjectLabelFor, subjectOptionsFor } from '@openedu/contracts';
+import { type Grade, type Item, type ItemBase, type SubjectId, subjectInGrade, subjectOptionsFor } from '@openedu/contracts';
 import { useDataSource, useItems } from '@openedu/data';
 import { Btn, Dialog, Empty } from '../../components/common';
 import { ItemPreview, ItemStudio, TypeBadge } from '../../components/items';
@@ -8,6 +8,7 @@ import { cx } from '../../lib/format';
 import type { DraftItem as Draft } from '@openedu/data/import';
 import { errText, type ImportLib } from './lib';
 import { SkillPicker } from './SkillPicker';
+import { SubjectOptions } from '../../components/SubjectOptions';
 
 type Status = 'ready' | 'missing-answer' | 'review';
 
@@ -28,7 +29,7 @@ const AI_ANSWER_TAG = 'dap-an-ai';
 const SOURCE_TEXT: Record<string, string> = { text: 'văn bản dán', xlsx: 'tệp Excel', docx: 'tệp Word', ai: 'AI', manual: 'gõ nhanh' };
 
 /** Màn hình soát chung cho mọi cách thêm nhanh: kiểm tra, sửa, gắn thẻ, lưu nhiều câu một lần. */
-export function ReviewScreen({ lib, drafts, onClose, onBack, onSaved }: { lib: ImportLib; drafts: Draft[]; onClose: () => void; onBack: () => void; onSaved?: (n: number) => void }) {
+export function ReviewScreen({ lib, drafts, notes, onClose, onBack, onSaved }: { lib: ImportLib; drafts: Draft[]; notes?: string[]; onClose: () => void; onBack: () => void; onSaved?: (n: number) => void }) {
   const ds = useDataSource();
   const qc = useQueryClient();
   const bank = useItems();
@@ -37,7 +38,13 @@ export function ReviewScreen({ lib, drafts, onClose, onBack, onSaved }: { lib: I
   const [skipDup, setSkipDup] = useState(true);
   const [detail, setDetail] = useState<Row | null>(null);
   const [progress, setProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
-  const [bulk, setBulk] = useState<{ subject: SubjectId | ''; grade: Grade | 0; difficulty: ItemBase['difficulty'] | ''; skills: string[] }>({ subject: '', grade: 0, difficulty: '', skills: [] });
+  // Môn / lớp chung của các câu (đọc từ đề hoặc mặc định) → hiện sẵn ở hàng "Đặt cho … câu đã chọn".
+  const [bulk, setBulk] = useState<{ subject: SubjectId | ''; grade: Grade | 0; difficulty: ItemBase['difficulty'] | ''; skills: string[] }>(() => {
+    const one = <T,>(vals: T[]): T | undefined => (vals.length && vals.every((v) => v === vals[0]) ? vals[0] : undefined);
+    return { subject: one(drafts.map((d) => d.item.subject)) ?? '', grade: one(drafts.map((d) => d.item.grade)) ?? 0, difficulty: '', skills: [] };
+  });
+  const bulkSubject = bulk.subject || focusRowSubject(drafts, focus);
+  const bulkGrade = (bulk.grade || drafts.find((d) => d.rowId === focus)?.item.grade || 3) as Grade;
 
   const status = (r: Row): Status => lib.draftStatus(r.d);
   const dups = useMemo(() => {
@@ -138,6 +145,7 @@ export function ReviewScreen({ lib, drafts, onClose, onBack, onSaved }: { lib: I
     >
       <div className="tc-qb-review">
         <div className="tc-qb-review__main">
+          {notes?.length ? <div className="tc-alert tc-alert--info tc-qb-notes" role="status" data-testid="qb-review-notes"><span>{notes.join(' ')}</span></div> : null}
           <div className="tc-qb-summary">
             <span className="tc-chip tc-chip--ok">{STATUS_TEXT.ready}: {counts.ready}</span>
             <span className={cx('tc-chip', counts['missing-answer'] > 0 && 'tc-chip--warn')}>{STATUS_TEXT['missing-answer']}: {counts['missing-answer']}</span>
@@ -160,14 +168,15 @@ export function ReviewScreen({ lib, drafts, onClose, onBack, onSaved }: { lib: I
             <select className="tc-input tc-input--sm" aria-label="Mức độ cho các câu đã chọn" value={bulk.difficulty ?? ''} onChange={(e) => setBulk({ ...bulk, difficulty: e.target.value as ItemBase['difficulty'] | '' })}>
               <option value="">Mức độ…</option>{DIFF.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
             </select>
-            {(bulk.subject || focusRow?.d.item.subject) === 'toan' ? (
-              <SkillPicker subject="toan" grade={(bulk.grade || focusRow?.d.item.grade || 3) as Grade} value={bulk.skills} onChange={(skills) => setBulk({ ...bulk, skills })} compact />
+            {bulkSubject ? (
+              <SkillPicker subject={bulkSubject} grade={bulkGrade} value={bulk.skills} onChange={(skills) => setBulk({ ...bulk, skills })} compact />
             ) : null}
             <Btn size="sm" onClick={applyBulk} disabled={!selectedPending.length || (!bulk.subject && !bulk.grade && !bulk.difficulty && !bulk.skills.length)}>Áp dụng</Btn>
             <span className="tc-ebar__spacer" />
             <Btn size="sm" kind="ghost" onClick={() => setAll(true)}>Chọn tất cả</Btn>
             <Btn size="sm" kind="ghost" onClick={() => setAll(false)}>Bỏ chọn</Btn>
             <Btn size="sm" kind="ghost" onClick={selectReady}>Chỉ chọn câu sẵn sàng</Btn>
+            <a className="tc-small" href="/ki-nang" target="_blank" rel="noreferrer" title="Xem, thêm, sửa kĩ năng; xuất danh mục kĩ năng ra Excel">Danh mục kĩ năng ↗</a>
           </div>
 
           {!rows.length ? <Empty icon="puzzle" title="Không đọc được câu hỏi nào">Thầy cô quay lại, kiểm tra nội dung rồi thử lại nhé.</Empty> : (
@@ -202,7 +211,7 @@ export function ReviewScreen({ lib, drafts, onClose, onBack, onSaved }: { lib: I
                         <InlineEditor item={r.d.item} lib={lib} onChange={(it) => setItem(r.d.rowId, it)} />
                         <div className="tc-qb-row__meta">
                           <select className="tc-input tc-input--sm" aria-label="Môn" value={r.d.item.subject} onChange={(e) => setItem(r.d.rowId, { ...r.d.item, subject: e.target.value as SubjectId, skills: [] } as Item)}>
-                            {subjectOptionsFor(r.d.item.grade, [r.d.item.subject]).map((s) => <option key={s.id} value={s.id}>{subjectLabelFor(s.id, r.d.item.grade)}</option>)}
+                            <SubjectOptions grade={r.d.item.grade} present={[r.d.item.subject]} />
                           </select>
                           <select className="tc-input tc-input--sm" aria-label="Lớp" value={r.d.item.grade} onChange={(e) => setItem(r.d.rowId, { ...r.d.item, grade: Number(e.target.value) as Grade } as Item)}>
                             {[1, 2, 3, 4, 5].map((g) => <option key={g} value={g}>Lớp {g}</option>)}
@@ -247,6 +256,10 @@ export function ReviewScreen({ lib, drafts, onClose, onBack, onSaved }: { lib: I
       ) : null}
     </Dialog>
   );
+}
+
+function focusRowSubject(drafts: Draft[], focus: string | null): SubjectId | '' {
+  return drafts.find((d) => d.rowId === focus)?.item.subject ?? drafts[0]?.item.subject ?? '';
 }
 
 function DetailEditor({ item, onClose, onDone }: { item: Item; onClose: () => void; onDone: (it: Item) => void }) {

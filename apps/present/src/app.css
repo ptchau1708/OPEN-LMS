@@ -51,9 +51,10 @@ body { background: var(--k-bg-2); }
 .pr-join { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.6vmin 4vmin; border-radius: 4vmin; background: var(--k-card); box-shadow: 0 1vmin 0 var(--k-press); }
 .pr-join__label { margin: 0; font-size: 3.4vmin; font-weight: 800; color: var(--k-sub); }
 .pr-join__pin { display: flex; margin: 0.6vmin 0 2vmin; }
-.pr-join__digit { font: 800 13vmin/1 var(--f-kid-display); color: var(--k-ink); margin: 0 0.3vmin; }
+.pr-join__digit { font: 800 11vmin/1 var(--f-kid-display); color: var(--k-ink); margin: 0 0.3vmin; }
 .pr-join__digit.is-gap { margin-left: 3vmin; }
-.pr-join__qr { width: 34vmin; height: 34vmin; }
+.pr-join__qr { width: 44vmin; height: 44vmin; cursor: zoom-in; }
+.pr-join__zoom { margin: 0.8vmin 0 0; font-size: 2.2vmin; font-weight: 700; color: var(--k-sub); }
 .pr-join__url { margin: 1.4vmin 0 0; font: 800 3.4vmin var(--f-kid); color: var(--k-info); }
 .pr-room { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; margin-left: 4vmin; }
 .pr-room__bubble .k-mbubble__mascot { width: 17vmin; height: 17vmin; }
@@ -70,6 +71,7 @@ body { background: var(--k-bg-2); }
 .pr-stage { height: 100%; display: flex; flex-direction: column; }
 .pr-hud { flex: none; display: flex; align-items: center; height: 14vmin; padding: 1.2vmin 2vmin 0; }
 .pr-corner { flex: none; display: flex; align-items: center; padding: 0.8vmin 1.6vmin 0.8vmin 0.8vmin; border-radius: 2.4vmin; background: var(--k-card); box-shadow: 0 0.5vmin 0 var(--k-press); }
+.pr-corner { cursor: zoom-in; }
 .pr-corner__qr { width: 11vmin; height: 11vmin; }
 .pr-corner__txt { display: flex; flex-direction: column; margin-left: 1.2vmin; line-height: 1.1; }
 .pr-corner__l { font-size: 2.4vmin; font-weight: 800; color: var(--k-sub); }
@@ -193,3 +195,13 @@ body { background: var(--k-bg-2); }
 @keyframes pr-lbin { from { opacity: 0; transform: translateY(1.5vmin); } }
 @keyframes pr-gain { from { opacity: 0; transform: translateY(1vmin); } 30% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .pr-lb__list li, .pr-lb__gain { animation: none; } }
+
+/* ---------- mã QR phóng to ---------- */
+.pr-qrbig { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; gap: 5vmin; padding: 3vmin; background: #fff; cursor: zoom-out; animation: pr-pop 260ms var(--k-ease) both; }
+.pr-qrbig__qr { width: min(92vh, 62vw); height: min(92vh, 62vw); }
+.pr-qrbig__side { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.pr-qrbig__l { margin: 0; font-size: 4vmin; font-weight: 800; color: var(--k-sub); }
+.pr-qrbig__pin { margin: 0.5vmin 0 2vmin; font: 800 14vmin/1 var(--f-kid-display); color: var(--k-ink); white-space: nowrap; }
+.pr-qrbig__u { margin: 0; font: 800 3.6vmin var(--f-kid); color: var(--k-info); word-break: break-all; }
+.pr-qrbig__hint { margin: 3vmin 0 0; font-size: 2.4vmin; color: var(--k-sub); }
+@media (max-aspect-ratio: 1/1) { .pr-qrbig { flex-direction: column; } .pr-qrbig__qr { width: 86vw; height: 86vw; } .pr-qrbig__side { align-items: center; } }

@@ -1,18 +1,18 @@
 /** Phòng thảo luận — Supabase (SQL 15: 20261124000001_v2_discussions.sql). */
 import { getSupabaseClient, type V2Client } from '../supabase/client';
 import { compressWorkImage } from '../workImage';
-import { discussionProblem } from './rules';
+import { cleanQuickReplies, discussionProblem } from './rules';
 import type {
   Discussion, DiscussionInput, DiscussionPost, DiscussionReaction, DiscussionStats, DiscussionWord, DiscussSource, NewDiscussionPost,
 } from './types';
 
 interface PgError { message: string; code?: string }
 function fail(e: PgError, vi: string): never {
+  if (/SQL 1[69]/.test(vi)) throw new Error(vi);
   if (e.code === '42P01' || /discussion/.test(e.message ?? '') && /does not exist|schema cache/i.test(e.message ?? '')) {
     throw new Error('Cần chạy tệp SQL 15 (phòng thảo luận) trên Supabase trước.');
   }
   if (e.code === '42501' && !/[À-ỹ]/.test(e.message ?? '')) throw new Error('Chưa có quyền làm việc này.');
-  if (/SQL 16/.test(vi)) throw new Error(vi);
   throw new Error(e.message && /[À-ỹ]/.test(e.message) ? e.message : vi);
 }
 
@@ -20,6 +20,9 @@ type Row = Record<string, unknown>;
 const BUCKET = 'discussion';
 const DISC_COLS_OLD = 'id,class_id,title,prompt,moderation,hide_others,opens_at,closes_at,locked,pinned,archived,rooms,tabs,created_by,created_at,updated_at';
 const DISC_COLS = `${DISC_COLS_OLD},kind`;
+const DISC_COLS_QR = `${DISC_COLS},quick_replies`;
+/** Chưa chạy SQL 19 (chưa có cột quick_replies). */
+const noQuick = (e: PgError | null) => !!e && /quick_replies/.test(e.message ?? '');
 const POST_COLS = 'id,discussion_id,room_id,tab_id,parent_id,author_id,body,images,color,status,flagged,created_at,updated_at';
 
 const toDisc = (r: Row): Discussion => ({
@@ -28,6 +31,7 @@ const toDisc = (r: Row): Discussion => ({
   opensAt: (r.opens_at as string | null) ?? null, closesAt: (r.closes_at as string | null) ?? null,
   locked: !!r.locked, pinned: !!r.pinned, archived: !!r.archived,
   rooms: (r.rooms as Discussion['rooms']) ?? [], tabs: (r.tabs as Discussion['tabs']) ?? [],
+  ...(Array.isArray(r.quick_replies) && r.quick_replies.length ? { quickReplies: (r.quick_replies as unknown[]).filter((x): x is string => typeof x === 'string') } : {}),
   createdBy: (r.created_by as string | null) ?? null, createdAt: String(r.created_at), updatedAt: String(r.updated_at),
 });
 const zero = () => ({ heart: 0, star: 0, like: 0 });
@@ -56,14 +60,16 @@ export class SupabaseDiscussSource implements DiscussSource {
   async listDiscussions(classId: string): Promise<Discussion[]> {
     const sb = await this.clientP;
     const q = (cols: string) => sb.from('discussions').select(cols).eq('class_id', classId).order('pinned', { ascending: false }).order('created_at', { ascending: false });
-    let { data, error } = await q(DISC_COLS);
+    let { data, error } = await q(DISC_COLS_QR);
+    if (noQuick(error)) ({ data, error } = await q(DISC_COLS));
     if (noKind(error)) ({ data, error } = await q(DISC_COLS_OLD));
     if (error) fail(error, 'Chưa tải được phòng thảo luận.');
     return ((data ?? []) as unknown as Row[]).map(toDisc);
   }
   async getDiscussion(id: string): Promise<Discussion | null> {
     const sb = await this.clientP;
-    let { data, error } = await sb.from('discussions').select(DISC_COLS).eq('id', id).maybeSingle();
+    let { data, error } = await sb.from('discussions').select(DISC_COLS_QR).eq('id', id).maybeSingle();
+    if (noQuick(error)) ({ data, error } = await sb.from('discussions').select(DISC_COLS).eq('id', id).maybeSingle());
     if (noKind(error)) ({ data, error } = await sb.from('discussions').select(DISC_COLS_OLD).eq('id', id).maybeSingle());
     if (error) fail(error, 'Chưa tải được phòng thảo luận.');
     return data ? toDisc(data as unknown as Row) : null;
@@ -77,16 +83,18 @@ export class SupabaseDiscussSource implements DiscussSource {
       opens_at: i.opensAt, closes_at: i.closesAt, locked: i.locked, pinned: i.pinned, archived: i.archived, rooms: i.rooms, tabs: i.tabs,
       // Chỉ gửi cột kind khi là phòng trò chuyện: bảng thảo luận vẫn lưu được khi chưa chạy SQL 16.
       ...(i.kind === 'chat' ? { kind: 'chat' } : {}),
+      // Chỉ gửi câu trả lời nhanh khi GV có đặt (cột mới của SQL 19).
+      ...(i.quickReplies !== undefined ? { quick_replies: cleanQuickReplies(i.quickReplies) } : {}),
     };
-    const cols = i.kind === 'chat' ? DISC_COLS : DISC_COLS_OLD;
+    const cols = i.quickReplies !== undefined ? DISC_COLS_QR : i.kind === 'chat' ? DISC_COLS : DISC_COLS_OLD;
     if (i.id) {
       const { data, error } = await sb.from('discussions').update(row).eq('id', i.id).select(cols).maybeSingle();
-      if (error) fail(error, noKind(error) ? 'Cần chạy tệp SQL 16 (trò chuyện nhóm) trên Supabase trước.' : 'Chưa lưu được phòng thảo luận.');
+      if (error) fail(error, noQuick(error) ? 'Cần chạy tệp SQL 19 trên Supabase để lưu câu trả lời nhanh.' : noKind(error) ? 'Cần chạy tệp SQL 16 (trò chuyện nhóm) trên Supabase trước.' : 'Chưa lưu được phòng thảo luận.');
       if (!data) throw new Error('Thầy cô chưa có quyền sửa phòng này.');
       return toDisc(data as unknown as Row);
     }
     const { data, error } = await sb.from('discussions').insert({ ...row, created_by: await this.me() }).select(cols).single();
-    if (error) fail(error, noKind(error) ? 'Cần chạy tệp SQL 16 (trò chuyện nhóm) trên Supabase trước.' : 'Chưa tạo được phòng thảo luận.');
+    if (error) fail(error, noQuick(error) ? 'Cần chạy tệp SQL 19 trên Supabase để lưu câu trả lời nhanh.' : noKind(error) ? 'Cần chạy tệp SQL 16 (trò chuyện nhóm) trên Supabase trước.' : 'Chưa tạo được phòng thảo luận.');
     return toDisc(data as unknown as Row);
   }
   async deleteDiscussion(id: string): Promise<void> {

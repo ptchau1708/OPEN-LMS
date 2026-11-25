@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { Icon } from '@openedu/ui';
 import { SUBJECTS, uid, type Item, type Lesson, type LiveGameMode, type Profile } from '@openedu/contracts';
 import { GAME_MODE_LABEL, paperFriendly, useClasses, useCreateLiveSession, useSaveLesson } from '@openedu/data';
 import { Btn, Dialog, ErrorNote, Field, Seg } from '../../components/common';
@@ -87,8 +88,8 @@ export function GameSetupDialog({ user, items, lesson, onClose }: { user: Profil
         {mode === 'paper' ? (
           <div className="tc-alert tc-alert--info"><span>
             Chế độ giấy chỉ dùng câu <b>chọn 1 đáp án, 2–4 lựa chọn</b>{paperOk !== null ? <> — dùng được <b>{paperOk}/{list.length}</b> câu đã chọn</> : null}.
-            Mỗi em một thẻ in sẵn theo danh sách lớp (in ở bước sau, nút <b>In thẻ</b>). GV quét bằng camera điện thoại hoặc chạm chọn đáp án cho từng em.
-          </span></div>
+            Mỗi em một thẻ in sẵn theo danh sách lớp — in một lần, dùng cho mọi trò chơi. GV quét bằng camera điện thoại hoặc chạm chọn đáp án cho từng em.
+          </span>{classId ? <Link className="tc-btn tc-btn--sm" to={`/truc-tiep/the-giay?lop=${encodeURIComponent(classId)}`} target="_blank" data-testid="game-print-cards"><Icon name="print" size={16} /><span>In thẻ giấy cho lớp này</span></Link> : null}</div>
         ) : mode === 'self' ? (
           <p className="tc-small tc-muted">Mỗi em làm lần lượt các câu trên máy, biết đúng/sai ngay. Trả lời đúng càng nhanh càng nhiều điểm, đúng liên tiếp được thưởng thêm.</p>
         ) : (

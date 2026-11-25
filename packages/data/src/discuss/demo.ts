@@ -3,7 +3,7 @@ import type { DataSource, Profile } from '@openedu/contracts';
 import { DEMO_CLASSES, DEMO_GUARDIANS, DEMO_USERS } from '../seed/users';
 import { createDefaultStorage, readJson, writeJson, type KVStorage } from '../storage';
 import { compressWorkImage } from '../workImage';
-import { CHAT_TAB, DEFAULT_BLOCK_WORDS, DISCUSSION_RATE_PER_MIN, discussionProblem, discussionState, flagText, roomsFromTeams, TAB_COLORS } from './rules';
+import { CHAT_TAB, cleanQuickReplies, DEFAULT_BLOCK_WORDS, DISCUSSION_RATE_PER_MIN, discussionProblem, discussionState, flagText, roomsFromTeams, TAB_COLORS } from './rules';
 import type {
   Discussion, DiscussionInput, DiscussionPost, DiscussionReaction, DiscussionStats, DiscussionWord, DiscussSource, NewDiscussionPost,
 } from './types';
@@ -138,7 +138,7 @@ export class DemoDiscussSource implements DiscussSource {
     if (problem) throw new Error(problem);
     const { s, save, now } = await this.load();
     const old = i.id ? s.discussions.find((d) => d.id === i.id) : undefined;
-    const d: Discussion = { ...i, id: old?.id ?? rid('dc'), title: i.title.trim(), createdBy: old?.createdBy ?? me.id, createdAt: old?.createdAt ?? now.toISOString(), updatedAt: now.toISOString() };
+    const d: Discussion = { ...i, ...(i.quickReplies !== undefined ? { quickReplies: cleanQuickReplies(i.quickReplies) } : {}), id: old?.id ?? rid('dc'), title: i.title.trim(), createdBy: old?.createdBy ?? me.id, createdAt: old?.createdAt ?? now.toISOString(), updatedAt: now.toISOString() };
     if (old) s.discussions[s.discussions.indexOf(old)] = d; else s.discussions.push(d);
     save();
     emit(d.id);

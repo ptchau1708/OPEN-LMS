@@ -353,3 +353,71 @@ describe('resolveChoiceAnswer', () => {
     expect(resolveChoiceAnswer('không biết', o)).toBeNull();
   });
 });
+
+describe('parseQuestionText — tự nhận môn, lớp, kĩ năng trong đề', () => {
+  const P = (t: string) => parseQuestionText(t, D);
+  it('tiêu đề "ĐỀ … MÔN TIẾNG VIỆT – LỚP 4" → môn, lớp của cả đề', () => {
+    const r = P('ĐỀ KIỂM TRA CUỐI HỌC KÌ I\nMÔN TIẾNG VIỆT – LỚP 2\nCâu 1: Từ nào chỉ sự vật?\nA. chạy\nB. quyển vở\nĐáp án: B');
+    expect(r.detected).toEqual({ subject: 'tieng-viet', grade: 2 });
+    expect(r.drafts[0].item.subject).toBe('tieng-viet');
+    expect(r.drafts[0].item.grade).toBe(2);
+    expect(r.preamble).toBeUndefined();
+  });
+  it('dòng khai báo "Môn: …", "Lớp: 5A2", "Mã kĩ năng: …" ở đầu đề', () => {
+    const r = P('Môn: Lịch sử và Địa lí\nLớp: 5A2\nMã kĩ năng: LSDL5.XDBV.LY-TRAN\n\nCâu 1: Năm 1010, vua Lý Thái Tổ dời đô ra đâu?\nA. Cổ Loa\nB. Thành Đại La\nĐáp án: B\nCâu 2: Ai dời đô?\nA. Lý Thái Tổ\nB. Lê Lợi\nĐáp án: A');
+    expect(r.detected).toEqual({ subject: 'lich-su-dia-li', grade: 5, skills: ['LSDL5.XDBV.LY-TRAN'] });
+    for (const d of r.drafts) {
+      expect(d.item.subject).toBe('lich-su-dia-li');
+      expect(d.item.grade).toBe(5);
+      expect(d.item.skills).toEqual(['LSDL5.XDBV.LY-TRAN']);
+    }
+  });
+  it('tiêu đề thường "Đố vui Lịch sử và Địa lí lớp 5" và "Phiếu bài tập Toán 3"', () => {
+    expect(P('Đố vui Lịch sử và Địa lí lớp 5\nCâu 1: Kinh đô thời Lý?\nA. Huế\nB. Thăng Long\nĐáp án: B').detected).toEqual({ subject: 'lich-su-dia-li', grade: 5 });
+    expect(P('Phiếu bài tập Toán 3\nCâu 1: 5 + 5 = ?\nA. 10\nB. 11\nĐáp án: A').detected).toEqual({ subject: 'toan', grade: 3 });
+  });
+  it('môn không dạy ở lớp mặc định → chọn lớp gần nhất có môn', () => {
+    const r = P('MÔN KHOA HỌC\nCâu 1: Nước sôi ở bao nhiêu độ?\nA. 50\nB. 100\nĐáp án: B');
+    expect(r.drafts[0].item.subject).toBe('khoa-hoc');
+    expect(r.drafts[0].item.grade).toBe(4);
+    const r3 = parseQuestionText('Môn: Khoa học\nCâu 1: Nước sôi?\nA. 50\nB. 100\nĐáp án: B', { grade: 2, subject: 'toan' });
+    expect(r3.drafts[0].item.grade).toBe(4);
+  });
+  it('không nhầm bài đọc / chữ "bài toán" trong đề là tên môn', () => {
+    const passage = 'Ngày xưa, có một bài toán rất khó mà cả làng không ai giải được. Một cậu bé chăn trâu nghĩ mãi rồi tìm ra cách giải, khiến mọi người đều thán phục và khen ngợi.';
+    const r = P(`${passage}\nCâu 1: Ai giải được bài toán?\nA. Cậu bé\nB. Ông lão\nĐáp án: A`);
+    expect(r.detected).toBeUndefined();
+    expect(r.drafts[0].item.subject).toBe('toan');
+    expect(r.preamble).toContain('cậu bé');
+  });
+  it('dòng "Môn:", "Lớp:", "Kĩ năng:", "Mức độ:" riêng từng câu (ghi tên kĩ năng thay cho mã)', () => {
+    const r = P('Câu 1: Năm 1010 vua Lý Thái Tổ dời đô ra đâu?\nA. Cổ Loa\nB. Đại La\nĐáp án: B\nMôn: Lịch sử và Địa lí\nLớp: 5\nKĩ năng: Triều Lý, triều Trần\nMức độ: Nhận biết\nCâu 2: 7 + 8 = ?\nA. 15\nB. 16\nĐáp án: A');
+    const [a, b] = r.drafts;
+    expect(a.item.subject).toBe('lich-su-dia-li');
+    expect(a.item.grade).toBe(5);
+    expect(a.item.skills).toEqual(['LSDL5.XDBV.LY-TRAN']);
+    expect(a.item.difficulty).toBe('nhan-biet');
+    expect(opts(a.item)).toEqual(['Cổ Loa', 'Đại La']);
+    expect(draftStatus(a)).toBe('ready');
+    expect(b.item.subject).toBe('toan');
+    expect(b.item.grade).toBe(4);
+    expect(b.item.skills).toBeUndefined();
+  });
+  it('kĩ năng không có trong danh mục → ghi chú cho GV', () => {
+    const [d] = P('Câu 1: 2 + 2 = ?\nA. 4\nB. 5\nĐáp án: A\nMã kĩ năng: T9.KHONG.CO').drafts;
+    expect(d.notes.join(' ')).toContain('T9.KHONG.CO');
+    expect(d.item.skills).toBeUndefined();
+  });
+});
+
+describe('parseSkills — mã, tên, nội dung', () => {
+  it('nhận mã, "mã – nội dung", tên ngắn, nhiều mã ngăn bằng dấu phẩy', async () => {
+    const { parseSkills } = await import('../import');
+    expect(parseSkills('t4.ps.rut-gon').codes).toEqual(['T4.PS.RUT-GON']);
+    expect(parseSkills('T4.PS.RUT-GON – Rút gọn phân số').codes).toEqual(['T4.PS.RUT-GON']);
+    expect(parseSkills('Rút gọn phân số', { subject: 'toan', grade: 4 }).codes).toEqual(['T4.PS.RUT-GON']);
+    expect(parseSkills('T4.PS.RUT-GON, LSDL5.XDBV.LY-TRAN').codes).toEqual(['T4.PS.RUT-GON', 'LSDL5.XDBV.LY-TRAN']);
+    expect(parseSkills('Triều Lý, triều Trần').codes).toEqual(['LSDL5.XDBV.LY-TRAN']);
+    expect(parseSkills('không có kĩ năng này').unknown).toEqual(['không có kĩ năng này']);
+  });
+});

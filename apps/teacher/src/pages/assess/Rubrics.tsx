@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { SKILLS, SKILL_BY_CODE, SUBJECT_LIST, SUBJECTS, fitSubjectToGrade, subjectLabelFor, subjectOptionsFor, type Grade, type Profile, type Rubric, type RubricCriterion, type SubjectId } from '@openedu/contracts';
 import { Icon } from '@openedu/ui';
-import { criteriaMax, fmtScore, matchesSearch, useDeleteRubric, useRubrics, useSaveRubric } from '@openedu/data';
+import { criteriaMax, fmtScore, matchesSearch, useCatalogVersion, useDeleteRubric, useRubrics, useSaveRubric } from '@openedu/data';
 import { Btn, ConfirmBar, Dialog, Empty, ErrorNote, Field, Loading, PageHead, Seg, SubjectDot } from '../../components/common';
 
 const SUBJ: SubjectId[] = SUBJECT_LIST.map((s) => s.id);
@@ -23,8 +23,9 @@ export function blankRubric(user: Profile, subject: SubjectId = 'toan', grade: G
 export function SkillPicker({ value, onChange, subject, grade, label = 'Kĩ năng' }: { value: string[]; onChange: (v: string[]) => void; subject: SubjectId; grade: Grade; label?: string }) {
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
-  const opts = useMemo(() => SKILLS.filter((s) => s.subject === subject && Math.abs(s.grade - grade) <= 1 && !value.includes(s.code) && (matchesSearch(`${s.code} ${s.short} ${s.topic}`, q)))
-    .sort((a, b) => Math.abs(a.grade - grade) - Math.abs(b.grade - grade)).slice(0, 40), [subject, grade, value, q]);
+  const ver = useCatalogVersion();
+  const opts = useMemo(() => { void ver; return SKILLS; }, [ver]).filter((s) => s.subject === subject && Math.abs(s.grade - grade) <= 1 && !value.includes(s.code) && (matchesSearch(`${s.code} ${s.short} ${s.topic}`, q)))
+    .sort((a, b) => Math.abs(a.grade - grade) - Math.abs(b.grade - grade)).slice(0, 40);
   return (
     <div className="tc-field">
       <span className="tc-field__label">{label}</span>

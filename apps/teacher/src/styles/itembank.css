@@ -76,3 +76,5 @@
   .tc-qb-review__side { position: static; max-height: none; }
   .tc-qb-opt .tc-input, .tc-qb-answer .tc-input { width: 100%; }
 }
+.tc-qb-detected { margin: 0; padding: 6px 10px; border-radius: 8px; background: var(--tc-ok-soft, #e8f7ef); color: var(--tc-ok, #1d7a4c); }
+.tc-qb-notes { margin-bottom: 8px; }

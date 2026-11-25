@@ -2,11 +2,13 @@
  * Mẫu Excel của ngân hàng câu hỏi: tải mẫu → điền → tải lên; xuất ngân hàng ra đúng mẫu này (sửa trong Excel rồi nhập lại).
  * Thuần (không đụng DOM). Cột — xem TEMPLATE_COLUMNS và docs/PHASE7_QUESTION_BANK.md.
  */
-import { SKILL_BY_CODE, SUBJECTS, SUBJECT_LIST, subjectGradeNote, uid, type Choice, type Grade, type Item, type ItemBase, type SubjectId } from '@openedu/contracts';
+import { SUBJECTS, SUBJECT_LIST, subjectGradeNote, uid, type Choice, type Item } from '@openedu/contracts';
 import { foldVietnamese } from '../text';
 import { resolveChoiceAnswer } from './textParser';
 import { DIFFICULTY_LABEL, isTrueFalse, letterId, makeMcq, makeShort, makeTrueFalse, newRowId, type DraftItem, type ImportDefaults } from './types';
 import { readXlsx, writeXlsx, type XlsxCell, type XlsxSheet } from './xlsx';
+import { parseDifficulty, parseGrade, parseSkills, parseSubject } from './meta';
+import { skillsSheet } from './skillsSheet';
 
 export type TemplateKind = 'MCQ' | 'MCQ_MULTIPLE' | 'SHORT_ANSWER' | 'ORDERING' | 'MATCHING' | 'TRUE_FALSE';
 
@@ -62,55 +64,7 @@ export function parseKind(v: string): TemplateKind | null {
   return null;
 }
 
-export function parseDifficulty(v: string): ItemBase['difficulty'] | undefined {
-  const f = fold(v);
-  if (!f) return undefined;
-  if (['nhan biet', 'nb', '1', 'm1', 'muc 1', 'de', 'nhan-biet'].includes(f)) return 'nhan-biet';
-  if (['ket noi', 'thong hieu', 'th', 'kn', '2', 'm2', 'muc 2', 'trung binh', 'tb', 'vua'].includes(f)) return 'ket-noi';
-  if (['van dung', 'vd', 'van dung cao', 'vdc', '3', 'm3', 'muc 3', '4', 'm4', 'muc 4', 'kho', 'nang cao'].includes(f)) return 'van-dung';
-  return undefined;
-}
-
-export function parseSubject(v: string): SubjectId | undefined {
-  const f = fold(v);
-  if (!f) return undefined;
-  const hit = Object.values(SUBJECTS).find((s) => s.id === f || fold(s.name) === f || fold(s.id) === f);
-  if (hit) return hit.id;
-  const alias: Record<string, SubjectId> = {
-    'tu nhien xa hoi': 'tnxh', 'tu nhien va xa hoi': 'tnxh', tnxh: 'tnxh', 'tn xh': 'tnxh', 'tn&xh': 'tnxh',
-    'tieng viet': 'tieng-viet', tv: 'tieng-viet', 'tieng anh': 'tieng-anh', ta: 'tieng-anh', 'anh van': 'tieng-anh', 'ngoai ngu': 'tieng-anh', 'ngoai ngu 1': 'tieng-anh',
-    'my thuat': 'mi-thuat', 'khoa hoc': 'khoa-hoc', kh: 'khoa-hoc', 'am nhac': 'am-nhac', nhac: 'am-nhac',
-    'dao duc': 'dao-duc', dd: 'dao-duc',
-    'lich su va dia li': 'lich-su-dia-li', 'lich su dia li': 'lich-su-dia-li', 'lich su & dia li': 'lich-su-dia-li', 'lich su va dia ly': 'lich-su-dia-li',
-    'lich su dia ly': 'lich-su-dia-li', 'ls&dl': 'lich-su-dia-li', 'ls dl': 'lich-su-dia-li', lsdl: 'lich-su-dia-li', 'lich su': 'lich-su-dia-li', 'dia li': 'lich-su-dia-li', 'dia ly': 'lich-su-dia-li',
-    'tin hoc': 'tin-hoc', tin: 'tin-hoc', 'tin hoc va cong nghe': 'tin-hoc', 'tin hoc & cong nghe': 'tin-hoc',
-    'cong nghe': 'cong-nghe', cn: 'cong-nghe',
-    'giao duc the chat': 'gdtc', gdtc: 'gdtc', 'the duc': 'gdtc',
-    'hoat dong trai nghiem': 'hdtn', hdtn: 'hdtn', 'trai nghiem': 'hdtn',
-  };
-  return alias[f] ?? alias[f.replace(/\s*&\s*/g, ' va ')];
-}
-
-export function parseGrade(v: string): Grade | undefined {
-  const m = String(v ?? '').match(/[1-5]/);
-  const f = fold(v);
-  if (!m || !/^(?:lop |khoi )?[1-5](?:\.0+)?$/.test(f)) return undefined;
-  return Number(m[0]) as Grade;
-}
-
-export function parseSkills(v: string): { codes: string[]; unknown: string[] } {
-  const codes: string[] = [];
-  const unknown: string[] = [];
-  for (const raw of String(v ?? '').split(/[,;\n]+/)) {
-    const c = raw.trim();
-    if (!c) continue;
-    const hit = SKILL_BY_CODE[c] ? c : Object.keys(SKILL_BY_CODE).find((k) => k.toLowerCase() === c.toLowerCase());
-    if (hit) {
-      if (!codes.includes(hit)) codes.push(hit);
-    } else unknown.push(c);
-  }
-  return { codes, unknown };
-}
+export { parseSubject, parseGrade, parseSkills, resolveSkill, parseDifficulty } from './meta';
 
 const PAIR_SEP = /\s*(?:→|->|=>|\|)\s*/;
 function splitPair(cell: string): [string, string] | null {
@@ -186,9 +140,9 @@ export function rowsToDrafts(rowsIn: (string | number | null | undefined)[][], d
     if (get('subject') && !subject) notes.push(`Không hiểu môn «${get('subject')}»`);
     if (get('grade') && !grade) notes.push(`Không hiểu lớp «${get('grade')}»`);
     if (get('difficulty') && !difficulty) notes.push(`Không hiểu mức độ «${get('difficulty')}»`);
-    const sk = parseSkills(get('skills'));
-    if (sk.unknown.length) notes.push(`Mã kĩ năng không có trong danh mục: ${sk.unknown.join(', ')}`);
     const d: ImportDefaults = { ...defaults, grade: grade ?? defaults.grade, subject: subject ?? defaults.subject };
+    const sk = parseSkills(get('skills'), { subject: d.subject, grade: d.grade });
+    if (sk.unknown.length) notes.push(`Kĩ năng không có trong danh mục: ${sk.unknown.join(', ')} — xem trang "Danh mục kĩ năng" của mẫu`);
 
     let kind = parseKind(get('kind'));
     if (get('kind') && !kind) notes.push(`Không hiểu loại «${get('kind')}» — đã tự đoán`);
@@ -373,18 +327,18 @@ const GUIDE: XlsxCell[][] = [
   ['Mức độ', 'Nhận biết | Kết nối | Vận dụng (hoặc 1, 2, 3). Không bắt buộc.'],
   ['Môn', `${SUBJECT_LIST.map((s) => (s.id === 'khac' ? s.name : `${s.name} (${subjectGradeNote(s.id)})`)).join(' | ')}. Bỏ trống: dùng môn chọn lúc tải lên.`],
   ['Lớp', '1 đến 5. Bỏ trống: dùng lớp chọn lúc tải lên.'],
-  ['Mã kĩ năng', 'Mã yêu cầu cần đạt, ví dụ T4.PS.RUT-GON; nhiều mã ngăn bằng dấu phẩy. Có thể bỏ trống rồi gắn ở màn hình soát.'],
+  ['Mã kĩ năng', 'Kĩ năng (yêu cầu cần đạt) của câu: chép MÃ ở trang "Danh mục kĩ năng" trong tệp này (ví dụ T4.PS.RUT-GON), hoặc chép đúng TÊN NGẮN của kĩ năng. Nhiều kĩ năng ngăn bằng dấu chấm phẩy (;). Có thể bỏ trống rồi gắn ở màn hình soát.'],
   ['Đơn vị', 'Chỉ cho Điền đáp án: cm, kg, giờ… (hiện cạnh ô trả lời). Không bắt buộc.'],
   ['Mã câu (không sửa)', 'Chỉ có khi xuất từ ngân hàng. Giữ nguyên để khi tải lên, câu đó được CẬP NHẬT thay vì tạo câu mới. Câu mới thì bỏ trống.'],
 ];
 
 const EXAMPLES: XlsxCell[][] = [
-  ['Trắc nghiệm', 'Số liền sau của 99 là:', '98', '100', '101', '109', '', '', 'B', 'Số liền sau lớn hơn số đã cho 1 đơn vị.', '99 + 1 = 100', 'Nhận biết', 'Toán', 2, '', '', ''],
+  ['Trắc nghiệm', 'Số liền sau của 99 là:', '98', '100', '101', '109', '', '', 'B', 'Số liền sau lớn hơn số đã cho 1 đơn vị.', '99 + 1 = 100', 'Nhận biết', 'Toán', 2, 'T2.STN.LIEN-TRUOC-SAU', '', ''],
   ['Nhiều đáp án', 'Những số nào là số chẵn?', '12', '15', '20', '31', '', '', 'A, C', '', 'Số chẵn có chữ số tận cùng là 0, 2, 4, 6, 8.', 'Kết nối', 'Toán', 3, '', '', ''],
-  ['Điền đáp án', 'Một hình vuông có cạnh 6 cm. Chu vi hình vuông đó là bao nhiêu?', '', '', '', '', '', '', '24', 'Chu vi hình vuông = cạnh × 4', '6 × 4 = 24 (cm)', 'Vận dụng', 'Toán', 3, '', 'cm', ''],
+  ['Điền đáp án', 'Một hình vuông có cạnh 6 cm. Chu vi hình vuông đó là bao nhiêu?', '', '', '', '', '', '', '24', 'Chu vi hình vuông = cạnh × 4', '6 × 4 = 24 (cm)', 'Vận dụng', 'Toán', 3, 'T3.DL.CHU-VI', 'cm', ''],
   ['Đúng – Sai', 'Từ "xinh xắn" là từ chỉ đặc điểm. Đúng hay sai?', '', '', '', '', '', '', 'Đúng', '', '', 'Nhận biết', 'Tiếng Việt', 2, '', '', ''],
   ['Sắp xếp', 'Sắp xếp các số theo thứ tự từ bé đến lớn.', '0,25', '1/2', '0,75', '1', '', '', '', '', '', 'Kết nối', 'Toán', 5, '', '', ''],
-  ['Nối cặp', 'Nối phép tính với kết quả đúng.', '7 × 8 = 56', '9 × 6 = 54', '8 × 8 = 64', '', '', '', '', '', '', 'Nhận biết', 'Toán', 3, '', '', ''],
+  ['Nối cặp', 'Nối phép tính với kết quả đúng.', '7 × 8 = 56', '9 × 6 = 54', '8 × 8 = 64', '', '', '', '', '', '', 'Nhận biết', 'Toán', 3, 'T3.PT.BANG-NHAN-CHIA', '', ''],
 ];
 
 function questionSheet(rows: XlsxCell[][]): XlsxSheet {
@@ -404,9 +358,9 @@ function questionSheet(rows: XlsxCell[][]): XlsxSheet {
 
 const guideSheet = (): XlsxSheet => ({ name: 'Hướng dẫn', rows: GUIDE, widths: [22, 120], headerRows: 0 });
 
-/** Tệp mẫu để GV tải về (có 6 dòng ví dụ, mỗi loại một dòng). */
+/** Tệp mẫu để GV tải về (có 6 dòng ví dụ, mỗi loại một dòng) + trang "Danh mục kĩ năng" để tra mã. */
 export function buildTemplateXlsx(): Uint8Array {
-  return writeXlsx([questionSheet(EXAMPLES), guideSheet()]);
+  return writeXlsx([questionSheet(EXAMPLES), guideSheet(), skillsSheet()]);
 }
 
 export interface ExportResult {
@@ -418,7 +372,7 @@ export interface ExportResult {
 
 export function exportItemsXlsx(items: Item[]): ExportResult {
   const rows = items.map((it) => itemToRow(it)).filter((r): r is XlsxCell[] => !!r);
-  return { bytes: writeXlsx([questionSheet(rows), guideSheet()]), exported: rows.length, skipped: items.length - rows.length };
+  return { bytes: writeXlsx([questionSheet(rows), guideSheet(), skillsSheet()]), exported: rows.length, skipped: items.length - rows.length };
 }
 
 /** Đọc tệp .xlsx (trang "Câu hỏi" nếu có, không thì trang đầu) → câu nháp. */

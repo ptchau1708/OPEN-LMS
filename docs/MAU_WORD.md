@@ -29,7 +29,9 @@ Dòng chung: `Gợi ý:`, `Giải thích:`, `Mức độ: Nhận biết | Kết 
 
 Mã: `packages/data/src/import/typedBlock.ts`, `wordTemplate.ts`. Kiểm thử: `__tests__/wordTemplate.test.ts`, `e2e/mau-word.spec.ts`.
 
-## Môn học theo lớp (CT GDPT 2018, Thông tư 32/2018 — SQL 17)
+## Môn học theo lớp (CT GDPT 2018, Thông tư 32/2018 — SQL 17, SQL 20)
+Ô chọn môn khi soạn chia nhóm theo TT32: **Môn học bắt buộc · Hoạt động giáo dục bắt buộc (HĐTN) · Môn học tự chọn** (Tiếng dân tộc thiểu số; Tiếng Anh lớp 1–2). Phân môn ghi kèm môn ghép: “Âm nhạc (Nghệ thuật)”, “Tin học (Tin học và Công nghệ)”.
+
 | Môn | Lớp | Kiểm tra định kì (TT27) |
 |---|---|---|
 | Tiếng Việt, Toán | 1–5 | có |
@@ -39,6 +41,7 @@ Mã: `packages/data/src/import/typedBlock.ts`, `wordTemplate.ts`. Kiểm thử: 
 | Lịch sử và Địa lí, Khoa học | 4–5 | có |
 | Tin học, Công nghệ (tách từ "Tin học và Công nghệ") | 3–5 | có |
 | Giáo dục thể chất, Âm nhạc, Mĩ thuật, Hoạt động trải nghiệm | 1–5 | — |
+| **Tiếng dân tộc thiểu số** (môn học tự chọn, SQL 20) | 1–5 | — |
 | Khác | mọi lớp | — |
 
 **Ô chọn môn hiện theo lớp đang chọn** (hàm `subjectOptionsFor(grade, present)` trong `packages/contracts/src/subjects.ts`):

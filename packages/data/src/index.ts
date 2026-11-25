@@ -43,3 +43,6 @@ export { newPasswordProblem, isSystemEmail, NO_REAL_EMAIL_TEXT, PASSWORD_MIN, PA
 export { handoffTo, consumeHandoff, handoffUrl, readHandoffHash, packSession, unpackSession, HANDOFF_KEY, type PackedSession } from './handoff';
 export * from './discuss';
 export * from './prefs';
+export * from './catalog';
+export * from './commentbank';
+export * from './notes';

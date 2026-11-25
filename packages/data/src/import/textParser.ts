@@ -11,8 +11,9 @@
  *  - câu không có lựa chọn → Điền đáp án (có đáp án nếu đề ghi, không thì "thiếu đáp án")
  *  - khối không hiểu được → giữ nguyên chữ, đánh dấu "cần xem lại"
  */
-import type { Item, ItemBase } from '@openedu/contracts';
+import type { Grade, Item, ItemBase, SubjectId } from '@openedu/contracts';
 import { promptKey } from './dedupe';
+import { detectDocMeta, nearestGradeFor, parseDifficulty, parseGrade, parseSkills, parseSubject } from './meta';
 import { isTypedBlock, parseTypedBlock } from './typedBlock';
 import { DEFAULT_IMPORT, makeMcq, makeShort, makeTrueFalse, newRowId, type DraftItem, type DraftSource, type ImportDefaults } from './types';
 
@@ -22,6 +23,8 @@ export interface ParseTextResult {
   preamble?: string;
   /** Số đáp án lấy được từ bảng đáp án cuối đề. */
   answerTableCount: number;
+  /** Môn / lớp / kĩ năng đọc được ở phần đầu đề (tiêu đề, dòng "Môn: …", "Lớp 5"…) — áp cho các câu không ghi riêng. */
+  detected?: { subject?: SubjectId; grade?: Grade; skills?: string[]; unknownSkills?: string[] };
 }
 
 /** Kí tự bộ đọc .docx chèn trước đoạn chữ được tô đậm / gạch chân / tô màu trong một lựa chọn. */
@@ -325,8 +328,34 @@ function draft(item: Item, source: DraftSource, raw: string, extra: Partial<Draf
   return { rowId: newRowId(), item, source, notes: [], raw, ...extra };
 }
 
-function parseBlock(b: Block, answers: Map<number, string>, d: ImportDefaults, source: DraftSource, numbered: boolean): DraftItem[] {
+/** Dòng khai báo riêng của một câu: "Môn: …", "Lớp: …", "Mã kĩ năng: …", "Mức độ: …" (phải có dấu hai chấm). */
+const BLOCK_FIELD = /^(môn(?:\s*học)?|lớp|khối|mã\s*k[iỹĩy]\s*năng|k[iỹĩy]\s*năng|mã\s*yccđ|yccđ|mức\s*độ)\s*[:：]\s*(.+)$/i;
+
+function parseBlock(b: Block, answers: Map<number, string>, d0: ImportDefaults, source: DraftSource, numbered: boolean): DraftItem[] {
   const raw = b.lines.join('\n').trim();
+  // Môn / lớp riêng của câu (đọc trước để kĩ năng và câu tạo ra theo đúng môn, lớp).
+  const fieldNotes: string[] = [];
+  let bSubject: SubjectId | undefined;
+  let bGrade: Grade | undefined;
+  let bDiff: ItemBase['difficulty'] | undefined;
+  let bSkillRaw = '';
+  b.lines.forEach((l, i) => {
+    const fd = i > 0 ? l.match(BLOCK_FIELD) : null;
+    if (!fd) return;
+    const k = fd[1].toLowerCase().normalize('NFC');
+    const v = fd[2].trim();
+    if (k.startsWith('môn')) { bSubject = parseSubject(v); if (!bSubject) fieldNotes.push(`Không hiểu môn «${v}»`); }
+    else if (k.startsWith('lớp') || k.startsWith('khối')) { bGrade = parseGrade(v); if (!bGrade) fieldNotes.push(`Không hiểu lớp «${v}»`); }
+    else if (k.startsWith('mức')) { bDiff = parseDifficulty(v); if (!bDiff) fieldNotes.push(`Không hiểu mức độ «${v}»`); }
+    else bSkillRaw = bSkillRaw ? `${bSkillRaw}; ${v}` : v;
+  });
+  const d: ImportDefaults = {
+    ...d0,
+    ...(bSubject ? { subject: bSubject } : {}),
+    ...(bGrade ? { grade: bGrade } : bSubject ? { grade: nearestGradeFor(bSubject, d0.grade) } : {}),
+  };
+  const bSkills = bSkillRaw ? parseSkills(bSkillRaw, { subject: d.subject, grade: d.grade }) : null;
+  if (bSkills?.unknown.length) fieldNotes.push(`Kĩ năng không có trong danh mục: ${bSkills.unknown.join(', ')}`);
   const promptLines: string[] = [];
   const opts: Opt[] = [];
   let first = '';
@@ -345,8 +374,13 @@ function parseBlock(b: Block, answers: Map<number, string>, d: ImportDefaults, s
     gap = false;
   };
 
-  for (const line of b.lines) {
+  for (const [li, line] of b.lines.entries()) {
     if (!line) {
+      if (ph() === 'options') gap = true;
+      continue;
+    }
+    if (li > 0 && BLOCK_FIELD.test(line)) {
+      lastField = null;
       if (ph() === 'options') gap = true;
       continue;
     }
@@ -419,10 +453,14 @@ function parseBlock(b: Block, answers: Map<number, string>, d: ImportDefaults, s
   const given = answerRaw || tableAnswer;
   const finish = (item: Item, extra: Partial<DraftItem> = {}): DraftItem => {
     const it = { ...item } as Item;
-    if (difficulty) it.difficulty = difficulty;
+    if (bDiff ?? difficulty) it.difficulty = bDiff ?? difficulty;
     if (hint) it.hint = hint;
     if (expl) it.explanation = expl;
-    return draft(it, source, raw, { ...(difficulty ? { given: { difficulty: true } } : {}), ...extra });
+    if (bSkills?.codes.length) it.skills = bSkills.codes;
+    else if (d.skills?.length && !it.skills?.length) it.skills = [...d.skills];
+    const given = { ...(bDiff ?? difficulty ? { difficulty: true } : {}), ...(bSubject ? { subject: true } : {}), ...(bGrade ? { grade: true } : {}) };
+    const notes = [...fieldNotes, ...(extra.notes ?? [])];
+    return draft(it, source, raw, { ...(Object.keys(given).length ? { given } : {}), ...extra, notes });
   };
 
   if (!prompt && opts.length === 0) {
@@ -501,24 +539,52 @@ export function parseQuestionText(text: string, defaults: ImportDefaults = DEFAU
     const wordStyle = lines.some((l) => Q_WORD.test(l));
     const { rest, answers } = extractAnswerTable(lines, (l) => (wordStyle ? Q_WORD.test(l) : Q_NUM.test(l)));
     const { blocks, preamble, numbered } = splitBlocks(rest);
+    // Phần hướng dẫn ở đầu tệp mẫu Word ("MẪU NHẬP CÂU HỎI…") không phải bài đọc, cũng không phải tiêu đề đề.
+    const isGuide = preamble.some((l) => /^mẫu nhập câu hỏi/i.test(l));
+    // Môn / lớp / kĩ năng ở đầu đề → mặc định cho cả đề (dòng riêng của từng câu vẫn ưu tiên hơn).
+    let meta = isGuide ? { used: [] as number[] } : detectDocMeta(preamble);
+    let headLines = preamble;
+    if (!numbered && blocks.length > 1 && !isGuide) {
+      // Đề không đánh số: đoạn đầu chỉ gồm tiêu đề / "Môn: …" / "Lớp: …" → là phần đầu đề.
+      const first = blocks[0].lines.filter(Boolean);
+      const m = detectDocMeta(first);
+      if (m.used.length && m.used.length === first.length) {
+        meta = m;
+        headLines = first;
+        blocks.shift();
+      }
+    }
+    const docDefaults: ImportDefaults = {
+      ...defaults,
+      ...(meta.subject ? { subject: meta.subject } : {}),
+      ...(meta.grade ? { grade: meta.grade } : meta.subject ? { grade: nearestGradeFor(meta.subject, defaults.grade) } : {}),
+      ...(meta.skills?.length ? { skills: meta.skills } : {}),
+    };
     const drafts: DraftItem[] = [];
     for (const b of blocks) {
       try {
         // Câu có dòng "Dạng: …" (mẫu Word đủ 16 dạng) → bộ đọc theo dạng.
         if (isTypedBlock(b.lines)) {
-          drafts.push(parseTypedBlock(b.lines, defaults, source, b.num !== null ? answers.get(b.num) : undefined));
+          drafts.push(parseTypedBlock(b.lines, docDefaults, source, b.num !== null ? answers.get(b.num) : undefined));
           continue;
         }
-        drafts.push(...parseBlock(b, answers, defaults, source, numbered));
+        drafts.push(...parseBlock(b, answers, docDefaults, source, numbered));
       } catch {
         const raw = b.lines.join('\n').trim();
-        if (raw) drafts.push(draft(makeShort(raw, [], defaults), source, raw, { review: 'Không đọc được đoạn này' }));
+        if (raw) drafts.push(draft(makeShort(raw, [], docDefaults), source, raw, { review: 'Không đọc được đoạn này' }));
       }
     }
-    // Phần hướng dẫn ở đầu tệp mẫu Word ("MẪU NHẬP CÂU HỎI…") không phải bài đọc.
-    const isGuide = preamble.some((l) => /^mẫu nhập câu hỏi/i.test(l));
-    const pre = isGuide ? '' : preamble.filter((l) => l && !HAS_DOTS.test(l) && !ANSWER_HEADING.test(l)).join('\n').trim();
-    return { drafts, ...(pre.length >= 120 ? { preamble: pre } : {}), answerTableCount: answers.size };
+    const used = new Set(headLines === preamble ? meta.used : []);
+    const pre = isGuide ? '' : preamble.filter((l, i) => l && !used.has(i) && !HAS_DOTS.test(l) && !ANSWER_HEADING.test(l)).join('\n').trim();
+    const detected = meta.subject || meta.grade || meta.skills?.length || ('unknownSkills' in meta && meta.unknownSkills?.length)
+      ? {
+          ...(meta.subject ? { subject: meta.subject } : {}),
+          ...(docDefaults.grade !== defaults.grade || meta.grade ? { grade: docDefaults.grade } : {}),
+          ...(meta.skills?.length ? { skills: meta.skills } : {}),
+          ...('unknownSkills' in meta && meta.unknownSkills?.length ? { unknownSkills: meta.unknownSkills } : {}),
+        }
+      : undefined;
+    return { drafts, ...(pre.length >= 120 ? { preamble: pre } : {}), answerTableCount: answers.size, ...(detected ? { detected } : {}) };
   } catch {
     const raw = String(text ?? '').trim();
     return {

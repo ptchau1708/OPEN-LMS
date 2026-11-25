@@ -6,6 +6,9 @@ import type { MascotId } from './mascots';
  *     Tiếng Việt, Toán, Đạo đức, GDTC, Âm nhạc, Mĩ thuật, HĐTN: lớp 1–5
  *     Tự nhiên và Xã hội: lớp 1–3 · Lịch sử và Địa lí, Khoa học: lớp 4–5 · Tin học, Công nghệ: lớp 3–5
  *     Tiếng Anh (Ngoại ngữ 1): bắt buộc lớp 3–5, tự chọn lớp 1–2 (`elective`).
+ *     Tiếng dân tộc thiểu số: môn học tự chọn lớp 1–5.
+ * - `group`: nhóm theo Thông tư 32 — môn học bắt buộc / hoạt động giáo dục bắt buộc (HĐTN) / môn học tự chọn.
+ * - `part`: phân môn của môn ghép — Âm nhạc, Mĩ thuật thuộc "Nghệ thuật"; Tin học, Công nghệ thuộc "Tin học và Công nghệ".
  * - `periodic`: có bài kiểm tra định kì theo Thông tư 27/2020 (Tiếng Việt, Toán, Ngoại ngữ 1, Lịch sử và Địa lí,
  *   Khoa học, Tin học và Công nghệ) — chỉ ở lớp môn đó là bắt buộc.
  * - Tin học và Công nghệ (lớp 3–5) tách làm hai môn "Tin học", "Công nghệ" để soạn câu hỏi riêng từng phần.
@@ -25,7 +28,17 @@ export type SubjectId =
   | 'am-nhac'
   | 'mi-thuat'
   | 'hdtn'
+  | 'tieng-dan-toc'
   | 'khac';
+
+/** Nhóm theo Thông tư 32/2018: môn học bắt buộc, hoạt động giáo dục bắt buộc, môn học tự chọn. */
+export type SubjectGroup = 'bat-buoc' | 'hoat-dong' | 'tu-chon' | 'khac';
+export const SUBJECT_GROUP_LABEL: Record<SubjectGroup, string> = {
+  'bat-buoc': 'Môn học bắt buộc',
+  'hoat-dong': 'Hoạt động giáo dục bắt buộc',
+  'tu-chon': 'Môn học tự chọn',
+  khac: 'Khác',
+};
 
 export interface SubjectMeta {
   id: SubjectId;
@@ -46,6 +59,10 @@ export interface SubjectMeta {
   periodic?: boolean;
   /** Ẩn khỏi ô chọn; dữ liệu cũ vẫn dùng được. */
   retired?: boolean;
+  /** Nhóm theo TT32 (mặc định: môn học bắt buộc). */
+  group?: SubjectGroup;
+  /** Tên môn ghép chứa phân môn này (vd "Nghệ thuật", "Tin học và Công nghệ"). */
+  part?: string;
 }
 
 const ALL = [1, 2, 3, 4, 5] as const;
@@ -57,17 +74,51 @@ export const SUBJECTS: Record<SubjectId, SubjectMeta> = {
   tnxh: { id: 'tnxh', name: 'Tự nhiên và Xã hội', short: 'TN&XH', colorVar: '--k-nat', color: '#20a974', mascot: 'koala', grades: [1, 2, 3] },
   'lich-su-dia-li': { id: 'lich-su-dia-li', name: 'Lịch sử và Địa lí', short: 'LS&ĐL', colorVar: '--k-hist', color: '#b45309', mascot: 'ho', grades: [4, 5], periodic: true },
   'khoa-hoc': { id: 'khoa-hoc', name: 'Khoa học', short: 'KH', colorVar: '--k-sci', color: '#0ea5a4', mascot: 'capybara', grades: [4, 5], periodic: true },
-  'tin-hoc': { id: 'tin-hoc', name: 'Tin học', short: 'Tin', colorVar: '--k-it', color: '#2563eb', mascot: 'panda', grades: [3, 4, 5], periodic: true },
-  'cong-nghe': { id: 'cong-nghe', name: 'Công nghệ', short: 'CN', colorVar: '--k-tech', color: '#4d7c0f', mascot: 'koala', grades: [3, 4, 5], periodic: true },
+  'tin-hoc': { id: 'tin-hoc', name: 'Tin học', short: 'Tin', colorVar: '--k-it', color: '#2563eb', mascot: 'panda', grades: [3, 4, 5], periodic: true, part: 'Tin học và Công nghệ' },
+  'cong-nghe': { id: 'cong-nghe', name: 'Công nghệ', short: 'CN', colorVar: '--k-tech', color: '#4d7c0f', mascot: 'koala', grades: [3, 4, 5], periodic: true, part: 'Tin học và Công nghệ' },
   gdtc: { id: 'gdtc', name: 'Giáo dục thể chất', short: 'GDTC', colorVar: '--k-pe', color: '#dc2626', mascot: 'ho', grades: ALL },
-  'am-nhac': { id: 'am-nhac', name: 'Âm nhạc', short: 'ÂN', colorVar: '--k-music', color: '#e8485f', mascot: 'ga', grades: ALL },
-  'mi-thuat': { id: 'mi-thuat', name: 'Mĩ thuật', short: 'MT', colorVar: '--k-art', color: '#ff5d8f', mascot: 'cong', grades: ALL },
-  hdtn: { id: 'hdtn', name: 'Hoạt động trải nghiệm', short: 'HĐTN', colorVar: '--k-exp', color: '#16a34a', mascot: 'nghe', grades: ALL },
-  khac: { id: 'khac', name: 'Khác', short: 'Khác', colorVar: '--k-other', color: '#64748b', mascot: 'panda', grades: ALL },
+  'am-nhac': { id: 'am-nhac', name: 'Âm nhạc', short: 'ÂN', colorVar: '--k-music', color: '#e8485f', mascot: 'ga', grades: ALL, part: 'Nghệ thuật' },
+  'mi-thuat': { id: 'mi-thuat', name: 'Mĩ thuật', short: 'MT', colorVar: '--k-art', color: '#ff5d8f', mascot: 'cong', grades: ALL, part: 'Nghệ thuật' },
+  hdtn: { id: 'hdtn', name: 'Hoạt động trải nghiệm', short: 'HĐTN', colorVar: '--k-exp', color: '#16a34a', mascot: 'nghe', grades: ALL, group: 'hoat-dong' },
+  'tieng-dan-toc': { id: 'tieng-dan-toc', name: 'Tiếng dân tộc thiểu số', short: 'TDT', colorVar: '--k-ethnic', color: '#a16207', mascot: 'voi', grades: ALL, elective: ALL, group: 'tu-chon' },
+  khac: { id: 'khac', name: 'Khác', short: 'Khác', colorVar: '--k-other', color: '#64748b', mascot: 'panda', grades: ALL, group: 'khac' },
 };
 
-/** Các môn đang dùng (hiện trong ô chọn), theo thứ tự CT GDPT 2018. */
+/** Các môn đang dùng (hiện trong ô chọn), theo thứ tự CT GDPT 2018. Cập nhật tại chỗ bởi `applySubjectOverrides`. */
 export const SUBJECT_LIST: SubjectMeta[] = Object.values(SUBJECTS).filter((s) => !s.retired);
+
+/** Cài đặt môn học của trường (quản trị viên): đổi tên hiển thị, tên ngắn, ẩn / hiện. */
+export interface SubjectOverride {
+  name?: string;
+  short?: string;
+  /** true = ẩn khỏi ô chọn; false = hiện (kể cả môn mặc định đang ẩn). */
+  hidden?: boolean;
+}
+export type SubjectOverrides = Partial<Record<SubjectId, SubjectOverride>>;
+
+const BUILTIN_SUBJECTS: Readonly<Record<SubjectId, Readonly<SubjectMeta>>> = Object.fromEntries(
+  Object.entries(SUBJECTS).map(([k, v]) => [k, { ...v }]),
+) as Record<SubjectId, SubjectMeta>;
+
+/** Bản gốc trong mã của một môn (để khôi phục). */
+export function builtinSubject(id: SubjectId): Readonly<SubjectMeta> | undefined {
+  return BUILTIN_SUBJECTS[id];
+}
+
+/** Áp cài đặt môn học của trường lên danh mục, cập nhật TẠI CHỖ `SUBJECTS` và `SUBJECT_LIST`. Gọi lại thì tính lại từ bản gốc. */
+export function applySubjectOverrides(map: SubjectOverrides | null | undefined): void {
+  for (const id of Object.keys(BUILTIN_SUBJECTS) as SubjectId[]) {
+    const b = BUILTIN_SUBJECTS[id];
+    const o = map?.[id];
+    const meta = SUBJECTS[id];
+    meta.name = o?.name?.trim() || b.name;
+    meta.short = o?.short?.trim() || b.short;
+    const hidden = o?.hidden ?? b.retired ?? false;
+    if (hidden) meta.retired = true; else delete meta.retired;
+  }
+  SUBJECT_LIST.length = 0;
+  SUBJECT_LIST.push(...Object.values(SUBJECTS).filter((s) => !s.retired));
+}
 
 const metaOf = (id: string): SubjectMeta | undefined => (SUBJECTS as Record<string, SubjectMeta | undefined>)[id];
 
@@ -82,9 +133,12 @@ export function isPeriodicAt(id: SubjectId | string, grade: number): boolean {
   return !!m?.periodic && m.grades.includes(grade) && !m.elective?.includes(grade);
 }
 
-/** Môn học của một lớp (không gồm "Khác"). `periodic`: chỉ các môn có kiểm tra định kì ở lớp đó. */
-export function subjectsForGrade(grade: number, opts: { periodic?: boolean } = {}): SubjectId[] {
-  return SUBJECT_LIST.filter((s) => s.id !== 'khac' && s.grades.includes(grade) && (!opts.periodic || isPeriodicAt(s.id, grade))).map((s) => s.id);
+/**
+ * Môn học của một lớp (không gồm "Khác"). `periodic`: chỉ các môn có kiểm tra định kì ở lớp đó.
+ * `compulsory`: bỏ môn tự chọn ở lớp đó (Tiếng dân tộc thiểu số, Tiếng Anh lớp 1–2).
+ */
+export function subjectsForGrade(grade: number, opts: { periodic?: boolean; compulsory?: boolean } = {}): SubjectId[] {
+  return SUBJECT_LIST.filter((s) => s.id !== 'khac' && s.grades.includes(grade) && (!opts.periodic || isPeriodicAt(s.id, grade)) && (!opts.compulsory || !s.elective?.includes(grade))).map((s) => s.id);
 }
 
 /** Danh sách cho ô lọc: các môn đang dùng + môn đã ẩn nhưng còn dữ liệu (`present`). */
@@ -103,13 +157,31 @@ export function subjectOptionsFor(grade: number | null | undefined, present: Ite
   return Object.values(SUBJECTS).filter((s) => (!s.retired && s.grades.includes(grade)) || have.has(s.id));
 }
 
-/** Nhãn môn trong ô chọn theo lớp: thêm "(tự chọn)" hoặc "(không thuộc lớp N)". */
+/** Nhãn môn trong ô chọn theo lớp: thêm phân môn "(Nghệ thuật)", "(tự chọn)" hoặc "(không thuộc lớp N)". */
 export function subjectLabelFor(id: SubjectId, grade: number | null | undefined): string {
   const m = SUBJECTS[id];
   if (!m) return id;
-  if (!grade) return m.name;
+  const base = m.part ? `${m.name} (${m.part})` : m.name;
+  if (!grade) return base;
   if (!m.grades.includes(grade)) return `${m.name} (không thuộc lớp ${grade})`;
-  return m.elective?.includes(grade) ? `${m.name} (tự chọn)` : m.name;
+  return m.elective?.includes(grade) && m.group !== 'tu-chon' ? `${m.name} (tự chọn)` : base;
+}
+
+/** Nhóm TT32 của môn ở một lớp (Tiếng Anh lớp 1–2 là môn tự chọn). */
+export function subjectGroupAt(id: SubjectId, grade: number | null | undefined): SubjectGroup {
+  const m = SUBJECTS[id];
+  if (!m) return 'khac';
+  if (grade && m.elective?.includes(grade)) return 'tu-chon';
+  return m.group ?? 'bat-buoc';
+}
+
+/** Ô chọn môn chia nhóm theo Thông tư 32 (môn bắt buộc → hoạt động giáo dục → tự chọn → khác). */
+export function subjectGroupsFor(grade: number | null | undefined, present: Iterable<SubjectId | ''> = []): { group: SubjectGroup; label: string; subjects: SubjectMeta[] }[] {
+  const list = subjectOptionsFor(grade, present);
+  const order: SubjectGroup[] = ['bat-buoc', 'hoat-dong', 'tu-chon', 'khac'];
+  return order
+    .map((g) => ({ group: g, label: SUBJECT_GROUP_LABEL[g], subjects: list.filter((s) => (grade && !s.grades.includes(grade) ? 'khac' : subjectGroupAt(s.id, grade)) === g) }))
+    .filter((g) => g.subjects.length);
 }
 
 /** Môn hợp lệ cho lớp mới: giữ `current` nếu lớp đó có, nếu không lấy môn đầu tiên của lớp. */
@@ -125,6 +197,7 @@ export function subjectGradeNote(id: SubjectId): string {
   if (!m || id === 'khac') return 'mọi lớp';
   const g = [...m.grades];
   const range = (a: number[]) => (a.length === 1 ? `lớp ${a[0]}` : `lớp ${a[0]}–${a[a.length - 1]}`);
+  if (m.elective?.length === g.length) return `${range(g)}, tự chọn`;
   return range(g) + (m.elective?.length ? ` (${range([...m.elective])} tự chọn)` : '');
 }
 

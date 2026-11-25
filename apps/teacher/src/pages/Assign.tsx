@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import type { Assignment, LatePolicy, Profile } from '@openedu/contracts';
-import { roundsOf, useAssignments, useClasses, useCreateAssignment, useLessons, usePackages, useStudents } from '@openedu/data';
-import { Avatar, Btn, Empty, ErrorNote, Field, Loading, PageHead, Seg } from '../components/common';
+import { roundsOf, useAssignments, useClasses, useCreateAssignment, useDeleteAssignment, useLessons, usePackages, useStudents, useUpdateAssignment } from '@openedu/data';
+import { Avatar, Btn, ConfirmBar, Dialog, Empty, ErrorNote, Field, Loading, PageHead, Seg } from '../components/common';
 import { cx, fmtDateTime, toLocalInput } from '../lib/format';
 import { ShareClassroomButton } from './bridge/ShareClassroom';
 import { AssignmentDetail, LateField, RetryDialog, roundLabel, StudentChip, useAssignmentReports } from './assign/report';
@@ -30,6 +30,9 @@ export default function Assign({ user }: { user: Profile }) {
   const [late, setLate] = useState<LatePolicy>('allow');
   const [detail, setDetail] = useState<Assignment | null>(null);
   const [retry, setRetry] = useState<Assignment | null>(null);
+  const [editing, setEditing] = useState<Assignment | null>(null);
+  const [delId, setDelId] = useState<string | null>(null);
+  const del = useDeleteAssignment();
   const reports = useAssignmentReports(list.data ?? [], students.data ?? [], lessons.data ?? []);
   const targets = kind === 'lesson' ? (lessons.data ?? []).map((l) => ({ id: l.id, title: l.title, sub: `Lớp ${l.grade} · ${l.slides.length} slide${l.status === 'draft' ? ' · nháp' : ''}` })) : (pkgs.data ?? []).map((p) => ({ id: p.id, title: p.title, sub: p.kind.toUpperCase() }));
   const lessonById = useMemo(() => Object.fromEntries((lessons.data ?? []).map((l) => [l.id, l])), [lessons.data]);
@@ -88,6 +91,7 @@ export default function Assign({ user }: { user: Profile }) {
 
         <section className="tc-stack">
           <h2>Bài đã giao{classes.data?.find((c) => c.id === classId) ? ` — lớp ${classes.data.find((c) => c.id === classId)?.name}` : ''}</h2>
+          <ErrorNote error={del.error} />
           {list.isLoading ? <Loading /> : !list.data?.length ? <Empty icon="check" title="Lớp này chưa có bài được giao" /> : list.data.map((a) => {
             const who = (students.data ?? []).filter((s) => !a.studentIds.length || a.studentIds.includes(s.id));
             const overdue = a.dueAt && new Date(a.dueAt).getTime() < Date.now();
@@ -107,7 +111,10 @@ export default function Assign({ user }: { user: Profile }) {
                   <span className="tc-ebar__spacer" />
                   <Btn size="sm" icon="eye" onClick={() => setDetail(a)} data-testid="assign-report">Báo cáo</Btn>
                   <Btn size="sm" icon="plus" onClick={() => setRetry(a)} data-testid="assign-retry">Giao lại</Btn>
+                  <Btn size="sm" icon="pencil" onClick={() => setEditing(a)} data-testid="assign-edit">Sửa</Btn>
+                  <Btn size="sm" kind="ghost" icon="trash" aria-label={`Xoá bài đã giao ${a.title}`} onClick={() => setDelId(a.id)} data-testid="assign-delete" />
                 </div>
+                {delId === a.id ? <ConfirmBar text={`Xoá bài đã giao “${a.title}”? Học sinh sẽ không thấy bài này nữa (kết quả đã làm vẫn giữ trong hồ sơ).`} busy={del.isPending} onCancel={() => setDelId(null)} onConfirm={() => del.mutate(a.id, { onSuccess: () => { setDelId(null); setOk(`Đã xoá “${a.title}”.`); } })} /> : null}
                 <div className="tc-chips">{reports.reports[a.id] ? reports.reports[a.id]!.students.map((s) => <StudentChip key={s.studentId} s={s} profile={who.find((p) => p.id === s.studentId)} />) : who.map((s) => <span key={s.id} className="tc-chip tc-chip--student">{s.name}</span>)}</div>
               </article>
             );
@@ -115,7 +122,55 @@ export default function Assign({ user }: { user: Profile }) {
         </section>
       </div>
       {detail ? <AssignmentDetail a={detail} all={list.data ?? []} me={user} className={classes.data?.find((c) => c.id === detail.classId)?.name ?? ''} onClose={() => setDetail(null)} /> : null}
+      {editing ? <EditAssignmentDialog a={editing} students={students.data ?? []} onClose={() => setEditing(null)} onSaved={(n) => { setEditing(null); setOk(`Đã sửa “${n.title}”.`); }} /> : null}
       {retry && students.data ? <RetryDialog base={retry} rounds={roundsOf(retry, list.data ?? [])} report={reports.reports[roundsOf(retry, list.data ?? []).slice(-1)[0]?.id ?? retry.id]} students={students.data} me={user} onClose={() => setRetry(null)} onDone={(n) => { setRetry(null); setOk(`Đã giao lại “${n.title}” (${roundLabel(n)}).`); }} /> : null}
     </div>
+  );
+}
+
+/** Sửa bài đã giao: tên, đối tượng, giờ mở, hạn nộp, nộp muộn. Nội dung (bài giảng / gói) giữ nguyên — muốn đổi thì giao bài mới. */
+function EditAssignmentDialog({ a, students, onClose, onSaved }: { a: Assignment; students: Profile[]; onClose: () => void; onSaved: (a: Assignment) => void }) {
+  const save = useUpdateAssignment();
+  const [title, setTitle] = useState(a.title);
+  const [all, setAll] = useState(!a.studentIds.length);
+  const [picked, setPicked] = useState<string[]>(a.studentIds);
+  const [openAt, setOpenAt] = useState(() => toLocalInput(new Date(a.openAt)));
+  const [dueAt, setDueAt] = useState(() => (a.dueAt ? toLocalInput(new Date(a.dueAt)) : ''));
+  const [late, setLate] = useState<LatePolicy>(a.latePolicy ?? 'allow');
+  const bad = !title.trim() || (!all && !picked.length) || (!!dueAt && new Date(dueAt).getTime() < new Date(openAt).getTime());
+  const submit = () => {
+    const next: Assignment = { ...a, title: title.trim(), studentIds: all ? [] : picked, openAt: new Date(openAt).toISOString(), latePolicy: late };
+    if (dueAt) next.dueAt = new Date(dueAt).toISOString(); else delete next.dueAt;
+    save.mutate(next, { onSuccess: onSaved });
+  };
+  return (
+    <Dialog open title="Sửa bài đã giao" onClose={onClose} footer={<>
+      <Btn onClick={onClose}>Hủy</Btn>
+      <Btn kind="primary" onClick={submit} disabled={bad || save.isPending} data-testid="assign-edit-save">{save.isPending ? 'Đang lưu…' : 'Lưu thay đổi'}</Btn>
+    </>}>
+      <div className="tc-stack">
+        <Field label="Tên hiển thị cho HS"><input className="tc-input" value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
+        <div className="tc-field">
+          <span className="tc-field__label">Học sinh</span>
+          <Seg label="Đối tượng" value={all ? 'all' : 'some'} onChange={(v) => setAll(v === 'all')} options={[{ value: 'all', label: 'Cả lớp' }, { value: 'some', label: 'Chọn từng em' }]} />
+          {!all ? (
+            <div className="tc-pickstudents">
+              {students.map((s) => (
+                <button key={s.id} type="button" aria-pressed={picked.includes(s.id)} onClick={() => setPicked((p) => (p.includes(s.id) ? p.filter((x) => x !== s.id) : [...p, s.id]))}>
+                  <Avatar mascot={s.avatarMascot} color={s.avatarColor} size={26} /> {s.name}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+        <div className="tc-grid2 tc-grid2--tight">
+          <Field label="Mở lúc"><input className="tc-input" type="datetime-local" value={openAt} onChange={(e) => setOpenAt(e.target.value)} /></Field>
+          <Field label="Hạn nộp (để trống = không hạn)"><input className="tc-input" type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} aria-label="Hạn nộp" /></Field>
+        </div>
+        <LateField value={late} onChange={setLate} />
+        {dueAt && new Date(dueAt).getTime() < new Date(openAt).getTime() ? <p className="tc-small tc-warn">Hạn nộp phải sau giờ mở.</p> : null}
+        <ErrorNote error={save.error} />
+      </div>
+    </Dialog>
   );
 }
