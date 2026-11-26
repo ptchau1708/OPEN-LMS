@@ -1,0 +1,107 @@
+/* ---------- Đấu trường (GV) ---------- */
+.tc-spacer { flex: 1 1 auto; }
+.tc-h2 { font-size: 20px; margin: 0; }
+.tc-arena__bar { gap: 12px; }
+.tc-cupchip--ok { background: var(--tc-ok-soft); border-color: transparent; color: var(--tc-ok); }
+.tc-cupchip--info { background: #e8f0fc; border-color: transparent; color: #1d4a8f; }
+.tc-cupchip--gold { background: #fff4d6; border-color: transparent; color: #8a5a00; }
+.tc-cupchip--muted { opacity: .8; }
+.tc-cuplist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.tc-cupcard { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: inherit; }
+.tc-cupcard:hover { border-color: var(--tc-accent, #4f46e5); }
+.tc-cupcard__title { font-size: 16px; }
+.tc-cupcard p { margin: 0; }
+.tc-cupform .tc-seg { flex-wrap: wrap; }
+
+/* Bục vinh quang */
+.tc-podium { display: flex; justify-content: center; align-items: flex-end; gap: 18px; flex-wrap: wrap; padding: 14px; border-radius: 14px; background: linear-gradient(180deg, #fff8e1, transparent); }
+.tc-podium__p { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 16px; border-radius: 12px; background: var(--tc-surface, #fff); border: 1px solid var(--p-line); min-width: 120px; text-align: center; }
+.tc-podium__p.is-gold { color: #8a5a00; border-color: #f0c24b; padding-bottom: 22px; box-shadow: 0 4px 14px rgba(240, 194, 75, .35); }
+.tc-podium__p.is-silver { color: #55606e; border-color: #c3cad4; }
+.tc-podium__p.is-bronze { color: #8a4b1c; border-color: #e0a77c; }
+.tc-podium__p strong { color: var(--p-ink, #1f2a44); }
+
+/* Nhánh đấu */
+.tc-bracket { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; align-items: flex-start; }
+.tc-bracket__col { display: flex; flex-direction: column; gap: 10px; min-width: 220px; flex: 0 0 auto; }
+.tc-bracket__col.is-now .tc-bracket__h { color: var(--tc-accent, #4f46e5); }
+.tc-bracket__h { margin: 0; font-size: 13px; font-weight: 700; color: var(--p-muted); text-transform: uppercase; letter-spacing: .02em; }
+.tc-bracket__h small { text-transform: none; font-weight: 500; }
+.tc-bracket__byes { font-size: 12px; color: var(--p-muted); }
+.tc-bracket__byes p { margin: 4px 0 0; }
+.tc-bm { border: 1px solid var(--p-line); border-radius: 10px; background: var(--tc-surface, #fff); padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.tc-bm.is-open { border-color: #9db5e8; box-shadow: 0 0 0 2px #e8f0fc; }
+.tc-bm.is-future { opacity: .5; border-style: dashed; }
+.tc-bm__p { display: flex; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 6px; font-size: 13px; min-height: 28px; }
+.tc-bm__p.is-win { background: var(--tc-ok-soft); color: var(--tc-ok); font-weight: 700; }
+.tc-bm__p.is-lose { opacity: .6; }
+.tc-bm__p.is-empty { color: var(--p-muted); font-style: italic; }
+.tc-bm__name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tc-bm__name small { color: var(--p-muted); font-weight: 400; }
+.tc-bm__seed { font-size: 11px; color: var(--p-muted); }
+.tc-bm__score { font-variant-numeric: tabular-nums; font-weight: 700; }
+.tc-bm__done { color: var(--tc-ok); font-weight: 700; }
+.tc-bm__note { margin: 2px 4px 0; color: var(--p-muted); }
+.tc-bm__pick { padding: 2px 4px; }
+.tc-bracket.is-big .tc-bracket__col { min-width: 260px; }
+.tc-bracket.is-big .tc-bm__p { font-size: 17px; min-height: 36px; }
+.tc-bracket.is-big .tc-bracket__h { font-size: 16px; }
+
+.tc-cupplayers { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px; }
+.tc-cupplayers li { display: flex; align-items: center; gap: 6px; font-size: 13px; padding: 4px 6px; border: 1px solid var(--p-line); border-radius: 8px; }
+.tc-cupplayers__name { flex: 1 1 auto; min-width: 0; }
+
+/* Bảng xếp hạng */
+.tc-arenatable tr.is-top1 td { background: #fff4d6; }
+.tc-arenatable tr.is-top2 td { background: #f1f3f6; }
+.tc-arenatable tr.is-top3 td { background: #fbeee4; }
+.tc-seasonlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tc-seasonlist p { margin: 4px 0 0; }
+
+/* Cài đặt */
+.tc-arenaset { max-width: 820px; }
+.tc-daychips { gap: 4px; }
+.tc-daychip { border: 1px solid var(--p-line); background: var(--tc-surface, #fff); border-radius: 999px; padding: 4px 9px; font: inherit; font-size: 12px; cursor: pointer; }
+.tc-daychip.is-on { background: var(--tc-accent, #4f46e5); border-color: var(--tc-accent, #4f46e5); color: #fff; }
+.tc-hourrow input[type='time'] { width: 8rem; }
+.tc-arenapool { padding: 10px 12px; border-radius: 10px; background: var(--tc-surface-2); }
+.tc-arenapool p { margin: 0; }
+.tc-arenapool__list { list-style: none; margin: 6px 0; padding: 0; max-height: 260px; overflow: auto; }
+.tc-arenapool__list li { display: flex; align-items: center; gap: 6px; justify-content: space-between; border-bottom: 1px solid var(--p-line); padding: 2px 0; }
+
+/* TV */
+.tc-cuptv { min-height: 100vh; padding: 3vmin 4vmin; display: flex; flex-direction: column; gap: 2vmin; background: var(--tc-bg, #f6f7fb); }
+.tc-cuptv__head h1 { margin: 0; font-size: 4.4vmin; }
+.tc-cuptv__head p { margin: .4vmin 0 0; font-size: 2.2vmin; color: var(--p-muted); }
+.tc-cuptv__head .tc-cuptv__now { font-size: 3vmin; color: var(--tc-accent, #4f46e5); font-weight: 700; }
+
+/* Giấy khen */
+.tc-certs { display: flex; flex-direction: column; gap: 20px; align-items: center; }
+.tc-cert {
+  width: 277mm; max-width: 100%; aspect-ratio: 297 / 210; box-sizing: border-box; padding: 12mm 18mm; position: relative;
+  background: #fffdf6; color: #3b2a00; border: 3mm double #c99a2e; outline: 1mm solid #e8c66a; outline-offset: -6mm;
+  display: flex; flex-direction: column; align-items: center; text-align: center; font-family: 'Times New Roman', Times, serif;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.tc-cert__top { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; font-size: 13pt; }
+.tc-cert__school { font-weight: 700; max-width: 45%; text-align: left; }
+.tc-cert__nation { display: flex; flex-direction: column; align-items: center; }
+.tc-cert__nation span { text-decoration: underline; }
+.tc-cert__cup { font-size: 34pt; margin-top: 4mm; }
+.tc-cert h2.tc-cert__title { margin: 0; font-size: 44pt; line-height: 1.1; letter-spacing: .06em; color: #b3261e; font-family: 'Times New Roman', Times, serif; }
+.tc-cert__by { margin: 2mm 0 0; font-size: 15pt; font-weight: 700; }
+.tc-cert__name { margin: 4mm 0 0; font-size: 20pt; }
+.tc-cert__name b { font-size: 24pt; color: #1d3c8f; }
+.tc-cert__honor { margin: 3mm 0 0; font-size: 18pt; }
+.tc-cert__honor b { color: #b3261e; font-size: 22pt; }
+.tc-cert__detail { margin: 1mm 0 0; font-size: 16pt; font-style: italic; }
+.tc-cert__sign { margin-top: auto; align-self: flex-end; min-width: 85mm; font-size: 13pt; }
+.tc-cert__sign p { margin: 0; }
+.tc-cert__space { height: 18mm; }
+@media print {
+  @page { size: A4 landscape; margin: 6mm; }
+  .tc-certpage { padding: 0 !important; }
+  .tc-certs { gap: 0; }
+  .tc-cert { width: 285mm; height: 198mm; aspect-ratio: auto; break-after: page; page-break-after: always; }
+  .tc-cert:last-child { break-after: auto; page-break-after: auto; }
+}

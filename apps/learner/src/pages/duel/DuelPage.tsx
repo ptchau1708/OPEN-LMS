@@ -7,6 +7,7 @@ import { EmptyState, ErrorState, LoadingScreen, NumberPad, TopBack } from '../..
 import { useUi } from '../../lib/store';
 import { errText, resolveSettings, safeGet, safeSet, useMe } from '../../lib/util';
 import { DuelMatchView } from './DuelMatchView';
+import { useArenaGate } from '../arena/ArenaWidgets';
 import './duel.css';
 
 type View =
@@ -23,13 +24,15 @@ export default function DuelPage() {
   const me = useMe();
   const itemsQ = useItems(me.grade ? { grade: me.grade } : undefined);
   const companion = usePassport(me.id).data?.companion ?? me.avatarMascot;
+  const gate = useArenaGate('duel');
   const subjects = useMemo(() => {
     const n: Partial<Record<SubjectId, number>> = {};
-    for (const i of itemsQ.data ?? []) if (DUEL_TYPES.indexOf(i.type) >= 0) n[i.subject] = (n[i.subject] ?? 0) + 1;
+    for (const i of itemsQ.data ?? []) if (DUEL_TYPES.indexOf(i.type) >= 0 && (!gate.pool || gate.pool.has(i.id))) n[i.subject] = (n[i.subject] ?? 0) + 1;
     return (Object.keys(n) as SubjectId[]).filter((s) => (n[s] ?? 0) >= 3).sort((a, b) => (n[b] ?? 0) - (n[a] ?? 0));
-  }, [itemsQ.data]);
+  }, [itemsQ.data, gate.pool]);
 
-  if (itemsQ.isPending) return <LoadingScreen label="Đang mở sàn đấu" mascot={companion} />;
+  if (itemsQ.isPending || gate.loading) return <LoadingScreen label="Đang mở sàn đấu" mascot={companion} />;
+  if (gate.closed) return <div className="ln-page"><TopBack title="Đấu 1–1" to="/choi" /><EmptyState title={gate.closed.title} text={gate.closed.text} mascot={companion} /></div>;
   if (itemsQ.isError) return <ErrorState message="Chưa tải được câu hỏi." onRetry={() => void itemsQ.refetch()} />;
   if (!subjects.length || !me.grade) {
     return <div className="ln-page"><TopBack title="Đấu 1–1" to="/choi" /><EmptyState title="Sàn đấu đang chuẩn bị" text="Chưa có đủ câu hỏi cho lớp của em. Em quay lại sau nhé!" mascot={companion} /></div>;

@@ -46,3 +46,4 @@ export * from './prefs';
 export * from './catalog';
 export * from './commentbank';
 export * from './notes';
+export * from './arena';

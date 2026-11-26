@@ -3,13 +3,14 @@ import { Link, useNavigate } from 'react-router';
 import { Icon } from '@openedu/ui';
 import { uid, type Lesson, type Profile, subjectInGrade, subjectOptionsFor } from '@openedu/contracts';
 import { ACTIVITY_TYPES, SUBJECTS, type Grade, type Item, type ItemType, type SubjectId } from '@openedu/contracts';
-import { useCurrentUser, useDataSource, useDeleteItem, useItems, useLessons, useSaveItem, useSaveLesson } from '@openedu/data';
+import { useClasses, useCurrentUser, useDataSource, useDeleteItem, useItems, useLessons, useSaveItem, useSaveLesson } from '@openedu/data';
 import { Btn, ConfirmBar, Dialog, Empty, ErrorNote, Field, Loading, PageHead } from '../components/common';
 import { SampleContent } from './admin/Admin';
 import { ItemPreview, ItemStudio, newItemOfType, TypeBadge, TypePickerDialog } from '../components/items';
 import { cx, relTime, shorten } from '../lib/format';
 import { exportBankXlsx, QuickAddDialog } from './itembank/QuickAdd';
 import { GameSetupDialog } from './live/GameSetup';
+import { ArenaPoolDialog } from './arena/ArenaPoolDialog';
 
 /** Giao các câu đã chọn: tạo một bài luyện tập (mỗi câu một trang hoạt động) rồi sang trang Giao bài để chọn lớp, hạn nộp. */
 function AssignDialog({ items, me, onClose }: { items: Item[]; me: Profile; onClose: () => void }) {
@@ -64,6 +65,8 @@ export default function ItemBank() {
   const [rowDel, setRowDel] = useState<string | null>(null);
   const [bulkDel, setBulkDel] = useState<null | 'ask' | { done: number; total: number; failed: string[] }>(null);
   const me = useCurrentUser().data;
+  const [arena, setArena] = useState(false);
+  const myClasses = useClasses(me && me.role !== 'admin' ? me.id : undefined).data ?? [];
   const ds = useDataSource();
   const togglePick = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
   const q = useItems({ ...(subject ? { subject } : {}), ...(grade ? { grade } : {}), ...(type ? { type } : {}), ...(search.trim() ? { search: search.trim() } : {}) });
@@ -149,6 +152,7 @@ export default function ItemBank() {
             <Btn size="sm" kind="ghost" onClick={() => setPicked([])}>Bỏ chọn</Btn>
             <span className="tc-ebar__spacer" />
             <Btn kind="danger" icon="trash" disabled={!!bulkDel} onClick={() => setBulkDel('ask')} data-testid="qb-del-picked">Xoá {picked.length} câu</Btn>
+            <Btn icon="trophy" disabled={!me || !myClasses.length} onClick={() => setArena(true)} data-testid="qb-arena" title="Thêm câu vào bộ câu Đấu trường của lớp (Đấu 1–1, Leo tháp) hoặc mở giải đấu loại trực tiếp">Đưa vào Đấu trường</Btn>
             <Btn icon="play" disabled={!me} onClick={() => setPlay(true)} data-testid="qb-play" title="Thi đua trực tiếp trên lớp: kiểu Kahoot, Quizizz hoặc thẻ giấy">Chơi trực tiếp</Btn>
             <Btn kind="primary" icon="check" disabled={!me} onClick={() => setAssign(true)} data-testid="qb-assign">Giao cho học sinh ({picked.length} câu)</Btn>
           </> : <span className="tc-muted tc-small">Tích ô trước mỗi câu để chọn câu giao cho học sinh, chơi trực tiếp hoặc xoá nhiều câu.</span>}
@@ -242,6 +246,7 @@ export default function ItemBank() {
         </aside>
       ) : null}
       {play && me ? <GameSetupDialog user={me} items={picked.map((id) => (q.data ?? []).find((it) => it.id === id)).filter((x): x is Item => !!x)} onClose={() => setPlay(false)} /> : null}
+      {arena && me ? <ArenaPoolDialog classes={myClasses} items={picked.map((id) => (q.data ?? []).find((it) => it.id === id)).filter((x): x is Item => !!x)} onClose={() => setArena(false)} onDone={(text) => { setArena(false); setToast({ text }); }} /> : null}
       {assign && me ? <AssignDialog items={picked.map((id) => (q.data ?? []).find((it) => it.id === id)).filter((x): x is Item => !!x)} me={me} onClose={() => setAssign(false)} /> : null}
       <QuickAddDialog open={quick} onClose={() => setQuick(false)} initial={{ ...(subject ? { subject } : {}), ...(grade ? { grade } : {}) }} onSaved={(n) => n > 0 && setToast({ text: `Đã lưu ${n} câu vào ngân hàng.` })} />
       <TypePickerDialog open={typePick} onClose={() => setTypePick(false)} onPick={(t) => { setTypePick(false); setOpen({ item: newItemOfType(t, grade || undefined, subject || undefined), mode: 'edit', isNew: true }); }} />

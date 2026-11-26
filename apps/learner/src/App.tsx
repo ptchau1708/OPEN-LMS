@@ -18,6 +18,7 @@ const LiveJoin = lazy(() => import('./pages/LiveJoin'));
 const LiveRoom = lazy(() => import('./pages/LiveRoom'));
 const Tower = lazy(() => import('./pages/Tower'));
 const Duel = lazy(() => import('./pages/duel/DuelPage'));
+const CupPage = lazy(() => import('./pages/arena/CupPage'));
 const Passport = lazy(() => import('./pages/Passport'));
 const Parent = lazy(() => import('./pages/Parent'));
 const ParentLink = lazy(() => import('./pages/parent/ParentLink'));
@@ -68,6 +69,7 @@ export function App() {
             <Route path="choi" element={<Play />} />
             <Route path="choi/thap" element={<Tower />} />
             <Route path="choi/doi-dau" element={<Duel />} />
+            <Route path="choi/giai/:id" element={<CupPage />} />
             <Route path="qua" element={<Passport />} />
             <Route path="toi" element={<Me />} />
             <Route path="toi/tai-ve" element={<Downloads />} />

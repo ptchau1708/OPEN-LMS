@@ -8,6 +8,7 @@ import { EmptyState, ErrorState, Heart, LoadingScreen, TopBack } from '../compon
 import { useUi } from '../lib/store';
 import { resolveSettings, safeGet, safeSet, shuffle, useMe } from '../lib/util';
 import { bestFloorKey } from './Play';
+import { useArenaGate } from './arena/ArenaWidgets';
 import '../styles/tower.css';
 
 const FAST: ItemType[] = ['MCQ', 'LISTEN_CHOOSE', 'MCQ_MULTIPLE', 'SHORT_ANSWER', 'MATH_MANIPULATIVE', 'ORDERING', 'MATCHING'];
@@ -20,9 +21,11 @@ export default function Tower() {
   const settings = resolveSettings(me);
   const itemsQ = useItems(me.grade ? { grade: me.grade } : undefined);
   const companion: MascotId = usePassport(me.id).data?.companion ?? me.avatarMascot;
-  const pool = useMemo(() => (itemsQ.data ?? []).filter((i) => FAST.indexOf(i.type) >= 0), [itemsQ.data]);
+  const gate = useArenaGate('tower');
+  const pool = useMemo(() => (itemsQ.data ?? []).filter((i) => FAST.indexOf(i.type) >= 0 && (!gate.pool || gate.pool.has(i.id))), [itemsQ.data, gate.pool]);
 
-  if (itemsQ.isPending) return <LoadingScreen label="Đang dựng tháp" mascot={companion} />;
+  if (itemsQ.isPending || gate.loading) return <LoadingScreen label="Đang dựng tháp" mascot={companion} />;
+  if (gate.closed) return <div className="ln-page"><TopBack title="Leo tháp" to="/choi" /><EmptyState title={gate.closed.title} text={gate.closed.text} mascot={companion} /></div>;
   if (itemsQ.isError) return <ErrorState message="Chưa tải được câu hỏi." onRetry={() => void itemsQ.refetch()} />;
   if (!pool.length) return <div className="ln-page"><TopBack title="Leo tháp" to="/choi" /><EmptyState title="Tháp đang xây" text="Chưa có câu hỏi cho lớp của em. Em quay lại sau nhé!" mascot={companion} /></div>;
   return <TowerGame pool={pool} companion={companion} bigText={settings.bigText} />;

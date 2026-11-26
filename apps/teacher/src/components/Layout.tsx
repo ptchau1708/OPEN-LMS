@@ -17,6 +17,7 @@ const NAV: { to: string; label: string; icon: IconName; end?: boolean; match?: R
   { to: '/kien-thuc', label: 'Kiến thức', icon: 'map', match: /^\/(kien-thuc|lop\/[^/]+\/ban-do-kien-thuc)/ },
   { to: '/ki-nang', label: 'Danh mục kĩ năng', icon: 'puzzle' },
   { to: '/truc-tiep', label: 'Trực tiếp', icon: 'tv' },
+  { to: '/dau-truong', label: 'Đấu trường', icon: 'trophy', match: /^\/dau-truong/ },
   { to: '/trang-hoc', label: 'Trang học', icon: 'puzzle' },
   { to: '/thao-luan', label: 'Thảo luận', icon: 'team', match: /^\/thao-luan/ },
   { to: '/bai-viet', label: 'Bài viết', icon: 'pencil', section: 'Đánh giá', match: /^\/bai-viet/ },

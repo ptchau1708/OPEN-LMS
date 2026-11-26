@@ -19,6 +19,7 @@ export * from './duel';
 export * from './school';
 export * from './badges';
 export * from './exam';
+export * from './arena';
 
 /** Tạo id ngắn, đủ duy nhất cho client (demo). */
 export function uid(prefix = ''): string {

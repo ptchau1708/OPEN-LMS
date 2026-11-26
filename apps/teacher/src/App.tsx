@@ -50,6 +50,10 @@ const TeacherLtiAuth = lazy(() => import('./pages/pages/LtiAuth'));
 const BehaviorStats = lazy(() => import('./pages/assess/BehaviorStats'));
 const AssignReport = lazy(() => import('./pages/assign/report'));
 const ChangePassword = lazy(() => import('./pages/Password'));
+const ArenaHome = lazy(() => import('./pages/arena/ArenaHome'));
+const CupDetail = lazy(() => import('./pages/arena/CupDetail'));
+const CupTv = lazy(() => import('./pages/arena/CupTv'));
+const Certificates = lazy(() => import('./pages/arena/Certificates'));
 const ForcedChange = lazy(() => import('./pages/Password').then((m) => ({ default: m.ForcedChange })));
 
 export function App() {
@@ -66,6 +70,7 @@ export function App() {
     <Routes>
       <Route path="lti/auth" element={<Suspense fallback={<Loading />}><TeacherLtiAuth /></Suspense>} />
       <Route path="thao-luan/:id/tv" element={<Suspense fallback={<Loading />}><DiscussTv /></Suspense>} />
+      <Route path="dau-truong/giai/:id/tv" element={<Suspense fallback={<Loading />}><CupTv /></Suspense>} />
       <Route element={<Layout user={user} />}>
         <Route index element={<Dashboard user={user} />} />
         <Route path="bai-giang" element={<Lessons user={user} />} />
@@ -79,6 +84,9 @@ export function App() {
         <Route path="hoc-sinh" element={<Suspense fallback={<Loading />}><Students user={user} /></Suspense>} />
         <Route path="hoc-sinh/:studentId" element={<Suspense fallback={<Loading />}><StudentProfile user={user} /></Suspense>} />
         <Route path="truc-tiep" element={<Suspense fallback={<Loading />}><LiveStart user={user} /></Suspense>} />
+        <Route path="dau-truong" element={<Suspense fallback={<Loading />}><ArenaHome user={user} /></Suspense>} />
+        <Route path="dau-truong/giai/:id" element={<Suspense fallback={<Loading />}><CupDetail user={user} /></Suspense>} />
+        <Route path="dau-truong/giay-khen" element={<Suspense fallback={<Loading />}><Certificates user={user} /></Suspense>} />
         <Route path="thao-luan" element={<Suspense fallback={<Loading />}><DiscussList user={user} /></Suspense>} />
         <Route path="thao-luan/:id" element={<Suspense fallback={<Loading />}><DiscussBoard user={user} /></Suspense>} />
         <Route path="truc-tiep/the-giay" element={<Suspense fallback={<Loading />}><PaperCards user={user} /></Suspense>} />
