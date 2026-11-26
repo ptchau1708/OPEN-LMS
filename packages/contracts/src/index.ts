@@ -20,6 +20,7 @@ export * from './school';
 export * from './badges';
 export * from './exam';
 export * from './arena';
+export * from './parentHub';
 
 /** Tạo id ngắn, đủ duy nhất cho client (demo). */
 export function uid(prefix = ''): string {

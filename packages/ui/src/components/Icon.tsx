@@ -2,7 +2,8 @@ import type { CSSProperties } from 'react';
 
 export type IconName = 'home' | 'book' | 'play' | 'gift' | 'user' | 'speaker' | 'star' | 'close' | 'back' | 'next' | 'check' | 'retry'
   | 'lock' | 'tv' | 'pencil' | 'mic' | 'stop' | 'clock' | 'trophy' | 'map' | 'passport' | 'team' | 'plus' | 'trash' | 'eye'
-  | 'settings' | 'upload' | 'image' | 'video' | 'puzzle' | 'wheel' | 'hint' | 'flame' | 'tower' | 'qr' | 'parent' | 'menu' | 'drag' | 'camera' | 'print';
+  | 'settings' | 'upload' | 'image' | 'video' | 'puzzle' | 'wheel' | 'hint' | 'flame' | 'tower' | 'qr' | 'parent' | 'menu' | 'drag' | 'camera' | 'print'
+  | 'bell' | 'chat' | 'send';
 
 export interface IconProps {
   name: IconName;
@@ -75,6 +76,9 @@ const ICONS: Record<IconName, Def> = {
     R(5.6, 5.6, 2.3, 2.3, .5) + R(16.1, 5.6, 2.3, 2.3, .5) + R(5.6, 16.1, 2.3, 2.3, .5)],
   parent: C(8.5, 6.5, 3) + 'M3 21v-1.5a5.5 5.5 0 0 1 11 0V21' + C(17.5, 11.5, 2.2) + 'M14.5 21v-1a3 3 0 0 1 6 0v1',
   menu: 'M4 6.5h16M4 12h16M4 17.5h16',
+  bell: 'M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 2.2H4.4zM9.8 20.5a2.3 2.3 0 0 0 4.4 0',
+  chat: 'M4.5 5h15A1.5 1.5 0 0 1 21 6.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V17h-1A1.5 1.5 0 0 1 3 15.5v-9A1.5 1.5 0 0 1 4.5 5zM7.5 9.5h9M7.5 13h6',
+  send: 'M3.5 11.2 20.5 4l-6.8 16.6-2.6-6.8zM11.1 13.8 20.5 4',
   drag: ['', C(9, 6, 1.7) + C(15, 6, 1.7) + C(9, 12, 1.7) + C(15, 12, 1.7) + C(9, 18, 1.7) + C(15, 18, 1.7)],
 };
 

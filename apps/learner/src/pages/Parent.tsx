@@ -2,9 +2,9 @@ import { ParentDiscuss } from './parent/ParentDiscuss';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useQueries } from '@tanstack/react-query';
-import type { Lesson, ParentSummary, Profile, StudentProfile, TimelineKind } from '@openedu/contracts';
+import type { Lesson, ParentSummary, Profile, ShareKind, StudentProfile, TimelineKind } from '@openedu/contracts';
 import { TT27_LEVEL_LABEL } from '@openedu/contracts';
-import { dayKey, qk, useAssignments, useChildren, useClass, useDataSource, useLessons, useParentSummary, useStudentProfile, useRewards, useSignOut, useWallet } from '@openedu/data';
+import { dayKey, qk, useAssignments, useChildren, useClass, useDataSource, useLessons, useParentInbox, useParentSummary, useStudentProfile, useRewards, useSignOut, useWallet } from '@openedu/data';
 import { Button, Icon, Mascot } from '@openedu/ui';
 import type { IconName } from '@openedu/ui';
 import { Avatar, EmptyState, ErrorState, LoadingScreen, NumberPad } from '../components/Common';
@@ -13,6 +13,9 @@ import { dayLabel, dueLabel, timeLabel, useMe } from '../lib/util';
 import '../styles/parent.css';
 import '../styles/parent5.css';
 import { ParentWeek } from './parent/ParentWeek';
+import { ParentInbox } from './parent/ParentInbox';
+import { NotifyBell } from '../components/NotifyBell';
+import '../styles/notify.css';
 
 export default function Parent() {
   const me = useMe();
@@ -91,6 +94,10 @@ function ParentView({ child, siblings, onPick, parent, onExitLabel }: { child: P
   const assigns = useAssignments({ studentId: child.id });
   const lessonIds = (assigns.data ?? []).filter((a) => a.targetType === 'lesson').map((a) => a.targetId);
   const progress = useQueries({ queries: lessonIds.map((id) => ({ queryKey: qk.progress(child.id, id), queryFn: () => ds.getProgress(child.id, id) })) });
+  // Tài khoản phụ huynh: thông báo của cô + mục cô cho xem (SQL 23). Chế độ phụ huynh trên máy của con: không có.
+  const inbox = useParentInbox(child.id, !!parent);
+  const modes = inbox.data?.modes;
+  const show = (k: ShareKind) => !modes || modes[k] !== 'off';
 
   const lessons = useMemo(() => {
     const m: Record<string, Lesson> = {};
@@ -122,6 +129,7 @@ function ParentView({ child, siblings, onPick, parent, onExitLabel }: { child: P
       <header className="ln-pp-head">
         <div className="ln-pp-head__brand"><Icon name="parent" size={26} /> Chế độ phụ huynh</div>
         <div className="ln-row">
+          {parent && <NotifyBell className="ln-bell--pp" />}
           {parent && <Link className="k-btn k-btn--ghost" to="/doi-mat-khau" data-testid="parent-change-pw"><span className="k-btn__label">Đổi mật khẩu</span></Link>}
           <Button variant="secondary" onClick={exit}>{onExitLabel ?? 'Đăng xuất'}</Button>
         </div>
@@ -142,14 +150,18 @@ function ParentView({ child, siblings, onPick, parent, onExitLabel }: { child: P
         </div>
       </section>
 
+      {parent && inbox.data ? <ParentInbox child={child} box={inbox.data} /> : null}
+      {parent && inbox.isError ? <section className="ln-pp-card"><p className="ln-pp-muted">{(inbox.error as Error).message}</p></section> : null}
+
       {sumQ.isError ? (
         <section className="ln-pp-card"><p className="ln-pp-muted">Chưa tải được tóm tắt. <button type="button" className="ln-link" onClick={() => void sumQ.refetch()}>Thử lại</button></p></section>
       ) : (
         <>
-          {sum && <section className="ln-pp-headline"><p className="ln-pp-headline__lead">{sum.headline}</p>{otherSentences(sum).length > 0 && <ul className="ln-pp-sents">{otherSentences(sum).map((t, i) => <li key={i}>{t}</li>)}</ul>}</section>}
+          {sum && show('study') && <section className="ln-pp-headline"><p className="ln-pp-headline__lead">{sum.headline}</p>{otherSentences(sum).length > 0 && <ul className="ln-pp-sents">{otherSentences(sum).map((t, i) => <li key={i}>{t}</li>)}</ul>}</section>}
           {sum && <SchoolCard sum={sum} prof={prof} />}
-          <ParentWeek child={child} />
-          <ParentDiscuss child={child} />
+          <ParentWeek child={child} showDigest={show('study')} />
+          {show('discuss') ? <ParentDiscuss child={child} /> : null}
+          {show('study') ? <>
           <h2 className="ln-pp-h ln-pp-h--sec">Tuần này của con</h2>
           <section className="ln-pp-grid">
             <div className="ln-pp-stat"><span className="ln-pp-stat__n">{w ? w.stars : week.stars}</span><span>sao trong tuần</span></div>
@@ -157,10 +169,11 @@ function ParentView({ child, siblings, onPick, parent, onExitLabel }: { child: P
             <div className="ln-pp-stat"><span className="ln-pp-stat__n">{w ? w.answered : '–'}</span><span>{w && w.correctRate != null ? `câu đã làm · đúng ${Math.round(w.correctRate * 100)}%` : 'câu đã làm'}</span></div>
             <div className="ln-pp-stat"><span className="ln-pp-stat__n">{w ? `${w.daysActive}/7` : '–'}</span><span>ngày có học · chuỗi {wallet?.streakDays ?? 0} ngày</span></div>
           </section>
+          </> : null}
         </>
       )}
 
-      {sum && sum.gaps.length > 0 && (
+      {sum && show('skills') && sum.gaps.length > 0 && (
         <section className="ln-pp-card ln-pp-care">
           <h2 className="ln-pp-h">Điều bố mẹ có thể cùng con luyện</h2>
           {sum.gaps.map((g) => (
@@ -174,12 +187,12 @@ function ParentView({ child, siblings, onPick, parent, onExitLabel }: { child: P
       )}
 
       <div className="ln-pp-two">
-        <section className="ln-pp-card">
+        {show('skills') ? <section className="ln-pp-card">
           <h2 className="ln-pp-h">Con đã vững</h2>
           {sum && sum.strengths.length ? <div className="ln-pp-chips">{sum.strengths.map((t) => <span key={t} className="ln-pp-chip"><Icon name="check" size={16} /> {t}</span>)}</div>
             : <p className="ln-pp-muted">{sumQ.isPending ? 'Đang tải…' : 'Con đang tích lũy dần — cứ khuyến khích con học đều mỗi ngày.'}</p>}
-        </section>
-        <section className="ln-pp-card">
+        </section> : null}
+        {show('assignments') ? <section className="ln-pp-card">
           <h2 className="ln-pp-h">Lịch ôn sắp tới</h2>
           {upcoming.length ? (
             <ul className="ln-pp-list">{upcoming.map((r) => {
@@ -193,10 +206,10 @@ function ParentView({ child, siblings, onPick, parent, onExitLabel }: { child: P
               );
             })}</ul>
           ) : <p className="ln-pp-muted">{profQ.isPending ? 'Đang tải…' : 'Chưa có bài ôn nào được hẹn.'}</p>}
-        </section>
+        </section> : null}
       </div>
 
-      <section className="ln-pp-card">
+      {show('study') ? <section className="ln-pp-card">
         <h2 className="ln-pp-h">Sao mỗi ngày</h2>
         <div className="ln-pp-bars" role="img" aria-label={`Sao 7 ngày qua: ${week.days.map((d) => `${d.label} ${d.stars}`).join(', ')}`}>
           {week.days.map((d) => (
@@ -207,10 +220,10 @@ function ParentView({ child, siblings, onPick, parent, onExitLabel }: { child: P
             </div>
           ))}
         </div>
-      </section>
+      </section> : null}
 
       <div className="ln-pp-two">
-        <section className="ln-pp-card">
+        {show('assignments') ? <section className="ln-pp-card">
           <h2 className="ln-pp-h">Bài được giao</h2>
           {assigns.isPending ? <p className="ln-pp-muted">Đang tải…</p> : (assigns.data ?? []).length === 0 ? <p className="ln-pp-muted">Hiện chưa có bài được giao.</p> : (
             <ul className="ln-pp-list">
@@ -231,9 +244,9 @@ function ParentView({ child, siblings, onPick, parent, onExitLabel }: { child: P
               })}
             </ul>
           )}
-        </section>
+        </section> : null}
 
-        <section className="ln-pp-card">
+        {show('study') ? <section className="ln-pp-card">
           <h2 className="ln-pp-h">Hoạt động gần đây</h2>
           {profQ.isError ? <p className="ln-pp-muted">Chưa tải được hoạt động. <button type="button" className="ln-link" onClick={() => void profQ.refetch()}>Thử lại</button></p> :
             !prof ? <p className="ln-pp-muted">Đang tải…</p> : prof.timeline.length === 0 ? <p className="ln-pp-muted">Chưa có hoạt động nào.</p> : (
@@ -247,7 +260,7 @@ function ParentView({ child, siblings, onPick, parent, onExitLabel }: { child: P
                 ))}
               </ul>
             )}
-        </section>
+        </section> : null}
       </div>
 
       <p className="ln-pp-foot"><Mascot id="nghe" size={36} title="" /> Khen con mỗi ngày một chút — con sẽ thích học hơn!</p>

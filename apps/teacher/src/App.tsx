@@ -39,7 +39,8 @@ const ExamPrint = lazy(() => import('./pages/exam/ExamPrint'));
 const ExamResults = lazy(() => import('./pages/exam/ExamResults'));
 const Reports = lazy(() => import('./pages/admin/Reports'));
 const GradeMap = lazy(() => import('./pages/admin/GradeMap'));
-const ParentLinks = lazy(() => import('./pages/admin/ParentLinks'));
+const ParentHub = lazy(() => import('./pages/parents/ParentHub'));
+const NotifySettings = lazy(() => import('./pages/NotifySettings'));
 const AdminClasses = lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.AdminClasses })));
 const AdminUsers = lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.AdminUsers })));
 const AdminSettings = lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.AdminSettings })));
@@ -108,7 +109,8 @@ export function App() {
         <Route path="de-kiem-tra/:examId/ket-qua" element={<Suspense fallback={<Loading />}><ExamResults /></Suspense>} />
         <Route path="bao-cao" element={<Suspense fallback={<Loading />}><Reports user={user} /></Suspense>} />
         <Route path="bao-cao/ban-do-khoi" element={<Suspense fallback={<Loading />}><GradeMap user={user} /></Suspense>} />
-        <Route path="phu-huynh" element={<Suspense fallback={<Loading />}><ParentLinks user={user} /></Suspense>} />
+        <Route path="phu-huynh" element={<Suspense fallback={<Loading />}><ParentHub user={user} /></Suspense>} />
+        <Route path="thong-bao" element={<Suspense fallback={<Loading />}><NotifySettings /></Suspense>} />
         <Route path="thi-dua/thong-ke" element={<Suspense fallback={<Loading />}><BehaviorStats user={user} /></Suspense>} />
         <Route path="bao-cao-bai-giao" element={<Suspense fallback={<Loading />}><AssignReport user={user} /></Suspense>} />
         <Route path="doi-mat-khau" element={<Suspense fallback={<Loading />}><ChangePassword /></Suspense>} />

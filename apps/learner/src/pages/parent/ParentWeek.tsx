@@ -7,7 +7,8 @@ import { Icon } from '@openedu/ui';
 const DAY = 86_400_000;
 const fmt = (iso: string) => { const d = new Date(iso); return `${d.getDate()}/${d.getMonth() + 1}`; };
 
-export function ParentWeek({ child }: { child: Profile }) {
+/** showDigest = false: lớp tắt "Kết quả tự học" cho phụ huynh → bỏ bản tin tuần, vẫn hiện TT27 + ghi chép (mỗi mục máy chủ tự lọc). */
+export function ParentWeek({ child, showDigest = true }: { child: Profile; showDigest?: boolean }) {
   const [offset, setOffset] = useState(0);
   const weekStart = new Date(Date.parse(vnWeekStart(new Date())) - offset * 7 * DAY).toISOString();
   const q = useParentDigest(child.id, weekStart);
@@ -15,7 +16,7 @@ export function ParentWeek({ child }: { child: Profile }) {
   const last = new Date(Date.parse(weekStart) + 6 * DAY).toISOString();
   return (
     <>
-      <section className="ln-pp-card ln-pw" aria-label="Bản tin tuần">
+      {showDigest ? <section className="ln-pp-card ln-pw" aria-label="Bản tin tuần">
         <header className="ln-pw__head">
           <h2 className="ln-pp-h">Bản tin tuần {fmt(weekStart)} – {fmt(last)}</h2>
           <div className="ln-pw__nav">
@@ -58,7 +59,7 @@ export function ParentWeek({ child }: { child: Profile }) {
             {d.tips.length > 0 && <div className="ln-pw__tips"><strong><Icon name="hint" size={18} /> Gợi ý ở nhà</strong><ul className="ln-pp-tips">{d.tips.map((t, i) => <li key={i}>{t}</li>)}</ul></div>}
           </>
         )}
-      </section>
+      </section> : null}
       {d?.tt27 ? <Tt27Card t={d.tt27} /> : null}
       <TeacherNotes childId={child.id} />
     </>

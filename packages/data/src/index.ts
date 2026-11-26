@@ -47,3 +47,5 @@ export * from './catalog';
 export * from './commentbank';
 export * from './notes';
 export * from './arena';
+export * from './parenthub';
+export * from './notify';

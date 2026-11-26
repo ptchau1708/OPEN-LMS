@@ -8,7 +8,8 @@ import { AccountSlipCard, CodeSlip } from './util';
 import type { AccountSlip } from '@openedu/contracts';
 import '../../styles/admin.css';
 
-export default function ParentLinks({ user }: { user: Profile }) {
+/** embedded: nằm trong trang Phụ huynh (thẻ "Liên kết tài khoản") — dùng lớp đang chọn ở trang đó (?lop=). */
+export default function ParentLinks({ user, embedded }: { user: Profile; embedded?: boolean }) {
   const { list, cls, classId, setClassId } = useClassPick(user);
   const { roster } = useRoster(cls);
   const codes = useGuardianCodes(classId || undefined);
@@ -66,17 +67,17 @@ export default function ParentLinks({ user }: { user: Profile }) {
   const makeAll = () => create.mutate({ classId }, { onSuccess: (list) => setPrint(list) });
   const printActive = () => setPrint(roster.map((s) => activeBy.get(s.id)).filter((c): c is GuardianCode => !!c));
 
+  const sub = `Mỗi em một mã 8 kí tự, dùng một lần, hết hạn sau 14 ngày. Một em có tối đa ${MAX_GUARDIANS_PER_CHILD} tài khoản phụ huynh. Phụ huynh quên mật khẩu: bấm “Cấp lại mật khẩu” để in mật khẩu tạm.`;
+  const actions = <>
+    {embedded ? null : <ClassPicker list={list} value={classId} onChange={setClassId} />}
+    <Btn icon="eye" disabled={!activeBy.size} onClick={printActive}>In phiếu mã còn hạn ({activeBy.size})</Btn>
+    <Btn kind="primary" icon="qr" disabled={!cls || create.isPending} onClick={makeAll}>{create.isPending ? 'Đang tạo…' : 'Tạo mã mới cho cả lớp'}</Btn>
+  </>;
   return (
-    <div className="tc-page ad-page">
-      <PageHead
-        title="Liên kết phụ huynh"
-        sub={`Mỗi em một mã 8 kí tự, dùng một lần, hết hạn sau 14 ngày. Một em có tối đa ${MAX_GUARDIANS_PER_CHILD} tài khoản phụ huynh. Phụ huynh quên mật khẩu: bấm “Cấp lại mật khẩu” để in mật khẩu tạm.`}
-        actions={<>
-          <ClassPicker list={list} value={classId} onChange={setClassId} />
-          <Btn icon="eye" disabled={!activeBy.size} onClick={printActive}>In phiếu mã còn hạn ({activeBy.size})</Btn>
-          <Btn kind="primary" icon="qr" disabled={!cls || create.isPending} onClick={makeAll}>{create.isPending ? 'Đang tạo…' : 'Tạo mã mới cho cả lớp'}</Btn>
-        </>}
-      />
+    <div className={embedded ? 'ad-page' : 'tc-page ad-page'}>
+      {embedded ? (
+        <div className="tc-row tc-wrap ad-embedhead"><p className="tc-small tc-muted">{sub}</p><span className="tc-spacer" />{actions}</div>
+      ) : <PageHead title="Liên kết phụ huynh" sub={sub} actions={actions} />}
       <ErrorNote error={create.error ?? codes.error ?? links.error ?? revokeLink.error ?? revokeCode.error ?? reset.error} />
       {confirm ? <ConfirmBar text={confirm.text} confirmLabel="Gỡ liên kết" busy={revokeLink.isPending} onCancel={() => setConfirm(null)} onConfirm={() => revokeLink.mutate({ parentId: confirm.parentId, studentId: confirm.studentId }, { onSuccess: () => setConfirm(null) })} /> : null}
       {!cls ? <Empty icon="team" title="Chưa có lớp" /> : codes.isPending || links.isPending ? <Loading /> : (

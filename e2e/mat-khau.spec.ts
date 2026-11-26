@@ -37,7 +37,7 @@ test('phụ huynh tự đổi mật khẩu rồi đăng nhập bằng mật kh�
 test('GVCN cấp lại mật khẩu cho phụ huynh lớp mình → phiếu mật khẩu tạm', async ({ page }) => {
   const w = watchErrors(page);
   await teacherLogin(page, 'colan');
-  await spaGo(page, '/phu-huynh');
+  await spaGo(page, '/phu-huynh?the=lien-ket');
   await page.getByTestId('parent-reset-pw').first().click();
   await expect(page.locator('.ad-slip--acc')).toContainText('Mật khẩu tạm');
   await expect(page.locator('.ad-slip--acc')).toContainText('Phụ huynh');

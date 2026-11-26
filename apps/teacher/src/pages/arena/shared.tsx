@@ -138,12 +138,4 @@ export function cupInfoLine(c: Cup): string {
 }
 
 /** Như Field nhưng không bọc <label> — dùng cho nhóm nút (Seg), nhiều ô: nhãn không "dính" vào nút đầu tiên. */
-export function GroupField({ label, help, children }: { label: string; help?: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <div className="tc-field" role="group" aria-label={label}>
-      <span className="tc-field__label">{label}</span>
-      {children}
-      {help ? <span className="tc-field__help">{help}</span> : null}
-    </div>
-  );
-}
+export { GroupField } from '../../components/common';

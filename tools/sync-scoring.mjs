@@ -11,7 +11,8 @@
  * supabase/functions/_shared/mastery/ (Edge Function `grade` cập nhật skill_mastery bằng đúng mã này), và
  * mã chấm bài làm THUẦN packages/data/src/assess/*.ts sang supabase/functions/_shared/assess/ (Edge Function `ai-grade`),
  * và mã gợi ý khi làm sai THUẦN packages/data/src/hint/*.ts sang supabase/functions/_shared/hint/ (Edge Function `ai-gateway`),
- * và nền tảng LTI 1.3 THUẦN packages/data/src/lti/*.ts sang supabase/functions/_shared/lti/ (Edge Function `lti`).
+ * và nền tảng LTI 1.3 THUẦN packages/data/src/lti/*.ts sang supabase/functions/_shared/lti/ (Edge Function `lti`),
+ * và thông báo đẩy THUẦN packages/data/src/webpush/*.ts sang supabase/functions/_shared/webpush/ (Edge Function `push`).
  *
  * Nguồn:
  *   packages/activity-engine/src/scoring.ts, src/types/<TYPE>/score.ts, src/shared/text.ts, src/shared/shuffle.ts
@@ -40,7 +41,9 @@ const HINT = path.join(ROOT, 'packages', 'data', 'src', 'hint');
 const HINT_OUT = path.join(ROOT, 'supabase', 'functions', '_shared', 'hint');
 const LTI = path.join(ROOT, 'packages', 'data', 'src', 'lti');
 const LTI_OUT = path.join(ROOT, 'supabase', 'functions', '_shared', 'lti');
-const OUT_DIRS = [OUT, MASTERY_OUT, ASSESS_OUT, HINT_OUT, LTI_OUT];
+const PUSH = path.join(ROOT, 'packages', 'data', 'src', 'webpush');
+const PUSH_OUT = path.join(ROOT, 'supabase', 'functions', '_shared', 'webpush');
+const OUT_DIRS = [OUT, MASTERY_OUT, ASSESS_OUT, HINT_OUT, LTI_OUT, PUSH_OUT];
 const CONTRACT_BASE = ['items', 'subjects', 'mascots'];
 const CHECK_ONLY = process.argv.includes('--check');
 
@@ -60,6 +63,7 @@ function destFor(src) {
   if (src.startsWith(ASSESS + path.sep)) return path.join(ASSESS_OUT, path.relative(ASSESS, src));
   if (src.startsWith(HINT + path.sep)) return path.join(HINT_OUT, path.relative(HINT, src));
   if (src.startsWith(LTI + path.sep)) return path.join(LTI_OUT, path.relative(LTI, src));
+  if (src.startsWith(PUSH + path.sep)) return path.join(PUSH_OUT, path.relative(PUSH, src));
   return null;
 }
 
@@ -115,7 +119,7 @@ async function main() {
     const p = path.join(ENGINE, 'shared', f);
     if (isFile(p)) entries.push(p);
   }
-  for (const dir of [MASTERY, ASSESS, HINT, LTI]) {
+  for (const dir of [MASTERY, ASSESS, HINT, LTI, PUSH]) {
     if (!existsSync(dir)) continue;
     for (const f of (await fs.readdir(dir)).sort()) {
       if (f.endsWith('.ts') && !f.endsWith('.test.ts')) entries.push(path.join(dir, f));
@@ -182,7 +186,7 @@ async function main() {
           errors.push(`${rel(src)}: import "${spec}" là .tsx — mã chấm điểm phải thuần (không React/DOM)`);
           return full;
         }
-        if (![ENGINE, CONTRACTS, MASTERY, ASSESS, HINT, LTI].some((d) => r.startsWith(d + path.sep))) {
+        if (![ENGINE, CONTRACTS, MASTERY, ASSESS, HINT, LTI, PUSH].some((d) => r.startsWith(d + path.sep))) {
           errors.push(`${rel(src)}: import "${spec}" ra ngoài gói`);
           return full;
         }
@@ -300,7 +304,7 @@ async function main() {
   for (const p of changes.written) console.log(`  ${verb}   ${rel(p)}`);
   for (const p of changes.removed) console.log(`  ${CHECK_ONLY ? 'cần xóa' : 'đã xóa'}   ${rel(p)}`);
   console.log(
-    `sync-scoring: ${outputs.size} file → ${rel(OUT)}, ${rel(MASTERY_OUT)}, ${rel(ASSESS_OUT)}, ${rel(HINT_OUT)}, ${rel(LTI_OUT)} ` +
+    `sync-scoring: ${outputs.size} file → ${rel(OUT)}, ${rel(MASTERY_OUT)}, ${rel(ASSESS_OUT)}, ${rel(HINT_OUT)}, ${rel(LTI_OUT)}, ${rel(PUSH_OUT)} ` +
       `(${changes.written.length} ${verb}, ${changes.unchanged.length} không đổi, ${changes.removed.length} ${CHECK_ONLY ? 'cần xóa' : 'đã xóa'})`,
   );
   if (CHECK_ONLY && (changes.written.length || changes.removed.length)) {

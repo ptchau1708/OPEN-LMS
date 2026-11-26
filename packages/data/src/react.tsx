@@ -180,7 +180,14 @@ export function useSignOut() {
   const ds = useDataSource();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => ds.signOut(),
+    mutationFn: async () => {
+      // Máy này thôi nhận thông báo đẩy của tài khoản vừa thoát (máy dùng chung trong nhà).
+      if (ds.mode !== 'demo') {
+        const [{ forgetPushOnSignOut }, { getNotify }] = await Promise.all([import('./notify/push'), import('./notify/source')]);
+        await forgetPushOnSignOut(getNotify(ds));
+      }
+      return ds.signOut();
+    },
     onSuccess: () => {
       qc.clear();
       qc.setQueryData(qk.me, null);

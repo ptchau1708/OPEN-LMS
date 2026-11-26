@@ -104,6 +104,17 @@ export function Field({ label, children, help }: { label: string; children: Reac
   );
 }
 
+/** Nhóm nút (Seg, chip…) có nhãn — không bọc <label> để nhãn không lẫn vào tên nút. */
+export function GroupField({ label, help, children }: { label: string; help?: ReactNode; children: ReactNode }) {
+  return (
+    <div className="tc-field" role="group" aria-label={label}>
+      <span className="tc-field__label">{label}</span>
+      {children}
+      {help ? <span className="tc-field__help">{help}</span> : null}
+    </div>
+  );
+}
+
 export function PageHead({ title, sub, actions }: { title: string; sub?: ReactNode; actions?: ReactNode }) {
   return (
     <header className="tc-pagehead">

@@ -8,6 +8,7 @@ import { AppTabs, Avatar, EmptyState, ErrorState } from '../components/Common';
 import { dueLabel, partOfDay, subjectColor, useMe } from '../lib/util';
 import { isReviewTask, remPath, remStage } from '../lib/remediation';
 import { useWorkItems, WorkTaskCard } from '../components/WorkCards';
+import { NotifyBell } from '../components/NotifyBell';
 
 const DownloadAssigned = lazy(() => import('../offline/DownloadButtons').then((m) => ({ default: m.DownloadAssignedButton })));
 import { workPath } from '../lib/work';
@@ -62,6 +63,7 @@ export default function Home() {
           <span className="ln-hello__class">{cls ? `Lớp ${cls.name}` : me.grade ? `Lớp ${me.grade}` : 'Học sinh'}</span>
         </div>
         <div className="ln-hello__stats">
+          <NotifyBell />
           <StarCount value={wallet?.stars ?? 0} size="md" />
           <span className={`ln-streak${streak ? '' : ' is-off'}`} title="Số ngày học liên tiếp">
             <Icon name="flame" size={22} /> {streak} ngày

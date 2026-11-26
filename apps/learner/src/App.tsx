@@ -5,6 +5,7 @@ import { CatalogGate, handoffTo, useCurrentUser, useSignOut } from '@openedu/dat
 import { Button, Icon, KidShell, Mascot, setSoundEnabled } from '@openedu/ui';
 import { ErrorState, LoadingScreen, Toasts } from './components/Common';
 import { UnlockCelebration } from './components/UnlockCelebration';
+import { NotifyWatch } from './components/NotifyBell';
 import { MeContext, resolveSettings, teacherUrl } from './lib/util';
 import Home from './pages/Home';
 
@@ -40,6 +41,8 @@ const LtiApps = lazy(() => import('./pages/connect/LtiApps'));
 const DiscussHome = lazy(() => import('./pages/discuss/Discuss').then((m) => ({ default: m.DiscussHome })));
 const DiscussRoom = lazy(() => import('./pages/discuss/Discuss'));
 const PageView = lazy(() => import('./pages/connect/PageView'));
+const NotifyPage = lazy(() => import('./pages/notify/NotifyPage'));
+const ParentChat = lazy(() => import('./pages/parent/ParentChat'));
 
 export function App() {
   const me = useCurrentUser().data ?? null;
@@ -88,11 +91,16 @@ export function App() {
           </Route>
           <Route element={<Guard allow={['student', 'parent']} />}>
             <Route path="phu-huynh" element={<Parent />} />
+            <Route path="thong-bao" element={<NotifyPage />} />
+          </Route>
+          <Route element={<Guard allow={['parent']} />}>
+            <Route path="phu-huynh/nhan-tin" element={<ParentChat />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
         </CatalogGate>
       </Suspense>
+      {!quiet && me && (me.role === 'student' || me.role === 'parent') && !me.mustChangePassword ? <NotifyWatch /> : null}
       {!quiet && <UnlockCelebration />}
       {!quiet && me?.role === 'student' && <Suspense fallback={null}><BadgeWatcher /></Suspense>}
       <Toasts />

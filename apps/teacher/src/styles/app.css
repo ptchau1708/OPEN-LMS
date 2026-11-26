@@ -728,3 +728,27 @@ textarea.tc-input { resize: vertical; line-height: 1.5; }
 .tc-skimport { max-height: 46vh; overflow: auto; border: 1px solid var(--p-line); border-radius: 8px; }
 .tc-skimport tr.is-error td { color: var(--p-danger); }
 .tc-skimport td { vertical-align: top; padding: 5px 8px; border-bottom: 1px solid var(--p-line); }
+
+/* ---------- chuông thông báo ---------- */
+.tc-spacer { flex: 1 1 auto; }
+.tc-side__top { display: flex; align-items: center; gap: 6px; }
+.tc-side__top .tc-brand { flex: 1 1 auto; min-width: 0; }
+.tc-app--rail .tc-side__top { flex-direction: column; }
+.tc-bell { position: relative; }
+.tc-bell__btn { position: relative; }
+.tc-bell__n { position: absolute; top: 0; right: 0; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--p-danger, #d93838); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
+.tc-bell__panel { position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; width: min(380px, calc(100vw - 24px)); max-height: min(70vh, 560px); display: flex; flex-direction: column; background: var(--p-surface); border: 1px solid var(--p-line); border-radius: 12px; box-shadow: var(--tc-shadow-pop); }
+.tc-topbar .tc-bell__panel { left: auto; right: 0; }
+.tc-bell__panel > header { padding: 10px 12px; border-bottom: 1px solid var(--p-line); }
+.tc-bell__panel > footer { padding: 8px 12px; border-top: 1px solid var(--p-line); font-size: 13px; }
+.tc-bell__panel > p { padding: 12px; margin: 0; }
+.tc-bell__list { list-style: none; margin: 0; padding: 4px; overflow-y: auto; }
+.tc-bell__item { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; border: 0; background: transparent; font: inherit; color: var(--p-ink); padding: 8px 10px; border-radius: 8px; cursor: pointer; }
+.tc-bell__item:hover { background: var(--tc-surface-2); }
+.tc-bell__item.is-unread { background: var(--p-accent-soft); }
+.tc-bell__item.is-unread .tc-bell__title { font-weight: 700; }
+.tc-bell__title { font-size: 13.5px; }
+.tc-bell__body { font-size: 12.5px; color: var(--p-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tc-bell__at { font-size: 11.5px; color: var(--p-muted); }
+.tc-linkbtn { border: 0; background: transparent; color: var(--p-accent); font: inherit; font-size: 13px; cursor: pointer; padding: 2px 4px; }
+.tc-linkbtn:hover { text-decoration: underline; }

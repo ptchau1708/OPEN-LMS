@@ -48,3 +48,7 @@ verify_jwt = false
 # LTI 1.3: app ngoài gọi /jwks, /token, /ags không có JWT Supabase; /authorize tự kiểm JWT của học sinh.
 [functions.lti]
 verify_jwt = false
+
+# Thông báo đẩy: GET khoá công khai (ai cũng gọi được), POST chỉ CSDL gọi (header x-openedu-push).
+[functions.push]
+verify_jwt = false

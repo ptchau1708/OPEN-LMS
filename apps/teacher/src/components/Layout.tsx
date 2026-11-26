@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import type { Profile } from '@openedu/contracts';
 import { Icon, type IconName } from '@openedu/ui';
-import { useDataSource, useSignOut } from '@openedu/data';
+import { useDataSource, useNotifications, usePushSync, useSignOut } from '@openedu/data';
 import { Avatar } from './common';
+import { NotifyBell } from './NotifyBell';
 import { cx } from '../lib/format';
 
 const NAV: { to: string; label: string; icon: IconName; end?: boolean; match?: RegExp; section?: string; admin?: boolean }[] = [
@@ -20,6 +21,7 @@ const NAV: { to: string; label: string; icon: IconName; end?: boolean; match?: R
   { to: '/dau-truong', label: 'Đấu trường', icon: 'trophy', match: /^\/dau-truong/ },
   { to: '/trang-hoc', label: 'Trang học', icon: 'puzzle' },
   { to: '/thao-luan', label: 'Thảo luận', icon: 'team', match: /^\/thao-luan/ },
+  { to: '/phu-huynh', label: 'Phụ huynh', icon: 'parent', match: /^\/phu-huynh/ },
   { to: '/bai-viet', label: 'Bài viết', icon: 'pencil', section: 'Đánh giá', match: /^\/bai-viet/ },
   { to: '/cham-bai', label: 'Chấm bài', icon: 'eye', match: /^\/cham-bai/ },
   { to: '/de-kiem-tra', label: 'Đề kiểm tra', icon: 'check', match: /^\/de-kiem-tra/ },
@@ -29,7 +31,6 @@ const NAV: { to: string; label: string; icon: IconName; end?: boolean; match?: R
   { to: '/vuon-lop', label: 'Vườn lớp & huy hiệu', icon: 'star' },
   { to: '/diem-danh', label: 'Điểm danh', icon: 'clock' },
   { to: '/bao-cao', label: 'Báo cáo', icon: 'map', section: 'Trường', match: /^\/bao-cao/ },
-  { to: '/phu-huynh', label: 'Liên kết phụ huynh', icon: 'parent' },
   { to: '/xuat-nhap', label: 'Xuất / nhập dữ liệu', icon: 'upload' },
   { to: '/quan-tri/lop', label: 'Quản lí lớp', icon: 'team', admin: true, section: 'Quản trị' },
   { to: '/quan-tri/tai-khoan', label: 'Tài khoản', icon: 'user', admin: true },
@@ -54,6 +55,8 @@ export function Layout({ user }: { user: Profile }) {
   const [menu, setMenu] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
   const rail = /^\/bai-giang\/[^/]+/.test(loc.pathname);
+  const notes = useNotifications();
+  usePushSync('gv');
   useEffect(() => { setMenu(false); setUserMenu(false); }, [loc.pathname]);
 
   const userBox = (
@@ -80,6 +83,7 @@ export function Layout({ user }: { user: Profile }) {
       <aside className={cx('tc-side', menu && 'is-open')}>
         <div className="tc-side__top">
           <Brand />
+          <NotifyBell data={notes.data} id="bell-side" />
         </div>
         <nav className="tc-nav" aria-label="Điều hướng chính">
           {NAV.filter((n) => !n.admin || user.role === 'admin').map((n) => [
@@ -97,6 +101,8 @@ export function Layout({ user }: { user: Profile }) {
           <Icon name={menu ? 'close' : 'menu'} size={22} />
         </button>
         <Brand />
+        <span className="tc-spacer" />
+        <NotifyBell data={notes.data} id="bell-top" testId="notify-bell-m" />
       </header>
       {menu ? <div className="tc-side-scrim" onClick={() => setMenu(false)} /> : null}
       <main className="tc-main">
