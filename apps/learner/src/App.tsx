@@ -6,6 +6,7 @@ import { Button, Icon, KidShell, Mascot, setSoundEnabled } from '@openedu/ui';
 import { ErrorState, LoadingScreen, Toasts } from './components/Common';
 import { UnlockCelebration } from './components/UnlockCelebration';
 import { NotifyWatch } from './components/NotifyBell';
+import { StarFly } from './components/StarFly';
 import { MeContext, resolveSettings, teacherUrl } from './lib/util';
 import Home from './pages/Home';
 
@@ -103,6 +104,7 @@ export function App() {
       {!quiet && me && (me.role === 'student' || me.role === 'parent') && !me.mustChangePassword ? <NotifyWatch /> : null}
       {!quiet && <UnlockCelebration />}
       {!quiet && me?.role === 'student' && <Suspense fallback={null}><BadgeWatcher /></Suspense>}
+      {!quiet && me?.role === 'student' && !me.mustChangePassword ? <StarFly userId={me.id} reduced={s.reducedMotion} /> : null}
       <Toasts />
     </KidShell>
   );

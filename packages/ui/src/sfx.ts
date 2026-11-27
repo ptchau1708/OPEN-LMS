@@ -22,6 +22,15 @@ function ac(): AudioContext | null {
   return ctx;
 }
 
+/**
+ * Rung nhẹ (Android). iPhone/Safari không hỗ trợ rung từ web nên bỏ qua êm. Đi theo cài đặt "Âm thanh và rung".
+ */
+export function haptic(pattern: number | number[] = 12): void {
+  if (!enabled || typeof navigator === 'undefined') return;
+  const nav = navigator as Navigator & { vibrate?: (p: number | number[]) => boolean };
+  try { if (typeof nav.vibrate === 'function') nav.vibrate(pattern); } catch { /* bỏ qua */ }
+}
+
 export function unlockAudio(): void {
   const c = ac();
   if (c && c.state === 'suspended') void c.resume();
@@ -53,23 +62,27 @@ export const sfx = {
     if (!enabled) return;
     tone(784, 0, 0.12, 'triangle');
     tone(1175, 0.1, 0.22, 'triangle');
+    haptic(18);
   },
   /** Chưa đúng: một nốt trầm, dịu — không phải tiếng "sai" gắt. */
   tryAgain(): void {
     if (!enabled) return;
     tone(392, 0, 0.18, 'sine', 0.12);
     tone(330, 0.14, 0.22, 'sine', 0.1);
+    haptic([10, 60, 10]);
   },
   /** Nhận sao. */
   star(): void {
     if (!enabled) return;
     [988, 1319, 1568].forEach((f, i) => tone(f, i * 0.07, 0.16, 'triangle', 0.12));
+    haptic(14);
   },
   /** Hoàn thành bài / mở khóa linh vật. */
   fanfare(): void {
     if (!enabled) return;
     [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.25, 'triangle', 0.14));
     tone(1319, 0.5, 0.4, 'triangle', 0.12);
+    haptic([20, 70, 20, 70, 40]);
   },
   /** Thả thẻ vào ô. */
   drop(): void {

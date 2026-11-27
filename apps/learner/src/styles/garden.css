@@ -1,7 +1,22 @@
 /* Vườn kĩ năng */
-.ln-garden > * + * { margin-top: 14px; }
-.ln-bed { padding: 16px; border-top: 6px solid var(--subj); background: linear-gradient(180deg, var(--k-card) 70%, var(--k-ok-soft) 100%); }
-.ln-bed__h { margin: 0 0 10px; font-family: var(--f-kid-display); font-size: calc(20px * var(--k-scale)); font-weight: 800; color: var(--subj); }
+.ln-garden > * + * { margin-top: 10px; }
+.ln-bed { padding: 0; overflow: hidden; border-left: 6px solid var(--subj); }
+.ln-bed.is-open { background: linear-gradient(180deg, var(--k-card) 70%, var(--k-ok-soft) 100%); }
+.ln-bed__head { display: flex; align-items: center; width: 100%; margin: 0; padding: 12px 12px 12px 14px; border: 0; background: transparent; color: var(--k-ink); font: inherit; text-align: left; cursor: pointer; touch-action: manipulation; }
+.ln-bed__title { flex: 1; min-width: 0; display: block; }
+.ln-bed__h { margin: 0; font-family: var(--f-kid-display); font-size: calc(19px * var(--k-scale)); font-weight: 800; color: var(--k-ink); line-height: 1.15; }
+.ln-bed__mini { display: flex; flex-wrap: wrap; align-items: center; margin-top: 4px; font-family: var(--f-kid-display); font-weight: 800; font-size: calc(15px * var(--k-scale)); color: var(--k-sub); }
+.ln-bed__mini > span { display: inline-flex; align-items: center; margin-right: 10px; }
+.ln-bed__mini svg { margin-right: 2px; }
+.ln-bed__mini .is-can-on { color: #c2410c; }
+.ln-bed__seg { display: flex; height: 6px; margin-top: 8px; border-radius: 999px; background: var(--k-line); overflow: hidden; }
+.ln-bed__seg i { display: block; height: 100%; }
+.ln-bed__seg .is-vung { background: var(--k-ok); }
+.ln-bed__seg .is-dang-hoc { background: var(--subj); }
+.ln-bed__seg .is-can-on { background: var(--k-try); }
+.ln-bed__chev { flex: none; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-left: 8px; border-radius: 50%; background: var(--k-bg); color: var(--k-sub); transition: transform 200ms var(--k-ease); }
+.ln-bed.is-open .ln-bed__chev { transform: rotate(90deg); }
+.ln-bed__body { padding: 0 14px 16px; }
 .ln-bed__counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-gap: 6px; }
 .ln-bed__count { display: flex; flex-direction: column; align-items: center; padding: 6px 2px; border-radius: 14px; background: var(--k-bg); text-align: center; line-height: 1.1; }
 .ln-bed__count strong { font-family: var(--f-kid-display); font-size: 22px; font-weight: 800; }

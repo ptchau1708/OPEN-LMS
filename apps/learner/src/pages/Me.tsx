@@ -17,7 +17,7 @@ const BadgeShelf = lazy(() => import('./rewards/BadgeShelf'));
 const TOGGLES: { key: keyof StudentSettings; label: string; desc: string; icon: IconName }[] = [
   { key: 'bigText', label: 'Chữ to', desc: 'Chữ và nút to hơn, dễ đọc hơn', icon: 'eye' },
   { key: 'autoRead', label: 'Tự đọc đề bài', desc: 'Máy đọc to đề bài khi mở câu hỏi', icon: 'speaker' },
-  { key: 'sound', label: 'Âm thanh', desc: 'Tiếng “ting” khi đúng, nhạc khi nhận sao', icon: 'star' },
+  { key: 'sound', label: 'Âm thanh và rung', desc: 'Tiếng “ting” khi đúng, nhạc khi nhận sao, rung nhẹ trên điện thoại Android', icon: 'star' },
   { key: 'reducedMotion', label: 'Giảm chuyển động', desc: 'Ít hình động hơn cho dịu mắt', icon: 'settings' },
 ];
 

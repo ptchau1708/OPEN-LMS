@@ -50,11 +50,11 @@ export function EmptyState({ title, text, mascot = 'nghe', action }: { title: st
 }
 
 const TABS: { id: string; path: string; label: string; icon: IconName; color: string }[] = [
-  { id: 'home', path: '/', label: 'Nhà', icon: 'home', color: 'var(--k-math)' },
-  { id: 'learn', path: '/hoc', label: 'Học', icon: 'map', color: 'var(--k-nat)' },
-  { id: 'play', path: '/choi', label: 'Chơi', icon: 'trophy', color: 'var(--k-viet)' },
-  { id: 'gift', path: '/qua', label: 'Quà', icon: 'gift', color: 'var(--k-art)' },
-  { id: 'me', path: '/toi', label: 'Tôi', icon: 'user', color: 'var(--k-eng)' },
+  { id: 'home', path: '/', label: 'Nhà', icon: 'home', color: 'var(--k-sky)' },
+  { id: 'learn', path: '/hoc', label: 'Học', icon: 'map', color: 'var(--k-sea)' },
+  { id: 'play', path: '/choi', label: 'Chơi', icon: 'trophy', color: '#e0601a' },
+  { id: 'gift', path: '/qua', label: 'Quà', icon: 'gift', color: '#6b5cf0' },
+  { id: 'me', path: '/toi', label: 'Tôi', icon: 'user', color: 'var(--k-navy)' },
 ];
 
 export function AppTabs({ active }: { active: string }) {

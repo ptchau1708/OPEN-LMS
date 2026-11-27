@@ -13,6 +13,10 @@ export const MASCOT_COUNTRY_EN: Record<MascotId, { country: string; emoji: strin
   ho: { country: 'Korea', emoji: '🐯' },
   ga: { country: 'France', emoji: '🐓' },
   cong: { country: 'India', emoji: '🦚' },
+  sutu: { country: 'Kenya', emoji: '🦁' },
+  gautuyet: { country: 'Canada', emoji: '🐻‍❄️' },
+  canhcut: { country: 'Argentina', emoji: '🐧' },
+  lacda: { country: 'Egypt', emoji: '🐪' },
 };
 
 const greet = (id: MascotId) => MASCOT_BY_ID[id].greeting;

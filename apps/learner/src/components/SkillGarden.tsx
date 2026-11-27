@@ -20,6 +20,7 @@ export default function SkillGarden() {
   const mq = useSkillMastery(me.id);
   const sets = useRemediationSets(me.id).data ?? [];
   const [openSeeds, setOpenSeeds] = useState<Record<string, boolean>>({});
+  const [openBed, setOpenBed] = useState<Record<string, boolean>>({});
   const big = (me.grade ?? 1) >= 4;
 
   const groups = useMemo(() => {
@@ -41,6 +42,15 @@ export default function SkillGarden() {
   if (mq.isPending) return <div className="ln-skeleton-list"><i /><i /></div>;
   if (mq.isError) return <p className="k-muted">Chưa tải được vườn cây. <button type="button" className="ln-link" onClick={() => void mq.refetch()}>Thử lại</button></p>;
 
+  // Mặc định chỉ mở luống cần tưới; không có thì mở luống đầu tiên đã có cây mọc. Các luống khác thu gọn thành một dòng.
+  const autoOpen = (() => {
+    const need = groups.filter((g) => g.plants.some((x) => x.level === 'can-on')).map((g) => g.subject as string);
+    if (need.length) return need;
+    const grown = groups.find((g) => g.plants.some((x) => x.level !== 'chua-hoc'));
+    return grown ? [grown.subject as string] : groups.length ? [groups[0].subject as string] : [];
+  })();
+  const isOpen = (subj: string) => (openBed[subj] === undefined ? autoOpen.indexOf(subj) >= 0 : openBed[subj]);
+
   return (
     <div className="ln-garden">
       {groups.map(({ subject, plants }) => {
@@ -48,37 +58,60 @@ export default function SkillGarden() {
         const grown = plants.filter((x) => x.level !== 'chua-hoc');
         const seeds = plants.length - grown.length;
         const color = subjectColor(subject);
+        const open = isOpen(subject);
+        const total = Math.max(1, plants.length);
+        const name = SUBJECTS[subject]?.name ?? 'Môn khác';
         return (
-          <section key={subject} className="ln-bed k-card" style={{ ['--subj' as string]: color } as CSSProperties}>
-            <h3 className="ln-bed__h">{SUBJECTS[subject]?.name ?? 'Môn khác'}</h3>
-            <div className="ln-bed__counts">
-              {(['vung', 'dang-hoc', 'can-on', 'chua-hoc'] as MasteryLevel[]).map((l) => (
-                <span key={l} className={`ln-bed__count is-${l}`}><PlantArt level={l} size={34} /><strong>{count(l)}</strong><span>{KID_LABEL[l]}</span></span>
-              ))}
-            </div>
-            {big && <ProgressBar value={count('vung') / Math.max(1, plants.length)} color="var(--k-ok)" label={`Đã nở hoa ${count('vung')} trên ${plants.length} cây`} className="ln-bed__bar" />}
-            {grown.length > 0 && (
-              <ul className="ln-plants">
-                {grown.map((x) => (
-                  <li key={x.skill.code} className={`ln-plant is-${x.level}`}>
-                    <PlantArt level={x.level} size={64} />
-                    <span className="ln-plant__name">{x.skill.short}</span>
-                    {big && x.level !== 'can-on' && <ProgressBar value={x.p} color={x.level === 'vung' ? 'var(--k-ok)' : color} label={`${Math.round(x.p * 100)}%`} className="ln-plant__bar" />}
-                    {x.level === 'can-on' && (x.set
-                      ? <Button size="md" variant="subject" color="var(--k-sci)" className="ln-plant__water" onClick={() => { sfx.tap(); nav(remPath((x.set as RemediationSet).id)); }} icon={<Icon name="play" size={20} />}>Tưới cây</Button>
-                      : <span className="ln-plant__wait">Sắp tưới</span>)}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {seeds > 0 && (
-              <div className="ln-seeds">
-                <button type="button" className="ln-seeds__btn" aria-expanded={!!openSeeds[subject]} onClick={() => setOpenSeeds((o) => ({ ...o, [subject]: !o[subject] }))}>
-                  <PlantArt level="chua-hoc" size={28} /> {seeds} hạt giống đang chờ em gieo <Icon name={openSeeds[subject] ? 'close' : 'next'} size={18} />
-                </button>
-                {openSeeds[subject] && <ul className="ln-seeds__list">{plants.filter((x) => x.level === 'chua-hoc').map((x) => <li key={x.skill.code}>{x.skill.short}</li>)}</ul>}
+          <section key={subject} className={`ln-bed k-card${open ? ' is-open' : ''}`} style={{ ['--subj' as string]: color } as CSSProperties}>
+            <button type="button" className="ln-bed__head" aria-expanded={open} onClick={() => { sfx.tap(); setOpenBed((o) => ({ ...o, [subject]: !open })); }}>
+              <span className="ln-bed__title">
+                <h3 className="ln-bed__h">{name}</h3>
+                <span className="ln-bed__mini" aria-label={`${count('vung')} nở hoa, ${count('dang-hoc')} đang lớn, ${count('can-on')} cần tưới, ${seeds} hạt giống`}>
+                  <span className="is-vung"><PlantArt level="vung" size={22} />{count('vung')}</span>
+                  <span className="is-dang-hoc"><PlantArt level="dang-hoc" size={22} />{count('dang-hoc')}</span>
+                  {count('can-on') ? <span className="is-can-on"><PlantArt level="can-on" size={22} />{count('can-on')}</span> : null}
+                  <span className="is-chua-hoc"><PlantArt level="chua-hoc" size={22} />{seeds}</span>
+                </span>
+                <span className="ln-bed__seg" aria-hidden="true">
+                  <i className="is-vung" style={{ width: `${(count('vung') / total) * 100}%` }} />
+                  <i className="is-dang-hoc" style={{ width: `${(count('dang-hoc') / total) * 100}%` }} />
+                  <i className="is-can-on" style={{ width: `${(count('can-on') / total) * 100}%` }} />
+                </span>
+              </span>
+              <span className="ln-bed__chev" aria-hidden="true"><Icon name="next" size={22} /></span>
+            </button>
+            {open ? (
+              <div className="ln-bed__body">
+                <div className="ln-bed__counts">
+                  {(['vung', 'dang-hoc', 'can-on', 'chua-hoc'] as MasteryLevel[]).map((l) => (
+                    <span key={l} className={`ln-bed__count is-${l}`}><PlantArt level={l} size={34} /><strong>{count(l)}</strong><span>{KID_LABEL[l]}</span></span>
+                  ))}
+                </div>
+                {big && <ProgressBar value={count('vung') / total} color="var(--k-ok)" label={`Đã nở hoa ${count('vung')} trên ${plants.length} cây`} className="ln-bed__bar" />}
+                {grown.length > 0 && (
+                  <ul className="ln-plants">
+                    {grown.map((x) => (
+                      <li key={x.skill.code} className={`ln-plant is-${x.level}`}>
+                        <PlantArt level={x.level} size={64} />
+                        <span className="ln-plant__name">{x.skill.short}</span>
+                        {big && x.level !== 'can-on' && <ProgressBar value={x.p} color={x.level === 'vung' ? 'var(--k-ok)' : color} label={`${Math.round(x.p * 100)}%`} className="ln-plant__bar" />}
+                        {x.level === 'can-on' && (x.set
+                          ? <Button size="md" variant="subject" color="var(--k-sea)" className="ln-plant__water" onClick={() => { sfx.tap(); nav(remPath((x.set as RemediationSet).id)); }} icon={<Icon name="play" size={20} />}>Tưới cây</Button>
+                          : <span className="ln-plant__wait">Sắp tưới</span>)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {seeds > 0 && (
+                  <div className="ln-seeds">
+                    <button type="button" className="ln-seeds__btn" aria-expanded={!!openSeeds[subject]} onClick={() => setOpenSeeds((o) => ({ ...o, [subject]: !o[subject] }))}>
+                      <PlantArt level="chua-hoc" size={28} /> {seeds} hạt giống đang chờ em gieo <Icon name={openSeeds[subject] ? 'close' : 'next'} size={18} />
+                    </button>
+                    {openSeeds[subject] && <ul className="ln-seeds__list">{plants.filter((x) => x.level === 'chua-hoc').map((x) => <li key={x.skill.code}>{x.skill.short}</li>)}</ul>}
+                  </div>
+                )}
               </div>
-            )}
+            ) : null}
           </section>
         );
       })}

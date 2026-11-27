@@ -25,22 +25,33 @@
   --k-star: #ffc22e;
   --k-star-dark: #d99a00;
 
+  /* Bảng màu "Trời quê" (2026-11): tươi sáng, nhẹ nhàng, chắc khỏe — trời xanh, sông ngọc, nắng vàng, lúa xanh, chữ xanh mực.
+     Ít hồng/tím; màu đậm chỉ dùng cho hành động và phần thưởng. */
+  --k-sky: #2d7ff9;        /* Trời — hành động chính, liên kết */
+  --k-sky-deep: #1f63cf;
+  --k-sky-soft: #e2efff;
+  --k-sea: #0b9494;        /* Sông — tiến độ, phụ */
+  --k-sea-soft: #dcf4f1;
+  --k-sun: #ffb31a;        /* Nắng — sao, phần thưởng, điểm nhấn */
+  --k-sun-soft: #fff3d6;
+  --k-navy: #15294a;       /* Mực — chữ, nền tối */
+
   /* nền & chữ (kid) */
-  --k-bg: #eaf4ff;
-  --k-bg-2: #f6f0ff;
+  --k-bg: #edf5ff;
+  --k-bg-2: #e8f7f3;
   --k-card: #ffffff;
-  --k-ink: #22304a;
-  --k-sub: #5a6a86;
-  --k-line: #d6e1f0;
-  --k-press: rgba(20, 35, 70, 0.12); /* viền dưới nút nổi khối */
+  --k-ink: #15294a;
+  --k-sub: #52627f;
+  --k-line: #d5e2f2;
+  --k-press: rgba(21, 41, 74, 0.12); /* viền dưới nút nổi khối */
 
   /* trạng thái */
-  --k-ok: #22b573;
-  --k-ok-dark: #178a55;
-  --k-ok-soft: #dff7ea;
+  --k-ok: #1ea566;
+  --k-ok-dark: #157a4b;
+  --k-ok-soft: #dcf5e8;
   --k-try: #ff9f43; /* sai: cam dịu, không dùng đỏ gắt */
   --k-try-soft: #fff1e0;
-  --k-info: #2f7bf6;
+  --k-info: #2d7ff9;
   --k-focus: #ffb703;
 
   /* chữ */
@@ -57,8 +68,9 @@
   --k-fs-hero: calc(38px * var(--k-scale));
 
   /* hình khối */
-  --k-radius: 20px;
+  --k-radius: 22px;
   --k-radius-sm: 14px;
+  --k-radius-lg: 28px;
   --k-touch: 56px; /* kích thước chạm tối thiểu */
   --k-gap: 12px;
   --k-shadow: 0 4px 0 var(--k-press);

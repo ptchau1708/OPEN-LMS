@@ -23,7 +23,7 @@ export default function BadgeShelf({ userId }: { userId: string }) {
 
   return (
     <div className="ln-shelf">
-      <p className="ln-shelf__count"><Icon name="trophy" size={22} /> Em có <strong>{count + teacher.length}</strong> huy hiệu · còn {BADGES.length - count} huy hiệu đang chờ em</p>
+      <p className="ln-shelf__count"><Icon name="trophy" size={22} /> <span>Em có <strong>{count + teacher.length}</strong> huy hiệu · còn {BADGES.length - count} huy hiệu đang chờ em</span></p>
       {teacher.length > 0 && (
         <div className="ln-shelf__row">
           <h3 className="ln-shelf__cat" style={{ color: BADGE_CATEGORIES[7].color }}>Huy hiệu của thầy/cô</h3>
@@ -40,11 +40,15 @@ export default function BadgeShelf({ userId }: { userId: string }) {
           </div>
         </div>
       )}
-      {BADGE_CATEGORIES.filter((c) => c.id !== 'cua-co').map((c) => (
+      {BADGE_CATEGORIES.filter((c) => c.id !== 'cua-co').map((c) => {
+        // Huy hiệu đã có xếp trước; trên điện thoại mỗi kệ là một hàng vuốt ngang.
+        const list = BADGES.filter((d) => d.category === c.id).sort((x, y) => Number(byId.has(y.id)) - Number(byId.has(x.id)));
+        const got = list.filter((d) => byId.has(d.id)).length;
+        return (
         <div key={c.id} className="ln-shelf__row">
-          <h3 className="ln-shelf__cat" style={{ color: c.color }}>{c.name}</h3>
+          <h3 className="ln-shelf__cat" style={{ color: c.color }}>{c.name} <span className="ln-shelf__n">{got}/{list.length}</span></h3>
           <div className="ln-shelf__grid">
-            {BADGES.filter((d) => d.category === c.id).map((d) => {
+            {list.map((d) => {
               const b = byId.get(d.id);
               const p = prog.get(d.id);
               return (
@@ -58,7 +62,8 @@ export default function BadgeShelf({ userId }: { userId: string }) {
             })}
           </div>
         </div>
-      ))}
+        );
+      })}
       <Sheet open={!!open} onClose={() => setOpen(null)} title={open?.kind === 'earned' ? badgeView(open.b).title : open ? 'Huy hiệu đang chờ em' : ''}>
         {open?.kind === 'earned' && (() => {
           const v = badgeView(open.b);

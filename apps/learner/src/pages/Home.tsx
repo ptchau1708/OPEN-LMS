@@ -2,13 +2,14 @@ import { lazy, Suspense, useEffect, useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router';
 import type { RemediationSet, Task } from '@openedu/contracts';
 import { discussionState, MAX_REMEDIATION_TASKS, remediationTask, useClass, useClassPages, useDiscussions, useLtiTools, usePassport, useRemediationSets, useTodayTasks, useWallet } from '@openedu/data';
-import { Button, Card, Confetti, Icon, Mascot, MascotBubble, ProgressBar, SpeakButton, StarCount, sfx } from '@openedu/ui';
+import { Button, Card, Confetti, Icon, Mascot, ProgressBar, SpeakButton, StarCount, sfx } from '@openedu/ui';
 import type { IconName } from '@openedu/ui';
 import { AppTabs, Avatar, EmptyState, ErrorState } from '../components/Common';
 import { dueLabel, partOfDay, subjectColor, useMe } from '../lib/util';
 import { isReviewTask, remPath, remStage } from '../lib/remediation';
 import { useWorkItems, WorkTaskCard } from '../components/WorkCards';
 import { NotifyBell } from '../components/NotifyBell';
+import { KiteSky } from '../components/KiteSky';
 
 const DownloadAssigned = lazy(() => import('../offline/DownloadButtons').then((m) => ({ default: m.DownloadAssignedButton })));
 import { workPath } from '../lib/work';
@@ -45,79 +46,104 @@ export default function Home() {
   const ltiCount = (useLtiTools().data?.length ?? 0) + (useClassPages(me.classId).data?.length ?? 0);
   const openDisc = (useDiscussions(me.classId).data ?? []).filter((d) => discussionState(d) === 'open').length;
 
-  let line = `${partOfDay()}, ${me.name}! `;
-  if (tasksQ.isPending) line += 'Mình đang xem hôm nay có gì nhé…';
-  else if (!work.length) line += 'Hôm nay chưa có bài mới. Mình đi phiêu lưu trên bản đồ nhé!';
-  else if (allDone) line += 'Em làm xong hết nhiệm vụ rồi. Giỏi quá đi!';
-  else if (left === work.length) line += `Hôm nay có ${left} nhiệm vụ đang chờ em. Mình bắt đầu nhé!`;
-  else line += `Còn ${left} nhiệm vụ nữa thôi. Cố lên em ơi!`;
+  let line = '';
+  if (tasksQ.isPending) line = 'Mình đang xem hôm nay có gì nhé…';
+  else if (!work.length) line = 'Hôm nay chưa có bài mới. Mình đi phiêu lưu trên bản đồ nhé!';
+  else if (allDone) line = 'Em làm xong hết nhiệm vụ rồi. Giỏi quá đi!';
+  else if (left === work.length) line = `Có ${left} nhiệm vụ đang chờ em. Mình bắt đầu nhé!`;
+  else line = `Còn ${left} nhiệm vụ nữa thôi. Cố lên em ơi!`;
   if (writeLeft && !tasksQ.isPending) line += ` Em còn ${writeLeft} bài viết nữa nhé.`;
   if (streak >= 2 && !allDone) line += ` Em đã học ${streak} ngày liền rồi đó!`;
+  const spoken = `${partOfDay()}, ${me.name}! ${line}`;
+  const done = work.length - left;
 
   return (
     <div className="ln-page ln-home">
       <header className="ln-hello">
-        <Avatar mascot={companion} color={me.avatarColor} size={64} />
+        <Avatar mascot={companion} color={me.avatarColor} size={52} />
         <div className="ln-hello__text">
           <h1 className="ln-hello__name">Chào {me.name}!</h1>
           <span className="ln-hello__class">{cls ? `Lớp ${cls.name}` : me.grade ? `Lớp ${me.grade}` : 'Học sinh'}</span>
         </div>
         <div className="ln-hello__stats">
           <NotifyBell />
-          <StarCount value={wallet?.stars ?? 0} size="md" />
-          <span className={`ln-streak${streak ? '' : ' is-off'}`} title="Số ngày học liên tiếp">
-            <Icon name="flame" size={22} /> {streak} ngày
-          </span>
         </div>
       </header>
 
-      <div className="ln-home__grid">
-        <section className="ln-home__bubble">
-          <MascotBubble mascot={companion} mood={allDone ? 'cheer' : 'wave'} size={96}>
-            <span className="ln-bubble-line">{line}</span>
-            <SpeakButton text={line} size="sm" label="Nghe Nghé đọc" className="ln-bubble-speak" />
-          </MascotBubble>
-        </section>
+      <KiteSky
+        done={done}
+        total={work.length}
+        mascot={companion}
+        mood={allDone ? 'cheer' : 'wave'}
+        headline={tasksQ.isPending ? '…' : allDone ? 'Xong hết!' : work.length ? <><b>{done}</b>/{work.length}</> : 'Bay thôi!'}
+        caption={allDone ? 'Diều bay cao nhất rồi!' : work.length ? 'nhiệm vụ đã xong' : 'Hôm nay chưa có bài mới'}
+        badge={<>
+          <StarCount value={wallet?.stars ?? 0} size="md" />
+          <span className={`ln-streak${streak ? '' : ' is-off'}`} title="Số ngày học liên tiếp"><Icon name="flame" size={20} /> {streak} ngày</span>
+        </>}
+      >
+        <span className="ln-bubble-line">{line}</span>
+        <SpeakButton text={spoken} size="sm" label="Nghe đọc" className="ln-bubble-speak" />
+      </KiteSky>
 
-        <section className="ln-home__tasks" aria-labelledby="ln-tasks-h">
-          <h2 id="ln-tasks-h" className="ln-h2 ln-section-h">
-            Nhiệm vụ hôm nay
-            {work.length > 0 && <span className="ln-count">{work.length - left}/{work.length}</span>}
-          </h2>
-          {tasksQ.data && <Suspense fallback={null}><DownloadAssigned tasks={tasksQ.data} /></Suspense>}
-          {tasksQ.isError ? (
-            <ErrorState message="Chưa tải được nhiệm vụ." onRetry={() => void tasksQ.refetch()} mascot={companion} />
-          ) : tasksQ.isPending ? (
-            <div className="ln-skeleton-list"><i /><i /><i /></div>
-          ) : (
-            <>
-              {allDone && <DoneCard mascot={companion} onArena={() => nav('/choi/thap')} />}
-              {!work.length && (
-                <EmptyState title="Chưa có bài được giao" text="Em mở Bản đồ phiêu lưu để học thêm nhé!" mascot={companion}
-                  action={<Button onClick={() => nav('/hoc')} icon={<Icon name="map" size={24} />}>Mở bản đồ</Button>} />
-              )}
-              <div className="ln-tasks">{tasks.map((t) => isReviewTask(t) ? <ReviewCard key={t.id} t={t} onOpen={() => openTask(t, nav)} /> : <TaskCard key={t.id} t={t} onOpen={() => openTask(t, nav)} />)}</div>
-            </>
-          )}
-          <Suspense fallback={null}><ExamCards /></Suspense>
-          {writing.length > 0 && (
-            <>
-              <h2 className="ln-h2 ln-section-h ln-work-h">Bài viết{writeLeft > 0 && <span className="ln-count">{writeLeft} bài cần làm</span>}</h2>
-              <div className="ln-tasks">{writing.map((x) => <WorkTaskCard key={x.task.id} item={x} onOpen={() => { sfx.tap(); nav(workPath(x.task.id)); }} />)}</div>
-            </>
-          )}
-        </section>
+      <section className="ln-home__tasks" aria-labelledby="ln-tasks-h">
+        <h2 id="ln-tasks-h" className="ln-h2 ln-section-h">
+          Nhiệm vụ hôm nay
+          {work.length > 0 && <span className="ln-count">{done}/{work.length}</span>}
+        </h2>
+        {tasksQ.data && <Suspense fallback={null}><DownloadAssigned tasks={tasksQ.data} /></Suspense>}
+        {tasksQ.isError ? (
+          <ErrorState message="Chưa tải được nhiệm vụ." onRetry={() => void tasksQ.refetch()} mascot={companion} />
+        ) : tasksQ.isPending ? (
+          <div className="ln-skeleton-list"><i /><i /><i /></div>
+        ) : (
+          <>
+            {allDone && <DoneCard mascot={companion} onArena={() => nav('/choi/thap')} />}
+            {!work.length && (
+              <EmptyState title="Chưa có bài được giao" text="Em mở Bản đồ phiêu lưu để học thêm nhé!" mascot={companion}
+                action={<Button onClick={() => nav('/hoc')} icon={<Icon name="map" size={24} />}>Mở bản đồ</Button>} />
+            )}
+            <div className="ln-tasks">{tasks.map((t) => isReviewTask(t) ? <ReviewCard key={t.id} t={t} onOpen={() => openTask(t, nav)} /> : <TaskCard key={t.id} t={t} onOpen={() => openTask(t, nav)} />)}</div>
+          </>
+        )}
+        <Suspense fallback={null}><ExamCards /></Suspense>
+        {writing.length > 0 && (
+          <>
+            <h2 className="ln-h2 ln-section-h ln-work-h">Bài viết{writeLeft > 0 && <span className="ln-count">{writeLeft} bài cần làm</span>}</h2>
+            <div className="ln-tasks">{writing.map((x) => <WorkTaskCard key={x.task.id} item={x} onOpen={() => { sfx.tap(); nav(workPath(x.task.id)); }} />)}</div>
+          </>
+        )}
+      </section>
 
-        <section className="ln-home__live">
-          <Button size="xl" block className="ln-live-btn" onClick={() => nav('/lop')} icon={<Icon name="tv" size={32} />}>Vào lớp trực tiếp</Button>
-          <p className="ln-live-hint">Khi thầy/cô mở bài trên TV, em bấm vào đây và nhập mã nhé.</p>
-          {me.classId && <Button size="lg" block variant="secondary" className="ln-garden-btn" onClick={() => { sfx.tap(); nav('/vuon-lop'); }} icon={<Icon name="star" size={26} />}>Vườn lớp em</Button>}
-          {me.classId && <Button size="lg" block variant="secondary" className="ln-garden-btn" onClick={() => { sfx.tap(); nav('/thao-luan'); }} icon={<Icon name="team" size={26} />} data-testid="home-discuss">Thảo luận{openDisc > 0 ? <span className="ln-count">{openDisc}</span> : null}</Button>}
-          {ltiCount > 0 && <Button size="lg" block variant="secondary" className="ln-garden-btn" onClick={() => { sfx.tap(); nav('/ung-dung'); }} icon={<Icon name="puzzle" size={26} />} data-testid="home-lti">Ứng dụng học</Button>}
-        </section>
-      </div>
+      <section className="ln-home__live" aria-label="Lớp học và góc lớp">
+        <button type="button" className="ln-live-card" onClick={() => { sfx.tap(); nav('/lop'); }}>
+          <span className="ln-live-card__tile" aria-hidden="true"><Icon name="tv" size={30} /></span>
+          <span className="ln-live-card__text">
+            <span className="ln-live-card__title">Vào lớp trực tiếp</span>
+            <span className="ln-live-card__sub">Khi thầy/cô mở bài trên TV, em bấm vào đây và nhập mã nhé.</span>
+          </span>
+          <span className="ln-live-card__go" aria-hidden="true"><Icon name="next" size={24} /></span>
+        </button>
+        {me.classId || ltiCount > 0 ? (
+          <div className="ln-quick">
+            {me.classId && <QuickTile icon="sprout" label="Vườn lớp em" color="var(--k-ok)" onClick={() => { sfx.tap(); nav('/vuon-lop'); }} />}
+            {me.classId && <QuickTile icon="team" label="Thảo luận" color="var(--k-sky)" count={openDisc} onClick={() => { sfx.tap(); nav('/thao-luan'); }} testId="home-discuss" />}
+            {ltiCount > 0 && <QuickTile icon="puzzle" label="Ứng dụng học" color="var(--k-sea)" onClick={() => { sfx.tap(); nav('/ung-dung'); }} testId="home-lti" />}
+          </div>
+        ) : null}
+      </section>
       <AppTabs active="home" />
     </div>
+  );
+}
+
+function QuickTile({ icon, label, color, count, onClick, testId }: { icon: IconName; label: string; color: string; count?: number; onClick: () => void; testId?: string }) {
+  return (
+    <button type="button" className="ln-quick__tile" style={{ ['--q' as string]: color } as CSSProperties} onClick={onClick} data-testid={testId}>
+      <span className="ln-quick__icon" aria-hidden="true"><Icon name={icon} size={26} /></span>
+      <span className="ln-quick__label">{label}</span>
+      {count ? <span className="ln-quick__count" aria-label={`${count} phòng đang mở`}>{count}</span> : null}
+    </button>
   );
 }
 

@@ -1,5 +1,5 @@
 /**
- * 10 linh vật OPEN-EDU — vẽ mới hoàn toàn, mỗi bạn một nét văn hóa nhỏ.
+ * 14 linh vật OPEN-EDU — vẽ mới hoàn toàn, mỗi bạn một nét văn hóa nhỏ.
  * Chỉ khai báo phần riêng; khung chung (thân, tay, mắt, miệng…) nằm ở Mascot.tsx + parts.tsx.
  */
 import type { ReactNode } from 'react';
@@ -133,6 +133,80 @@ const roosterTail = (
     {P('M62 82 C66 66 78 52 90 47 C86 60 76 73 67 85 Z', '#2bb3a3')}
     {P('M64 84 C70 72 82 63 96 62 C88 70 80 78 69 88 Z', RED)}
     {P('M66 87 C74 80 85 77 95 79 C87 84 79 88 70 91 Z', '#ffa23a')}
+  </g>
+);
+
+/* ---------- bạn mới (2026-11) ---------- */
+const MANE = '#c9672a';
+const maneHalf = (droop: boolean) => (
+  <>
+    <g transform={droop ? 'translate(0 2)' : undefined}>
+      {E(20.3, 57.4, 10, 10, MANE)}
+      {E(15.8, 47.4, 10, 10, MANE)}
+      {E(15.3, 36.7, 10, 10, MANE)}
+      {E(19.1, 26.4, 10, 10, MANE)}
+      {E(26.6, 18.0, 10, 10, MANE)}
+      {E(38.0, 11.9, 10, 10, MANE)}
+      {E(48.8, 10.0, 10, 10, MANE)}
+      {F(ell(50, 40, 33, 26), MANE)}
+    </g>
+    <g transform={droop ? 'rotate(-28 24 16)' : undefined}>
+      {E(25, 15.5, 6.2, 6.2, '#f5b94e')}
+      {E(25.3, 16, 3.1, 3.1, '#fff1d2', false)}
+    </g>
+  </>
+);
+
+/** Vòng hạt nhiều màu kiểu Maasai (Kenya). */
+const beadCollar = (
+  <>
+    {P('M32 67.5 Q50 76 68 67.5 L67 72 Q50 80.5 33 72 Z', '#e2453c')}
+    {[[37, 72.2, '#2d7ff9'], [43, 74.6, GOLD], [50, 75.6, '#ffffff'], [57, 74.6, GOLD], [63, 72.2, '#2d7ff9']].map(([x, y, c]) => (
+      <circle key={String(x)} cx={x as number} cy={y as number} r="1.7" fill={c as string} stroke={INK} strokeWidth="0.9" />
+    ))}
+  </>
+);
+
+const lionTail = (
+  <>
+    <Limb d="M64 88 C78 91 84 80 80 71" color="#f5b94e" w={5.5} />
+    {E(80, 69, 4.6, 5.2, MANE)}
+  </>
+);
+
+/** Lá phong đỏ (Canada). Gốc (0,0) = bàn tay. */
+const mapleLeaf = (
+  <g>
+    {S('M1 3 L-3 -9', '#8a4b2a', 2.2)}
+    {P('M-3 -9 L-6 -12 L-11 -11 L-9.5 -15 L-14 -19 L-9.5 -19.5 L-10.5 -24 L-6.5 -21.5 L-3 -28 L0.5 -21.5 L4.5 -24 L3.5 -19.5 L8 -19 L3.5 -15 L5 -11 L0 -12 Z', '#e2453c')}
+  </g>
+);
+
+const redScarf = (
+  <>
+    {P('M31 66.5 Q50 76 69 66.5 L70.5 73 Q50 83 29.5 73 Z', '#e2453c')}
+    {S('M33 71.4 Q50 79.4 67 71.4', '#ffffff', 1.6)}
+    {P('M40 75 L33 74 L30.5 88 L38.5 88.5 Z', '#e2453c')}
+    {S('M32 82 L39 82.4', '#ffffff', 1.5)}
+  </>
+);
+
+/** Cờ nhỏ xanh – trắng – xanh, mặt trời vàng ở giữa (Ác-hen-ti-na). Gốc (0,0) = bàn tay. */
+const blueFlag = (
+  <g>
+    {S('M0 4 L0 -24', '#8a6a42', 2.2)}
+    <rect x="-20.5" y="-24" width="20" height="14" rx="1.5" fill="#ffffff" stroke={INK} strokeWidth="1.5" />
+    <rect x="-19.7" y="-23.2" width="18.4" height="4.1" fill="#74b9ef" />
+    <rect x="-19.7" y="-14.9" width="18.4" height="4.1" fill="#74b9ef" />
+    <circle cx="-10.5" cy="-17" r="1.7" fill={GOLD} />
+  </g>
+);
+
+/** Kim tự tháp nhỏ (Ai Cập). Gốc (0,0) = bàn tay. */
+const pyramid = (
+  <g>
+    {P('M-24 0 L-12 -24 L0 0 Z', '#f2cf86')}
+    {S('M-12 -24 L-10 0M-20.5 -7 L-3.4 -7M-17 -14 L-6.8 -14', '#c99a5c', 1.4)}
   </g>
 );
 
@@ -329,6 +403,68 @@ export const SPECS: Record<MascotId, Spec> = {
     beak: () => P('M46.5 53 Q50 51.4 53.5 53 L50 59 Z', '#f6d58e'),
     mouth: null, smile: [50, 53], eyeY: 47.5, eyeDX: 12, blushY: 56, blushDX: 21, shine: [38, 31],
   },
+  // Sư tử Leo — Kenya, bờm tròn, vòng hạt nhiều màu
+  sutu: {
+    fill: '#f5b94e', shade: '#d9952c', light: '#fff1d2', belly: '#ffe2a6',
+    ear: maneHalf,
+    face: (
+      <>
+        {E(50, 57.5, 13.5, 9, '#fff1d2')}
+        {P('M45.6 52 Q50 50.2 54.4 52 Q53.4 55.6 50 56.2 Q46.6 55.6 45.6 52 Z', '#7a4a2a')}
+      </>
+    ),
+    mouth: [50, 59.6], eyeY: 43.5, blushY: 53, shine: [33, 27],
+    neck: beadCollar,
+    back: lionTail,
+  },
+  // Gấu Tuyết — Canada, khăn đỏ, cầm lá phong
+  gautuyet: {
+    fill: '#f4f7fb', shade: '#d3dceb', light: '#ffffff', belly: '#ffffff',
+    ear: (droop) => (
+      <g transform={droop ? 'rotate(-30 30 24)' : undefined}>
+        {E(26.5, 20.5, 7.6, 7.2, '#f4f7fb')}
+        {E(26.8, 21, 3.8, 3.6, '#dfe7f2', false)}
+      </g>
+    ),
+    face: (
+      <>
+        {E(50, 57, 13, 9, '#ffffff')}
+        {P('M45.2 51.8 Q50 49.8 54.8 51.8 Q54 55.6 50 56.3 Q46 55.6 45.2 51.8 Z', '#2b3550')}
+      </>
+    ),
+    mouth: [50, 59.8], eyeY: 43.5, blushY: 53, shine: [34, 25],
+    neck: redScarf,
+    prop: mapleLeaf,
+  },
+  // Cánh Cụt Pip — Ác-hen-ti-na, cầm lá cờ nhỏ
+  canhcut: {
+    fill: '#2b3a55', shade: '#1d2940', light: '#ffffff', body: '#2b3a55', limb: '#2b3a55', foot: '#ffa53a', belly: '#ffffff',
+    headD: ell(50, 43, 31, 28),
+    patch: P('M50 30 C40 22 24 30 24 46 C24 60 36 68 50 68 C64 68 76 60 76 46 C76 30 60 22 50 30 Z', '#ffffff'),
+    beak: () => P('M45.5 52.5 Q50 50.6 54.5 52.5 L50 58.6 Z', '#ffa53a'),
+    mouth: null, smile: [50, 53], eyeY: 45, eyeDX: 12, blushY: 54, blushDX: 20, shine: [36, 24],
+    prop: blueFlag,
+  },
+  // Lạc đà Sa Sa — Ai Cập, cầm kim tự tháp nhỏ
+  lacda: {
+    fill: '#e2b77a', shade: '#c99a5c', light: '#f6dfb8', belly: '#f6dfb8',
+    headD: ell(50, 43, 30, 28),
+    ear: (droop) => (
+      <g transform={`rotate(${droop ? -40 : -12} 24 30)`}>
+        {P('M27 31 Q15 26 14 32 Q17 37 27 35 Z', '#e2b77a')}
+        {F('M24.5 32 Q18.5 30 17.6 32.6 Q19.5 35 24.5 34 Z', '#f6dfb8')}
+      </g>
+    ),
+    patch: P('M38 14 Q44 20 50 16 Q56 20 62 14 Q56 10 50 12 Q44 10 38 14 Z', '#c99a5c'),
+    face: (
+      <>
+        {E(50, 58.5, 15.5, 10.5, '#f6dfb8')}
+        {S('M45 54.5 Q46.2 52.6 47.6 54.2M52.4 54.2 Q53.8 52.6 55 54.5', '#8a6a42', 1.7)}
+      </>
+    ),
+    mouth: [50, 61.4], eyeY: 42.5, blushY: 51, blushDX: 22, shine: [33, 25],
+    prop: pyramid,
+  },
 };
 
-export const MASCOT_ORDER: MascotId[] = ['nghe', 'shiba', 'panda', 'capybara', 'koala', 'voi', 'kiwi', 'ho', 'ga', 'cong'];
+export const MASCOT_ORDER: MascotId[] = ['nghe', 'shiba', 'panda', 'capybara', 'koala', 'voi', 'kiwi', 'ho', 'ga', 'cong', 'sutu', 'gautuyet', 'canhcut', 'lacda'];

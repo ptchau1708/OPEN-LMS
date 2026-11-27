@@ -4,7 +4,7 @@
  */
 export { speak, stopSpeaking, hasVoice, voicesReady, findVoice } from './speech';
 export type { SpeakLang, SpeakOptions } from './speech';
-export { sfx, unlockAudio, setSoundEnabled, isSoundEnabled } from './sfx';
+export { sfx, haptic, unlockAudio, setSoundEnabled, isSoundEnabled } from './sfx';
 
 export { Button } from './components/Button';
 export type { ButtonProps } from './components/Button';
