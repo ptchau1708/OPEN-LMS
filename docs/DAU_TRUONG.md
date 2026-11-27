@@ -45,7 +45,7 @@ Migration `20261126000002_v2_arena_cup.sql`. Tệp dán vào Supabase SQL Editor
 - GV: nhánh đấu từng vòng, ai đã đấu xong, kết quả số câu đúng, danh sách HS, nút "Chiếu lên TV" (toàn màn hình, tự cập nhật 5 giây).
 - HS: tab **Đấu trường** có mục "Giải đấu" với trạng thái của em (Đấu ngay / Chờ bạn / Em vào bán kết…) và nhánh đấu từng vòng.
 
-**Bản demo:** mô phỏng kết quả của các bạn khác, để thầy cô và học sinh xem được trọn một giải.
+**Bản demo:** mô phỏng kết quả của các bạn khác, để thầy/cô và học sinh xem được trọn một giải.
 
 ## 2. Cài đặt Đấu trường của lớp (chơi tự do)
 

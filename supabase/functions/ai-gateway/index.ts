@@ -160,7 +160,7 @@ async function complete(r: LlmRequest): Promise<{ text: string; provider: Provid
     }
   }
   console.error('ai-gateway: all providers failed', errors);
-  throw new HttpError(503, orKey || gKey ? 'Trợ lý AI đang bận, thầy cô thử lại sau ít phút nhé.' : 'Chưa cấu hình khóa AI trên máy chủ.', 'ai_unavailable');
+  throw new HttpError(503, orKey || gKey ? 'Trợ lý AI đang bận, thầy/cô thử lại sau ít phút nhé.' : 'Chưa cấu hình khóa AI trên máy chủ.', 'ai_unavailable');
 }
 
 /* ------------------------------------------------------------------ */
@@ -172,11 +172,11 @@ function parseLooseJson(text: string): unknown {
   if (fence) t = fence[1].trim();
   const start = t.search(/[[{]/);
   const end = Math.max(t.lastIndexOf('}'), t.lastIndexOf(']'));
-  if (start < 0 || end < start) throw new HttpError(502, 'AI trả về dữ liệu không đọc được, thầy cô thử lại nhé.', 'ai_bad_output');
+  if (start < 0 || end < start) throw new HttpError(502, 'AI trả về dữ liệu không đọc được, thầy/cô thử lại nhé.', 'ai_bad_output');
   try {
     return JSON.parse(t.slice(start, end + 1)) as unknown;
   } catch {
-    throw new HttpError(502, 'AI trả về dữ liệu không đọc được, thầy cô thử lại nhé.', 'ai_bad_output');
+    throw new HttpError(502, 'AI trả về dữ liệu không đọc được, thầy/cô thử lại nhé.', 'ai_bad_output');
   }
 }
 
@@ -456,7 +456,7 @@ serveJson(async (req) => {
   }
 
   if (task === 'extract_items') {
-    if (!isStaff(caller)) throw new HttpError(403, 'Chỉ thầy cô mới dùng được trợ lý soạn bài.', 'forbidden');
+    if (!isStaff(caller)) throw new HttpError(403, 'Chỉ thầy/cô mới dùng được trợ lý soạn bài.', 'forbidden');
     const g = intIn(input.grade, 1, 5, 0);
     return handleExtract(input, {
       complete,
@@ -465,14 +465,14 @@ serveJson(async (req) => {
       schemas: ITEM_SCHEMAS,
       subjectName: (s) => SUBJECT_NAMES[s],
       takeQuota: () => takeQuota(caller.id, 'generate'),
-      quotaMessage: `Hôm nay thầy cô đã dùng hết ${limitFor('generate')} lượt AI. Mai dùng tiếp nhé.`,
+      quotaMessage: `Hôm nay thầy/cô đã dùng hết ${limitFor('generate')} lượt AI. Mai dùng tiếp nhé.`,
     }, { grade: g ? (g as 1 | 2 | 3 | 4 | 5) : null, subject: typeof input.subject === 'string' ? subjectOf(input.subject) : null });
   }
 
   if (task !== 'generate_items' && task !== 'lesson_outline') {
     throw new HttpError(400, 'Tác vụ AI không hợp lệ (generate_items, lesson_outline, encourage, hint, extract_items).', 'bad_task');
   }
-  if (!isStaff(caller)) throw new HttpError(403, 'Chỉ thầy cô mới dùng được trợ lý soạn bài.', 'forbidden');
+  if (!isStaff(caller)) throw new HttpError(403, 'Chỉ thầy/cô mới dùng được trợ lý soạn bài.', 'forbidden');
   const grade = gradeOf(input.grade);
   const subject = subjectOf(input.subject);
 
@@ -493,7 +493,7 @@ serveJson(async (req) => {
       : [];
     const types = wanted.length ? wanted : ['MCQ', 'SHORT_ANSWER', 'MATCHING', 'FILL_IN_PASSAGE'] as ItemType[];
     if (!(await takeQuota(caller.id, 'generate'))) {
-      throw new HttpError(429, `Hôm nay thầy cô đã dùng hết ${limitFor('generate')} lượt AI. Mai dùng tiếp nhé.`, 'quota');
+      throw new HttpError(429, `Hôm nay thầy/cô đã dùng hết ${limitFor('generate')} lượt AI. Mai dùng tiếp nhé.`, 'quota');
     }
     const r = await complete({
       system: systemGenerate(grade, subject, types),
@@ -513,7 +513,7 @@ serveJson(async (req) => {
       .map((x) => normalizeItem(x, grade, subject, allowed))
       .filter((x): x is Item => x !== null)
       .slice(0, count);
-    if (items.length === 0) throw new HttpError(502, 'AI chưa soạn được câu hỏi hợp lệ, thầy cô thử lại hoặc rút gọn nội dung nhé.', 'ai_bad_output');
+    if (items.length === 0) throw new HttpError(502, 'AI chưa soạn được câu hỏi hợp lệ, thầy/cô thử lại hoặc rút gọn nội dung nhé.', 'ai_bad_output');
     if (skillCodes.length) for (const it of items) (it as { skills?: string[] }).skills = skillCodes;
     return { text: r.text, items, provider: r.provider };
   }
@@ -524,7 +524,7 @@ serveJson(async (req) => {
   const minutes = intIn(input.minutes, 5, 120, 35);
   const sgk = str(input.text, 8000);
   if (!(await takeQuota(caller.id, 'generate'))) {
-    throw new HttpError(429, `Hôm nay thầy cô đã dùng hết ${limitFor('generate')} lượt AI. Mai dùng tiếp nhé.`, 'quota');
+    throw new HttpError(429, `Hôm nay thầy/cô đã dùng hết ${limitFor('generate')} lượt AI. Mai dùng tiếp nhé.`, 'quota');
   }
   const r = await complete({
     system: systemOutline(grade, subject, minutes),

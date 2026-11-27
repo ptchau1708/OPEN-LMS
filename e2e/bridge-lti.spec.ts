@@ -133,7 +133,7 @@ test('học sinh: Ứng dụng học → mở trang ngay trong OPEN-EDU (trang �
   await learnerLogin(page);
   await expect(page.getByTestId('home-lti')).toBeVisible();
   await spaGo(page, '/ung-dung');
-  await expect(page.getByText('Thầy cô giao')).toBeVisible();
+  await expect(page.getByText('Thầy/cô giao')).toBeVisible();
   await page.getByTestId('page-open-pg-1').click();
   await expect(page.getByTestId('page-frame')).toHaveAttribute('src', /robots\.txt$/);
   await spaGo(page, '/trang/pg-2');

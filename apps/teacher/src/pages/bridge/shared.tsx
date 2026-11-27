@@ -17,7 +17,7 @@ export function ExcelPicker({ label, hint, onOpen, testId }: { label: string; hi
     setError('');
     setBusy(true);
     try {
-      if (file.size > 20 * 1024 * 1024) throw new Error('Tệp lớn hơn 20 MB. Thầy cô kiểm tra lại có đúng tệp không nhé.');
+      if (file.size > 20 * 1024 * 1024) throw new Error('Tệp lớn hơn 20 MB. Thầy/cô kiểm tra lại có đúng tệp không nhé.');
       const bytes = new Uint8Array(await file.arrayBuffer());
       onOpen({ name: file.name, bytes, opened: bridge.openTemplate(bytes) });
     } catch (e) {

@@ -80,7 +80,7 @@ export default function LessonPage() {
   if (lessonQ.isError) return <ErrorState message="Chưa mở được bài học." onRetry={() => void lessonQ.refetch()} />;
   if (lessonQ.isPending || (ids.length > 0 && itemsQ.isPending) || progressQ.isPending || (needsPkg && pkgQ.isPending))
     return <LoadingScreen label="Đang mở bài học" mascot={companion} />;
-  if (!lesson) return <ErrorState title="Không tìm thấy bài này" message="Có thể thầy cô đã cất bài đi rồi." extra={<Button size="lg" variant="secondary" onClick={() => nav('/')}>Về trang Hôm nay</Button>} />;
+  if (!lesson) return <ErrorState title="Không tìm thấy bài này" message="Có thể thầy/cô đã cất bài đi rồi." extra={<Button size="lg" variant="secondary" onClick={() => nav('/')}>Về trang Hôm nay</Button>} />;
   if (itemsQ.isError) return <ErrorState message="Chưa tải được câu hỏi của bài." onRetry={() => void itemsQ.refetch()} />;
 
   const onAnswer = (e: AnswerEvent) => {
@@ -159,7 +159,7 @@ function Completion({ lessonTitle, mascot, done, lessonId, subject }: { lessonTi
           )}
         </div>
         <p className="ln-complete__note">
-          {done.bonus === null ? 'Đang cất sao vào túi…' : done.bonus > 0 ? `Thưởng hoàn thành bài: +${done.bonus} sao!` : done.pending ? 'Đã lưu bài trên máy. Có mạng, cô chấm và sao sẽ về túi em nhé!' : done.failed ? 'Mình sẽ lưu bài khi có mạng nhé.' : 'Học lại giúp em nhớ thật lâu. Giỏi lắm!'}
+          {done.bonus === null ? 'Đang cất sao vào túi…' : done.bonus > 0 ? `Thưởng hoàn thành bài: +${done.bonus} sao!` : done.pending ? 'Đã lưu bài trên máy. Có mạng, thầy/cô chấm và sao sẽ về túi em nhé!' : done.failed ? 'Mình sẽ lưu bài khi có mạng nhé.' : 'Học lại giúp em nhớ thật lâu. Giỏi lắm!'}
         </p>
         <div className="ln-complete__actions">
           <Button size="xl" block onClick={() => nav(next ? `/bai/${next.targetId}` : `/hoc?mon=${subject}`)} icon={<Icon name="next" size={28} />}>Học bài tiếp</Button>

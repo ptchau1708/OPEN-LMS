@@ -14,7 +14,7 @@ test('TT27: chọn môn hiển thị, ngân hàng nhận xét gợi ý, nhập c
   // Môn tự chọn (Tiếng dân tộc thiểu số) mặc định không hiện
   await expect(table.locator('thead th').filter({ hasText: 'Tiếng dân tộc' })).toHaveCount(0);
 
-  // Cô chỉ dạy Toán + Tiếng Việt
+  // Thầy/cô chỉ dạy Toán + Tiếng Việt
   await page.getByTestId('tt27-cols').click();
   const cols = page.getByRole('dialog');
   await expect(cols.getByText('Môn học tự chọn')).toBeVisible();
@@ -93,7 +93,7 @@ test('Hồ sơ học sinh: thông tin bổ sung — nhập tay, từ Word, Excel
   await expect(chess).toContainText('Phụ huynh xem được');
   await expect(chess).toContainText('Giải');
 
-  // Từ Word (chỉ thầy cô xem)
+  // Từ Word (chỉ thầy/cô xem)
   await card.getByTestId('note-word-file').setInputFiles(path.join(FIX, 'ghi-chep-quan-sat.docx'));
   dlg = page.getByRole('dialog');
   await expect(dlg.getByLabel('Nội dung ghi chép')).toHaveValue(/tích cực phát biểu/);

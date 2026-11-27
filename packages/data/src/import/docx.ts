@@ -109,9 +109,9 @@ function paragraph(xml: string, stats: { autoNumbered: number; marked: number })
 }
 
 export function docxToText(data: Uint8Array): DocxTextResult {
-  if (data.length > DOCX_MAX_BYTES) throw new Error('Tệp Word quá lớn (tối đa 15 MB). Thầy cô chép phần câu hỏi rồi dán vào ô văn bản nhé.');
+  if (data.length > DOCX_MAX_BYTES) throw new Error('Tệp Word quá lớn (tối đa 15 MB). Thầy/cô chép phần câu hỏi rồi dán vào ô văn bản nhé.');
   if (data.length < 4 || data[0] !== 0x50 || data[1] !== 0x4b) {
-    throw new Error('Đây không phải tệp Word .docx. Nếu là tệp .doc đời cũ, thầy cô mở bằng Word rồi "Lưu thành" .docx, hoặc chép chữ rồi dán vào ô văn bản.');
+    throw new Error('Đây không phải tệp Word .docx. Nếu là tệp .doc đời cũ, thầy/cô mở bằng Word rồi "Lưu thành" .docx, hoặc chép chữ rồi dán vào ô văn bản.');
   }
   let xml: string;
   try {

@@ -94,7 +94,7 @@ export const SUBMISSION_STATUS_LABEL: Record<SubmissionStatus, string> = {
   submitted: 'Đã nộp',
   grading: 'Đang chấm',
   graded: 'Chờ duyệt',
-  'needs-review': 'Cần thầy cô xem',
+  'needs-review': 'Cần thầy/cô xem',
   approved: 'Đã duyệt',
   returned: 'Trả lại để làm lại',
   error: 'Chưa chấm được',

@@ -8,13 +8,16 @@ import { relTime } from '../lib/format';
 import { ShareClassroomButton } from './bridge/ShareClassroom';
 import { copyLesson } from '../lib/copyLesson';
 import { SubjectOptions } from '../components/SubjectOptions';
+import { byFocus, useFocusGrade } from '../lib/focusGrade';
 
 export function CreateLessonDialog({ open, onClose, user }: { open: boolean; onClose: () => void; user: Profile }) {
   const nav = useNavigate();
   const save = useSaveLesson();
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState<SubjectId>('toan');
-  const [grade, setGrade] = useState<Grade>(2);
+  const focus = useFocusGrade().grade;
+  const [grade, setGrade] = useState<Grade>(focus);
+  useEffect(() => { if (open) setGrade(focus); }, [open, focus]);
   const create = () => {
     const t = title.trim() || 'Bài giảng mới';
     const lesson: Lesson = {
@@ -43,7 +46,9 @@ export function CreateLessonDialog({ open, onClose, user }: { open: boolean; onC
 export function Lessons({ user }: { user: Profile }) {
   const [params, setParams] = useSearchParams();
   const [subject, setSubject] = useState<SubjectId | ''>('');
-  const [grade, setGrade] = useState<Grade | 0>(0);
+  const focus = useFocusGrade().grade;
+  // Mặc định: khối ưu tiên của thầy/cô (lớp 5); chọn "Mọi lớp" để xem hết — khối ưu tiên vẫn đứng đầu.
+  const [grade, setGrade] = useState<Grade | 0>(focus);
   const [status, setStatus] = useState<'' | 'draft' | 'published'>('');
   const [search, setSearch] = useState('');
   const [mine, setMine] = useState(user.role !== 'admin');
@@ -69,9 +74,9 @@ export function Lessons({ user }: { user: Profile }) {
         <Seg label="Trạng thái" value={status} onChange={setStatus} options={[{ value: '', label: 'Tất cả' }, { value: 'draft', label: 'Nháp' }, { value: 'published', label: 'Đã xuất bản' }]} />
         <label className="tc-switch"><input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} /> Chỉ bài của tôi</label>
       </div>
-      {q.isLoading ? <Loading /> : !q.data?.length ? <Empty title="Không có bài giảng phù hợp">Đổi bộ lọc hoặc tạo bài mới.</Empty> : (
+      {q.isLoading ? <Loading /> : !q.data?.length ? <Empty title={grade ? `Chưa có bài giảng lớp ${grade} phù hợp` : 'Không có bài giảng phù hợp'}>{grade ? <Btn onClick={() => setGrade(0)}>Xem mọi lớp</Btn> : 'Đổi bộ lọc hoặc tạo bài mới.'}</Empty> : (
         <div className="tc-lessongrid">
-          {q.data.map((l) => {
+          {(grade ? q.data : byFocus(q.data, focus, (l) => l.grade)).map((l) => {
             const s = SUBJECTS[l.subject] ?? SUBJECTS.khac;
             return (
               <div key={l.id} className="br-cardwrap">

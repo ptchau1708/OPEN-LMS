@@ -31,7 +31,7 @@ export interface NotesSheet {
 
 export function parseNotesSheet(rows: string[][], students: readonly Profile[]): NotesSheet {
   const headIdx = rows.slice(0, 15).findIndex((r) => r.some((c) => IS_NAME.test(f(c))));
-  if (headIdx < 0) throw new Error('Không thấy cột "Họ và tên" ở dòng tiêu đề. Thầy cô dùng tệp mẫu nhé.');
+  if (headIdx < 0) throw new Error('Không thấy cột "Họ và tên" ở dòng tiêu đề. Thầy/cô dùng tệp mẫu nhé.');
   const head = rows[headIdx]!.map((c) => c.trim());
   const col = (re: RegExp) => head.findIndex((c) => re.test(f(c)));
   const cName = col(IS_NAME), cUser = col(IS_USER), cCode = col(IS_CODE), cStt = col(IS_STT), cBody = col(IS_BODY);
@@ -63,7 +63,7 @@ export function parseNotesSheet(rows: string[][], students: readonly Profile[]):
   return { dataColumns: dataIdx.map((d) => d.h), ...(cBody >= 0 ? { bodyColumn: head[cBody] } : {}), rows: out };
 }
 
-/** Tệp mẫu: danh sách lớp + vài cột ví dụ (thầy cô đổi tên / thêm / bớt cột tuỳ ý). */
+/** Tệp mẫu: danh sách lớp + vài cột ví dụ (thầy/cô đổi tên / thêm / bớt cột tuỳ ý). */
 export function buildNotesTemplate(students: readonly Profile[], className: string): Uint8Array {
   const head = ['STT', 'Họ và tên', 'Tên đăng nhập', 'Mã HS', 'Chiều cao (cm)', 'Cân nặng (kg)', 'Ghi chú'];
   const rows: (string | number)[][] = [head, ...[...students].sort((a, b) => a.name.localeCompare(b.name, 'vi')).map((s, i) => [i + 1, s.name, s.username ?? '', s.externalCode ?? '', '', '', ''])];
@@ -73,7 +73,7 @@ export function buildNotesTemplate(students: readonly Profile[], className: stri
     ['2. Các cột còn lại là dữ liệu: đổi tên cột, thêm hoặc xoá cột tuỳ ý (vd Thị lực, Nhóm máu, Điểm thi Violympic, Sở thích…).'],
     ['3. Cột "Ghi chú" (hoặc "Nội dung", "Nhận xét") được lưu thành nội dung của ghi chép.'],
     ['4. Dòng để trống dữ liệu sẽ được bỏ qua. Mỗi học sinh có dữ liệu → một ghi chép trong hồ sơ.'],
-    ['5. Khi nhập, thầy cô đặt tiêu đề (vd "Khám sức khoẻ đầu năm"), nhóm, ngày và chọn có cho phụ huynh xem hay không.'],
+    ['5. Khi nhập, thầy/cô đặt tiêu đề (vd "Khám sức khoẻ đầu năm"), nhóm, ngày và chọn có cho phụ huynh xem hay không.'],
   ];
   return writeXlsx([
     { name: 'Thông tin bổ sung', rows, widths: [6, 28, 18, 14, 16, 16, 40] },

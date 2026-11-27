@@ -256,7 +256,7 @@ export function buildWorkSeed(at: At) {
       edit: {
         feedbackStudent: 'Em nhớ đúng công thức vận tốc và trình bày rất gọn gàng. Em nhớ 30 phút là nửa giờ, tức 0,5 giờ, rồi tính lại nhé!',
       },
-      note: 'Cô sửa lời nhắn cho em ngắn gọn hơn.',
+      note: 'Thầy/cô sửa lời nhắn cho em ngắn gọn hơn.',
     },
     {
       id: 'sub-tv3-phuong',

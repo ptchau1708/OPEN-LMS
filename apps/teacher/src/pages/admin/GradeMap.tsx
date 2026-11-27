@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { MASTERY_LEVEL_LABEL, SUBJECTS, fitSubjectToGrade, subjectsForGrade, type Grade, type Profile, type SubjectId } from '@openedu/contracts';
-import { useClasses, useGradeHeatmap } from '@openedu/data';
+import { useGradeHeatmap } from '@openedu/data';
+import { useClasses, useFocusGrade } from '../../lib/focusGrade';
 import { Btn, Empty, ErrorNote, Loading, PageHead, Seg } from '../../components/common';
 import { cx } from '../../lib/format';
 import { levelOfP, pct } from './util';
@@ -13,7 +14,8 @@ export default function GradeMap({ user }: { user: Profile }) {
   const grades = [...new Set(classes.map((c) => c.grade))].sort() as Grade[];
   const [grade, setGrade] = useState<Grade | null>(null);
   const [picked, setSubject] = useState<SubjectId>('toan');
-  const g = grade ?? grades.find((x) => x === 4) ?? grades[0];
+  const focus = useFocusGrade().grade;
+  const g = grade ?? grades.find((x) => x === focus) ?? grades[0];
   const subjList = g ? subjectsForGrade(g, { periodic: true }) : subjectsForGrade(4, { periodic: true });
   const subject = g ? fitSubjectToGrade(picked, g, { periodic: true }) : picked;
   const q = useGradeHeatmap(g, subject);

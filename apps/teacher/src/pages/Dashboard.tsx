@@ -2,7 +2,8 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { ATTENDANCE_LABEL, MASTERY_LEVEL_LABEL, SUBJECTS, type AttendanceStatus, type ClassInfo, type MascotId, type MasteryLevel, type Profile, type SubmissionStatus } from '@openedu/contracts';
 import { Icon, Mascot, type IconName } from '@openedu/ui';
-import { useAssignments, useAttendance, useClasses, useClassGarden, useClassHeatmap, useClassLeaderboard, useEvents, useExams, useLessons, useStudents, useSubmissions } from '@openedu/data';
+import { useAssignments, useAttendance, useClassGarden, useClassHeatmap, useClassLeaderboard, useEvents, useExams, useLessons, useStudents, useSubmissions } from '@openedu/data';
+import { useClasses } from '../lib/focusGrade';
 import { Avatar, Empty, Loading, Seg, SubjectDot } from '../components/common';
 import { cx, fmtDate, relTime } from '../lib/format';
 import '../styles/dashboard.css';
@@ -115,7 +116,7 @@ function ActivityChart({ days }: { days: DayStat[] }) {
 
 /* ======================= bảng theo lớp ======================= */
 const SUB_GROUPS: { key: string; label: string; statuses: SubmissionStatus[]; cls: string }[] = [
-  { key: 'review', label: 'Chờ thầy cô duyệt', statuses: ['graded', 'needs-review'], cls: 'db-bar--warn' },
+  { key: 'review', label: 'Chờ thầy/cô duyệt', statuses: ['graded', 'needs-review'], cls: 'db-bar--warn' },
   { key: 'grading', label: 'Máy đang chấm', statuses: ['submitted', 'grading'], cls: 'db-bar--info' },
   { key: 'done', label: 'Đã duyệt', statuses: ['approved'], cls: 'db-bar--ok' },
   { key: 'returned', label: 'Trả lại làm tiếp', statuses: ['returned'], cls: 'db-bar--muted' },
@@ -431,7 +432,7 @@ export function Dashboard({ user }: { user: Profile }) {
       </section>
 
       {classes.isLoading ? <Loading /> : !cls ? (
-        <section className="tc-card"><Empty icon="team" title="Chưa có lớp">{user.role === 'admin' ? <>Tạo lớp ở <Link to="/quan-tri/lop">Quản trị → Quản lí lớp</Link>.</> : 'Nhờ quản trị trường phân công lớp cho thầy cô.'}</Empty></section>
+        <section className="tc-card"><Empty icon="team" title="Chưa có lớp">{user.role === 'admin' ? <>Tạo lớp ở <Link to="/quan-tri/lop">Quản trị → Quản lí lớp</Link>.</> : 'Nhờ quản trị trường phân công lớp cho thầy/cô.'}</Empty></section>
       ) : (
         <>
           <div className="db-classbar">

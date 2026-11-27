@@ -1,7 +1,7 @@
 /**
- * Hồ sơ học sinh — "Thông tin bổ sung": dữ liệu thầy cô thu thập bên ngoài ứng dụng (quan sát, sức khoẻ, gia đình,
+ * Hồ sơ học sinh — "Thông tin bổ sung": dữ liệu thầy/cô thu thập bên ngoài ứng dụng (quan sát, sức khoẻ, gia đình,
  * kết quả thi bên ngoài…). Nhập tay, nhập từ tệp Word cho từng em, hoặc nhập Excel cho cả lớp (trang Hồ sơ học sinh).
- * Mặc định chỉ thầy cô xem; tích "Cho phụ huynh xem" để hiện ở trang phụ huynh.
+ * Mặc định chỉ thầy/cô xem; tích "Cho phụ huynh xem" để hiện ở trang phụ huynh.
  */
 import { useMemo, useRef, useState } from 'react';
 import { NOTE_CATEGORIES, NOTE_CATEGORY_LABEL, NOTE_SOURCE_LABEL, useDeleteStudentNote, useSaveStudentNote, useStudentNotes, type NoteCategory, type StudentNote, type StudentNoteInput } from '@openedu/data';
@@ -30,7 +30,7 @@ export function StudentNotesCard({ studentId, studentName, parentView }: { stude
   const fromWord = async (file: File) => {
     setWordErr(null);
     try {
-      if (!/\.docx$/i.test(file.name)) throw new Error('Thầy cô chọn tệp Word .docx nhé (tệp .doc đời cũ: mở bằng Word rồi “Lưu thành” .docx).');
+      if (!/\.docx$/i.test(file.name)) throw new Error('Thầy/cô chọn tệp Word .docx nhé (tệp .doc đời cũ: mở bằng Word rồi “Lưu thành” .docx).');
       const lib = await loadImportLib();
       const t = lib.docxToText(new Uint8Array(await file.arrayBuffer()));
       const body = t.text.split('\n').map((l) => l.replace(/^✓\s*/, '').trimEnd()).join('\n').replace(/\n{3,}/g, '\n\n').trim();
@@ -43,7 +43,7 @@ export function StudentNotesCard({ studentId, studentName, parentView }: { stude
     <section className={cx('tc-card tc-notes', parentView && 'tc-notes--parent')} aria-label="Thông tin bổ sung" data-testid="notes-card">
       <header className="tc-card__head">
         <h2>Thông tin bổ sung</h2>
-        <span className="tc-muted tc-small">{parentView ? 'Chỉ những ghi chép thầy cô cho phụ huynh xem' : 'Dữ liệu thầy cô thu thập bên ngoài — mặc định chỉ thầy cô xem'}</span>
+        <span className="tc-muted tc-small">{parentView ? 'Chỉ những ghi chép thầy/cô cho phụ huynh xem' : 'Dữ liệu thầy/cô thu thập bên ngoài — mặc định chỉ thầy/cô xem'}</span>
       </header>
       {!parentView ? (
         <div className="tc-row tc-wrap tc-noprint">
@@ -115,7 +115,7 @@ function NoteDialog({ value, studentName, onClose }: { value: StudentNoteInput |
       <Btn kind="primary" disabled={!ok || save.isPending} onClick={() => save.mutate({ ...n, fields }, { onSuccess: onClose })} data-testid="note-save">{save.isPending ? 'Đang lưu…' : 'Lưu'}</Btn>
     </>}>
       <div className="tc-stack">
-        {n.source === 'word' ? <p className="tc-small tc-muted">Nội dung lấy từ tệp <b>{n.sourceName}</b> — thầy cô đọc lại, sửa nếu cần rồi lưu.</p> : null}
+        {n.source === 'word' ? <p className="tc-small tc-muted">Nội dung lấy từ tệp <b>{n.sourceName}</b> — thầy/cô đọc lại, sửa nếu cần rồi lưu.</p> : null}
         <div className="tc-grid2 tc-grid2--tight">
           <Field label="Tiêu đề"><input className="tc-input" value={n.title} maxLength={200} onChange={(e) => set({ title: e.target.value })} placeholder="vd: Khám sức khoẻ đầu năm" aria-label="Tiêu đề ghi chép" /></Field>
           <div className="tc-grid2 tc-grid2--tight">
@@ -123,7 +123,7 @@ function NoteDialog({ value, studentName, onClose }: { value: StudentNoteInput |
             <Field label="Ngày"><input className="tc-input" type="date" value={n.date} onChange={(e) => set({ date: e.target.value })} aria-label="Ngày ghi nhận" /></Field>
           </div>
         </div>
-        <Field label="Nội dung"><textarea className="tc-input" rows={8} maxLength={20000} value={n.body} onChange={(e) => set({ body: e.target.value })} aria-label="Nội dung ghi chép" placeholder="Ghi lại điều thầy cô quan sát / thu thập được…" /></Field>
+        <Field label="Nội dung"><textarea className="tc-input" rows={8} maxLength={20000} value={n.body} onChange={(e) => set({ body: e.target.value })} aria-label="Nội dung ghi chép" placeholder="Ghi lại điều thầy/cô quan sát / thu thập được…" /></Field>
         <div className="tc-stack">
           <span className="tc-field__label">Dữ liệu dạng bảng (không bắt buộc) — vd Chiều cao: 132 cm</span>
           {rows.map(([k, v], i) => (

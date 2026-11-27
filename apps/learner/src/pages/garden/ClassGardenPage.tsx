@@ -13,7 +13,7 @@ export default function ClassGardenPage() {
   const me = useMe();
   const q = useClassGarden(me.classId);
   const still = resolveSettings(me).reducedMotion;
-  if (!me.classId) return <div className="ln-page"><TopBack title="Vườn lớp" /><EmptyState title="Em chưa có lớp" text="Khi thầy cô xếp em vào lớp, vườn của lớp sẽ hiện ở đây." /><AppTabs active="home" /></div>;
+  if (!me.classId) return <div className="ln-page"><TopBack title="Vườn lớp" /><EmptyState title="Em chưa có lớp" text="Khi thầy/cô xếp em vào lớp, vườn của lớp sẽ hiện ở đây." /><AppTabs active="home" /></div>;
   if (q.isPending) return <><LoadingScreen label="Đang ra vườn" mascot="koala" /><AppTabs active="home" /></>;
   if (q.isError || !q.data) return <div className="ln-page"><ErrorState message="Chưa mở được Vườn lớp." onRetry={() => void q.refetch()} /><AppTabs active="home" /></div>;
   const g = q.data;

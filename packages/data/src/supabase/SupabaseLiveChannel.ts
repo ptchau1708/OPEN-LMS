@@ -248,7 +248,7 @@ export class SupabaseLiveChannel implements StatusfulLiveChannel {
 
   async send(cmd: LiveCommand): Promise<void> {
     if (this.role !== 'teacher') throw new Error('Chỉ giáo viên mới điều khiển được lớp học.');
-    if (!this.state) throw new Error('Lớp học chưa sẵn sàng, thầy cô chờ một chút nhé.');
+    if (!this.state) throw new Error('Lớp học chưa sẵn sàng, thầy/cô chờ một chút nhé.');
     const next = applyLiveCommand(this.state, cmd);
     if (next === this.state) return;
     this.adopt(next);

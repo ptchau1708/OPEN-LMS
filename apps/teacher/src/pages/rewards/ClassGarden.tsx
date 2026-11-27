@@ -1,5 +1,5 @@
 /**
- * Vườn lớp (GV): xem tiến độ tuần, đặt mục tiêu sao + loại cây, mở màn hình TV; tặng "Huy hiệu của cô".
+ * Vườn lớp (GV): xem tiến độ tuần, đặt mục tiêu sao + loại cây, mở màn hình TV; tặng "Huy hiệu của thầy/cô".
  */
 import { useEffect, useState } from 'react';
 import { BADGE_CATEGORIES, PLANTS, TEACHER_BADGE_GLYPHS, type BadgeGlyph, type PlantKind, type Profile } from '@openedu/contracts';
@@ -68,7 +68,7 @@ export default function ClassGardenTeacher({ user }: { user: Profile }) {
   useEffect(() => { if (g) { setTarget(g.goal.targetStars); setPlant(g.goal.plant); } }, [g?.classId, g?.goal.targetStars, g?.goal.plant]);
 
   if (classes.isLoading) return <Loading />;
-  if (!cls) return <Empty icon="team" title="Chưa có lớp">Khi thầy cô có lớp, Vườn lớp sẽ hiện ở đây.</Empty>;
+  if (!cls) return <Empty icon="team" title="Chưa có lớp">Khi thầy/cô có lớp, Vườn lớp sẽ hiện ở đây.</Empty>;
 
   return (
     <div className="tc-page tc-garden">
@@ -133,7 +133,7 @@ function TeacherBadges({ classId, cls }: { classId: string; cls: NonNullable<Ret
   const name = (id: string) => roster.find((r) => r.id === id)?.name ?? '';
   return (
     <section className="tc-card tc-tbadge">
-      <h2 className="tc-garden__h">Huy hiệu của cô</h2>
+      <h2 className="tc-garden__h">Huy hiệu của thầy/cô</h2>
       <p className="tc-muted tc-small">Tặng riêng một huy hiệu kèm lời khen. Học sinh sẽ thấy màn chúc mừng khi mở app.</p>
       <div className="tc-tbadge__grid">
         <div>

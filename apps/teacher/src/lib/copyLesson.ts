@@ -15,5 +15,5 @@ export function copyLesson(l: Lesson, me: Profile): Lesson {
   };
 }
 
-/** Thầy cô sửa trực tiếp được bài này không (chủ bài hoặc quản trị viên). */
+/** Thầy/cô sửa trực tiếp được bài này không (chủ bài hoặc quản trị viên). */
 export const canEditLesson = (l: Pick<Lesson, 'ownerId'>, me: Profile): boolean => me.role === 'admin' || l.ownerId === me.id;

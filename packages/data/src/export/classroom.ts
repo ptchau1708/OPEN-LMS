@@ -37,7 +37,7 @@ export class ClassroomError extends Error {
 }
 
 function viMessage(status: number, reason: string, raw: string): string {
-  if (status === 401) return 'Phiên đăng nhập Google đã hết hạn. Thầy cô bấm "Kết nối Google" lại nhé.';
+  if (status === 401) return 'Phiên đăng nhập Google đã hết hạn. Thầy/cô bấm "Kết nối Google" lại nhé.';
   if (status === 403 && /ProjectPermissionDenied/i.test(reason + raw)) return 'Google không cho sửa điểm bài tập này vì bài không do OPEN-EDU tạo. Hãy chọn "Tạo bài tập mới trên Classroom" rồi đẩy điểm.';
   if (status === 403 && /disabled|not been used|accessNotConfigured/i.test(reason + raw)) return 'Dự án Google Cloud chưa bật "Google Classroom API". Xem hướng dẫn cài đặt.';
   if (status === 403) return 'Tài khoản Google này không có quyền với lớp học đó (cần là giáo viên của lớp), hoặc trường chặn ứng dụng bên ngoài.';

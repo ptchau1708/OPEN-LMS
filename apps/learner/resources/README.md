@@ -32,9 +32,9 @@ cần nếu muốn giao diện chụp native (việc của nhóm app — TODO).
 **iOS** — `ios/App/App/Info.plist`:
 ```xml
 <key>NSCameraUsageDescription</key>
-<string>OPEN-EDU dùng máy ảnh để em chụp bài làm trên giấy gửi cho thầy cô.</string>
+<string>OPEN-EDU dùng máy ảnh để em chụp bài làm trên giấy gửi cho thầy/cô.</string>
 <key>NSPhotoLibraryUsageDescription</key>
-<string>OPEN-EDU mở thư viện ảnh để em chọn ảnh bài làm gửi cho thầy cô.</string>
+<string>OPEN-EDU mở thư viện ảnh để em chọn ảnh bài làm gửi cho thầy/cô.</string>
 <key>NSPhotoLibraryAddUsageDescription</key>
 <string>OPEN-EDU lưu ảnh bài làm vào thư viện khi em yêu cầu.</string>
 <key>NSMicrophoneUsageDescription</key>
@@ -44,7 +44,7 @@ cần nếu muốn giao diện chụp native (việc của nhóm app — TODO).
 **Android** — `android/app/src/main/AndroidManifest.xml`: `CAMERA`, `RECORD_AUDIO` (luyện đọc), `READ_MEDIA_IMAGES`
 (Android 13+) / `READ_EXTERNAL_STORAGE` với `android:maxSdkVersion="32"`. Không xin quyền vị trí, danh bạ, quảng cáo
 (`AD_ID`): thêm `<uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>`.
-Lời giải thích hiện trước hộp xin quyền: "Cho phép OPEN-EDU dùng máy ảnh để chụp bài làm gửi thầy cô nhé!"
+Lời giải thích hiện trước hộp xin quyền: "Cho phép OPEN-EDU dùng máy ảnh để chụp bài làm gửi thầy/cô nhé!"
 
 ## Google Play — chính sách Gia đình (Families)
 - Play Console → *Nội dung ứng dụng* → **Đối tượng mục tiêu**: chọn nhóm tuổi **6–8** và **9–12** (tiểu học) ⇒ app thuộc

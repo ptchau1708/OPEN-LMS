@@ -18,7 +18,7 @@ async function login(username: string) {
 }
 
 describe('Phụ huynh — danh mục và mặc định', () => {
-  it('mặc định: nhắc nhở cô duyệt, còn lại tự động; mục theo ngày mới có chế độ duyệt', () => {
+  it('mặc định: nhắc nhở thầy/cô duyệt, còn lại tự động; mục theo ngày mới có chế độ duyệt', () => {
     const d = defaultShareModes();
     expect(d.reminders).toBe('review');
     expect(Object.entries(d).filter(([k]) => k !== 'reminders').every(([, m]) => m === 'auto')).toBe(true);
@@ -26,7 +26,7 @@ describe('Phụ huynh — danh mục và mặc định', () => {
   });
   it('lỗi thiếu SQL 23 → hướng dẫn chạy tệp', () => {
     expect(parentHubError({ code: 'PGRST202', message: 'Could not find the function v2.parent_inbox' }, 'x').message).toMatch(/SQL 23/);
-    expect(parentHubError({ message: 'Lớp đang tắt nhắn tin với thầy cô.' }, 'x').message).toBe('Lớp đang tắt nhắn tin với thầy cô.');
+    expect(parentHubError({ message: 'Lớp đang tắt nhắn tin với thầy/cô.' }, 'x').message).toBe('Lớp đang tắt nhắn tin với thầy/cô.');
   });
 });
 
@@ -61,7 +61,7 @@ describe('Phụ huynh — bản demo', () => {
     }
   });
 
-  it('PH: hộp thư có thông báo mẫu, xác nhận, nhắn cô', async () => {
+  it('PH: hộp thư có thông báo mẫu, xác nhận, nhắn thầy/cô', async () => {
     const ds = await login('phuhuynh4a');
     const hub = getParentHub(ds);
     const box = await hub.inbox('u-lan4a2');

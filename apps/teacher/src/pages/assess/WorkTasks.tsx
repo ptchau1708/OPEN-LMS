@@ -7,6 +7,7 @@ import { ClassPicker, QUEUE_TABS, useClassPick, useRoster } from '../../lib/asse
 import { fmtDateTime, shorten, toLocalInput } from '../../lib/format';
 import { RubricEditor, blankRubric } from './Rubrics';
 import { ShareClassroomButton } from '../bridge/ShareClassroom';
+import { useFocusGrade } from '../../lib/focusGrade';
 
 const COUNT_COLS: { label: string; status: SubmissionStatus[]; tone?: string }[] = [
   { label: 'Cần xem', status: ['needs-review'], tone: 'warn' },
@@ -33,7 +34,7 @@ function TaskDialog({ user, cls, initial, rubrics, onClose }: { user: Profile; c
     try { set({ prompt: { ...t.prompt, image: (await compressWorkImage(f)).url } }); } catch (e) { setErr(e instanceof Error ? e.message : String(e)); } finally { setImgBusy(false); }
   };
   const submit = () => {
-    if (!t.title.trim()) return setErr('Thầy cô đặt tên bài nhé.');
+    if (!t.title.trim()) return setErr('Thầy/cô đặt tên bài nhé.');
     if (!t.prompt.text.trim() && !t.prompt.image) return setErr('Bài cần có đề bài (chữ hoặc ảnh).');
     if (!t.rubricId) return setErr('Chọn bộ tiêu chí chấm để AI chấm được.');
     if (!t.allowPhoto && !t.allowText) return setErr('Cho phép ít nhất một cách nộp.');
@@ -105,12 +106,13 @@ export default function WorkTasks({ user }: { user: Profile }) {
     return m;
   }, [subs.data]);
   const rubricOf = (id: string) => rubrics.data?.find((r) => r.id === id);
-  const blank = (): WorkTask => ({ id: '', title: '', prompt: { text: '' }, subject: 'toan', grade: cls?.grade ?? 4, rubricId: '', classId, studentIds: [], allowPhoto: true, allowText: true, createdBy: user.id, dueAt: new Date(Date.now() + 3 * 86400_000).toISOString() });
+  const focus = useFocusGrade().grade;
+  const blank = (): WorkTask => ({ id: '', title: '', prompt: { text: '' }, subject: 'toan', grade: cls?.grade ?? focus, rubricId: '', classId, studentIds: [], allowPhoto: true, allowText: true, createdBy: user.id, dueAt: new Date(Date.now() + 3 * 86400_000).toISOString() });
   const pending = (subs.data ?? []).filter((s) => s.status === 'needs-review' || s.status === 'graded').length;
 
   return (
     <div className="tc-page">
-      <PageHead title="Bài viết" sub="Bài làm trên giấy hoặc đánh máy, AI chấm theo tiêu chí, thầy cô duyệt trước khi học sinh và phụ huynh thấy." actions={<>
+      <PageHead title="Bài viết" sub="Bài làm trên giấy hoặc đánh máy, AI chấm theo tiêu chí, thầy/cô duyệt trước khi học sinh và phụ huynh thấy." actions={<>
         <ClassPicker list={list} value={classId} onChange={setClassId} />
         {pending ? <Link className="tc-btn" to={`/cham-bai?lop=${classId}`}>{pending} bài chờ duyệt</Link> : null}
         <Btn kind="primary" icon="plus" disabled={!cls} onClick={() => setEdit(blank())}>Giao bài viết</Btn>

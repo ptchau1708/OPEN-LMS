@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { MASTERY_LEVEL_LABEL, type MasteryLevel, type Profile } from '@openedu/contracts';
-import { foldVietnamese, useClasses, useClassHeatmap, useStudents } from '@openedu/data';
+import { foldVietnamese, useClassHeatmap, useStudents } from '@openedu/data';
+import { useClasses } from '../lib/focusGrade';
 import { Avatar, Btn, Empty, Loading, PageHead, Seg } from '../components/common';
 import { NotesExcelImport } from '../components/NotesExcelImport';
 import { cx } from '../lib/format';
@@ -36,7 +37,7 @@ export default function Students({ user }: { user: Profile }) {
     .sort((a, b) => (b.c['can-on'] - a.c['can-on']) || a.s.name.localeCompare(b.s.name, 'vi'));
 
   if (classes.isLoading) return <Loading />;
-  if (!cls) return <div className="tc-page"><Empty icon="team" title="Chưa có lớp nào">{user.role === 'admin' ? <>Tạo lớp ở <Link to="/quan-tri/lop">Quản trị → Quản lí lớp</Link>.</> : 'Nhờ quản trị trường phân công lớp cho thầy cô.'}</Empty></div>;
+  if (!cls) return <div className="tc-page"><Empty icon="team" title="Chưa có lớp nào">{user.role === 'admin' ? <>Tạo lớp ở <Link to="/quan-tri/lop">Quản trị → Quản lí lớp</Link>.</> : 'Nhờ quản trị trường phân công lớp cho thầy/cô.'}</Empty></div>;
 
   return (
     <div className="tc-page db-page">

@@ -58,7 +58,7 @@ Lối vào khác:
 
 - Mỗi dòng có nút **Sửa** (mở thẳng trình sửa) và **Xoá** (hỏi lại trước khi xoá).
 - Tích chọn nhiều câu rồi bấm **Xoá N câu**.
-- Câu của thầy cô khác hoặc của bộ câu mẫu chung thì không xoá được. Máy báo rõ lí do và gợi ý dùng "Nhân bản" để có bản riêng.
+- Câu của thầy/cô khác hoặc của bộ câu mẫu chung thì không xoá được. Máy báo rõ lí do và gợi ý dùng "Nhân bản" để có bản riêng.
 - Nút **Danh mục kĩ năng** ở đầu trang.
 
 ## 5. Dán đề / tệp Word: tự nhận môn, lớp, kĩ năng

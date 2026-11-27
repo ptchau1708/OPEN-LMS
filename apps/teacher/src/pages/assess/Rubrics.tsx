@@ -3,6 +3,7 @@ import { SKILLS, SKILL_BY_CODE, SUBJECT_LIST, SUBJECTS, fitSubjectToGrade, subje
 import { Icon } from '@openedu/ui';
 import { criteriaMax, fmtScore, matchesSearch, useCatalogVersion, useDeleteRubric, useRubrics, useSaveRubric } from '@openedu/data';
 import { Btn, ConfirmBar, Dialog, Empty, ErrorNote, Field, Loading, PageHead, Seg, SubjectDot } from '../../components/common';
+import { byFocus, useFocusGrade } from '../../lib/focusGrade';
 
 const SUBJ: SubjectId[] = SUBJECT_LIST.map((s) => s.id);
 const GRADES: Grade[] = [1, 2, 3, 4, 5];
@@ -65,7 +66,7 @@ export function RubricEditor({ initial, onClose, onSaved }: { initial: Rubric; o
   const setC = (i: number, p: Partial<RubricCriterion>) => setR((x) => ({ ...x, criteria: x.criteria.map((c, j) => (j === i ? { ...c, ...p } : c)) }));
   const sum = criteriaMax(r);
   const submit = () => {
-    if (!r.title.trim()) return setErr('Thầy cô đặt tên cho bộ tiêu chí nhé.');
+    if (!r.title.trim()) return setErr('Thầy/cô đặt tên cho bộ tiêu chí nhé.');
     if (!r.criteria.length || r.criteria.some((c) => !c.name.trim())) return setErr('Mỗi tiêu chí cần có tên.');
     setErr(null);
     save.mutate(r, { onSuccess: (x) => { onSaved?.(x); onClose(); } });
@@ -95,7 +96,7 @@ export function RubricEditor({ initial, onClose, onSaved }: { initial: Rubric; o
                 <Btn size="sm" kind="ghost" icon="back" aria-label="Chuyển lên" disabled={!i} onClick={() => setR((x) => { const a = [...x.criteria]; [a[i - 1], a[i]] = [a[i], a[i - 1]]; return { ...x, criteria: a }; })} style={{ transform: 'rotate(90deg)' }} />
                 <Btn size="sm" kind="danger" icon="trash" aria-label="Xóa tiêu chí" onClick={() => setR((x) => ({ ...x, criteria: x.criteria.filter((_, j) => j !== i) }))} />
               </div>
-              <textarea className="tc-input" rows={2} aria-label="Mô tả tiêu chí" placeholder="Chấm cái gì (cho thầy cô và AI)" value={c.description} onChange={(e) => setC(i, { description: e.target.value })} />
+              <textarea className="tc-input" rows={2} aria-label="Mô tả tiêu chí" placeholder="Chấm cái gì (cho thầy/cô và AI)" value={c.description} onChange={(e) => setC(i, { description: e.target.value })} />
               <div className="tc-levels">
                 {(c.levels ?? []).map((l, k) => (
                   <div key={k} className="tc-levels__row">
@@ -129,12 +130,13 @@ export default function Rubrics({ user }: { user: Profile }) {
   const [edit, setEdit] = useState<Rubric | null>(null);
   const [confirm, setConfirm] = useState<string | null>(null);
   const [subject, setSubject] = useState<SubjectId | 'all'>('all');
-  const list = (q.data ?? []).filter((r) => subject === 'all' || r.subject === subject);
+  const focus = useFocusGrade().grade;
+  const list = byFocus((q.data ?? []).filter((r) => subject === 'all' || r.subject === subject), focus, (r) => r.grade);
   return (
     <div className="tc-page">
       <PageHead title="Tiêu chí chấm (rubric)" sub="Mỗi tiêu chí có điểm tối đa, mức mô tả và kĩ năng. AI chấm theo đúng các tiêu chí này." actions={<>
         <Seg label="Lọc môn" value={subject} onChange={setSubject} options={[{ value: 'all' as const, label: 'Tất cả' }, ...SUBJ.slice(0, 2).map((s) => ({ value: s, label: SUBJECTS[s].name }))]} />
-        <Btn kind="primary" icon="plus" onClick={() => setEdit(blankRubric(user))}>Tạo tiêu chí</Btn>
+        <Btn kind="primary" icon="plus" onClick={() => setEdit(blankRubric(user, 'toan', focus))}>Tạo tiêu chí</Btn>
       </>} />
       <ErrorNote error={q.error ?? del.error} onRetry={() => void q.refetch()} />
       {q.isLoading ? <Loading /> : !list.length ? <Empty icon="check" title="Chưa có bộ tiêu chí nào">Bấm “Tạo tiêu chí” để bắt đầu.</Empty> : (

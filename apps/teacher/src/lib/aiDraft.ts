@@ -72,7 +72,7 @@ export async function aiDraft(ds: DataSource, text: string, grade: Grade, subjec
   const sb = await supabaseClient(ds);
   if (!sb) return { ...localDraft(text, grade, subject, topic), note: 'no-client' };
   const { data, error } = await sb.functions.invoke('ai-gateway', { body: { task: 'lesson_outline', input: { topic: topic || text.slice(0, 80), grade, subject, text } } });
-  if (error) throw new Error(error instanceof Error ? error.message : 'AI chưa trả lời được, thầy cô thử lại sau nhé.');
+  if (error) throw new Error(error instanceof Error ? error.message : 'AI chưa trả lời được, thầy/cô thử lại sau nhé.');
   const outline = (data as { outline?: Outline })?.outline;
   if (!outline || !Array.isArray(outline.slides)) throw new Error('AI trả về dữ liệu không hợp lệ.');
   const items: Item[] = [];

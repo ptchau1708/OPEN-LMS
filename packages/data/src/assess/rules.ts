@@ -159,7 +159,7 @@ export function approvalReward(a: Pick<ApprovalInput, 'submissionId' | 'studentI
     stars,
     coins: stars,
     xp: stars * 10,
-    reason: `Bài làm được thầy cô duyệt: ${a.taskTitle}`,
+    reason: `Bài làm được thầy/cô duyệt: ${a.taskTitle}`,
     sourceType: 'work' as const,
     sourceId: a.submissionId,
   };
@@ -174,9 +174,9 @@ export const TEACHER_GRADER_LABEL = 'GV tự chấm';
 /** Điểm gợi ý khi GV chỉ chọn mức: T 90% · H 70% · C 40% thang điểm. */
 export const LEVEL_SUGGEST_RATIO: Record<Tt27Level, number> = { T: 0.9, H: 0.7, C: 0.4 };
 export const LEVEL_DEFAULT_FEEDBACK: Record<Tt27Level, { student: string; parent: string }> = {
-  T: { student: 'Em làm bài rất tốt! Cô khen em. Em tiếp tục cố gắng nhé.', parent: 'Con hoàn thành tốt bài này. Gia đình khen ngợi để con giữ vững nhé.' },
-  H: { student: 'Em đã hoàn thành bài. Em xem lại phần cô góp ý để làm tốt hơn nhé.', parent: 'Con hoàn thành bài. Gia đình nhắc con xem lại lời góp ý của cô.' },
-  C: { student: 'Em đã cố gắng. Em làm lại phần chưa đúng cùng cô nhé.', parent: 'Con chưa hoàn thành bài này. Gia đình cùng con ôn lại ở nhà nhé.' },
+  T: { student: 'Em làm bài rất tốt! Thầy/cô khen em. Em tiếp tục cố gắng nhé.', parent: 'Con hoàn thành tốt bài này. Gia đình khen ngợi để con giữ vững nhé.' },
+  H: { student: 'Em đã hoàn thành bài. Em xem lại phần thầy/cô góp ý để làm tốt hơn nhé.', parent: 'Con hoàn thành bài. Gia đình nhắc con xem lại lời góp ý của thầy/cô.' },
+  C: { student: 'Em đã cố gắng. Em làm lại phần chưa đúng cùng thầy/cô nhé.', parent: 'Con chưa hoàn thành bài này. Gia đình cùng con ôn lại ở nhà nhé.' },
 };
 
 export function isTeacherGrade(g: Pick<AiGrade, 'model'> | undefined | null): boolean {
@@ -212,7 +212,7 @@ export function teacherGrade(i: TeacherGradeInput): AiGrade {
   const max = i.rubric.maxScore > 0 ? i.rubric.maxScore : 10;
   const given = (i.criteria ?? []).filter((c) => Number.isFinite(Number(c.points)));
   const hasTotal = typeof i.total === 'number' && Number.isFinite(i.total);
-  if (!i.level && !hasTotal && !given.length) throw new Error('Thầy cô chọn mức T/H/C hoặc nhập điểm nhé.');
+  if (!i.level && !hasTotal && !given.length) throw new Error('Thầy/cô chọn mức T/H/C hoặc nhập điểm nhé.');
   const rc = i.rubric.criteria;
   let total: number;
   let criteria: AiGrade['criteria'];

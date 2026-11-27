@@ -35,7 +35,7 @@ function seed(now: Date): Store {
     };
     discussions.push(d);
     const [s1, s2, s3] = cls.studentIds;
-    mk(d, 'chung', 'y-kien', cls.teacherId, 'Cô chào cả lớp! Các em viết ý kiến vào tab “Ý kiến”, có thắc mắc thì đăng vào tab “Câu hỏi” nhé.', 'visible', 500);
+    mk(d, 'chung', 'y-kien', cls.teacherId, 'Chào cả lớp! Các em viết ý kiến vào tab “Ý kiến”, có thắc mắc thì đăng vào tab “Câu hỏi” nhé.', 'visible', 500);
     const p1 = mk(d, 'chung', 'y-kien', s1, 'Em nhặt rác ở sân trường vào giờ ra chơi.', 'visible', 300, { color: '#dff3e4' });
     p1.reactions.push({ userId: s2, kind: 'heart' }, { userId: cls.teacherId, kind: 'star' });
     mk(d, 'chung', 'y-kien', s2, 'Em tắt điện khi ra khỏi lớp.', 'visible', 200, { color: '#fff4c2' });
@@ -255,7 +255,7 @@ export class DemoDiscussSource implements DiscussSource {
       n++;
       touched.add(d.id);
     }
-    if (!n && ids.length) throw new Error('Thầy cô chưa có quyền với các bài này.');
+    if (!n && ids.length) throw new Error('Thầy/cô chưa có quyền với các bài này.');
     save();
     touched.forEach(emit);
     return n;

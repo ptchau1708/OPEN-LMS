@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router';
 import { CatalogGate, useCurrentUser, useEmbedOriginsSync } from '@openedu/data';
 import { setEmbedOrigins } from '@openedu/lesson-player';
 import { Layout } from './components/Layout';
+import { FocusGradeProvider } from './lib/focusGrade';
 import { Loading } from './components/common';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -41,6 +42,7 @@ const Reports = lazy(() => import('./pages/admin/Reports'));
 const GradeMap = lazy(() => import('./pages/admin/GradeMap'));
 const ParentHub = lazy(() => import('./pages/parents/ParentHub'));
 const NotifySettings = lazy(() => import('./pages/NotifySettings'));
+const PersonalSettings = lazy(() => import('./pages/PersonalSettings'));
 const AdminClasses = lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.AdminClasses })));
 const AdminUsers = lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.AdminUsers })));
 const AdminSettings = lazy(() => import('./pages/admin/Admin').then((m) => ({ default: m.AdminSettings })));
@@ -68,6 +70,7 @@ export function App() {
   if (user.mustChangePassword) return <Suspense fallback={<Loading />}><ForcedChange user={user} /></Suspense>;
   return (
     <CatalogGate>
+    <FocusGradeProvider userId={user.id}>
     <Routes>
       <Route path="lti/auth" element={<Suspense fallback={<Loading />}><TeacherLtiAuth /></Suspense>} />
       <Route path="thao-luan/:id/tv" element={<Suspense fallback={<Loading />}><DiscussTv /></Suspense>} />
@@ -111,6 +114,7 @@ export function App() {
         <Route path="bao-cao/ban-do-khoi" element={<Suspense fallback={<Loading />}><GradeMap user={user} /></Suspense>} />
         <Route path="phu-huynh" element={<Suspense fallback={<Loading />}><ParentHub user={user} /></Suspense>} />
         <Route path="thong-bao" element={<Suspense fallback={<Loading />}><NotifySettings /></Suspense>} />
+        <Route path="cai-dat" element={<Suspense fallback={<Loading />}><PersonalSettings /></Suspense>} />
         <Route path="thi-dua/thong-ke" element={<Suspense fallback={<Loading />}><BehaviorStats user={user} /></Suspense>} />
         <Route path="bao-cao-bai-giao" element={<Suspense fallback={<Loading />}><AssignReport user={user} /></Suspense>} />
         <Route path="doi-mat-khau" element={<Suspense fallback={<Loading />}><ChangePassword /></Suspense>} />
@@ -123,6 +127,7 @@ export function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
+    </FocusGradeProvider>
     </CatalogGate>
   );
 }

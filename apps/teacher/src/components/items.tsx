@@ -5,6 +5,7 @@ import { Icon, KidShell } from '@openedu/ui';
 import { useItems } from '@openedu/data';
 import { Btn, Dialog, Empty, Loading, Seg } from './common';
 import { cx, shorten, TYPE_ICON, typeLabel } from '../lib/format';
+import { useFocusGrade } from '../lib/focusGrade';
 
 export function TypeBadge({ type }: { type: ItemType }) {
   const meta = ACTIVITY_TYPES.find((t) => t.type === type);
@@ -86,7 +87,8 @@ export function TypePickerDialog({ open, onClose, onPick }: { open: boolean; onC
 export function ItemPickerDialog({ open, onClose, onPick, grade, subject }: { open: boolean; onClose: () => void; onPick: (it: Item) => void; grade?: Grade; subject?: SubjectId }) {
   const [search, setSearch] = useState('');
   const [sub, setSub] = useState<SubjectId | ''>(subject ?? '');
-  const [gr, setGr] = useState<Grade | 0>(grade ?? 0);
+  const focus = useFocusGrade().grade;
+  const [gr, setGr] = useState<Grade | 0>(grade ?? focus);
   const [type, setType] = useState<ItemType | ''>('');
   const [sel, setSel] = useState<Item | null>(null);
   const q = useItems({ ...(sub ? { subject: sub } : {}), ...(gr ? { grade: gr } : {}), ...(type ? { type } : {}), ...(search.trim() ? { search: search.trim() } : {}) });

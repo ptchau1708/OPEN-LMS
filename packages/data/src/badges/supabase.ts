@@ -70,7 +70,7 @@ export class SupabaseRewardsSource implements RewardsSource {
   }
   async getClassGarden(classId: string, opts: { display?: 'tv'; tvKey?: string } = {}): Promise<ClassGarden> {
     const raw = opts.tvKey
-      ? await this.rpc<GardenRaw>('get_class_garden_tv', { p_class: classId, p_key: opts.tvKey }, 'Link TV không còn hiệu lực. Thầy cô mở lại từ Bàn làm việc giáo viên → Vườn lớp → Mở trên TV.')
+      ? await this.rpc<GardenRaw>('get_class_garden_tv', { p_class: classId, p_key: opts.tvKey }, 'Link TV không còn hiệu lực. Thầy/cô mở lại từ Bàn làm việc giáo viên → Vườn lớp → Mở trên TV.')
       : await this.rpc<GardenRaw>('get_class_garden', { p_class: classId }, 'Chưa mở được Vườn lớp.');
     const g = assembleGarden(raw);
     return opts.display === 'tv' || opts.tvKey ? anonymizeGarden(g) : g;

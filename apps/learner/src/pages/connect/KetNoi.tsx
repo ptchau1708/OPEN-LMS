@@ -111,10 +111,10 @@ export default function KetNoi() {
       <Button size="lg" onClick={() => void appQ.refetch()}>Thử lại</Button></Shell>;
   }
   if (autoError === 'unknown_app') {
-    return <Shell mood="sad" title="Ứng dụng này chưa được nhà trường cho phép"><p className="ln-state__text">Em báo thầy cô giúp nhé. Mã ứng dụng: <b>{req.appId}</b></p></Shell>;
+    return <Shell mood="sad" title="Ứng dụng này chưa được nhà trường cho phép"><p className="ln-state__text">Em báo thầy/cô giúp nhé. Mã ứng dụng: <b>{req.appId}</b></p></Shell>;
   }
   if (autoError === 'origin_not_allowed' || !app) {
-    return <Shell mood="sad" title="Địa chỉ này chưa được nhà trường cho phép"><p className="ln-state__text">Trang <b className="ln-connect__origin">{req.origin}</b> chưa được đăng kí cho ứng dụng «{app?.name ?? req.appId}». Em báo thầy cô giúp nhé.</p></Shell>;
+    return <Shell mood="sad" title="Địa chỉ này chưa được nhà trường cho phép"><p className="ln-state__text">Trang <b className="ln-connect__origin">{req.origin}</b> chưa được đăng kí cho ứng dụng «{app?.name ?? req.appId}». Em báo thầy/cô giúp nhé.</p></Shell>;
   }
 
   return (

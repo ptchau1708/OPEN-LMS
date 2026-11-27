@@ -27,9 +27,9 @@ export function DiscussHome() {
   return (
     <div className="ln-page ln-dhome">
       <TopBack title="Thảo luận" />
-      {!me.classId ? <EmptyState title="Em chưa có lớp" text="Khi thầy cô xếp em vào lớp, các phòng thảo luận sẽ hiện ở đây." />
+      {!me.classId ? <EmptyState title="Em chưa có lớp" text="Khi thầy/cô xếp em vào lớp, các phòng thảo luận sẽ hiện ở đây." />
         : q.isPending ? <LoadingScreen /> : q.isError ? <ErrorState onRetry={() => void q.refetch()} message={(q.error as Error).message} />
-        : !list.length ? <EmptyState title="Chưa có phòng thảo luận" text="Khi cô mở chủ đề mới, em sẽ thấy ở đây nhé!" />
+        : !list.length ? <EmptyState title="Chưa có phòng thảo luận" text="Khi thầy/cô mở chủ đề mới, em sẽ thấy ở đây nhé!" />
         : (
           <div className="ln-dhome__list">
             {list.map((d) => {
@@ -69,7 +69,7 @@ function Card2({ p, replies, meId, canPost, onReply }: { p: DiscussionPost; repl
         <strong>{mine ? 'Em' : p.author.name}{teacher ? ' 👩‍🏫' : ''}</strong>
         <small>{ago(p.createdAt)}</small>
       </header>
-      {p.status === 'pending' ? <p className="ln-dcard__wait" role="status">⏳ Đang chờ cô xem — chỉ em thấy bài này.</p> : null}
+      {p.status === 'pending' ? <p className="ln-dcard__wait" role="status">⏳ Đang chờ thầy/cô xem — chỉ em thấy bài này.</p> : null}
       {editing !== null ? (
         <div className="ln-dcard__edit">
           <textarea className="ln-dtext" value={editing} maxLength={1000} onChange={(e) => setEditing(e.target.value)} aria-label="Sửa bài" />
@@ -92,20 +92,20 @@ function Card2({ p, replies, meId, canPost, onReply }: { p: DiscussionPost; repl
             <button type="button" className="ln-dlink" onClick={() => setAsk('remove')}>Gỡ</button>
           </>
         ) : !teacher && p.status === 'visible' ? (
-          <button type="button" className="ln-dlink" disabled={p.reports > 0} onClick={() => setAsk('report')}>{p.reports ? 'Đã báo cô' : '⚑ Báo cô'}</button>
+          <button type="button" className="ln-dlink" disabled={p.reports > 0} onClick={() => setAsk('report')}>{p.reports ? 'Đã báo thầy/cô' : '⚑ Báo thầy/cô'}</button>
         ) : null}
       </footer>
       {ask ? (
-        <div className="ln-dask" role="alertdialog" aria-label={ask === 'remove' ? 'Gỡ bài' : 'Báo cô'}>
-          <span>{ask === 'remove' ? 'Gỡ bài này?' : 'Báo cô bài này chưa hay?'}</span>
+        <div className="ln-dask" role="alertdialog" aria-label={ask === 'remove' ? 'Gỡ bài' : 'Báo thầy/cô'}>
+          <span>{ask === 'remove' ? 'Gỡ bài này?' : 'Báo thầy/cô bài này chưa hay?'}</span>
           <Button size="md" variant="secondary" onClick={() => setAsk(null)}>Thôi</Button>
-          <Button size="md" onClick={() => { if (ask === 'remove') remove.mutate(p.id); else report.mutate({ postId: p.id, reason: '' }); setAsk(null); }}>{ask === 'remove' ? 'Gỡ' : 'Báo cô'}</Button>
+          <Button size="md" onClick={() => { if (ask === 'remove') remove.mutate(p.id); else report.mutate({ postId: p.id, reason: '' }); setAsk(null); }}>{ask === 'remove' ? 'Gỡ' : 'Báo thầy/cô'}</Button>
         </div>
       ) : null}
       {open ? (
         <div className="ln-dcard__replies">
           {replies.map((r) => (
-            <p key={r.id} className={`ln-dreply${r.status === 'pending' ? ' is-pending' : ''}`}><strong>{r.authorId === meId ? 'Em' : r.author.name}:</strong> {r.body}{r.status === 'pending' ? ' (chờ cô xem)' : ''}</p>
+            <p key={r.id} className={`ln-dreply${r.status === 'pending' ? ' is-pending' : ''}`}><strong>{r.authorId === meId ? 'Em' : r.author.name}:</strong> {r.body}{r.status === 'pending' ? ' (chờ thầy/cô xem)' : ''}</p>
           ))}
           {canPost && p.status === 'visible' ? <Button size="md" variant="secondary" onClick={() => onReply(p)} data-testid="dc-reply">Trả lời bạn</Button> : null}
         </div>
@@ -153,7 +153,7 @@ export default function DiscussRoom() {
     send.mutate({ discussionId: d.id, roomId, tabId: replyTo ? replyTo.tabId : tabId, parentId: replyTo?.id ?? null, body, files, color }, {
       onSuccess: (p) => {
         setBody(''); setFiles([]); setColor(null); setReplyTo(null);
-        setDone(p.status === 'pending' ? 'Đã gửi! Bài sẽ hiện khi cô xem xong.' : 'Đã đăng bài!');
+        setDone(p.status === 'pending' ? 'Đã gửi! Bài sẽ hiện khi thầy/cô xem xong.' : 'Đã đăng bài!');
         sfx.drop();
       },
     });

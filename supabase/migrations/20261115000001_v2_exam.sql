@@ -349,7 +349,7 @@ create or replace function v2.exam_allow_retake(p_exam text, p_student uuid) ret
 language plpgsql volatile security definer set search_path = v2, public as $$
 declare a v2.exam_attempts;
 begin
-  if not v2.is_exam_teacher(p_exam) then raise exception 'Chỉ thầy cô của lớp mới cho làm lại.' using errcode = '42501'; end if;
+  if not v2.is_exam_teacher(p_exam) then raise exception 'Chỉ thầy/cô của lớp mới cho làm lại.' using errcode = '42501'; end if;
   a := v2._exam_latest(p_exam, p_student);
   if a.id is null then raise exception 'Em này chưa làm bài nên chưa cần cho làm lại.' using errcode = 'P0001'; end if;
   if a.status <> 'submitted' then raise exception 'Em này đang làm bài.' using errcode = 'P0001'; end if;

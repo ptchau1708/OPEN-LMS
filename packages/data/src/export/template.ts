@@ -1,5 +1,5 @@
 /**
- * "Điền vào mẫu": lấy tệp Excel thầy cô tải từ VnEdu (hoặc bất kì mẫu nào có cột họ tên), điền dữ liệu OPEN-EDU vào
+ * "Điền vào mẫu": lấy tệp Excel thầy/cô tải từ VnEdu (hoặc bất kì mẫu nào có cột họ tên), điền dữ liệu OPEN-EDU vào
  * các cột đã chọn rồi trả lại tệp. Ưu tiên sửa thẳng trong tệp gốc (giữ nguyên định dạng); tệp lạ thì ghi tệp mới sạch
  * có cùng các dòng tiêu đề và thứ tự cột. Cách ghép cột được nhớ theo "dấu vân tay" của mẫu (localStorage).
  */

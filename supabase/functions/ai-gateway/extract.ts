@@ -117,7 +117,7 @@ export async function handleExtract(input: JsonObject, deps: ExtractDeps, opts: 
   if (comma >= 0) data = data.slice(comma + 1);
   if (!data) throw new HttpError(400, 'Thiếu tệp ảnh hoặc PDF.', 'bad_request');
   if (decodedBytes(data) > EXTRACT_FILE_MAX_BYTES) {
-    throw new HttpError(413, 'Tệp quá lớn (tối đa 4 MB). Thầy cô chụp từng trang hoặc tách PDF nhỏ hơn nhé.', 'too_large');
+    throw new HttpError(413, 'Tệp quá lớn (tối đa 4 MB). Thầy/cô chụp từng trang hoặc tách PDF nhỏ hơn nhé.', 'too_large');
   }
   if (!/^[A-Za-z0-9+/]+={0,2}$/.test(data) || data.length % 4 !== 0) throw new HttpError(400, 'Tệp gửi lên không đọc được.', 'bad_request');
   if (sniff(data) !== mimeType) throw new HttpError(400, 'Nội dung tệp không khớp định dạng (JPG, PNG, WEBP, PDF).', 'bad_request');
@@ -144,7 +144,7 @@ export async function handleExtract(input: JsonObject, deps: ExtractDeps, opts: 
     .filter((x): x is Item => x !== null)
     .slice(0, MAX_ITEMS);
   if (items.length === 0) {
-    throw new HttpError(502, 'AI không đọc được câu hỏi nào trong tệp này. Thầy cô thử ảnh rõ hơn, hoặc dán văn bản / dùng mẫu Excel nhé.', 'ai_bad_output');
+    throw new HttpError(502, 'AI không đọc được câu hỏi nào trong tệp này. Thầy/cô thử ảnh rõ hơn, hoặc dán văn bản / dùng mẫu Excel nhé.', 'ai_bad_output');
   }
   return { text: r.text, items, provider: r.provider };
 }

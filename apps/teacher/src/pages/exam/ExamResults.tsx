@@ -74,7 +74,7 @@ export default function ExamResults() {
         </section>
       </div>
       <section className="tc-card tc-card--flush">
-        <div className="ex-pad"><h2 className="ex-h2">Học sinh</h2><p className="tc-small tc-muted">Ghi chú chỉ để thầy cô tham khảo và trò chuyện với em — hệ thống không trừ điểm.</p></div>
+        <div className="ex-pad"><h2 className="ex-h2">Học sinh</h2><p className="tc-small tc-muted">Ghi chú chỉ để thầy/cô tham khảo và trò chuyện với em — hệ thống không trừ điểm.</p></div>
         <div className="tc-tablewrap">
           <table className="tc-table">
             <thead><tr><th>Học sinh</th><th>Đề</th><th>Trạng thái</th><th className="ex-c">Điểm</th><th className="ex-c">Gợi ý mức</th><th>Ghi chú</th><th /></tr></thead>

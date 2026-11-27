@@ -92,7 +92,7 @@ export function Session({ sessionId, pin, ctl, onLeave }: SessionProps) {
         <Mascot id="nghe" mood={stuck ? 'think' : 'happy'} size={200} animate className="pr-center__mascot" />
         <h1 className="pr-center__h">{status === 'error' ? 'Chưa vào được lớp' : 'Đang mở lớp học…'}</h1>
         {status === 'error' ? <p className="pr-center__p">{error ?? 'Không tìm thấy lớp học trực tiếp này.'}</p>
-          : slow ? <p className="pr-center__p">{pin || ctl ? 'Lớp đang mở chậm. Thầy cô kiểm tra mạng, hoặc bấm “Nhập mã lớp khác” rồi nhập mã 6 số trên máy giáo viên.' : 'Link này thiếu mã lớp. Bấm “Nhập mã lớp khác” rồi nhập mã 6 số trên máy giáo viên, hoặc bấm lại “Mở trên TV”.'}</p> : null}
+          : slow ? <p className="pr-center__p">{pin || ctl ? 'Lớp đang mở chậm. Thầy/cô kiểm tra mạng, hoặc bấm “Nhập mã lớp khác” rồi nhập mã 6 số trên máy giáo viên.' : 'Link này thiếu mã lớp. Bấm “Nhập mã lớp khác” rồi nhập mã 6 số trên máy giáo viên, hoặc bấm lại “Mở trên TV”.'}</p> : null}
         <button type="button" className="pr-link" onClick={onLeave}>
           Nhập mã lớp khác
         </button>

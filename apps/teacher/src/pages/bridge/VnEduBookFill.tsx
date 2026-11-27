@@ -51,7 +51,7 @@ export function VnEduBookFill({ data, file, book, onManual, onClear, onChanged }
   const warnings: string[] = [];
   if (book.termId && book.termId !== data.termId) warnings.push(`Tệp là “${book.termText ?? TT27_TERM_LABEL[book.termId]}” nhưng trang đang lấy đánh giá “${TT27_TERM_LABEL[data.termId]}”. Đổi ô “Kì” ở đầu trang thành “${TT27_TERM_LABEL[book.termId]}” rồi tải tệp lại.`);
   if (book.schoolYear && book.schoolYear !== data.schoolYear) warnings.push(`Tệp là năm học ${book.schoolYear}, OPEN-EDU đang dùng năm học ${data.schoolYear}.`);
-  if (book.className && normClass(book.className) !== normClass(data.cls.name)) warnings.push(`Tệp của lớp ${book.className}, thầy cô đang chọn lớp ${data.cls.name}.`);
+  if (book.className && normClass(book.className) !== normClass(data.cls.name)) warnings.push(`Tệp của lớp ${book.className}, thầy/cô đang chọn lớp ${data.cls.name}.`);
 
   const download = () => {
     setError('');
@@ -112,10 +112,10 @@ export function VnEduBookFill({ data, file, book, onManual, onClear, onChanged }
           </div>
           <p className="tc-small tc-muted">
             Lấy từ đánh giá TT27 “{TT27_TERM_LABEL[data.termId]}” trong OPEN-EDU: Nhận xét, điểm KT (số nguyên 1–10) và mức XL (T/H/C). Cột “Sau thi lại” để nguyên.
-            Môn OPEN-EDU chưa có (Lịch sử và Địa lí, Đạo đức, Tin học, Công nghệ, GD thể chất, HĐ trải nghiệm…) thầy cô nhập trên VnEdu như cũ.
+            Môn OPEN-EDU chưa có (Lịch sử và Địa lí, Đạo đức, Tin học, Công nghệ, GD thể chất, HĐ trải nghiệm…) thầy/cô nhập trên VnEdu như cũ.
           </p>
           {unmatched.length ? (
-            <div className="tc-alert tc-alert--warn"><span>Chưa ghép được {unmatched.length} em (dòng để nguyên): {unmatched.join(', ')}. Nếu tên trong OPEN-EDU viết khác, thầy cô dùng “Tự ghép cột” để chọn tay, hoặc tab “Nhập danh sách”.</span></div>
+            <div className="tc-alert tc-alert--warn"><span>Chưa ghép được {unmatched.length} em (dòng để nguyên): {unmatched.join(', ')}. Nếu tên trong OPEN-EDU viết khác, thầy/cô dùng “Tự ghép cột” để chọn tay, hoặc tab “Nhập danh sách”.</span></div>
           ) : null}
           {newCodes.length ? (
             <div className="tc-row tc-wrap br-actions">
@@ -138,10 +138,10 @@ export function VnEduBookFill({ data, file, book, onManual, onClear, onChanged }
             <p className="tc-small">Mẫu đang trống → OPEN-EDU viết thêm <b>{nlpc.added}</b> dòng (STT, mã học sinh, họ tên, học kì, các mức T/Đ/C) theo đánh giá TT27 “{TT27_TERM_LABEL[data.termId]}”.</p>
           ) : <p className="tc-small">Mẫu đã có {nlpc.matches.length} dòng học sinh → ghép theo mã / họ tên rồi điền các mức T/Đ/C.</p>}
           {nlpc.missingCode?.length ? (
-            <div className="tc-alert tc-alert--warn"><span>{nlpc.missingCode.length} em chưa có mã học sinh VnEdu nên chưa đưa vào tệp: {nlpc.missingCode.join(', ')}. Thầy cô tải sổ điểm VnEdu của lớp vào đây rồi bấm “Lưu mã học sinh VnEdu vào OPEN-EDU”, hoặc nhập mã ở tab “Mã học sinh”.</span></div>
+            <div className="tc-alert tc-alert--warn"><span>{nlpc.missingCode.length} em chưa có mã học sinh VnEdu nên chưa đưa vào tệp: {nlpc.missingCode.join(', ')}. Thầy/cô tải sổ điểm VnEdu của lớp vào đây rồi bấm “Lưu mã học sinh VnEdu vào OPEN-EDU”, hoặc nhập mã ở tab “Mã học sinh”.</span></div>
           ) : null}
           <label className="tc-row tc-small">Giá trị ghi vào cột “Học kì” <input className="tc-input tc-input--sm" style={{ width: 80 }} value={nlpcTerm} onChange={(e) => setNlpcTerm(e.target.value)} aria-label="Giá trị cột Học kì" /></label>
-          <p className="tc-small tc-muted">Ba cột “Nhận xét về…” để trống để thầy cô tự viết. Nếu VnEdu báo lỗi cột Học kì, thầy cô đổi giá trị cho đúng cách VnEdu yêu cầu rồi tải lại.</p>
+          <p className="tc-small tc-muted">Ba cột “Nhận xét về…” để trống để thầy/cô tự viết. Nếu VnEdu báo lỗi cột Học kì, thầy/cô đổi giá trị cho đúng cách VnEdu yêu cầu rồi tải lại.</p>
           <Btn size="sm" kind="ghost" onClick={() => setOpen(open ? null : nlpc.sheetName)}>{open ? 'Ẩn xem trước' : 'Xem trước'}</Btn>
         </section>
       ) : null}
@@ -178,12 +178,12 @@ export function VnEduBookFill({ data, file, book, onManual, onClear, onChanged }
         </label>
         <div className="tc-row tc-wrap br-actions">
           <Btn kind="primary" icon="check" size="lg" data-testid="br-vn-download" disabled={!plan.filled} onClick={download}>Tải tệp đã điền (.{file.opened.wb.format === 'xlsx' ? 'xlsx' : 'xls'})</Btn>
-          <span className="tc-small tc-muted">Giữ nguyên định dạng, cột ẩn, mã bảng của VnEdu. Tệp gốc không bị sửa và không rời khỏi máy thầy cô.</span>
+          <span className="tc-small tc-muted">Giữ nguyên định dạng, cột ẩn, mã bảng của VnEdu. Tệp gốc không bị sửa và không rời khỏi máy thầy/cô.</span>
         </div>
         {error ? <div className="tc-alert tc-alert--error" role="alert"><span>{error}</span></div> : null}
         {done ? (
           <div className="tc-alert tc-alert--ok" role="status" data-testid="br-vn-done">
-            <span>Đã tải “{done.fileName}” ({done.filled} ô). Trên VnEdu, vào đúng màn hình nhập điểm / nhận xét của lớp và chọn “Nhập từ Excel”, rồi chọn tệp này. Lần đầu thầy cô nên mở tệp kiểm tra vài dòng trước khi nhập.</span>
+            <span>Đã tải “{done.fileName}” ({done.filled} ô). Trên VnEdu, vào đúng màn hình nhập điểm / nhận xét của lớp và chọn “Nhập từ Excel”, rồi chọn tệp này. Lần đầu thầy/cô nên mở tệp kiểm tra vài dòng trước khi nhập.</span>
           </div>
         ) : null}
       </section>

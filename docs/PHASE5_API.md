@@ -22,7 +22,7 @@ Supabase: migration `20261113000002_v2_school.sql` + Edge Function `school-admin
 
 Thuần: `generateGuardianCode`, `normalizeCode`, `formatCode` ("ABCD-EFGH"), `codeStatus`, `checkRedeem`, `maskLogin`, `normalizeParentLogin`.
 `ParentDigest`: tuần thứ Hai→CN giờ VN; `days[7]`, `totals` (ngày học, câu, % đúng, sao, bài xong, bộ ôn đạt), `works` (bài viết đã duyệt trong tuần),
-`attendance`, `behavior`, `tt27` (bản **final** mới nhất; `generalComment` = "Lời nhắn của cô"), `tips` (≤ 3). Lắp từ DataSource công khai (`school/generic.ts`) nên chạy cả demo lẫn Supabase.
+`attendance`, `behavior`, `tt27` (bản **final** mới nhất; `generalComment` = "Lời nhắn của thầy/cô"), `tips` (≤ 3). Lắp từ DataSource công khai (`school/generic.ts`) nên chạy cả demo lẫn Supabase.
 
 App HS: `/phu-huynh/lien-ket` (công khai; đăng ký / đăng nhập + mã / thêm con), `/phu-huynh` có thanh chọn con + "Thêm con", bản tin tuần (lùi 12 tuần), thẻ TT27.
 HS trên máy dùng chung vào chế độ phụ huynh qua khoá phép tính (đã có, `ParentGate`).

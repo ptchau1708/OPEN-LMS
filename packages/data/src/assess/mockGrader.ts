@@ -210,7 +210,7 @@ function gradeTv4(text: string): Draft {
   if (ct < 1) issues.push({ text: `Có ${form.bad.length} câu chưa viết hoa đầu câu hoặc thiếu dấu chấm.`, skill: 'TV4.TAM.CHINH-TA-DOAN', location: form.bad[0] ? `“${form.bad[0].slice(0, 40)}”` : undefined });
   if (nh < 2) issues.push({ text: 'Tả ngoại hình còn sơ sài.', skill: 'TV4.TAM.VIET-DOAN-TA' });
   if (tn < 1) issues.push({ text: 'Chưa có hình ảnh so sánh, ít từ gợi tả.', skill: 'TV4.TAM.TU-GOI-TA-SO-SANH' });
-  const best = compare >= 1 ? 'Em có những hình ảnh so sánh rất đẹp' : nh >= 2 ? 'Em đã quan sát và tả được nhiều đặc điểm của con vật' : feel.length ? 'Cô cảm nhận được tình yêu của em với con vật' : 'Em đã viết được đoạn văn về con vật em yêu thích';
+  const best = compare >= 1 ? 'Em có những hình ảnh so sánh rất đẹp' : nh >= 2 ? 'Em đã quan sát và tả được nhiều đặc điểm của con vật' : feel.length ? 'Thầy/cô cảm nhận được tình yêu của em với con vật' : 'Em đã viết được đoạn văn về con vật em yêu thích';
   return {
     criteria: c,
     strengths: [nh >= 2 ? 'Quan sát tốt ngoại hình' : '', compare ? 'Có hình ảnh so sánh' : '', feel.length ? 'Bộc lộ tình cảm chân thành' : ''].filter(Boolean),
@@ -272,7 +272,7 @@ function gradeGeneric(text: string, rubric: Rubric): Draft {
   const words = norm(text).split(' ').filter(Boolean).length;
   const f = Math.min(1, words / 60) * 0.7;
   return {
-    criteria: rubric.criteria.map((c) => ({ criterionId: c.id, points: Math.round(c.points * f * 2) / 2, comment: 'Ước lượng theo độ dài bài (chấm mẫu) — thầy cô xem lại.' })),
+    criteria: rubric.criteria.map((c) => ({ criterionId: c.id, points: Math.round(c.points * f * 2) / 2, comment: 'Ước lượng theo độ dài bài (chấm mẫu) — thầy/cô xem lại.' })),
     strengths: words > 20 ? ['Bài có nội dung'] : [],
     issues: [],
     skills: rubric.skills.map((code) => ({ code, evidence: 'chua-ro' as const })),
@@ -320,7 +320,7 @@ export function mockGrade(input: MockGradeInput): AiGrade {
   if (unknownPhotos) {
     flags.add('unreadable');
     confidence = Math.min(confidence, 0.1);
-    teacher = `Bộ chấm mẫu (demo) chưa đọc được ${unknownPhotos} ảnh thầy cô/HS tải lên — thầy cô chấm tay, hoặc cấu hình VITE_DEMO_AI_KEY để AI đọc ảnh. ${text ? 'Điểm dưới đây chỉ tính phần chữ đánh máy.' : ''}`.trim();
+    teacher = `Bộ chấm mẫu (demo) chưa đọc được ${unknownPhotos} ảnh thầy/cô/HS tải lên — thầy/cô chấm tay, hoặc cấu hình VITE_DEMO_AI_KEY để AI đọc ảnh. ${text ? 'Điểm dưới đây chỉ tính phần chữ đánh máy.' : ''}`.trim();
     for (let i = 0; i < unknownPhotos; i++) transcript.push('[Bộ chấm mẫu chưa đọc được ảnh này]');
   }
   if (!text) {
@@ -329,7 +329,7 @@ export function mockGrade(input: MockGradeInput): AiGrade {
   }
   const { total, max } = totalFromCriteria(draft.criteria.map((c) => c.points), rubric);
   const level = levelFor(total, max);
-  const feedbackStudent = level === 'C' && !text ? 'Cô chưa đọc được bài của em. Em nhờ thầy cô chụp lại ảnh rõ hơn nhé!' : `${draft.praise} ${draft.next}`;
+  const feedbackStudent = level === 'C' && !text ? 'Chưa đọc được bài của em. Em nhờ thầy/cô chụp lại ảnh rõ hơn nhé!' : `${draft.praise} ${draft.next}`;
   const parentLead = level === 'T' ? 'Con làm bài tốt' : level === 'H' ? 'Con đã hoàn thành bài' : 'Con cần thêm thời gian cho dạng bài này';
   const raw: Raw = {
     transcript,

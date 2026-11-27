@@ -100,7 +100,7 @@ export default function OfflineHost() {
         <div ref={bar} className={`ln-offline${st.online ? ' is-online' : ''}`} role="status" aria-live="polite">
           <span className="ln-offline__icon">{st.online ? <Icon name="upload" size={20} /> : <CloudOff />}</span>
           <span className="ln-offline__text">
-            {!st.online ? 'Đang học không cần mạng' : st.syncing ? 'Đang gửi bài lên cho cô…' : 'Có mạng rồi! Gửi bài em đã làm nhé'}
+            {!st.online ? 'Đang học không cần mạng' : st.syncing ? 'Đang gửi bài lên cho thầy/cô…' : 'Có mạng rồi! Gửi bài em đã làm nhé'}
           </span>
           {st.pending > 0 && <span className="ln-offline__badge" aria-label={`${st.pending} việc chờ gửi`}>{st.pending} chờ gửi</span>}
           {st.online && st.pending > 0 && !st.syncing && (
@@ -121,7 +121,7 @@ function SyncParty({ r, onClose }: { r: SyncReport; onClose: () => void }) {
       <div className="ln-syncparty__card k-card">
         <Mascot id="nghe" mood="cheer" size={110} animate title="" />
         <div className="ln-syncparty__body">
-          <strong className="ln-syncparty__head">Cô đã chấm bài em làm lúc mất mạng!</strong>
+          <strong className="ln-syncparty__head">Thầy/cô đã chấm bài em làm lúc mất mạng!</strong>
           {r.graded > 0 && <span>Em làm đúng {r.correct}/{r.graded} câu.</span>}
           {r.stars > 0 && <span className="ln-syncparty__stars">+{r.stars} <Icon name="star" size={26} /> vào túi của em</span>}
         </div>

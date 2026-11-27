@@ -63,7 +63,7 @@ begin
   end if;
   select role into v_role from v2.profiles where id = p_user;
   if v_role is null then
-    raise exception 'Tài khoản của em chưa có trên hệ thống mới. Hãy báo thầy cô nhé.' using errcode = '42501';
+    raise exception 'Tài khoản của em chưa có trên hệ thống mới. Hãy báo thầy/cô nhé.' using errcode = '42501';
   end if;
   select * into v_item from v2.items where id = p_item_id;
   if not found then

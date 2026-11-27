@@ -34,7 +34,7 @@ export function CodeEditor({ data, onChanged }: { data: BridgeData; onChanged: (
       </header>
       <p className="tc-small tc-muted">Mã này dùng để ghép chắc chắn khi điền vào mẫu VnEdu (không phụ thuộc cách viết họ tên). Có thể nhập cả loạt từ tệp ở thẻ “Nhập danh sách”.</p>
       <ErrorNote error={save.error} />
-      {dup.size ? <div className="tc-alert tc-alert--info"><span>Có mã bị trùng giữa các em: {[...dup].join(', ')}. Thầy cô kiểm tra lại.</span></div> : null}
+      {dup.size ? <div className="tc-alert tc-alert--info"><span>Có mã bị trùng giữa các em: {[...dup].join(', ')}. Thầy/cô kiểm tra lại.</span></div> : null}
       <ul className="br-codes">
         {data.students.map((s, i) => (
           <li key={s.id}>

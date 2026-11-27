@@ -408,10 +408,10 @@ function readGlobals(s: Uint8Array): Globals {
   }
   const bof = recs[0];
   if (!bof || bof.id !== R.BOF) {
-    if (bof && (bof.id === 0x0009 || bof.id === 0x0209 || bof.id === 0x0409)) throw new XlsxError('Đây là tệp Excel rất cũ (trước 1997). Thầy cô mở tệp bằng Excel, chọn Lưu thành → "Excel Workbook (.xlsx)" rồi tải lên lại nhé.', 'old-xls');
+    if (bof && (bof.id === 0x0009 || bof.id === 0x0209 || bof.id === 0x0409)) throw new XlsxError('Đây là tệp Excel rất cũ (trước 1997). Thầy/cô mở tệp bằng Excel, chọn Lưu thành → "Excel Workbook (.xlsx)" rồi tải lên lại nhé.', 'old-xls');
     throw broken();
   }
-  if (u16(bof.data, 0) !== 0x0600) throw new XlsxError('Đây là tệp Excel 95 (định dạng cũ). Thầy cô mở tệp bằng Excel, chọn Lưu thành → "Excel Workbook (.xlsx)" rồi tải lên lại nhé.', 'old-xls');
+  if (u16(bof.data, 0) !== 0x0600) throw new XlsxError('Đây là tệp Excel 95 (định dạng cũ). Thầy/cô mở tệp bằng Excel, chọn Lưu thành → "Excel Workbook (.xlsx)" rồi tải lên lại nhé.', 'old-xls');
   const sheets: SheetInfo[] = [];
   const formats = new Map<number, string>();
   const xfFmt: number[] = [];
@@ -421,7 +421,7 @@ function readGlobals(s: Uint8Array): Globals {
   for (let i = 0; i < recs.length; i++) {
     const r = recs[i];
     switch (r.id) {
-      case R.FILEPASS: throw new XlsxError('Tệp Excel đang đặt mật khẩu. Thầy cô bỏ mật khẩu rồi tải lên lại nhé.', 'encrypted');
+      case R.FILEPASS: throw new XlsxError('Tệp Excel đang đặt mật khẩu. Thầy/cô bỏ mật khẩu rồi tải lên lại nhé.', 'encrypted');
       case R.BOUNDSHEET: sheets.push({ pos: u32(r.data, 0), hidden: (r.data[4] & 3) !== 0, type: r.data[5], name: xlString(r.data, 6, true), recIndex: i }); break;
       case R.FORMAT: formats.set(u16(r.data, 0), xlString(r.data, 2)); break;
       case R.XF: xfFmt.push(u16(r.data, 2)); break;
@@ -530,10 +530,10 @@ function parseSheet(recs: Rec[], g: Globals, name: string, hidden: boolean): XSh
 
 function workbookStream(bytes: Uint8Array): { root: CfbNode; node: CfbNode; s: Uint8Array } {
   const root = readCfb(bytes);
-  if (root.children.some((c) => c.name === 'EncryptedPackage' || c.name === 'EncryptionInfo')) throw new XlsxError('Tệp Excel đang đặt mật khẩu. Thầy cô bỏ mật khẩu rồi tải lên lại nhé.', 'encrypted');
+  if (root.children.some((c) => c.name === 'EncryptedPackage' || c.name === 'EncryptionInfo')) throw new XlsxError('Tệp Excel đang đặt mật khẩu. Thầy/cô bỏ mật khẩu rồi tải lên lại nhé.', 'encrypted');
   const node = findStream(root, ['Workbook']);
   if (!node) {
-    if (findStream(root, ['Book'])) throw new XlsxError('Đây là tệp Excel 95 (định dạng cũ). Thầy cô mở tệp bằng Excel, chọn Lưu thành → "Excel Workbook (.xlsx)" rồi tải lên lại nhé.', 'old-xls');
+    if (findStream(root, ['Book'])) throw new XlsxError('Đây là tệp Excel 95 (định dạng cũ). Thầy/cô mở tệp bằng Excel, chọn Lưu thành → "Excel Workbook (.xlsx)" rồi tải lên lại nhé.', 'old-xls');
     throw new XlsxError('Tệp này không phải tệp Excel.', 'not-xlsx');
   }
   return { root, node, s: node.data as Uint8Array };

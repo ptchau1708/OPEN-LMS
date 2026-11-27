@@ -175,7 +175,7 @@ export class DemoExamService implements ExamService {
   }
   private async staff(): Promise<Profile> {
     const u = await this.me();
-    if (u.role !== 'teacher' && u.role !== 'admin') throw friendly('Chỉ thầy cô dùng được chức năng này.');
+    if (u.role !== 'teacher' && u.role !== 'admin') throw friendly('Chỉ thầy/cô dùng được chức năng này.');
     return u;
   }
 

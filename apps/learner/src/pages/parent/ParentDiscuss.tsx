@@ -25,7 +25,7 @@ export function ParentDiscuss({ child }: { child: Profile }) {
     <section className="ln-pp-card" data-testid="pp-discuss">
       <h2 className="ln-pp-h">Con thảo luận cùng lớp</h2>
       {ds.slice(0, 6).map((d) => <One key={d.id} d={d} child={child} />)}
-      <p className="ln-pp-muted">Chỉ hiện các bài con đã đăng và được cô duyệt.</p>
+      <p className="ln-pp-muted">Chỉ hiện các bài con đã đăng và được thầy/cô duyệt.</p>
     </section>
   );
 }

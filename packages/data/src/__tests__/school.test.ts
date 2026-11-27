@@ -174,7 +174,7 @@ describe('báo cáo trường', () => {
     const code = hm.skills[0].code;
     expect(hm.total[code].n).toBe(hm.cells['c-4a'][code].n);
     await ds.signIn('hai4a1', '123456');
-    await expect(school.getSchoolOverview()).rejects.toThrow(/thầy cô/);
+    await expect(school.getSchoolOverview()).rejects.toThrow(/thầy\/cô/);
   });
 
   it('gộp bản đồ nhiệt nhiều lớp: p trung bình có trọng số số HS', () => {
@@ -222,7 +222,7 @@ describe('phụ huynh', () => {
     expect(normalizeParentLogin('84912345678')).toMatchObject({ ok: true, username: '0912345678' });
     expect(normalizeParentLogin('12345')).toMatchObject({ ok: false });
   });
-  it('bản tin tuần: 7 ngày từ thứ Hai, chỉ TT27 đã chốt, lời nhắn của cô', async () => {
+  it('bản tin tuần: 7 ngày từ thứ Hai, chỉ TT27 đã chốt, lời nhắn của thầy/cô', async () => {
     clock = new Date();
     const { ds, school } = setup();
     await ds.signIn('phuhuynh4a', '123456');

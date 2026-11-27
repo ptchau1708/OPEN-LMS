@@ -5,6 +5,7 @@ import { Icon, type IconName } from '@openedu/ui';
 import { useDataSource, useNotifications, usePushSync, useSignOut } from '@openedu/data';
 import { Avatar } from './common';
 import { NotifyBell } from './NotifyBell';
+import { useFocusGrade } from '../lib/focusGrade';
 import { cx } from '../lib/format';
 
 const NAV: { to: string; label: string; icon: IconName; end?: boolean; match?: RegExp; section?: string; admin?: boolean }[] = [
@@ -56,6 +57,7 @@ export function Layout({ user }: { user: Profile }) {
   const [userMenu, setUserMenu] = useState(false);
   const rail = /^\/bai-giang\/[^/]+/.test(loc.pathname);
   const notes = useNotifications();
+  const focus = useFocusGrade().grade;
   usePushSync('gv');
   useEffect(() => { setMenu(false); setUserMenu(false); }, [loc.pathname]);
 
@@ -63,10 +65,13 @@ export function Layout({ user }: { user: Profile }) {
     <div className="tc-user">
       <button type="button" className="tc-user__btn" aria-expanded={userMenu} onClick={() => setUserMenu((v) => !v)}>
         <Avatar mascot={user.avatarMascot} color={user.avatarColor} size={34} />
-        <span className="tc-user__text"><strong>{user.name}</strong><small>{user.role === 'admin' ? 'Quản trị' : 'Giáo viên'}{ds.mode === 'demo' ? ' · demo' : ''}</small></span>
+        <span className="tc-user__text"><strong>{user.name}</strong><small>{user.role === 'admin' ? 'Quản trị' : 'Giáo viên'} · ưu tiên lớp {focus}{ds.mode === 'demo' ? ' · demo' : ''}</small></span>
       </button>
       {userMenu ? (
         <div className="tc-menu tc-user__menu" role="menu">
+          <button type="button" role="menuitem" onClick={() => nav('/cai-dat')} data-testid="menu-settings">
+            <Icon name="settings" size={16} /> Cài đặt cá nhân (khối ưu tiên)
+          </button>
           <button type="button" role="menuitem" onClick={() => nav('/doi-mat-khau')} data-testid="menu-change-pw">
             <Icon name="lock" size={16} /> Đổi mật khẩu
           </button>

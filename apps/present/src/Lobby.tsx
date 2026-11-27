@@ -30,7 +30,7 @@ export function Lobby({ state }: { state: LiveState }) {
           <ol className="pr-paperlobby__steps">
             <li>Mỗi bạn cầm đúng thẻ có <b>số và tên</b> của mình.</li>
             <li>Chọn đáp án: xoay thẻ cho <b>chữ em chọn (A, B, C, D) ở phía trên</b>.</li>
-            <li>Giơ thẻ thẳng, không lấy tay che mã. Cô sẽ quét cả lớp.</li>
+            <li>Giơ thẻ thẳng, không lấy tay che mã. Thầy/cô sẽ quét cả lớp.</li>
           </ol>
           <p className="pr-room__count"><strong>{state.game.cards?.length ?? 0}</strong> thẻ</p>
         </section>

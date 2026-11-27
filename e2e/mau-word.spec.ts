@@ -5,7 +5,9 @@ test('Ngân hàng: tải mẫu Word đủ các dạng, tải lên lại → 18 c
   const w = watchErrors(page);
   await teacherLogin(page, 'cothu');
   await spaGo(page, '/ngan-hang');
-  // Môn học theo CT GDPT 2018 — "Mọi lớp" hiện đủ các môn, có cả TN&XH
+  // Mặc định lọc khối ưu tiên (lớp 5); "Mọi lớp" hiện đủ các môn theo CT GDPT 2018, có cả TN&XH
+  await expect(page.getByLabel('Lớp', { exact: true }).first()).toHaveValue('5');
+  await page.getByLabel('Lớp', { exact: true }).first().selectOption('0');
   const subj = page.getByLabel('Môn', { exact: true }).first();
   for (const name of ['Tự nhiên và Xã hội', 'Lịch sử và Địa lí', 'Tin học', 'Công nghệ', 'Đạo đức', 'Giáo dục thể chất', 'Hoạt động trải nghiệm']) {
     await expect(subj.locator('option', { hasText: name })).toHaveCount(1);

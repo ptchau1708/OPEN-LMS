@@ -26,13 +26,13 @@ Mỗi lớp có các **bảng thảo luận** theo chủ đề. Trong một bả
 - GV: **Thảo luận → Trò chuyện nhóm**: tự tạo một nhóm mỗi tổ (sửa được thành viên), tin nhắn hiện ngay, tin có từ chưa phù hợp
   chờ duyệt. Phòng mới tạo **đang khóa** → bấm **Mở 15 phút** khi bắt đầu hoạt động nhóm; hết giờ HS không nhắn được nữa.
 - GV xem **tất cả nhóm cùng lúc** (hoặc từng nhóm), nhắn vào từng nhóm, Duyệt / Ẩn / 🏅 Khen từng tin. **Mở trên TV**: mọi nhóm.
-- HS: chỉ thấy nhóm của mình; bong bóng tin nhắn, câu trả lời nhanh (“Em đồng ý! 👍”…), nút **micro** đọc thành chữ, ⚑ báo cô.
+- HS: chỉ thấy nhóm của mình; bong bóng tin nhắn, câu trả lời nhanh (“Em đồng ý! 👍”…), nút **micro** đọc thành chữ, ⚑ báo thầy/cô.
 - Tin mới hiện qua Realtime (dự phòng tải lại 4 giây một lần).
 
 ## Học sinh (Trang chủ → **Thảo luận**)
 - Chọn phòng nhỏ, tab → viết (câu mở đầu gợi ý, nút **Nói** để đọc thành chữ trên Chrome/Android), chụp ảnh, chọn màu thẻ → **Đăng**.
-- Phòng duyệt trước: bài hiện "⏳ Đang chờ cô xem" (chỉ em thấy). Bài có từ chưa phù hợp luôn chờ duyệt.
-- Thả ❤️ ⭐ 👍, bình luận, **⚑ Báo cô**; sửa / gỡ bài của mình. Tối đa 10 bài mỗi phút.
+- Phòng duyệt trước: bài hiện "⏳ Đang chờ thầy/cô xem" (chỉ em thấy). Bài có từ chưa phù hợp luôn chờ duyệt.
+- Thả ❤️ ⭐ 👍, bình luận, **⚑ Báo thầy/cô**; sửa / gỡ bài của mình. Tối đa 10 bài mỗi phút.
 - Phụ huynh: trang Phụ huynh có mục "Con thảo luận cùng lớp" (chỉ xem bài đã được duyệt của con).
 
 ## Kỹ thuật

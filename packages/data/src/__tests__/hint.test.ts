@@ -155,7 +155,7 @@ describe('hint — lời nhắc cho mô hình', () => {
 });
 
 describe('hint — gợi ý theo quy tắc', () => {
-  it('mức 1: gợi ý của thầy cô; mức 2: lời nhắc quan niệm sai; mức 3: cách làm', () => {
+  it('mức 1: gợi ý của thầy/cô; mức 2: lời nhắc quan niệm sai; mức 3: cách làm', () => {
     const mis = misconceptionFor(mcq, { choice: 'a' })?.kidHint;
     expect(composeFallbackHint({ item: mcq, level: 1, misconceptionHint: mis })).toBe(mcq.hint);
     expect(composeFallbackHint({ item: mcq, level: 2, misconceptionHint: mis })).toBe(mis);

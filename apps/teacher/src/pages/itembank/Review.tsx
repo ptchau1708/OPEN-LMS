@@ -9,6 +9,7 @@ import type { DraftItem as Draft } from '@openedu/data/import';
 import { errText, type ImportLib } from './lib';
 import { SkillPicker } from './SkillPicker';
 import { SubjectOptions } from '../../components/SubjectOptions';
+import { useFocusGrade } from '../../lib/focusGrade';
 
 type Status = 'ready' | 'missing-answer' | 'review';
 
@@ -44,7 +45,8 @@ export function ReviewScreen({ lib, drafts, notes, onClose, onBack, onSaved }: {
     return { subject: one(drafts.map((d) => d.item.subject)) ?? '', grade: one(drafts.map((d) => d.item.grade)) ?? 0, difficulty: '', skills: [] };
   });
   const bulkSubject = bulk.subject || focusRowSubject(drafts, focus);
-  const bulkGrade = (bulk.grade || drafts.find((d) => d.rowId === focus)?.item.grade || 3) as Grade;
+  const focusGrade = useFocusGrade().grade;
+  const bulkGrade = (bulk.grade || drafts.find((d) => d.rowId === focus)?.item.grade || focusGrade) as Grade;
 
   const status = (r: Row): Status => lib.draftStatus(r.d);
   const dups = useMemo(() => {
@@ -179,7 +181,7 @@ export function ReviewScreen({ lib, drafts, notes, onClose, onBack, onSaved }: {
             <a className="tc-small" href="/ki-nang" target="_blank" rel="noreferrer" title="Xem, thêm, sửa kĩ năng; xuất danh mục kĩ năng ra Excel">Danh mục kĩ năng ↗</a>
           </div>
 
-          {!rows.length ? <Empty icon="puzzle" title="Không đọc được câu hỏi nào">Thầy cô quay lại, kiểm tra nội dung rồi thử lại nhé.</Empty> : (
+          {!rows.length ? <Empty icon="puzzle" title="Không đọc được câu hỏi nào">Thầy/cô quay lại, kiểm tra nội dung rồi thử lại nhé.</Empty> : (
             <ol className="tc-qb-rows" aria-label="Các câu đọc được">
               {rows.map((r, idx) => {
                 const st = r.saved ? 'saved' : status(r);
@@ -226,7 +228,7 @@ export function ReviewScreen({ lib, drafts, notes, onClose, onBack, onSaved }: {
                     {reasons.length || aiAnswer || r.error ? (
                       <ul className="tc-qb-row__notes">
                         {r.error ? <li className="is-error">Chưa lưu được: {r.error}</li> : null}
-                        {aiAnswer && !r.saved ? <li>Đề gốc không ghi đáp án — đáp án do AI tự giải, thầy cô kiểm tra lại nhé.</li> : null}
+                        {aiAnswer && !r.saved ? <li>Đề gốc không ghi đáp án — đáp án do AI tự giải, thầy/cô kiểm tra lại nhé.</li> : null}
                         {reasons.map((t, i) => <li key={i}>{t}</li>)}
                       </ul>
                     ) : null}

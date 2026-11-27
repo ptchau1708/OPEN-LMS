@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { LEARNER, TEACHER, spaGo, teacherLogin, watchErrors } from './helpers';
 
-test('quên mật khẩu: tài khoản SĐT / tên đăng nhập được hướng dẫn nhờ thầy cô, không gửi thư', async ({ page }) => {
+test('quên mật khẩu: tài khoản SĐT / tên đăng nhập được hướng dẫn nhờ thầy/cô, không gửi thư', async ({ page }) => {
   await page.goto(`${LEARNER}/dang-nhap`);
   await page.getByRole('button', { name: 'Đăng nhập bằng tên' }).click();
   await page.getByTestId('login-forgot').click();

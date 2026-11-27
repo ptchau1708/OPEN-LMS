@@ -1,4 +1,4 @@
-/* Phase 6 — Vườn lớp & Huy hiệu của cô (trang GV). */
+/* Phase 6 — Vườn lớp & Huy hiệu của thầy/cô (trang GV). */
 .tc-garden__grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
 @media (max-width: 980px) { .tc-garden__grid { grid-template-columns: 1fr; } }
 .tc-garden__scene { min-height: 0; background: none; border-radius: 28px; }

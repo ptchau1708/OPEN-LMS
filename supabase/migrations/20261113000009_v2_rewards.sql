@@ -80,20 +80,20 @@ insert into v2.badges (id, category, title, hint, glyph, tier, rule_kind, min_va
   ('tnxh-2', 'kham-pha', 'Nhà tự nhiên nhí', 'Học xong 2 bài Tự nhiên và Xã hội', 'leaf', 2, 'lessons', 2, 'tnxh', 9),
   ('rem-1', 'va-lo-hong', 'Vá lỗ hổng đầu tiên', 'Ôn đạt 1 bộ “Ôn lại cho chắc”', 'bandage', 1, 'remediation', 1, null, 10),
   ('rem-5', 'va-lo-hong', 'Thợ vá siêu đẳng', 'Ôn đạt 5 bộ “Ôn lại cho chắc”', 'wrench', 3, 'remediation', 5, null, 11),
-  ('work-1', 'bai-viet', 'Bài viết đầu tay', 'Có 1 bài viết được thầy cô duyệt', 'pencil', 1, 'work', 1, null, 12),
-  ('work-5', 'bai-viet', 'Cây bút chăm chỉ', 'Có 5 bài viết được thầy cô duyệt', 'quill', 2, 'work', 5, null, 13),
+  ('work-1', 'bai-viet', 'Bài viết đầu tay', 'Có 1 bài viết được thầy/cô duyệt', 'pencil', 1, 'work', 1, null, 12),
+  ('work-5', 'bai-viet', 'Cây bút chăm chỉ', 'Có 5 bài viết được thầy/cô duyệt', 'quill', 2, 'work', 5, null, 13),
   ('work-top', 'bai-viet', 'Ngòi bút vàng', 'Có 1 bài viết đạt mức Hoàn thành tốt', 'crown', 3, 'workTop', 1, null, 14),
   ('duel-1', 'dau-truong', 'Trận đấu đầu tiên', 'Chơi 1 trận Đấu 1–1', 'bolt', 1, 'duels', 1, null, 15),
   ('duel-win-3', 'dau-truong', 'Ba lần chiến thắng', 'Thắng 3 trận Đấu 1–1', 'trophy', 2, 'duelWins', 3, null, 16),
   ('tower-10', 'dau-truong', 'Leo tháp', 'Trả lời đúng 10 câu ở Leo tháp', 'tower', 1, 'tower', 10, null, 17),
   ('tower-50', 'dau-truong', 'Chinh phục đỉnh tháp', 'Trả lời đúng 50 câu ở Leo tháp', 'flag', 3, 'tower', 50, null, 18),
-  ('behavior-10', 'thi-dua', 'Ngôi sao của lớp', 'Được thầy cô khen 10 điểm thi đua', 'star', 1, 'behavior', 10, null, 19),
-  ('behavior-30', 'thi-dua', 'Tấm gương sáng', 'Được thầy cô khen 30 điểm thi đua', 'medal', 3, 'behavior', 30, null, 20),
+  ('behavior-10', 'thi-dua', 'Ngôi sao của lớp', 'Được thầy/cô khen 10 điểm thi đua', 'star', 1, 'behavior', 10, null, 19),
+  ('behavior-30', 'thi-dua', 'Tấm gương sáng', 'Được thầy/cô khen 30 điểm thi đua', 'medal', 3, 'behavior', 30, null, 20),
   ('live-1', 'dac-biet', 'Lớp học trên TV', 'Vào lớp học trực tiếp lần đầu', 'tv', 1, 'live', 1, null, 21),
   ('live-5', 'dac-biet', 'Bạn nhỏ hăng hái', 'Vào lớp học trực tiếp 5 lần', 'rainbow', 2, 'live', 5, null, 22),
   ('help-1', 'dac-biet', 'Người bạn tốt', 'Được khen vì giúp đỡ bạn', 'hands', 1, 'help', 1, null, 23),
   ('help-5', 'dac-biet', 'Trái tim ấm áp', 'Được khen 5 lần vì giúp đỡ bạn', 'heart', 3, 'help', 5, null, 24),
-  ('cua-co', 'cua-co', 'Huy hiệu của cô', 'Thầy cô tặng riêng cho em', 'heart', 2, null, 0, null, 99)
+  ('cua-co', 'cua-co', 'Huy hiệu của thầy/cô', 'Thầy/cô tặng riêng cho em', 'heart', 2, null, 0, null, 99)
 on conflict (id) do update set category = excluded.category, title = excluded.title, hint = excluded.hint, glyph = excluded.glyph,
   tier = excluded.tier, rule_kind = excluded.rule_kind, min_value = excluded.min_value, subject = excluded.subject, position = excluded.position;
 
@@ -108,7 +108,7 @@ create table if not exists v2.user_badges (
   granted_by uuid references v2.profiles (id) on delete set null,
   seen_at timestamptz
 );
--- Huy hiệu theo quy tắc: mỗi HS một lần; "Huy hiệu của cô" thì nhiều lần.
+-- Huy hiệu theo quy tắc: mỗi HS một lần; "Huy hiệu của thầy/cô" thì nhiều lần.
 create unique index if not exists user_badges_once on v2.user_badges (user_id, badge_id) where badge_id <> 'cua-co';
 create index if not exists user_badges_user_idx on v2.user_badges (user_id, earned_at desc);
 
@@ -280,7 +280,7 @@ begin
     'earned', coalesce((select jsonb_agg(v2._user_badge_json(b) order by b.earned_at desc) from v2.user_badges b where b.user_id = v_user), '[]'::jsonb));
 end $$;
 
--- Xét huy hiệu cho chính HS đang đăng nhập; trả về huy hiệu chưa xem (mới đạt + của cô).
+-- Xét huy hiệu cho chính HS đang đăng nhập; trả về huy hiệu chưa xem (mới đạt + của thầy/cô).
 create or replace function v2.evaluate_badges() returns jsonb
 language plpgsql security definer set search_path = v2, public as $$
 declare
@@ -314,9 +314,9 @@ language plpgsql security definer set search_path = v2, public as $$
 declare v_title text := btrim(coalesce(p_title, '')); v_out jsonb := '[]'::jsonb; v_sid uuid; b v2.user_badges;
 begin
   if not v2.is_teacher_of_class(p_class) then
-    raise exception 'Thầy cô chỉ tặng huy hiệu cho học sinh lớp mình.' using errcode = '42501';
+    raise exception 'Thầy/cô chỉ tặng huy hiệu cho học sinh lớp mình.' using errcode = '42501';
   end if;
-  if length(v_title) = 0 then raise exception 'Thầy cô đặt tên cho huy hiệu nhé.' using errcode = '22023'; end if;
+  if length(v_title) = 0 then raise exception 'Thầy/cô đặt tên cho huy hiệu nhé.' using errcode = '22023'; end if;
   if p_glyph is null or p_glyph not in ('heart', 'star', 'flower', 'cup', 'rainbow', 'sun') then
     raise exception 'Biểu tượng này chưa có trong bộ huy hiệu.' using errcode = '22023';
   end if;
@@ -335,7 +335,7 @@ create or replace function v2.list_teacher_badges(p_class text) returns jsonb
 language plpgsql stable security definer set search_path = v2, public as $$
 begin
   if not v2.is_teacher_of_class(p_class) then
-    raise exception 'Chỉ thầy cô của lớp mới xem được.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô của lớp mới xem được.' using errcode = '42501';
   end if;
   return coalesce((select jsonb_agg(v2._user_badge_json(b) order by b.earned_at desc)
     from v2.user_badges b where b.badge_id = 'cua-co' and exists (select 1 from v2.class_ids_of(b.user_id) c where c = p_class)), '[]'::jsonb);
@@ -499,7 +499,7 @@ language plpgsql security definer set search_path = v2, public as $$
 declare v_week date := v2._vn_week_start();
 begin
   if not v2.is_teacher_of_class(p_class) then
-    raise exception 'Chỉ thầy cô của lớp mới đặt mục tiêu được.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô của lớp mới đặt mục tiêu được.' using errcode = '42501';
   end if;
   if p_target is null or p_target < 10 or p_target > 5000 then
     raise exception 'Mục tiêu nên từ 10 đến 5000 sao.' using errcode = '22023';

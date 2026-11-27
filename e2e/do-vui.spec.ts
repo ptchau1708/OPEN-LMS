@@ -32,7 +32,7 @@ test('Đố vui kiểu Kahoot: HS vào bằng mã, trả lời, bảng xếp h�
   const w = watchErrors(page);
   const { pin, sessionId } = await openGame(page, 'class');
   const kid = await student(browser, pin);
-  await expect(kid.getByText('Chờ cô giáo bắt đầu nhé!')).toBeVisible({ timeout: 15_000 });
+  await expect(kid.getByText('Chờ thầy/cô bắt đầu nhé!')).toBeVisible({ timeout: 15_000 });
   const tv = await (await browser.newContext()).newPage();
   await tv.goto(`${PRESENT}/?s=${sessionId}`);
 
@@ -65,7 +65,7 @@ test('Đố vui kiểu Quizizz: HS tự làm theo nhịp, GV thấy tiến độ
   const w = watchErrors(page);
   const { pin, sessionId } = await openGame(page, 'self');
   const kid = await student(browser, pin);
-  await expect(kid.getByText('Chờ cô bấm “Bắt đầu” nhé!')).toBeVisible({ timeout: 15_000 });
+  await expect(kid.getByText('Chờ thầy/cô bấm “Bắt đầu” nhé!')).toBeVisible({ timeout: 15_000 });
   const tv = await (await browser.newContext()).newPage();
   await tv.goto(`${PRESENT}/?s=${sessionId}`);
   await page.getByTestId('game-start').click();

@@ -1,6 +1,6 @@
 /**
- * Ngân hàng nhận xét của thầy cô — câu mẫu theo mức T / H / C, cho học sinh và cho phụ huynh.
- * Mặc định từ LEVEL_DEFAULT_FEEDBACK; thầy cô thêm / sửa / xoá / đưa lên đầu (câu đầu tiên là câu mặc định khi để trống).
+ * Ngân hàng nhận xét của thầy/cô — câu mẫu theo mức T / H / C, cho học sinh và cho phụ huynh.
+ * Mặc định từ LEVEL_DEFAULT_FEEDBACK; thầy/cô thêm / sửa / xoá / đưa lên đầu (câu đầu tiên là câu mặc định khi để trống).
  * Lưu theo tài khoản (cài đặt cá nhân, đồng bộ giữa các máy khi đã chạy SQL 18).
  */
 import { useState } from 'react';
@@ -36,7 +36,7 @@ export function useCommentBank(userId: string) {
   const bank = clean(pref.value);
   return {
     bank,
-    /** Câu mặc định (câu đầu) của mức, dùng khi thầy cô để trống. */
+    /** Câu mặc định (câu đầu) của mức, dùng khi thầy/cô để trống. */
     first: (l: Tt27Level, side: BankSide) => bank[l][side][0] ?? LEVEL_DEFAULT_FEEDBACK[l][side],
     save: (b: CommentBank | null) => pref.set(b),
     saving: pref.saving,
@@ -95,7 +95,7 @@ export function CommentBankDialog({ userId, onClose, initialLevel = 'T' }: { use
       <Btn kind="primary" onClick={submit} data-testid="bank-save">Lưu</Btn>
     </>}>
       <div className="tc-stack">
-        <p className="tc-small tc-muted">Câu mẫu hiện dưới ô nhận xét khi tự chấm — bấm để chèn. Câu đầu tiên (★) dùng khi thầy cô để trống ô nhận xét.{cb.synced ? ' Lưu theo tài khoản, máy nào cũng dùng được.' : ''}</p>
+        <p className="tc-small tc-muted">Câu mẫu hiện dưới ô nhận xét khi tự chấm — bấm để chèn. Câu đầu tiên (★) dùng khi thầy/cô để trống ô nhận xét.{cb.synced ? ' Lưu theo tài khoản, máy nào cũng dùng được.' : ''}</p>
         <Seg label="Mức" value={level} onChange={setLevel} options={LEVELS.map((l) => ({ value: l, label: `${l} · ${TT27_LEVEL_LABEL[l]}` }))} />
         <div className="tc-grid2">{col('student', 'Cho học sinh')}{col('parent', 'Cho phụ huynh')}</div>
         <ErrorNote error={cb.error} />

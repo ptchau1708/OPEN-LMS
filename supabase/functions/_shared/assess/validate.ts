@@ -122,8 +122,8 @@ export function sanitizeStudentFeedback(s: string): string {
 
 export function defaultStudentFeedback(level: Tt27Level): string {
   if (level === 'T') return 'Em làm bài rất tốt, trình bày rõ ràng. Em giữ vững phong độ nhé!';
-  if (level === 'H') return 'Em đã hoàn thành bài làm, cô khen em cố gắng. Em đọc lại bài một lần nữa để sửa những chỗ chưa đúng nhé!';
-  return 'Cô thấy em đã cố gắng làm bài. Em cùng cô xem lại đề bài và làm lại từng bước nhé!';
+  if (level === 'H') return 'Em đã hoàn thành bài làm, thầy/cô khen em cố gắng. Em đọc lại bài một lần nữa để sửa những chỗ chưa đúng nhé!';
+  return 'Thầy/cô thấy em đã cố gắng làm bài. Em cùng thầy/cô xem lại đề bài và làm lại từng bước nhé!';
 }
 
 export function defaultParentFeedback(level: Tt27Level): string {
@@ -164,7 +164,7 @@ export function validateAiGrade(raw: unknown, ctx: ValidateContext): ValidateRes
     const max = Math.max(0, c.points);
     if (i < 0) {
       repairs.push(`thiếu tiêu chí ${c.id}`);
-      return { criterionId: c.id, points: 0, max, comment: 'Chưa chấm được tiêu chí này — thầy cô xem giúp.' };
+      return { criterionId: c.id, points: 0, max, comment: 'Chưa chấm được tiêu chí này — thầy/cô xem giúp.' };
     }
     used.add(i);
     const x = list[i];

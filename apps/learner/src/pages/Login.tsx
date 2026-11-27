@@ -78,7 +78,7 @@ export default function Login() {
       )}
 
       <p className="ln-login__teacher">Bố mẹ? <Link to="/phu-huynh/lien-ket">Tạo tài khoản phụ huynh bằng mã của con</Link> · Đăng nhập bằng email / số điện thoại ở ô “Đăng nhập bằng tên”.</p>
-      <p className="ln-login__teacher" data-testid="login-staff-note">Thầy cô và quản trị cũng đăng nhập ở đây (bằng email hoặc tên đăng nhập) — trang tự chuyển sang Bàn làm việc giáo viên.</p>
+      <p className="ln-login__teacher" data-testid="login-staff-note">Thầy/cô và quản trị cũng đăng nhập ở đây (bằng email hoặc tên đăng nhập) — trang tự chuyển sang Bàn làm việc giáo viên.</p>
     </div>
   );
 }
@@ -115,7 +115,7 @@ function DemoPicker({ onPick, busyId }: { onPick: (u: Profile) => void; busyId: 
       )}
       {staff.length > 0 && (
         <>
-          <h3 className="ln-h3 ln-center">Thầy cô</h3>
+          <h3 className="ln-h3 ln-center">Thầy/cô</h3>
           <div className="ln-pick-grid ln-pick-grid--small">{staff.map((u) => card(u, u.role === 'admin' ? 'Quản trị trường' : 'Bàn làm việc giáo viên'))}</div>
         </>
       )}

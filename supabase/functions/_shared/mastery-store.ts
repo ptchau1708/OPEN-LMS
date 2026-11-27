@@ -10,7 +10,7 @@ import { fromPgError, type AdminClient } from './supabase.ts';
 const MASTERY_WINDOW_DAYS = 180;
 
 /**
- * Mã kĩ năng hợp lệ: có trong danh mục gốc, hoặc là kĩ năng thầy cô tự thêm (có trong v2.skills — danh mục mở, SQL 19).
+ * Mã kĩ năng hợp lệ: có trong danh mục gốc, hoặc là kĩ năng thầy/cô tự thêm (có trong v2.skills — danh mục mở, SQL 19).
  */
 export async function knownSkillCodes(admin: AdminClient, skills: string[]): Promise<string[]> {
   const uniq = [...new Set(skills)].filter((c) => typeof c === 'string' && c.length <= 80);

@@ -255,7 +255,7 @@ export class SupabaseDataSource implements DataSource {
     const { data, error } = await sb.auth.signInWithPassword({ email: usernameToEmail(username), password });
     if (error || !data.user) throw new Error('Tên đăng nhập hoặc mật khẩu chưa đúng. Em thử lại nhé!');
     const profile = await this.getCurrentUser();
-    if (!profile) throw new Error('Tài khoản chưa có hồ sơ trên hệ thống. Nhờ thầy cô kiểm tra giúp nhé.');
+    if (!profile) throw new Error('Tài khoản chưa có hồ sơ trên hệ thống. Nhờ thầy/cô kiểm tra giúp nhé.');
     return profile;
   }
 
@@ -455,7 +455,7 @@ export class SupabaseDataSource implements DataSource {
     // RLS chặn (câu của người khác / bộ mẫu chung) → không lỗi nhưng không xoá dòng nào.
     if (Array.isArray(data) && data.length === 0) {
       const { data: still } = await sb.from('items').select('id').eq('id', id).maybeSingle();
-      if (still) throw new Error('Thầy cô chỉ xoá được câu do mình tạo. Câu của thầy cô khác hoặc bộ câu mẫu chung: bấm “Nhân bản” để có bản riêng rồi sửa.');
+      if (still) throw new Error('Thầy/cô chỉ xoá được câu do mình tạo. Câu của thầy/cô khác hoặc bộ câu mẫu chung: bấm “Nhân bản” để có bản riêng rồi sửa.');
     }
   }
 
@@ -532,7 +532,7 @@ export class SupabaseDataSource implements DataSource {
       res = await sb.from('assignments').update(row).eq('id', a.id).select('*').maybeSingle();
     }
     if (res.error) fail(res.error, 'Không sửa được bài đã giao');
-    if (!res.data) throw new Error('Không sửa được: bài này không còn hoặc thầy cô không có quyền.');
+    if (!res.data) throw new Error('Không sửa được: bài này không còn hoặc thầy/cô không có quyền.');
     return fromAssignment(res.data as Row);
   }
 

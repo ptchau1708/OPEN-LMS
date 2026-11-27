@@ -30,7 +30,7 @@ Không đổi chức năng, không đổi dữ liệu. Bảy việc:
 ```sql
 select at, app, message, url, user_agent from v2.client_errors order by at desc limit 50;
 ```
-Trên máy đang lỗi, thầy cô bấm **Chép chi tiết lỗi** (app giáo viên) để gửi cho quản trị.
+Trên máy đang lỗi, thầy/cô bấm **Chép chi tiết lỗi** (app giáo viên) để gửi cho quản trị.
 
 ## Viết migration mới
 

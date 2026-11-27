@@ -136,12 +136,12 @@ export default function BatchUpload() {
   return (
     <div className="tc-page">
       <PageHead title="Chụp bài làm trên giấy" sub={<>{t.title} · {students.length} em · {submitted.size} em đã có bài</>} actions={<Btn kind="ghost" icon="back" onClick={() => nav(`/bai-viet?lop=${t.classId}`)}>Quay lại</Btn>} />
-      {mock ? <div className="tc-alert tc-alert--info"><span><b>Chế độ demo:</b> ảnh thầy cô tải lên sẽ được “Chấm mẫu (demo)” và đánh dấu <i>chữ khó đọc</i> để thầy cô chấm tay. Bật AI thật bằng khoá OpenRouter.</span></div> : null}
+      {mock ? <div className="tc-alert tc-alert--info"><span><b>Chế độ demo:</b> ảnh thầy/cô tải lên sẽ được “Chấm mẫu (demo)” và đánh dấu <i>chữ khó đọc</i> để thầy/cô chấm tay. Bật AI thật bằng khoá OpenRouter.</span></div> : null}
 
       <div className={cx('tc-bdrop', drag && 'is-over')} onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={(e) => { e.preventDefault(); setDrag(false); addFiles(e.dataTransfer.files); }}>
         <Icon name="image" size={34} />
         <strong>Kéo thả nhiều ảnh vào đây</strong>
-        <span className="tc-muted tc-small">Ảnh được gán lần lượt theo danh sách lớp — thầy cô đổi tên em ở từng ảnh nếu cần.</span>
+        <span className="tc-muted tc-small">Ảnh được gán lần lượt theo danh sách lớp — thầy/cô đổi tên em ở từng ảnh nếu cần.</span>
         <div className="tc-row tc-wrap" style={{ justifyContent: 'center' }}>
           <Btn kind="primary" size="lg" icon="image" onClick={() => camRef.current?.click()}>Chụp bằng máy ảnh</Btn>
           <Btn size="lg" icon="upload" onClick={() => fileRef.current?.click()}>Chọn nhiều ảnh</Btn>

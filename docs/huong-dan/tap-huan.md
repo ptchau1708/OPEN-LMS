@@ -35,7 +35,7 @@ A điều khiển: Tiếp → Khóa → Công bố đáp án. Đổi vai.
 **Bài tập 3 — Bài viết & duyệt AI (20 phút)**
 1. Bài viết → Tạo *Tả con vật em yêu thích*, chọn tiêu chí có sẵn, giao lớp 2A.
 2. Đăng nhập máy HS `an2a1`, chụp tờ bài viết tay mẫu và nộp. Nộp hộ thêm 2 bài bằng **nộp hộ** từ máy GV.
-3. Chấm bài: mở bài có cờ *Cần thầy cô xem* → đối chiếu ảnh với chữ AI đọc → **Sửa & duyệt** (đổi 1 tiêu chí, viết lại
+3. Chấm bài: mở bài có cờ *Cần thầy/cô xem* → đối chiếu ảnh với chữ AI đọc → **Sửa & duyệt** (đổi 1 tiêu chí, viết lại
    lời nhận xét cho phụ huynh). Bài thứ hai: **Trả lại cho HS** kèm lời nhắn. Bài thứ ba: **Duyệt**.
 4. Đăng nhập `an2a1` xem kết quả.
 ✅ Đạt khi: GV giải thích được vì sao bài *chờ duyệt* chưa hiện cho HS/phụ huynh.

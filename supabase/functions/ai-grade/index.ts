@@ -242,7 +242,7 @@ async function runModel(prompt: GradePrompt, images: { mimeType: string; data: s
     }
   }
   console.error('ai-grade: providers failed', errors);
-  throw new HttpError(503, orKey || gKey ? 'Trợ lý chấm bài đang bận, thầy cô thử lại sau ít phút nhé.' : 'Chưa cấu hình khóa AI trên máy chủ.', 'ai_unavailable');
+  throw new HttpError(503, orKey || gKey ? 'Trợ lý chấm bài đang bận, thầy/cô thử lại sau ít phút nhé.' : 'Chưa cấu hình khóa AI trên máy chủ.', 'ai_unavailable');
 }
 
 function limit(name: string, fallback: number): number {
@@ -261,7 +261,7 @@ async function removeWorkEvents(admin: AdminClient, l: Loaded, id: string): Prom
 
 async function grade(admin: AdminClient, caller: Caller, id: string, staff: boolean): Promise<SubmissionDetail> {
   const l = await load(admin, id);
-  if (l.row.status === 'approved') throw new HttpError(409, 'Bài đã được duyệt — muốn chấm lại, thầy cô chọn "Chấm lại" khi duyệt.', 'approved');
+  if (l.row.status === 'approved') throw new HttpError(409, 'Bài đã được duyệt — muốn chấm lại, thầy/cô chọn "Chấm lại" khi duyệt.', 'approved');
   if (l.row.status === 'grading' && Date.now() - Date.parse(String(l.row.updated_at)) < 90_000) throw new HttpError(409, 'Bài đang được chấm, đợi một chút nhé.', 'busy');
   const lim = staff ? limit('AI_DAILY_LIMIT_GRADE', 200) : limit('AI_DAILY_LIMIT_GRADE_STUDENT', 10);
   const q = await admin.rpc('ai_quota_take', { p_user: caller.id, p_bucket: 'grade', p_limit: lim });
@@ -284,7 +284,7 @@ async function grade(admin: AdminClient, caller: Caller, id: string, staff: bool
     await admin.from('grade_reviews').delete().eq('submission_id', id);
     await setStatus(admin, id, statusAfterGrade(g));
   } catch (e) {
-    const msg = e instanceof HttpError ? e.message : 'Chưa chấm được bài này, thầy cô thử lại nhé.';
+    const msg = e instanceof HttpError ? e.message : 'Chưa chấm được bài này, thầy/cô thử lại nhé.';
     await setStatus(admin, id, 'error', msg).catch(() => undefined);
     throw e instanceof HttpError ? e : new HttpError(502, msg, 'grade_failed');
   }
@@ -357,7 +357,7 @@ async function review(admin: AdminClient, caller: Caller, raw: JsonObject): Prom
     );
     if (gu.error) throw fromPgError(gu.error);
   }
-  if (!l.grade) throw new HttpError(400, 'Bài chưa được chấm — thầy cô bấm "Tự chấm" hoặc "Chấm bằng AI" trước nhé.', 'not_graded');
+  if (!l.grade) throw new HttpError(400, 'Bài chưa được chấm — thầy/cô bấm "Tự chấm" hoặc "Chấm bằng AI" trước nhé.', 'not_graded');
   const edits = !manual && isObject(raw.final) ? (raw.final as Partial<GradeFinal>) : undefined;
   const final = mergeFinal(l.grade, { decision, ...(edits ? { final: edits } : {}) }, l.rubric);
   const up = await admin.from('grade_reviews').upsert({ submission_id: id, teacher_id: caller.id, final, decision, note, at: now }, { onConflict: 'submission_id' });
@@ -391,7 +391,7 @@ serveJson(async (req) => {
   const body = await readJsonObject(req, 50_000);
   const admin = adminClient();
   if (body.action === 'review') {
-    if (!isStaff(caller)) throw new HttpError(403, 'Chỉ thầy cô mới duyệt được bài.', 'forbidden');
+    if (!isStaff(caller)) throw new HttpError(403, 'Chỉ thầy/cô mới duyệt được bài.', 'forbidden');
     if (!isObject(body.review)) throw new HttpError(400, 'Thiếu "review".', 'bad_request');
     return review(admin, caller, body.review);
   }

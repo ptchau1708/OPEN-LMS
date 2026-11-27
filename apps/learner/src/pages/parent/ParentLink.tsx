@@ -34,7 +34,7 @@ export default function ParentLink() {
 function CodeInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <label className="ln-field">
-      <span className="ln-field__label">Mã liên kết (8 kí tự trên phiếu thầy cô gửi)</span>
+      <span className="ln-field__label">Mã liên kết (8 kí tự trên phiếu thầy/cô gửi)</span>
       <input className="ln-input ln-pl__code" value={formatCode(value)} onChange={(e) => onChange(normalizeCode(e.target.value).slice(0, 8))} autoCapitalize="characters" autoComplete="one-time-code" spellCheck={false} placeholder="ABCD-EFGH" inputMode="text" />
     </label>
   );
@@ -49,7 +49,7 @@ function Done({ name }: { name: string }) {
     <section className="ln-pp-card ln-pl__done" role="status">
       <Mascot id="nghe" mood="happy" size={96} title="" />
       <h2 className="ln-pp-h">Đã liên kết với {name}!</h2>
-      <p className="ln-pp-muted">Từ nay bố mẹ xem được việc học, bài làm đã chấm, chuyên cần và nhận xét của thầy cô.</p>
+      <p className="ln-pp-muted">Từ nay bố mẹ xem được việc học, bài làm đã chấm, chuyên cần và nhận xét của thầy/cô.</p>
       <Button size="lg" onClick={() => nav('/phu-huynh', { replace: true })} icon={<Icon name="next" size={22} />}>Xem việc học của con</Button>
     </section>
   );

@@ -9,7 +9,7 @@ import './exam.css';
 function sub(c: ExamStudentCard): string {
   if (c.state === 'upcoming') return `Mở lúc ${new Date(c.openAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}`;
   if (c.state === 'in-progress') return 'Em đang làm dở — bấm để làm tiếp';
-  if (c.state === 'submitted') return c.resultReady ? 'Đã nộp · Xem điểm' : 'Đã nộp · Cô sẽ báo điểm sau';
+  if (c.state === 'submitted') return c.resultReady ? 'Đã nộp · Xem điểm' : 'Đã nộp · Thầy/cô sẽ báo điểm sau';
   if (c.state === 'closed') return 'Đã hết hạn làm bài';
   return `${c.questions} câu · ${c.durationMin} phút · ${dueLabel(c.closeAt).text}${c.canRetake ? ' · Được làm lại' : ''}`;
 }

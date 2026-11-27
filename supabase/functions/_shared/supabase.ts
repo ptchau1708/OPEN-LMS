@@ -73,7 +73,7 @@ export async function requireCaller(req: Request): Promise<Caller> {
     .maybeSingle();
   if (pe) throw fromPgError(pe);
   if (!row) {
-    throw new HttpError(403, 'Tài khoản chưa có hồ sơ trên hệ thống mới. Hãy báo thầy cô hoặc quản trị viên.', 'no_profile');
+    throw new HttpError(403, 'Tài khoản chưa có hồ sơ trên hệ thống mới. Hãy báo thầy/cô hoặc quản trị viên.', 'no_profile');
   }
   const p = row as { id: string; role: Role; grade: number | null; name: string | null };
   return { id: p.id, role: p.role, grade: p.grade, name: p.name ?? '' };

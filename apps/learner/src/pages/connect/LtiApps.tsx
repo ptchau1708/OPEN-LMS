@@ -22,10 +22,10 @@ export default function LtiApps() {
         <h1 className="ln-h1">Ứng dụng học</h1>
       </header>
       {loading ? <LoadingScreen /> : tools.isError && pages.isError ? <ErrorState onRetry={() => { void tools.refetch(); void pages.refetch(); }} /> : !list.length && !(tools.data ?? []).length ? (
-        <EmptyState title="Chưa có gì ở đây" text="Khi thầy cô thêm bài đọc, trang học hay ứng dụng cho lớp, em sẽ thấy ở đây." />
+        <EmptyState title="Chưa có gì ở đây" text="Khi thầy/cô thêm bài đọc, trang học hay ứng dụng cho lớp, em sẽ thấy ở đây." />
       ) : (
         <div className="ln-apps__list">
-          {list.length ? <h2 className="ln-h2">Thầy cô giao</h2> : null}
+          {list.length ? <h2 className="ln-h2">Thầy/cô giao</h2> : null}
           {list.map(({ page: p, children }) => (
             <Card key={p.id} className="ln-apps__card">
               <div className="ln-apps__icon" aria-hidden><Icon name={p.kind === 'lti' ? 'puzzle' : 'book'} size={34} /></div>

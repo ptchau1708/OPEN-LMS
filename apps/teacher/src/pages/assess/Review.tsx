@@ -47,7 +47,7 @@ export default function ReviewQueue({ user }: { user: Profile }) {
 
   return (
     <div className="tc-page">
-      <PageHead title="Chấm bài" sub="Thầy cô tự chấm, hoặc để AI chấm trước rồi duyệt. Học sinh và phụ huynh chỉ thấy điểm sau khi duyệt." actions={<>
+      <PageHead title="Chấm bài" sub="Thầy/cô tự chấm, hoặc để AI chấm trước rồi duyệt. Học sinh và phụ huynh chỉ thấy điểm sau khi duyệt." actions={<>
         <ClassPicker list={classes} value={classId} onChange={setClassId} />
         <select className="tc-input tc-input--sm" aria-label="Lọc theo bài" value={taskId} onChange={(e) => setParam('bai', e.target.value)}>
           <option value="">Tất cả bài</option>
@@ -176,7 +176,7 @@ function GradePanel({ d, user, onDone, onManual }: { d: SubmissionDetail; user: 
     return { ...x, criteria, total: t.total, max: t.max, level: levelFor(t.total, t.max) };
   });
   const act = (decision: 'approved' | 'edited' | 'regrade' | 'redo') => {
-    review.mutate({ submissionId: d.id, teacherId: user.id, decision, ...(decision === 'edited' ? { final: f } : {}), ...(decision === 'redo' ? { note: note.trim() || 'Em xem lại bài và làm lại giúp cô nhé.' } : {}) }, { onSuccess: () => onDone(decision === 'approved' || decision === 'edited') });
+    review.mutate({ submissionId: d.id, teacherId: user.id, decision, ...(decision === 'edited' ? { final: f } : {}), ...(decision === 'redo' ? { note: note.trim() || 'Em xem lại bài và làm lại giúp thầy/cô nhé.' } : {}) }, { onSuccess: () => onDone(decision === 'approved' || decision === 'edited') });
   };
   const approve = () => act(dirty ? 'edited' : 'approved');
   useHotkeys({ a: () => { if (!review.isPending && !redo) approve(); } });
@@ -199,7 +199,7 @@ function GradePanel({ d, user, onDone, onManual }: { d: SubmissionDetail; user: 
         </span>
       </header>
       {g.flags.length ? (
-        <div className="tc-alert tc-alert--warn" role="note"><Icon name="hint" size={18} /><span><b>Thầy cô xem kĩ:</b> {g.flags.map((x) => GRADE_FLAG_LABEL[x]).join(' · ')}</span></div>
+        <div className="tc-alert tc-alert--warn" role="note"><Icon name="hint" size={18} /><span><b>Thầy/cô xem kĩ:</b> {g.flags.map((x) => GRADE_FLAG_LABEL[x]).join(' · ')}</span></div>
       ) : null}
 
       <ol className="tc-critlist">
@@ -241,7 +241,7 @@ function GradePanel({ d, user, onDone, onManual }: { d: SubmissionDetail; user: 
 
       <Field label="Lời nhắn cho học sinh"><textarea className="tc-input" rows={3} value={f.feedbackStudent} onChange={(e) => setF((x) => ({ ...x, feedbackStudent: e.target.value }))} /></Field>
       <Field label="Lời nhắn cho phụ huynh"><textarea className="tc-input" rows={2} value={f.feedbackParent} onChange={(e) => setF((x) => ({ ...x, feedbackParent: e.target.value }))} /></Field>
-      <Field label="Chẩn đoán (chỉ thầy cô thấy)"><textarea className="tc-input tc-input--private" rows={2} value={f.feedbackTeacher ?? ''} onChange={(e) => setF((x) => ({ ...x, feedbackTeacher: e.target.value }))} /></Field>
+      <Field label="Chẩn đoán (chỉ thầy/cô thấy)"><textarea className="tc-input tc-input--private" rows={2} value={f.feedbackTeacher ?? ''} onChange={(e) => setF((x) => ({ ...x, feedbackTeacher: e.target.value }))} /></Field>
 
       <ErrorNote error={review.error} />
       {redo ? (
@@ -317,7 +317,7 @@ export function ManualPanel({ d, user, onDone, onCancel, onAi }: { d: Submission
       },
     }, { onSuccess: () => onDone(true) });
   };
-  const sendRedo = () => review.mutate({ submissionId: d.id, teacherId: user.id, decision: 'redo', note: note.trim() || 'Em xem lại bài và làm lại giúp cô nhé.' }, { onSuccess: () => onDone(false) });
+  const sendRedo = () => review.mutate({ submissionId: d.id, teacherId: user.id, decision: 'redo', note: note.trim() || 'Em xem lại bài và làm lại giúp thầy/cô nhé.' }, { onSuccess: () => onDone(false) });
 
   return (
     <section className="tc-card tc-gradepanel tc-manual" aria-label="Tự chấm">
@@ -327,7 +327,7 @@ export function ManualPanel({ d, user, onDone, onCancel, onAi }: { d: Submission
         {onAi ? <Btn size="sm" kind="ghost" icon="hint" onClick={onAi}>Chấm bằng AI</Btn> : null}
         {onCancel ? <Btn size="sm" kind="ghost" onClick={onCancel}>Quay lại bản AI</Btn> : null}
       </header>
-      {d.status === 'error' && d.error ? <p className="tc-small tc-muted">AI chưa chấm được ({d.error}) — thầy cô tự chấm bên dưới.</p> : null}
+      {d.status === 'error' && d.error ? <p className="tc-small tc-muted">AI chưa chấm được ({d.error}) — thầy/cô tự chấm bên dưới.</p> : null}
 
       <div role="radiogroup" aria-label="Mức đạt được" className="tc-manual__levels">
         {LEVELS.map((l) => (
@@ -365,7 +365,7 @@ export function ManualPanel({ d, user, onDone, onCancel, onAi }: { d: Submission
       {shownLevel ? <BankChips label="Câu mẫu cho học sinh" list={cb.bank[shownLevel].student} onPick={(t) => setStudent((v) => (v.trim() ? `${v.trim()} ${t}` : t))} /> : null}
       <Field label="Lời nhắn cho phụ huynh"><textarea className="tc-input" rows={2} value={parent} onChange={(e) => setParent(e.target.value)} placeholder={fb?.parent ?? ''} /></Field>
       {shownLevel ? <BankChips label="Câu mẫu cho phụ huynh" list={cb.bank[shownLevel].parent} onPick={(t) => setParent((v) => (v.trim() ? `${v.trim()} ${t}` : t))} /> : null}
-      <Field label="Ghi chú riêng (chỉ thầy cô thấy)"><textarea className="tc-input tc-input--private" rows={2} value={teacher} onChange={(e) => setTeacher(e.target.value)} /></Field>
+      <Field label="Ghi chú riêng (chỉ thầy/cô thấy)"><textarea className="tc-input tc-input--private" rows={2} value={teacher} onChange={(e) => setTeacher(e.target.value)} /></Field>
       <p className="tc-small tc-muted tc-row tc-wrap">Bỏ trống nhận xét thì dùng câu mẫu đầu tiên theo mức (chữ mờ ở trên). <Btn size="sm" kind="ghost" icon="pencil" onClick={() => setBankOpen(true)} data-testid="bank-open">Sửa mẫu nhận xét</Btn></p>
       {bankOpen ? <CommentBankDialog userId={user.id} initialLevel={shownLevel ?? 'T'} onClose={() => setBankOpen(false)} /> : null}
 

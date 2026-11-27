@@ -309,7 +309,7 @@
         });
       });
     }).catch(function (err) {
-      fail('Gói H5P chưa mở được. Em báo cô giáo kiểm tra gói nhé.', err);
+      fail('Gói H5P chưa mở được. Em báo thầy/cô kiểm tra gói nhé.', err);
     });
   }
 

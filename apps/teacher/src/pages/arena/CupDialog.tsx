@@ -6,6 +6,7 @@ import { roundsFor, useArenaSettings, useCreateCup } from '@openedu/data';
 import { Btn, Dialog, ErrorNote, Field, Seg } from '../../components/common';
 import { SubjectOptions } from '../../components/SubjectOptions';
 import { GroupField } from './shared';
+import { useFocusGrade } from '../../lib/focusGrade';
 
 type Src = 'auto' | 'picked' | 'pool';
 const MINUTES = [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 1440];
@@ -21,7 +22,8 @@ export function CupDialog({ classes, classId: initClass, itemIds, onClose }: { c
   const create = useCreateCup();
   const [classId, setClassId] = useState(initClass ?? classes[0]?.id ?? '');
   const cls = classes.find((c) => c.id === classId);
-  const grade = cls?.grade ?? 3;
+  const focus = useFocusGrade().grade;
+  const grade = cls?.grade ?? focus;
   const settings = useArenaSettings(classId || undefined);
   const pool = settings.data?.itemIds ?? [];
   const [src, setSrc] = useState<Src>(itemIds?.length ? 'picked' : 'auto');
@@ -39,9 +41,9 @@ export function CupDialog({ classes, classId: initClass, itemIds, onClose }: { c
   const autoTitle = `Giải ${SUBJECTS[subject]?.name ?? ''} ${scope === 'grade' ? `khối ${grade}` : `lớp ${cls?.name ?? ''}`}`.replace(/\s+/g, ' ').trim();
   const chosen = src === 'picked' ? itemIds ?? [] : src === 'pool' ? pool : [];
   const err = useMemo(() => {
-    if (!classId) return 'Thầy cô chọn lớp.';
+    if (!classId) return 'Thầy/cô chọn lớp.';
     if (src !== 'auto' && chosen.length < questions) return `Cần ít nhất ${questions} câu (đang có ${chosen.length}).`;
-    if (later && !startAt) return 'Thầy cô chọn giờ bắt đầu.';
+    if (later && !startAt) return 'Thầy/cô chọn giờ bắt đầu.';
     return '';
   }, [classId, src, chosen.length, questions, later, startAt]);
 
@@ -97,7 +99,7 @@ export function CupDialog({ classes, classId: initClass, itemIds, onClose }: { c
           { value: 'all', label: 'Tất cả học sinh' }, { value: 'signup', label: 'Học sinh tự đăng kí' },
         ]} />
         <div className="tc-grid2">
-          <GroupField label="Bắt đầu" help={entry === 'signup' && !later ? 'Học sinh tự đăng kí: giải bắt đầu sau 1 ngày, hoặc thầy cô bấm "Bắt đầu ngay" trong trang giải.' : undefined}>
+          <GroupField label="Bắt đầu" help={entry === 'signup' && !later ? 'Học sinh tự đăng kí: giải bắt đầu sau 1 ngày, hoặc thầy/cô bấm "Bắt đầu ngay" trong trang giải.' : undefined}>
             <div className="tc-row tc-wrap">
               <Seg label="Thời điểm bắt đầu" value={later ? 'later' : 'now'} onChange={(v) => setLater(v === 'later')} options={[
                 { value: 'now', label: entry === 'signup' ? 'Sau 1 ngày' : 'Ngay bây giờ' }, { value: 'later', label: 'Hẹn giờ' },

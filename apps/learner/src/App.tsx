@@ -116,7 +116,7 @@ function Guard({ allow }: { allow: Role[] }) {
   const me = q.data;
   if (!me) return <Navigate to="/dang-nhap" replace state={{ from: loc.pathname + loc.search }} />;
   if (me.role === 'teacher' || me.role === 'admin') return <TeacherHint me={me} />;
-  // Mật khẩu tạm do thầy cô cấp → đổi trước khi dùng tiếp (docs/MAT_KHAU.md).
+  // Mật khẩu tạm do thầy/cô cấp → đổi trước khi dùng tiếp (docs/MAT_KHAU.md).
   if (me.mustChangePassword) return <ForcedChange me={me} />;
   if (allow.indexOf(me.role) < 0) return <Navigate to={me.role === 'parent' ? '/phu-huynh' : '/'} replace />;
   return <MeContext.Provider value={me}><Outlet /></MeContext.Provider>;
@@ -141,7 +141,7 @@ export function TeacherHint({ me }: { me: Profile }) {
     <div className="ln-state">
       <Mascot id={me.avatarMascot} mood="wave" size={130} title="" />
       <h2 className="ln-state__title">Chào {me.name}!</h2>
-      <p className="ln-state__text">Thầy cô dùng Bàn làm việc giáo viên. Nếu trang chưa tự chuyển, thầy cô bấm nút dưới đây và đăng nhập lại.</p>
+      <p className="ln-state__text">Thầy/cô dùng Bàn làm việc giáo viên. Nếu trang chưa tự chuyển, thầy/cô bấm nút dưới đây và đăng nhập lại.</p>
       <div className="ln-row ln-row--center">
         <a className="k-btn k-btn--primary k-btn--lg" href={teacherUrl()}><span className="k-btn__label">Mở Bàn làm việc giáo viên</span></a>
         <Button size="lg" variant="secondary" onClick={() => out.mutate(undefined, { onSuccess: () => nav('/dang-nhap') })}>Đăng xuất</Button>

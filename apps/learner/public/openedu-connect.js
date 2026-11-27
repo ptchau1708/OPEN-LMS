@@ -336,7 +336,7 @@
    * Ghi một kết quả học vào hồ sơ OPEN-EDU của học sinh đang đăng nhập (record a learning result).
    * @param {object} data
    * @param {string} [data.activityId]  mã bài trong app của bạn (≤120 kí tự), vd 'bai-doc-12'
-   * @param {string} [data.title]       tên bài hiển thị cho thầy cô (≤200 kí tự)
+   * @param {string} [data.title]       tên bài hiển thị cho thầy/cô (≤200 kí tự)
    * @param {string} [data.kind]        loại hoạt động: 'reading' | 'quiz' | 'game' | 'writing' | ... (chữ thường, số, gạch nối)
    * @param {number} [data.score]       điểm đạt được
    * @param {number} [data.maxScore]    điểm tối đa

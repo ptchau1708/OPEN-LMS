@@ -1,4 +1,4 @@
-/** Bản tin tuần (getParentDigest) + kết quả TT27 đã chốt + "Lời nhắn của cô" + bài viết đã duyệt. */
+/** Bản tin tuần (getParentDigest) + kết quả TT27 đã chốt + "Lời nhắn của thầy/cô" + bài viết đã duyệt. */
 import { useState } from 'react';
 import { SUBJECTS, TT27_COMPETENCY_LABEL, TT27_LEVEL_LABEL, TT27_QUALITY_LABEL, TT27_RATING_LABEL, TT27_TERM_LABEL, type ParentTt27, type Profile, type Tt27Competency, type Tt27Quality } from '@openedu/contracts';
 import { NOTE_CATEGORY_LABEL, useParentDigest, useStudentNotes, vnWeekStart } from '@openedu/data';
@@ -44,7 +44,7 @@ export function ParentWeek({ child, showDigest = true }: { child: Profile; showD
             </dl>
             {d.works.length > 0 && (
               <div className="ln-pw__works">
-                <h3 className="ln-pw__h3">Bài viết thầy cô đã chấm</h3>
+                <h3 className="ln-pw__h3">Bài viết thầy/cô đã chấm</h3>
                 <ul className="ln-pp-list">
                   {d.works.map((w) => (
                     <li key={w.submissionId} className="ln-pp-row ln-pw__work">
@@ -72,7 +72,7 @@ function Tt27Card({ t }: { t: ParentTt27 }) {
       <h2 className="ln-pp-h">Kết quả {TT27_TERM_LABEL[t.termId].replace(/^G/, 'g').replace(/^C/, 'c')} · năm học {t.schoolYear}</h2>
       {t.generalComment ? (
         <blockquote className="ln-pt__note">
-          <span className="ln-pt__note-k">Lời nhắn của {t.teacherName ?? 'cô'}</span>
+          <span className="ln-pt__note-k">Lời nhắn của {t.teacherName ?? 'thầy/cô'}</span>
           <p>{t.generalComment}</p>
         </blockquote>
       ) : null}
@@ -94,15 +94,15 @@ function Tt27Card({ t }: { t: ParentTt27 }) {
   );
 }
 
-/** Ghi chép thầy cô cho phụ huynh xem (Thông tin bổ sung — chỉ những mục thầy cô đánh dấu chia sẻ). */
+/** Ghi chép thầy/cô cho phụ huynh xem (Thông tin bổ sung — chỉ những mục thầy/cô đánh dấu chia sẻ). */
 function TeacherNotes({ childId }: { childId: string }) {
   const q = useStudentNotes(childId);
   const list = (q.data ?? []).filter((n) => n.shareParent).slice(0, 10);
   if (!list.length) return null;
   const ymd = (s: string) => (/^\d{4}-\d{2}-\d{2}$/.test(s) ? s.split('-').reverse().join('/') : s);
   return (
-    <section className="ln-pp-card" aria-label="Thầy cô ghi chép">
-      <h2 className="ln-pp-h">Thầy cô ghi chép</h2>
+    <section className="ln-pp-card" aria-label="Thầy/cô ghi chép">
+      <h2 className="ln-pp-h">Thầy/cô ghi chép</h2>
       <ul className="ln-pp-list">
         {list.map((n) => (
           <li key={n.id} className="ln-pp-row">

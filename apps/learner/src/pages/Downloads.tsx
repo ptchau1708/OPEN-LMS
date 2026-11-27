@@ -66,7 +66,7 @@ export default function Downloads() {
 
       {(st.pending > 0 || failed.length > 0) && (
         <section className="ln-dlpage__queue k-card" aria-labelledby="ln-q-h">
-          <h2 id="ln-q-h" className="ln-h2">Chờ gửi lên cho cô <span className="ln-offline__badge">{st.pending}</span></h2>
+          <h2 id="ln-q-h" className="ln-h2">Chờ gửi lên cho thầy/cô <span className="ln-offline__badge">{st.pending}</span></h2>
           <ul className="ln-dlpage__ops">
             {ops.slice(0, 8).map((o) => (
               <li key={o.id} className={o.status === 'failed' ? 'is-failed' : ''}>

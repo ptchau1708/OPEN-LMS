@@ -89,7 +89,7 @@ export function CommentInput({ value, onChange, scope, level, onFocus, onBlur, o
               onMouseDown={(e) => { e.preventDefault(); pick(c.text); }} onMouseEnter={() => setHi(i)}>
               {c.level ? <span className={`tc-sugg__lv tc-pick--${c.level === 'Đ' ? 'D' : c.level}`}>{c.level}</span> : null}
               <span className="tc-sugg__text">{c.text}</span>
-              {!c.mine ? <span className="tc-sugg__meta" title="Câu thầy cô khác chia sẻ">chung</span> : c.uses > 1 ? <span className="tc-sugg__meta" title="Số lần đã dùng">×{c.uses}</span> : null}
+              {!c.mine ? <span className="tc-sugg__meta" title="Câu thầy/cô khác chia sẻ">chung</span> : c.uses > 1 ? <span className="tc-sugg__meta" title="Số lần đã dùng">×{c.uses}</span> : null}
             </li>
           ))}
         </ul>,

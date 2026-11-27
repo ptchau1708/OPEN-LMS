@@ -31,7 +31,7 @@ export function ArenaPoolDialog({ classes, items, onClose, onDone }: { classes: 
     </>}>
       <div className="tc-stack">
         <p className="tc-small">
-          Bộ câu Đấu trường của lớp dùng cho <b>Đấu 1–1</b>, <b>Leo tháp</b> (khi lớp chọn "Chỉ câu thầy cô đưa vào") và để mở <b>giải đấu</b>.
+          Bộ câu Đấu trường của lớp dùng cho <b>Đấu 1–1</b>, <b>Leo tháp</b> (khi lớp chọn "Chỉ câu thầy/cô đưa vào") và để mở <b>giải đấu</b>.
           Chỉ các dạng trả lời nhanh, máy chấm được (chọn đáp án, điền ngắn, sắp xếp…) mới dùng để đấu.
           {skipped ? <b className="tc-warn"> Bỏ qua {skipped} câu không phải dạng trả lời nhanh.</b> : null}
         </p>
@@ -40,7 +40,7 @@ export function ArenaPoolDialog({ classes, items, onClose, onDone }: { classes: 
             {classes.map((c) => <option key={c.id} value={c.id}>Lớp {c.name}</option>)}
           </select>
         </Field>
-        <label className="tc-switch"><input type="checkbox" checked={only} onChange={(e) => setOnly(e.target.checked)} /> Khi chơi tự do, lớp chỉ dùng câu thầy cô đưa vào (không lấy tự động)</label>
+        <label className="tc-switch"><input type="checkbox" checked={only} onChange={(e) => setOnly(e.target.checked)} /> Khi chơi tự do, lớp chỉ dùng câu thầy/cô đưa vào (không lấy tự động)</label>
         <p className="tc-small tc-muted">Xem, bớt câu và đặt giờ mở cửa ở <Link to={`/dau-truong?the=cai-dat&lop=${encodeURIComponent(classId)}`}>Đấu trường → Cài đặt</Link>.</p>
         <ErrorNote error={add.error ?? save.error} />
       </div>

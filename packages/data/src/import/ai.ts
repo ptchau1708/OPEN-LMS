@@ -82,7 +82,7 @@ async function invoke(task: string, input: Record<string, unknown>): Promise<{ i
   try {
     sb = await getSupabaseClient();
   } catch {
-    throw new AiError('Chưa kết nối được máy chủ. Thầy cô kiểm tra mạng rồi thử lại nhé.', 'network');
+    throw new AiError('Chưa kết nối được máy chủ. Thầy/cô kiểm tra mạng rồi thử lại nhé.', 'network');
   }
   const { data, error } = await sb.functions.invoke('ai-gateway', { body: { task, input } });
   if (error) {
@@ -98,7 +98,7 @@ async function invoke(task: string, input: Record<string, unknown>): Promise<{ i
     const known: AiErrorCode[] = ['ai_unavailable', 'quota', 'too_large', 'ai_bad_output', 'forbidden', 'bad_request'];
     // Máy chủ bản cũ chưa có tác vụ extract_items → báo rõ.
     if (code === 'bad_task') throw new AiError('Máy chủ chưa cập nhật chức năng này (cần triển khai lại Edge Function ai-gateway).', 'ai_unavailable');
-    throw new AiError(msg || 'AI chưa trả lời được, thầy cô thử lại sau nhé.', (known as string[]).includes(code) ? (code as AiErrorCode) : ctx ? 'error' : 'network');
+    throw new AiError(msg || 'AI chưa trả lời được, thầy/cô thử lại sau nhé.', (known as string[]).includes(code) ? (code as AiErrorCode) : ctx ? 'error' : 'network');
   }
   return (data ?? {}) as { items?: Item[]; provider?: string };
 }
@@ -117,14 +117,14 @@ export async function aiGenerateItems(ds: DataSource, input: AiGenerateInput): P
     ...(skills.length ? { skillCodes: skills, skillTexts: skills.map((c) => SKILL_BY_CODE[c].text) } : {}),
     ...(input.difficultyMix ? { difficultyMix: input.difficultyMix } : {}),
   });
-  if (!Array.isArray(res.items) || !res.items.length) throw new AiError('AI chưa soạn được câu hỏi hợp lệ, thầy cô thử lại nhé.', 'ai_bad_output');
+  if (!Array.isArray(res.items) || !res.items.length) throw new AiError('AI chưa soạn được câu hỏi hợp lệ, thầy/cô thử lại nhé.', 'ai_bad_output');
   return { drafts: toDrafts(res.items, d, false), demo: false, ...(res.provider ? { provider: res.provider } : {}) };
 }
 
 export async function aiExtractItems(ds: DataSource, input: AiExtractInput): Promise<AiItemsResult> {
-  const d: ImportDefaults = { grade: input.grade ?? 3, subject: input.subject ?? 'khac' };
+  const d: ImportDefaults = { grade: input.grade ?? 5, subject: input.subject ?? 'khac' };
   if (!AI_FILE_TYPES.includes(input.mimeType)) throw new AiError('Chỉ nhận ảnh JPG, PNG, WEBP hoặc tệp PDF.', 'bad_request');
-  if (base64Bytes(input.fileBase64) > AI_FILE_MAX_BYTES) throw new AiError('Tệp quá lớn (tối đa 4 MB). Thầy cô chụp từng trang hoặc tách PDF nhỏ hơn nhé.', 'too_large');
+  if (base64Bytes(input.fileBase64) > AI_FILE_MAX_BYTES) throw new AiError('Tệp quá lớn (tối đa 4 MB). Thầy/cô chụp từng trang hoặc tách PDF nhỏ hơn nhé.', 'too_large');
   if (ds.mode !== 'supabase') return { drafts: toDrafts(demoExtract(d), d, true), demo: true };
   const res = await invoke('extract_items', {
     fileBase64: input.fileBase64,
@@ -164,7 +164,7 @@ export async function prepareAiFile(file: Blob): Promise<PreparedAiFile> {
     const bytes = new Uint8Array(await file.arrayBuffer());
     const pdfHasText = pdfLooksTextual(bytes);
     if (bytes.length > AI_FILE_MAX_BYTES) {
-      throw new AiError(`Tệp PDF nặng ${(bytes.length / 1048576).toFixed(1)} MB — vượt mức 4 MB. ${pdfHasText ? 'PDF này chọn được chữ: thầy cô chép chữ rồi dán vào ô văn bản là nhanh nhất.' : 'Thầy cô chụp ảnh từng trang hoặc tách PDF nhỏ hơn nhé.'}`, 'too_large');
+      throw new AiError(`Tệp PDF nặng ${(bytes.length / 1048576).toFixed(1)} MB — vượt mức 4 MB. ${pdfHasText ? 'PDF này chọn được chữ: thầy/cô chép chữ rồi dán vào ô văn bản là nhanh nhất.' : 'Thầy/cô chụp ảnh từng trang hoặc tách PDF nhỏ hơn nhé.'}`, 'too_large');
     }
     return { fileBase64: bytesToBase64(bytes), mimeType: type, bytes: bytes.length, pdfHasText };
   }
@@ -173,13 +173,13 @@ export async function prepareAiFile(file: Blob): Promise<PreparedAiFile> {
   try {
     img = await compressWorkImage(file);
   } catch {
-    throw new AiError('Không mở được ảnh này. Thầy cô chọn ảnh khác nhé (ảnh HEIC của iPhone cần đổi sang JPG).', 'bad_request');
+    throw new AiError('Không mở được ảnh này. Thầy/cô chọn ảnh khác nhé (ảnh HEIC của iPhone cần đổi sang JPG).', 'bad_request');
   }
   const m = img.url.match(/^data:([^;,]+);base64,(.*)$/);
   if (!m) throw new AiError('Không đọc được ảnh này.', 'bad_request');
   const mimeType = AI_FILE_TYPES.includes(m[1]) ? m[1] : 'image/jpeg';
   const bytes = base64Bytes(m[2]);
-  if (bytes > AI_FILE_MAX_BYTES) throw new AiError('Ảnh quá lớn sau khi nén. Thầy cô chụp gần hơn hoặc cắt bớt nhé.', 'too_large');
+  if (bytes > AI_FILE_MAX_BYTES) throw new AiError('Ảnh quá lớn sau khi nén. Thầy/cô chụp gần hơn hoặc cắt bớt nhé.', 'too_large');
   return { fileBase64: m[2], mimeType, bytes };
 }
 
@@ -288,7 +288,7 @@ export function demoGenerate(input: AiGenerateInput): Item[] {
     } else {
       const s = sentences.length ? sentences[i % sentences.length] : `${input.topic?.trim() || 'Chủ đề'} — ý ${i + 1}`;
       const short = s.length > 110 ? `${s.slice(0, 107)}…` : s;
-      item = makeMcq(`Theo bài học: "${short}" — nhận định nào đúng?`, ['Đáp án đúng (thầy cô sửa lại)', 'Phương án nhiễu 1', 'Phương án nhiễu 2', 'Phương án nhiễu 3'], [0], d);
+      item = makeMcq(`Theo bài học: "${short}" — nhận định nào đúng?`, ['Đáp án đúng (thầy/cô sửa lại)', 'Phương án nhiễu 1', 'Phương án nhiễu 2', 'Phương án nhiễu 3'], [0], d);
     }
     if (levels[i]) item.difficulty = levels[i];
     item.tags = ['ai', 'demo'];

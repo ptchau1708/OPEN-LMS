@@ -142,7 +142,7 @@ describe('DemoRewardsSource', () => {
     const { ds, rs } = setup();
     await ds.signIn('an2a1', '123456');
     const first = await rs.evaluateBadges('u-an2a1');
-    expect(first.every((b) => b.badgeId === 'cua-co')).toBe(true); // chỉ huy hiệu của cô (mẫu) chưa xem
+    expect(first.every((b) => b.badgeId === 'cua-co')).toBe(true); // chỉ huy hiệu của thầy/cô (mẫu) chưa xem
     await rs.markBadgesSeen('u-an2a1', first.map((b) => b.id));
     expect(await rs.evaluateBadges('u-an2a1')).toEqual([]);
     for (const id of ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8', 'x9', 'x10']) {

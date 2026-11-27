@@ -110,7 +110,7 @@ export default function Home() {
 
         <section className="ln-home__live">
           <Button size="xl" block className="ln-live-btn" onClick={() => nav('/lop')} icon={<Icon name="tv" size={32} />}>Vào lớp trực tiếp</Button>
-          <p className="ln-live-hint">Khi cô mở bài trên TV, em bấm vào đây và nhập mã nhé.</p>
+          <p className="ln-live-hint">Khi thầy/cô mở bài trên TV, em bấm vào đây và nhập mã nhé.</p>
           {me.classId && <Button size="lg" block variant="secondary" className="ln-garden-btn" onClick={() => { sfx.tap(); nav('/vuon-lop'); }} icon={<Icon name="star" size={26} />}>Vườn lớp em</Button>}
           {me.classId && <Button size="lg" block variant="secondary" className="ln-garden-btn" onClick={() => { sfx.tap(); nav('/thao-luan'); }} icon={<Icon name="team" size={26} />} data-testid="home-discuss">Thảo luận{openDisc > 0 ? <span className="ln-count">{openDisc}</span> : null}</Button>}
           {ltiCount > 0 && <Button size="lg" block variant="secondary" className="ln-garden-btn" onClick={() => { sfx.tap(); nav('/ung-dung'); }} icon={<Icon name="puzzle" size={26} />} data-testid="home-lti">Ứng dụng học</Button>}

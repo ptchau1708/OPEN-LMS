@@ -81,7 +81,7 @@ export default function Me() {
       <section className="ln-me__work" aria-labelledby="ln-work-h">
         <h2 id="ln-work-h" className="ln-h2">Bài viết của em</h2>
         {works.isPending ? <div className="ln-skeleton-list"><i /></div>
-          : (works.data ?? []).length === 0 && !pendingWork ? <p className="k-muted">Khi thầy cô nhận xét bài viết của em, bài sẽ được cất vào đây.</p>
+          : (works.data ?? []).length === 0 && !pendingWork ? <p className="k-muted">Khi thầy/cô nhận xét bài viết của em, bài sẽ được cất vào đây.</p>
           : <WorkGallery entries={works.data ?? []} pending={pendingWork} onOpen={(id) => { sfx.tap(); nav(workPath(id)); }} />}
       </section>
 

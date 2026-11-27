@@ -353,7 +353,7 @@ export function parseTypedBlock(lines: string[], d0: ImportDefaults, source: Dra
     case 'RECORD_READ': {
       const text = (F.passage ?? '').trim();
       const sec = Math.round(num(F.seconds ?? '') ?? 60);
-      item = { ...base, prompt: { text: prompt || 'Em đọc to đoạn văn rồi ghi âm gửi thầy cô nhé.' }, type: 'RECORD_READ', payload: { text, maxSeconds: Math.min(180, Math.max(10, sec)) }, key: null };
+      item = { ...base, prompt: { text: prompt || 'Em đọc to đoạn văn rồi ghi âm gửi thầy/cô nhé.' }, type: 'RECORD_READ', payload: { text, maxSeconds: Math.min(180, Math.max(10, sec)) }, key: null };
       if (!text) review = 'Thiếu dòng "Đoạn đọc: …"';
       break;
     }

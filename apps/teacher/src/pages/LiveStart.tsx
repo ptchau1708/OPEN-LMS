@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { Icon } from '@openedu/ui';
 import { SUBJECTS, type Profile } from '@openedu/contracts';
-import { useClasses, useCreateLiveSession, useDataSource, useLessons } from '@openedu/data';
+import { useCreateLiveSession, useDataSource, useLessons } from '@openedu/data';
+import { byFocus, useClasses, useFocusGrade } from '../lib/focusGrade';
 import { Btn, Empty, ErrorNote, Field, Loading, PageHead, SubjectDot } from '../components/common';
 import { cx } from '../lib/format';
 import { matchesSearch } from '@openedu/data';
@@ -20,12 +21,13 @@ export default function LiveStart({ user }: { user: Profile }) {
   const [search, setSearch] = useState('');
   const [game, setGame] = useState(false);
   useEffect(() => { if (!classId && classes.data?.[0]) setClassId(user.classId && classes.data.some((c) => c.id === user.classId) ? user.classId : classes.data[0].id); }, [classes.data, classId, user.classId]);
-  const list = (lessons.data ?? []).filter((l) => !search.trim() || matchesSearch(l.title, search));
+  const focus = useFocusGrade().grade;
+  const list = byFocus((lessons.data ?? []).filter((l) => !search.trim() || matchesSearch(l.title, search)), focus, (l) => l.grade);
   const start = () => create.mutate({ lessonId, classId: classId || undefined }, { onSuccess: (s) => nav(`/truc-tiep/${s.sessionId}${classId ? `?lop=${classId}` : ''}`) });
 
   return (
     <div className="tc-page">
-      <PageHead title="Lớp học trực tiếp" sub="Bài giảng chiếu trên TV, học sinh trả lời trên máy, thầy cô điều khiển bằng điện thoại." actions={
+      <PageHead title="Lớp học trực tiếp" sub="Bài giảng chiếu trên TV, học sinh trả lời trên máy, thầy/cô điều khiển bằng điện thoại." actions={
         <Link className="tc-btn" to="/truc-tiep/the-giay" data-testid="live-print-cards" title="Thẻ A/B/C/D có mã QR cho chế độ chơi bằng thẻ giấy (HS không cần máy)"><Icon name="print" size={16} /><span>In thẻ giấy cho HS</span></Link>
       } />
       {ds.mode === 'demo' ? (

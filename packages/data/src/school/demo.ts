@@ -117,7 +117,7 @@ export class DemoSchoolSource implements SchoolSource {
     const cls = this.classes(s).find((c) => c.id === classId);
     if (!cls) throw err('Không tìm thấy lớp này.');
     const v = this.viewer(s);
-    if (v && v.role !== 'admin' && !(v.role === 'teacher' && cls.teacherId === v.id)) throw err('Thầy cô chỉ quản lí được lớp mình chủ nhiệm.');
+    if (v && v.role !== 'admin' && !(v.role === 'teacher' && cls.teacherId === v.id)) throw err('Thầy/cô chỉ quản lí được lớp mình chủ nhiệm.');
     return cls;
   }
   /** Lớp người xem được báo cáo: admin tất cả, GV lớp mình. */
@@ -126,7 +126,7 @@ export class DemoSchoolSource implements SchoolSource {
     const all = this.classes(s);
     if (!v || v.role === 'admin') return all;
     if (v.role === 'teacher') return all.filter((c) => c.teacherId === v.id);
-    throw err('Chỉ thầy cô và quản trị xem được báo cáo.');
+    throw err('Chỉ thầy/cô và quản trị xem được báo cáo.');
   }
   private studentName(s: KVStorage, id: string): string {
     return this.users(s).find((u) => u.id === id)?.name ?? id;
@@ -215,7 +215,7 @@ export class DemoSchoolSource implements SchoolSource {
     const day = vnDayKey(now.toISOString());
     const attempts = this.g<Record<string, number>>(s, 'codeAttempts', {});
     const akey = `${parentId}|${day}`;
-    if ((attempts[akey] ?? 0) >= MAX_CODE_ATTEMPTS_PER_DAY) throw err('Bố mẹ đã nhập sai quá nhiều lần hôm nay. Xin thử lại vào ngày mai hoặc nhờ thầy cô kiểm tra mã.');
+    if ((attempts[akey] ?? 0) >= MAX_CODE_ATTEMPTS_PER_DAY) throw err('Bố mẹ đã nhập sai quá nhiều lần hôm nay. Xin thử lại vào ngày mai hoặc nhờ thầy/cô kiểm tra mã.');
     const list = this.codes(s);
     const c = isWellFormedCode(code) ? list.find((x) => x.code === code) : undefined;
     const g = this.guardians(s);
@@ -358,7 +358,7 @@ export class DemoSchoolSource implements SchoolSource {
   async listSchoolUsers(filter: { role?: Role; classId?: string } = {}): Promise<SchoolUser[]> {
     const { s } = await this.kv();
     const v = this.viewer(s);
-    if (v && v.role !== 'admin' && v.role !== 'teacher') throw err('Chỉ thầy cô và quản trị xem được danh sách này.');
+    if (v && v.role !== 'admin' && v.role !== 'teacher') throw err('Chỉ thầy/cô và quản trị xem được danh sách này.');
     const classes = this.classes(s);
     const name = new Map(classes.map((c) => [c.id, c.name]));
     return this.users(s)
@@ -469,9 +469,9 @@ export class DemoSchoolSource implements SchoolSource {
         return !!st?.classId && this.classes(s).find((c) => c.id === st.classId)?.teacherId === v.id;
       };
       const ok = v.role === 'teacher' && (u.role === 'student' ? homeroom(u.id) : u.role === 'parent' && (this.guardians(s)[u.id] ?? []).some(homeroom));
-      if (!ok) throw err('Thầy cô chỉ cấp lại mật khẩu cho học sinh lớp mình chủ nhiệm và phụ huynh của các em.');
+      if (!ok) throw err('Thầy/cô chỉ cấp lại mật khẩu cho học sinh lớp mình chủ nhiệm và phụ huynh của các em.');
     }
-    if (v && v.id === u.id) throw err('Muốn đổi mật khẩu của chính mình, thầy cô dùng mục Đổi mật khẩu.');
+    if (v && v.id === u.id) throw err('Muốn đổi mật khẩu của chính mình, thầy/cô dùng mục Đổi mật khẩu.');
     const password = generatePassword(this.rand);
     this.setPassword(s, u.id, password);
     const temporary = u.role !== 'student';

@@ -65,7 +65,7 @@ function ParentAccount({ parent }: { parent: Profile }) {
   if (kids.isPending) return <LoadingScreen label="Đang tải" />;
   if (kids.isError) return <ErrorState message="Chưa tải được thông tin của con." onRetry={() => void kids.refetch()} />;
   const list = kids.data ?? [];
-  if (!list.length) return <div className="ln-parent"><EmptyState title="Chưa liên kết với con" text="Bố mẹ nhập mã liên kết 8 kí tự trên phiếu thầy cô gửi về (hoặc quét mã QR trên phiếu)." action={<Link className="k-btn k-btn--primary k-btn--lg" to="/phu-huynh/lien-ket"><span className="k-btn__label">Nhập mã liên kết</span></Link>} /><SignOutRow /></div>;
+  if (!list.length) return <div className="ln-parent"><EmptyState title="Chưa liên kết với con" text="Bố mẹ nhập mã liên kết 8 kí tự trên phiếu thầy/cô gửi về (hoặc quét mã QR trên phiếu)." action={<Link className="k-btn k-btn--primary k-btn--lg" to="/phu-huynh/lien-ket"><span className="k-btn__label">Nhập mã liên kết</span></Link>} /><SignOutRow /></div>;
   const child = list.find((k) => k.id === sel) ?? list[0];
   return <ParentView child={child} siblings={list} onPick={setSel} parent={parent} />;
 }
@@ -94,7 +94,7 @@ function ParentView({ child, siblings, onPick, parent, onExitLabel }: { child: P
   const assigns = useAssignments({ studentId: child.id });
   const lessonIds = (assigns.data ?? []).filter((a) => a.targetType === 'lesson').map((a) => a.targetId);
   const progress = useQueries({ queries: lessonIds.map((id) => ({ queryKey: qk.progress(child.id, id), queryFn: () => ds.getProgress(child.id, id) })) });
-  // Tài khoản phụ huynh: thông báo của cô + mục cô cho xem (SQL 23). Chế độ phụ huynh trên máy của con: không có.
+  // Tài khoản phụ huynh: thông báo của thầy/cô + mục thầy/cô cho xem (SQL 23). Chế độ phụ huynh trên máy của con: không có.
   const inbox = useParentInbox(child.id, !!parent);
   const modes = inbox.data?.modes;
   const show = (k: ShareKind) => !modes || modes[k] !== 'off';

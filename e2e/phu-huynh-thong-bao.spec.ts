@@ -35,7 +35,7 @@ test('GV: trang Phụ huynh — gửi thông báo, đã gửi, phụ huynh thấ
   // Phụ huynh thấy gì: tắt Kết quả tự học, xem như phụ huynh
   await page.getByRole('group', { name: 'Mục' }).getByRole('button', { name: 'Phụ huynh thấy gì' }).click();
   const vis = page.getByTestId('ph-visibility');
-  await expect(vis.getByRole('group', { name: 'Nhắc nhở nề nếp' }).getByRole('button', { name: 'Cô duyệt rồi mới gửi' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(vis.getByRole('group', { name: 'Nhắc nhở nề nếp' }).getByRole('button', { name: 'GV duyệt rồi mới gửi' })).toHaveAttribute('aria-pressed', 'true');
   await vis.getByRole('group', { name: 'Kết quả tự học' }).getByRole('button', { name: 'Không gửi' }).click();
   await vis.getByTestId('ph-vis-save').click();
   await expect(vis.getByText('Đã lưu.')).toBeVisible();
@@ -43,7 +43,7 @@ test('GV: trang Phụ huynh — gửi thông báo, đã gửi, phụ huynh thấ
   await expect(page.getByTestId('ph-preview')).toContainText('Kết quả tự học');
   await expect(page.getByTestId('ph-preview').locator('li.is-off')).toContainText('Kết quả tự học');
 
-  // Tin nhắn: phụ huynh Ngọc Lan đã nhắn (dữ liệu mẫu) → cô trả lời
+  // Tin nhắn: phụ huynh Ngọc Lan đã nhắn (dữ liệu mẫu) → thầy/cô trả lời
   await page.getByRole('group', { name: 'Mục' }).getByRole('button', { name: /Tin nhắn/ }).click();
   await page.getByTestId('ph-thread').filter({ hasText: 'Ngọc Lan' }).click();
   const chat = page.getByTestId('ph-chat');
@@ -77,7 +77,7 @@ test('GV: trang Phụ huynh — gửi thông báo, đã gửi, phụ huynh thấ
   w.expectClean();
 });
 
-test('PH: thông báo của cô, xác nhận, nhắn tin với cô, trang thông báo', async ({ page }) => {
+test('PH: thông báo của thầy/cô, xác nhận, nhắn tin với thầy/cô, trang thông báo', async ({ page }) => {
   const w = watchErrors(page);
   await page.goto(`${LEARNER}/dang-nhap`);
   await page.getByRole('button', { name: 'Đăng nhập bằng tên' }).click();
@@ -86,7 +86,7 @@ test('PH: thông báo của cô, xác nhận, nhắn tin với cô, trang thông
   await page.locator('form button[type=submit]').click();
   await page.waitForURL('**/phu-huynh');
   const inbox = page.getByTestId('pp-inbox');
-  await expect(inbox).toContainText('Thông báo của cô');
+  await expect(inbox).toContainText('Thông báo của thầy/cô');
   await inbox.getByTestId('pp-post').filter({ hasText: 'Họp phụ huynh cuối học kì I' }).click();
   await inbox.getByTestId('pp-ack').click();
   await expect(inbox).toContainText('Đã xác nhận');
@@ -117,5 +117,25 @@ test('HS: chuông trên trang Nhà → trang Thông báo', async ({ page }) => {
   await expect(page.getByTestId('ln-ntf-list')).toContainText('Bài mới: Ôn tập cuối tuần');
   await page.getByRole('button', { name: 'Đã đọc hết' }).click();
   await expect(page.locator('.ln-ntf__item.is-new')).toHaveCount(0);
+  w.expectClean();
+});
+
+test('GV: lớp chưa có phụ huynh liên kết — nhắc ngay khi soạn, báo rõ sau khi gửi, dẫn tới Liên kết tài khoản', async ({ page }) => {
+  const w = watchErrors(page);
+  await teacherLogin(page, 'thaynam');
+  await page.getByRole('link', { name: 'Phụ huynh', exact: true }).click();
+  const box = page.getByTestId('ph-compose');
+  await expect(box.getByTestId('ph-nolink')).toContainText('chưa có phụ huynh nào liên kết tài khoản');
+  await box.getByRole('button', { name: 'Lịch nghỉ học' }).click();
+  await expect(box.getByTestId('ph-reach')).toContainText('Chưa có phụ huynh nào nhận được');
+  await box.getByTestId('ph-send').click();
+  const done = box.getByTestId('ph-done');
+  await expect(done).toContainText('chưa phụ huynh nào nhận được');
+  await expect(done).toContainText('Phụ huynh liên kết sau vẫn đọc được');
+  await box.getByRole('button', { name: 'Xem đã gửi' }).click();
+  await expect(page.getByTestId('ph-sent-card').first()).toContainText('Chưa có phụ huynh nhận');
+  await page.getByRole('group', { name: 'Mục' }).getByRole('button', { name: 'Gửi phụ huynh' }).click();
+  await box.getByTestId('ph-nolink-go').click();
+  await expect(page.getByRole('button', { name: 'Tạo mã mới cho cả lớp' })).toBeVisible();
   w.expectClean();
 });

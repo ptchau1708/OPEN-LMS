@@ -40,9 +40,9 @@ export function LevelSticker({ level, size = 'md', className }: { level: Tt27Lev
 
 const STATE_UI: Record<WorkState, { sub: string; icon: IconName; go: IconName }> = {
   todo: { sub: 'Chụp ảnh hoặc gõ bài làm', icon: 'pencil', go: 'play' },
-  waiting: { sub: 'Đang chờ thầy cô xem', icon: 'clock', go: 'eye' },
-  feedback: { sub: 'Thầy cô đã nhận xét bài của em', icon: 'star', go: 'eye' },
-  redo: { sub: 'Thầy cô nhờ em sửa lại một chút', icon: 'retry', go: 'play' },
+  waiting: { sub: 'Đang chờ thầy/cô xem', icon: 'clock', go: 'eye' },
+  feedback: { sub: 'Thầy/cô đã nhận xét bài của em', icon: 'star', go: 'eye' },
+  redo: { sub: 'Thầy/cô nhờ em sửa lại một chút', icon: 'retry', go: 'play' },
 };
 
 export function WorkTaskCard({ item, onOpen }: { item: WorkItem; onOpen: () => void }) {
@@ -74,7 +74,7 @@ export function WorkTaskCard({ item, onOpen }: { item: WorkItem; onOpen: () => v
 export function WorkGallery({ entries, pending, onOpen }: { entries: StudentWorkEntry[]; pending: number; onOpen: (taskId: string) => void }) {
   return (
     <>
-      {pending > 0 && <p className="ln-wgal__pending"><Icon name="clock" size={20} /> {pending} bài đang chờ thầy cô xem</p>}
+      {pending > 0 && <p className="ln-wgal__pending"><Icon name="clock" size={20} /> {pending} bài đang chờ thầy/cô xem</p>}
       <div className="ln-wgal">
         {entries.map((e) => (
           <button key={e.submissionId} type="button" className="ln-wgal__item" onClick={() => onOpen(e.taskId)} style={{ ['--subj' as string]: subjectColor(e.subject) } as CSSProperties}>

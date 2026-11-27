@@ -6,6 +6,7 @@ import { ClassPicker, useClassPick, useRoster } from '../../lib/assess';
 import { cx } from '../../lib/format';
 import { BankProvider, CommentInput } from '../../components/CommentInput';
 import { TT27_GENERAL_SCOPE, Tt27BankDialog, Tt27ColumnsDialog, tt27Scope, useBankAuto } from './Tt27Bank';
+import { useFocusGrade } from '../../lib/focusGrade';
 
 const TERMS: Tt27TermId[] = ['GK1', 'CK1', 'GK2', 'CN'];
 const LEVELS: Tt27Level[] = ['T', 'H', 'C'];
@@ -95,7 +96,8 @@ export default function Tt27({ user }: { user: Profile }) {
   const [msg, setMsg] = useState<string | null>(null);
   const [print, setPrint] = useState(false);
   const [picked, setPicked] = useState<Set<string>>(new Set());
-  const grade = cls?.grade ?? 4;
+  const focus = useFocusGrade().grade;
+  const grade = cls?.grade ?? focus;
   const allSubjects = subjectsFor(grade);
   // Môn hiển thị: GV chọn theo lớp (lưu theo tài khoản); mặc định các môn bắt buộc.
   const colPref = usePref<{ subjects?: SubjectId[] }>(user.id, classId ? `tt27-mon.${classId.toLowerCase()}` : null);
@@ -149,7 +151,7 @@ export default function Tt27({ user }: { user: Profile }) {
       } catch { /* hiện lỗi qua suggest.error */ }
     }
     setBusy(null);
-    setMsg(`Đã soạn nháp cho ${ids.length} em từ dữ liệu. Thầy cô đọc, sửa rồi lưu nhé.`);
+    setMsg(`Đã soạn nháp cho ${ids.length} em từ dữ liệu. Thầy/cô đọc, sửa rồi lưu nhé.`);
   };
   /** Câu nhận xét mới / đã sửa của các em vừa lưu → ngân hàng (bỏ câu có tên riêng của em). */
   const collectBank = (ids: string[]): BankAdd[] => {

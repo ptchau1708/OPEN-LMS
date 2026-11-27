@@ -287,7 +287,7 @@ export class RelayLiveChannel implements StatusfulLiveChannel {
             this.rawSend(JSON.stringify({ t: 'create', state: this.state }));
             return;
           }
-          this.setStatus('error', 'Chưa tìm thấy lớp học trực tiếp này. Em chờ cô/thầy mở lớp hoặc kiểm tra lại mã nhé!');
+          this.setStatus('error', 'Chưa tìm thấy lớp học trực tiếp này. Em chờ thầy/cô mở lớp hoặc kiểm tra lại mã nhé!');
           // Thử vào lại: GV có thể đang tạo lại phòng.
           if (!this.rejoinTimer && !this.closedByUser) {
             this.rejoinTimer = setTimeout(() => {
@@ -315,7 +315,7 @@ export class RelayLiveChannel implements StatusfulLiveChannel {
 
   async send(cmd: LiveCommand): Promise<void> {
     if (this.role !== 'teacher') throw new Error('Chỉ giáo viên mới điều khiển được lớp học.');
-    if (!this.state) throw new Error('Lớp học chưa sẵn sàng, thầy cô chờ một chút nhé.');
+    if (!this.state) throw new Error('Lớp học chưa sẵn sàng, thầy/cô chờ một chút nhé.');
     const next = applyLiveCommand(this.state, cmd);
     if (next === this.state) return;
     this.adoptState(next);

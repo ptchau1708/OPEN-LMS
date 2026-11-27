@@ -26,7 +26,7 @@ export default function BadgeShelf({ userId }: { userId: string }) {
       <p className="ln-shelf__count"><Icon name="trophy" size={22} /> Em có <strong>{count + teacher.length}</strong> huy hiệu · còn {BADGES.length - count} huy hiệu đang chờ em</p>
       {teacher.length > 0 && (
         <div className="ln-shelf__row">
-          <h3 className="ln-shelf__cat" style={{ color: BADGE_CATEGORIES[7].color }}>Huy hiệu của cô</h3>
+          <h3 className="ln-shelf__cat" style={{ color: BADGE_CATEGORIES[7].color }}>Huy hiệu của thầy/cô</h3>
           <div className="ln-shelf__grid">
             {teacher.map((b) => {
               const v = badgeView(b);
@@ -66,7 +66,7 @@ export default function BadgeShelf({ userId }: { userId: string }) {
             <div className="ln-badge-detail">
               <BadgeArt glyph={v.glyph} color={v.color} tier={v.tier} size={150} />
               {open.b.badgeId === 'cua-co'
-                ? <p><strong>{open.b.grantedByName ?? 'Thầy cô'}</strong> tặng em{open.b.note ? `: “${open.b.note}”` : '.'}</p>
+                ? <p><strong>{open.b.grantedByName ?? 'Thầy/cô'}</strong> tặng em{open.b.note ? `: “${open.b.note}”` : '.'}</p>
                 : <p>Em đã làm được: {v.hint?.toLowerCase()}.</p>}
               <p className="k-muted">Nhận ngày {dayLabel(open.b.earnedAt)}</p>
             </div>

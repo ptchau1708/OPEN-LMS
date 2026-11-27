@@ -22,7 +22,7 @@
   ghép học sinh theo Tên đăng nhập → Mã HS → Họ và tên; xem trước dòng chưa ghép (trùng tên / không có); mỗi em → một ghi chép.
   Cột “Ghi chú / Nội dung / Nhận xét” → nội dung; cột khác → dữ liệu.
 - Quyền (RLS): chỉ GV của em + quản trị xem / sửa / xoá; **phụ huynh chỉ thấy ghi chép được tích “Cho phụ huynh xem”**
-  (hiện ở trang phụ huynh, mục “Thầy cô ghi chép”); học sinh không xem. Khi in hồ sơ, ghi chép không chia sẻ không được in.
+  (hiện ở trang phụ huynh, mục “Thầy/cô ghi chép”); học sinh không xem. Khi in hồ sơ, ghi chép không chia sẻ không được in.
 
 ## Kiểm thử
 `e2e/tt27-ho-so.spec.ts` (3), `packages/data/src/__tests__/tt32Notes.test.ts`, `supabase/tests/database/tt32_notes_bank.test.sql` (26).

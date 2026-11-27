@@ -43,11 +43,11 @@ export interface Skill {
   prereqs: string[];
   /** true = kĩ năng tạm, chờ danh mục chính thức. */
   provisional?: boolean;
-  /** Danh mục mở (SQL 19): kĩ năng do thầy cô thêm. */
+  /** Danh mục mở (SQL 19): kĩ năng do thầy/cô thêm. */
   custom?: boolean;
   /** Đã ẩn khỏi danh mục (vẫn đọc được lịch sử). */
   hidden?: boolean;
-  /** Kĩ năng gốc đã được thầy cô sửa chữ (khôi phục được). */
+  /** Kĩ năng gốc đã được thầy/cô sửa chữ (khôi phục được). */
   edited?: boolean;
   /** Người thêm (kĩ năng tự thêm). */
   ownerId?: string;
@@ -65,20 +65,20 @@ export interface Misconception {
   rootSkill?: string;
 }
 
-/** Danh mục gốc trong mã (không đổi) — để khôi phục khi thầy cô sửa. */
+/** Danh mục gốc trong mã (không đổi) — để khôi phục khi thầy/cô sửa. */
 const BUILTIN_SKILLS: readonly Skill[] = [...TOAN_SKILLS, ...PROVISIONAL_SKILLS, ...CT2018_SKILLS];
 const BUILTIN_BY_CODE: Readonly<Record<string, Skill>> = Object.fromEntries(BUILTIN_SKILLS.map((s) => [s.code, s]));
 
 /**
  * Danh mục kĩ năng ĐANG DÙNG (không gồm kĩ năng đã ẩn). Mảng được cập nhật tại chỗ bởi `applySkillOverrides`
- * khi tải phần thầy cô đã sửa / thêm / ẩn (danh mục mở, SQL 19) — mọi nơi import SKILLS đều thấy bản mới.
+ * khi tải phần thầy/cô đã sửa / thêm / ẩn (danh mục mở, SQL 19) — mọi nơi import SKILLS đều thấy bản mới.
  */
 export const SKILLS: Skill[] = [...BUILTIN_SKILLS];
 
 /** Tra cứu theo mã — gồm cả kĩ năng đã ẩn (để đọc lịch sử). */
 export const SKILL_BY_CODE: Record<string, Skill> = Object.fromEntries(SKILLS.map((s) => [s.code, s]));
 
-/** Phần thầy cô sửa / thêm / ẩn của một kĩ năng (hàng v2.skills có custom / hidden / edit_*). */
+/** Phần thầy/cô sửa / thêm / ẩn của một kĩ năng (hàng v2.skills có custom / hidden / edit_*). */
 export interface SkillOverride {
   code: string;
   /** Kĩ năng tự thêm: đủ các trường. Kĩ năng gốc: chỉ các trường đã sửa. */
@@ -107,7 +107,7 @@ export function allSkills(): Skill[] {
 }
 
 /**
- * Áp phần thầy cô đã sửa lên danh mục gốc, cập nhật TẠI CHỖ `SKILLS` (đang dùng) và `SKILL_BY_CODE` (tất cả).
+ * Áp phần thầy/cô đã sửa lên danh mục gốc, cập nhật TẠI CHỖ `SKILLS` (đang dùng) và `SKILL_BY_CODE` (tất cả).
  * Gọi lại với danh sách mới thì tính lại từ bản gốc (không cộng dồn).
  */
 export function applySkillOverrides(rows: readonly SkillOverride[]): void {
@@ -130,7 +130,7 @@ export function applySkillOverrides(rows: readonly SkillOverride[]): void {
   for (const o of byCode.values()) {
     if (!o.custom || !o.subject || !o.grade || !o.text || !o.short) continue;
     out.push({
-      code: o.code, subject: o.subject, grade: o.grade, strand: 'CHU-DE', topic: o.topic || 'Do thầy cô thêm',
+      code: o.code, subject: o.subject, grade: o.grade, strand: 'CHU-DE', topic: o.topic || 'Do thầy/cô thêm',
       text: o.text, short: o.short, prereqs: [], provisional: true, custom: true,
       ...(o.hidden ? { hidden: true } : {}), ...(o.ownerId ? { ownerId: o.ownerId } : {}),
     });

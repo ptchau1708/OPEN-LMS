@@ -90,7 +90,7 @@ export class SupabaseDiscussSource implements DiscussSource {
     if (i.id) {
       const { data, error } = await sb.from('discussions').update(row).eq('id', i.id).select(cols).maybeSingle();
       if (error) fail(error, noQuick(error) ? 'Cần chạy tệp SQL 19 trên Supabase để lưu câu trả lời nhanh.' : noKind(error) ? 'Cần chạy tệp SQL 16 (trò chuyện nhóm) trên Supabase trước.' : 'Chưa lưu được phòng thảo luận.');
-      if (!data) throw new Error('Thầy cô chưa có quyền sửa phòng này.');
+      if (!data) throw new Error('Thầy/cô chưa có quyền sửa phòng này.');
       return toDisc(data as unknown as Row);
     }
     const { data, error } = await sb.from('discussions').insert({ ...row, created_by: await this.me() }).select(cols).single();

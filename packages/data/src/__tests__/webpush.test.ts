@@ -97,11 +97,11 @@ describe('web push (RFC 8291 / 8292)', () => {
 
   it('tin nhạy cảm không lộ nội dung; máy dùng chung có tên người nhận', () => {
     const n: ClaimedNotification = {
-      id: 1, userId: 'u', kind: 'ph-nhac-nho', title: 'An: cô nhắc nhở Nói chuyện riêng', body: 'Trong giờ Toán', link: '/phu-huynh',
+      id: 1, userId: 'u', kind: 'ph-nhac-nho', title: 'An: thầy/cô nhắc nhở Nói chuyện riêng', body: 'Trong giờ Toán', link: '/phu-huynh',
       sensitive: true, showSensitive: false, count: 1, tag: 'x', name: 'Mẹ An', badge: 3, subs: [],
     };
     expect(pushMessage(n, { shared: false })).toMatchObject({ title: 'OPEN-EDU: có thông tin mới', body: 'Mở ứng dụng để xem chi tiết.', badge: 3 });
-    expect(pushMessage({ ...n, showSensitive: true }, { shared: true }).title).toBe('Mẹ An · An: cô nhắc nhở Nói chuyện riêng');
+    expect(pushMessage({ ...n, showSensitive: true }, { shared: true }).title).toBe('Mẹ An · An: thầy/cô nhắc nhở Nói chuyện riêng');
     expect(pushMessage({ ...n, link: 'https://lạ.vn' }, { shared: false }).link).toBe('/');
   });
 });

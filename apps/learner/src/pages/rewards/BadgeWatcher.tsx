@@ -51,18 +51,18 @@ export default function BadgeWatcher() {
   const reduced = resolveSettings(me).reducedMotion;
   const close = () => { seen.mutate({ userId: me.id, ids: [cur.id] }); setQueue((q) => q.slice(1)); };
   const teacher = cur.badgeId === 'cua-co';
-  const say = teacher ? `${cur.grantedByName ?? 'Thầy cô'} tặng em huy hiệu ${v.title}. ${cur.note ?? ''}` : `Em nhận được huy hiệu ${v.title}!`;
+  const say = teacher ? `${cur.grantedByName ?? 'Thầy/cô'} tặng em huy hiệu ${v.title}. ${cur.note ?? ''}` : `Em nhận được huy hiệu ${v.title}!`;
 
   return (
     <div className={`ln-unlock ln-badge-pop${reduced ? ' is-still' : ''}`} role="dialog" aria-modal="true" aria-label={`Huy hiệu mới: ${v.title}`} style={{ ['--mc' as string]: v.color } as CSSProperties}>
       {!reduced && <div className="ln-unlock__rays" aria-hidden="true" />}
       {!reduced && <Confetti show durationMs={2800} count={44} />}
       <div className="ln-unlock__card">
-        <p className="ln-unlock__kicker">{teacher ? `${cur.grantedByName ?? 'Thầy cô'} tặng em` : 'Huy hiệu mới!'}</p>
+        <p className="ln-unlock__kicker">{teacher ? `${cur.grantedByName ?? 'Thầy/cô'} tặng em` : 'Huy hiệu mới!'}</p>
         <div className="ln-badge-pop__hero"><BadgeArt glyph={v.glyph} color={v.color} tier={v.tier} size={180} title={v.title} /></div>
         <h2 className="ln-unlock__name">{v.title}</h2>
         <div className="ln-unlock__greet">
-          <span>{teacher ? (cur.note || 'Cô rất vui vì em!') : `Nhóm “${v.catName}” · ${v.hint ?? ''}`}</span>
+          <span>{teacher ? (cur.note || 'Thầy/cô rất vui vì em!') : `Nhóm “${v.catName}” · ${v.hint ?? ''}`}</span>
           <SpeakButton text={say} size="sm" label="Nghe đọc" />
         </div>
         <div className="ln-unlock__actions">

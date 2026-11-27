@@ -49,10 +49,10 @@ export async function requestGoogleToken(scopes: readonly string[]): Promise<Goo
       client_id: clientId,
       scope: scopes.join(' '),
       callback: (r) => {
-        if (r.error || !r.access_token) return reject(new Error(r.error === 'access_denied' ? 'Thầy cô chưa cho phép OPEN-EDU truy cập Classroom.' : `Google từ chối: ${r.error_description ?? r.error ?? 'không rõ lí do'}`));
+        if (r.error || !r.access_token) return reject(new Error(r.error === 'access_denied' ? 'Thầy/cô chưa cho phép OPEN-EDU truy cập Classroom.' : `Google từ chối: ${r.error_description ?? r.error ?? 'không rõ lí do'}`));
         const granted = (r.scope ?? '').split(' ').filter(Boolean);
         const missing = scopes.filter((s) => granted.length && !granted.includes(s));
-        if (missing.length) return reject(new Error('Thầy cô cần đánh dấu đủ các ô quyền trên màn hình Google rồi bấm Tiếp tục.'));
+        if (missing.length) return reject(new Error('Thầy/cô cần đánh dấu đủ các ô quyền trên màn hình Google rồi bấm Tiếp tục.'));
         resolve({ token: r.access_token, expiresAt: Date.now() + (r.expires_in ?? 3600) * 1000 - 60_000, scopes: [...scopes] });
       },
       error_callback: (e) => reject(new Error(e.type === 'popup_closed' ? 'Cửa sổ Google đã bị đóng trước khi xong.' : e.type === 'popup_failed_to_open' ? 'Trình duyệt chặn cửa sổ bật lên. Cho phép cửa sổ bật lên rồi thử lại.' : e.message ?? 'Không đăng nhập được Google.')),

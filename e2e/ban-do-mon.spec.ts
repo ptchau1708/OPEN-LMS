@@ -10,7 +10,7 @@ test('Bản đồ kiến thức: GV tự chọn môn hiện cho lớp, nhớ sau
   const DEF = ['Tiếng Việt', 'Toán', 'Tiếng Anh', 'Lịch sử và Địa lí', 'Khoa học'];
   await expect(seg.getByRole('button')).toHaveText(DEF);
 
-  // Cô dạy Toán + Khoa học + Tin học
+  // Thầy/cô dạy Toán + Khoa học + Tin học
   await page.getByTestId('hm-pick-open').click();
   const dlg = page.getByRole('dialog');
   await expect(dlg.getByRole('checkbox')).toHaveCount(13);

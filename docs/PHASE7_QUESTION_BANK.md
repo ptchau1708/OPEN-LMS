@@ -2,7 +2,7 @@
 
 Trang **Ngân hàng hoạt động** (app GV) có thêm nút **Thêm nhanh nhiều câu**, **Xuất ra Excel**, và trong ngăn xem câu hỏi có nút **Nhân bản câu này**.
 
-## Dành cho thầy cô
+## Dành cho thầy/cô
 
 ### Các cách thêm câu hỏi
 
@@ -16,7 +16,7 @@ Trang **Ngân hàng hoạt động** (app GV) có thêm nút **Thêm nhanh nhi�
 | **Gõ nhanh trắc nghiệm** | Không | Gõ tay nhiều câu 4 lựa chọn: câu hỏi, A–D, chọn đáp án, Enter sang dòng mới |
 | **Tạo hoạt động / Nhân bản** | Không | Một câu, đủ 16 dạng, có ảnh, âm thanh |
 
-Mọi cách (trừ tạo từng câu) đều dẫn tới **màn hình soát**. Ở đây thầy cô xem trạng thái từng câu (**Sẵn sàng / Thiếu đáp án / Cần xem lại**), sửa đề, lựa chọn và đáp án ngay trong danh sách, rồi đặt môn, lớp, mức độ và mã kĩ năng cho từng câu hoặc cho mọi câu đang chọn. Bên phải là bản xem trước giống màn hình học sinh. Bật **Bỏ qua câu trùng** thì câu đã có trong ngân hàng (cùng đề bài) sẽ không lưu lần nữa. Bấm **Lưu N câu vào ngân hàng** để lưu. Chỉ câu **Sẵn sàng** mới lưu được. Câu lưu lỗi hiện chữ đỏ ở dòng của câu đó.
+Mọi cách (trừ tạo từng câu) đều dẫn tới **màn hình soát**. Ở đây thầy/cô xem trạng thái từng câu (**Sẵn sàng / Thiếu đáp án / Cần xem lại**), sửa đề, lựa chọn và đáp án ngay trong danh sách, rồi đặt môn, lớp, mức độ và mã kĩ năng cho từng câu hoặc cho mọi câu đang chọn. Bên phải là bản xem trước giống màn hình học sinh. Bật **Bỏ qua câu trùng** thì câu đã có trong ngân hàng (cùng đề bài) sẽ không lưu lần nữa. Bấm **Lưu N câu vào ngân hàng** để lưu. Chỉ câu **Sẵn sàng** mới lưu được. Câu lưu lỗi hiện chữ đỏ ở dòng của câu đó.
 
 ### Mẫu Excel
 
@@ -55,8 +55,8 @@ Tiêu đề cột viết khác vẫn đọc được ("Nội dung câu hỏi", "
 ### Giới hạn
 
 - Excel: chỉ .xlsx (tệp .xls cũ phải "Lưu thành" .xlsx), tối đa 8 MB và 5000 dòng. Word: chỉ .docx, tối đa 15 MB. Không nhập hình ảnh, công thức phức tạp hay hộp văn bản. Số thứ tự tự động của Word không có trong chữ đọc ra.
-- Ảnh / PDF gửi AI: tối đa 4 MB mỗi lần (ảnh được tự thu nhỏ còn cạnh dài 1600 px). PDF chọn được chữ thì nên **dán văn bản**: nhanh hơn, không tốn lượt AI, chép đúng từng chữ. Ứng dụng tự nhận ra loại PDF này và nhắc thầy cô.
-- AI soạn: 1–20 câu mỗi lần. Mỗi lần soạn hoặc đọc ảnh tốn 1 lượt AI (mặc định 60 lượt / thầy cô / ngày, dùng chung với các tác vụ soạn khác).
+- Ảnh / PDF gửi AI: tối đa 4 MB mỗi lần (ảnh được tự thu nhỏ còn cạnh dài 1600 px). PDF chọn được chữ thì nên **dán văn bản**: nhanh hơn, không tốn lượt AI, chép đúng từng chữ. Ứng dụng tự nhận ra loại PDF này và nhắc thầy/cô.
+- AI soạn: 1–20 câu mỗi lần. Mỗi lần soạn hoặc đọc ảnh tốn 1 lượt AI (mặc định 60 lượt / thầy/cô / ngày, dùng chung với các tác vụ soạn khác).
 - Chưa có khóa AI trên máy chủ: hai thẻ cần AI sẽ báo rõ và gợi ý chuyển sang Dán văn bản / Excel / Gõ nhanh.
 - Chế độ demo: AI soạn chạy ngay trên máy (môn Toán ra phép tính có đáp án đúng, môn khác ra câu giữ chỗ). "Ảnh chụp / PDF" trả về 3 câu mẫu cố định, có nhãn **bản mẫu (demo)**.
 

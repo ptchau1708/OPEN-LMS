@@ -22,12 +22,12 @@ export function useArenaGate(mode?: ArenaMode): ArenaGate {
   if (!a) return { loading: q.isPending && !q.isError, closed: null, pool: null };
   const pool = a.settings.source === 'picked' ? new Set(a.settings.itemIds) : null;
   if (!a.open) {
-    if (a.reason === 'off') return { loading: false, closed: { title: 'Đấu trường đang tạm đóng', text: 'Thầy cô đang tạm đóng Đấu trường. Em vẫn xem được giải đấu và bảng xếp hạng nhé!' }, pool };
+    if (a.reason === 'off') return { loading: false, closed: { title: 'Đấu trường đang tạm đóng', text: 'Thầy/cô đang tạm đóng Đấu trường. Em vẫn xem được giải đấu và bảng xếp hạng nhé!' }, pool };
     const next = nextOpening(a.settings.hours);
     return { loading: false, closed: { title: 'Đấu trường đang nghỉ', text: `Giờ mở cửa: ${hoursText(a.settings.hours)}.${next ? ` Mở lại lúc ${openingText(next)}.` : ''}` }, pool };
   }
   if (mode && !a.settings.modes.includes(mode)) {
-    return { loading: false, closed: { title: mode === 'duel' ? 'Đấu 1–1 đang tạm tắt' : 'Leo tháp đang tạm tắt', text: 'Thầy cô đang tạm tắt phần chơi này. Em thử phần khác nhé!' }, pool };
+    return { loading: false, closed: { title: mode === 'duel' ? 'Đấu 1–1 đang tạm tắt' : 'Leo tháp đang tạm tắt', text: 'Thầy/cô đang tạm tắt phần chơi này. Em thử phần khác nhé!' }, pool };
   }
   return { loading: false, closed: null, pool };
 }

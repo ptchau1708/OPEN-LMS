@@ -115,8 +115,8 @@ $$;
 create or replace function v2.can_see_profile(p_id uuid, p_role text) returns boolean
 language sql stable security definer set search_path = v2, public as $$
   select p_id = auth.uid()
-      or p_role in ('teacher', 'admin')     -- tên thầy cô hiển thị cho mọi người
-      or v2.is_staff()                      -- thầy cô thấy danh sách học sinh toàn trường
+      or p_role in ('teacher', 'admin')     -- tên thầy/cô hiển thị cho mọi người
+      or v2.is_staff()                      -- thầy/cô thấy danh sách học sinh toàn trường
       or v2.is_guardian_of(p_id)
       or v2.shares_class_with(p_id)         -- bạn cùng lớp (tên, linh vật)
 $$;

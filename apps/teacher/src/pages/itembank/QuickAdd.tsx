@@ -9,6 +9,7 @@ import { ReviewScreen } from './Review';
 import { SkillPicker } from './SkillPicker';
 import '../../styles/itembank.css';
 import { SubjectOptions } from '../../components/SubjectOptions';
+import { useFocusGrade } from '../../lib/focusGrade';
 
 type Tab = 'file' | 'paste' | 'scan' | 'ai' | 'grid';
 const TABS: { id: Tab; label: string; hint: string }[] = [
@@ -27,7 +28,8 @@ export function QuickAddDialog({ open, onClose, initial, onSaved }: { open: bool
   const [lib, setLib] = useState<ImportLib | null>(null);
   const [loadErr, setLoadErr] = useState<unknown>(null);
   const [tab, setTab] = useState<Tab>('paste');
-  const [def, setDef] = useState<Defaults>({ subject: initial?.subject ?? 'toan', grade: initial?.grade ?? 3 });
+  const focus = useFocusGrade().grade;
+  const [def, setDef] = useState<Defaults>({ subject: initial?.subject ?? 'toan', grade: initial?.grade ?? focus });
   const [review, setReview] = useState<DraftItem[] | null>(null);
   const [notice, setNotice] = useState<string[]>([]);
 
@@ -36,7 +38,7 @@ export function QuickAddDialog({ open, onClose, initial, onSaved }: { open: bool
     loadImportLib().then(setLib, setLoadErr);
   }, [open, lib]);
   useEffect(() => {
-    if (open) setDef({ subject: initial?.subject ?? 'toan', grade: initial?.grade ?? 3 });
+    if (open) setDef({ subject: initial?.subject ?? 'toan', grade: initial?.grade ?? focus });
     // chỉ đặt lại khi mở hộp thoại
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -110,20 +112,20 @@ function FilePane({ lib, def, onDrafts }: PaneProps) {
       const bytes = await readFileBytes(f);
       if (name.endsWith('.xlsx') || f.type === XLSX_MIME) {
         const r = lib.importXlsx(bytes, def, bank.data ?? []);
-        if (!r.drafts.length) throw new Error('Tệp Excel không có dòng câu hỏi nào. Thầy cô kiểm tra lại trang "Câu hỏi" nhé.');
+        if (!r.drafts.length) throw new Error('Tệp Excel không có dòng câu hỏi nào. Thầy/cô kiểm tra lại trang "Câu hỏi" nhé.');
         onDrafts(r.drafts, [`Đọc ${r.drafts.length} dòng từ "${f.name}".`, ...r.warnings]);
       } else if (name.endsWith('.docx')) {
         const t = lib.docxToText(bytes);
         const r = lib.parseQuestionText(t.text, def, 'docx');
-        if (!r.drafts.length) throw new Error('Không thấy câu hỏi nào trong tệp Word này. Thầy cô thử chép chữ rồi dán vào ô "Dán văn bản" nhé.');
+        if (!r.drafts.length) throw new Error('Không thấy câu hỏi nào trong tệp Word này. Thầy/cô thử chép chữ rồi dán vào ô "Dán văn bản" nhé.');
         const notes = [`Đọc ${r.drafts.length} câu từ "${f.name}".`];
         if (r.detected) notes.push(detectedText(r.detected));
         if (t.marked) notes.push(`${t.marked} lựa chọn tô đậm / gạch chân / tô màu được hiểu là đáp án đúng.`);
-        if (t.autoNumbered) notes.push('Tệp dùng đánh số tự động của Word — số câu hoặc chữ A, B, C có thể không đọc được; thầy cô soát kĩ nhé.');
+        if (t.autoNumbered) notes.push('Tệp dùng đánh số tự động của Word — số câu hoặc chữ A, B, C có thể không đọc được; thầy/cô soát kĩ nhé.');
         if (t.hasImages) notes.push('Hình ảnh trong tệp không được nhập.');
         onDrafts(r.drafts, notes);
       } else if (name.endsWith('.xls') || name.endsWith('.doc')) {
-        throw new Error(`Tệp ${name.endsWith('.xls') ? '.xls' : '.doc'} là định dạng cũ. Thầy cô mở tệp rồi chọn "Lưu thành" ${name.endsWith('.xls') ? '.xlsx' : '.docx'} nhé.`);
+        throw new Error(`Tệp ${name.endsWith('.xls') ? '.xls' : '.doc'} là định dạng cũ. Thầy/cô mở tệp rồi chọn "Lưu thành" ${name.endsWith('.xls') ? '.xlsx' : '.docx'} nhé.`);
       } else if (name.endsWith('.pdf') || f.type.startsWith('image/')) {
         throw new Error('Ảnh và PDF dùng thẻ "Ảnh chụp / PDF". Nếu PDF chọn được chữ, chép chữ rồi dán vào "Dán văn bản" là nhanh nhất.');
       } else throw new Error('Chỉ nhận tệp Excel (.xlsx) hoặc Word (.docx).');
@@ -234,7 +236,7 @@ function NeedsKey({ goTab }: { goTab: (t: Tab) => void }) {
     <div className="tc-alert tc-alert--info tc-qb-needkey" role="alert">
       <span>
         <strong>Cách này cần khóa AI.</strong> Máy chủ của trường chưa được cài khóa AI (quản trị viên đặt <code>OPENROUTER_API_KEY</code> hoặc <code>GEMINI_API_KEY</code> cho Edge Function <code>ai-gateway</code>).
-        Trong lúc chờ, thầy cô dùng cách không cần AI:
+        Trong lúc chờ, thầy/cô dùng cách không cần AI:
       </span>
       <span className="tc-row tc-wrap">
         <Btn size="sm" onClick={() => goTab('paste')}>Dán văn bản</Btn>
@@ -275,7 +277,7 @@ function ScanPane({ lib, def, onDrafts, goTab }: PaneProps & { goTab: (t: Tab) =
     setErr({ needsKey: false, error: null });
     try {
       const r = await lib.aiExtractItems(ds, { fileBase64: file.prep.fileBase64, mimeType: file.prep.mimeType, grade: def.grade, subject: def.subject });
-      onDrafts(r.drafts, r.demo ? ['Chế độ demo: đây là BẢN MẪU cố định, không phải AI đọc tệp của thầy cô. Kết nối máy chủ có khóa AI để đọc tệp thật.'] : [`AI đọc được ${r.drafts.length} câu từ "${file.name}". Thầy cô đối chiếu với đề gốc trước khi lưu nhé.`]);
+      onDrafts(r.drafts, r.demo ? ['Chế độ demo: đây là BẢN MẪU cố định, không phải AI đọc tệp của thầy/cô. Kết nối máy chủ có khóa AI để đọc tệp thật.'] : [`AI đọc được ${r.drafts.length} câu từ "${file.name}". Thầy/cô đối chiếu với đề gốc trước khi lưu nhé.`]);
     } catch (e) {
       setErr(aiNote(e));
     } finally {
@@ -298,7 +300,7 @@ function ScanPane({ lib, def, onDrafts, goTab }: PaneProps & { goTab: (t: Tab) =
           </div>
         ) : null}
         {file?.prep.pdfHasText ? (
-          <div className="tc-alert tc-alert--info"><span><strong>PDF này chọn được chữ.</strong> Thầy cô mở PDF, chọn tất cả (Ctrl+A), chép (Ctrl+C) rồi dán vào "Dán văn bản" — nhanh hơn, không tốn lượt AI và chép đúng từng chữ.</span><Btn size="sm" onClick={() => goTab('paste')}>Dán văn bản</Btn></div>
+          <div className="tc-alert tc-alert--info"><span><strong>PDF này chọn được chữ.</strong> Thầy/cô mở PDF, chọn tất cả (Ctrl+A), chép (Ctrl+C) rồi dán vào "Dán văn bản" — nhanh hơn, không tốn lượt AI và chép đúng từng chữ.</span><Btn size="sm" onClick={() => goTab('paste')}>Dán văn bản</Btn></div>
         ) : null}
         <div className="tc-row">
           <Btn kind="primary" onClick={() => void run()} disabled={!file || !!busy}>{busy === 'ai' ? 'AI đang đọc đề… (có thể mất 30 giây)' : 'AI đọc đề'}</Btn>
@@ -309,8 +311,8 @@ function ScanPane({ lib, def, onDrafts, goTab }: PaneProps & { goTab: (t: Tab) =
         <h3>Mẹo chụp ảnh</h3>
         <ul className="tc-small">
           <li>Chụp thẳng, đủ sáng, mỗi ảnh một trang.</li>
-          <li>Câu có hình vẽ (đếm hình, xem đồng hồ…) AI sẽ bỏ qua — thầy cô thêm bằng tay.</li>
-          <li>AI chép lại đề; đề không ghi đáp án thì AI tự giải và nhắc thầy cô kiểm tra.</li>
+          <li>Câu có hình vẽ (đếm hình, xem đồng hồ…) AI sẽ bỏ qua — thầy/cô thêm bằng tay.</li>
+          <li>AI chép lại đề; đề không ghi đáp án thì AI tự giải và nhắc thầy/cô kiểm tra.</li>
           <li>Mỗi lần đọc tốn 1 lượt AI trong ngày.</li>
         </ul>
       </div>
@@ -351,7 +353,7 @@ function AiPane({ lib, def, onDrafts, goTab }: PaneProps & { goTab: (t: Tab) => 
         difficultyMix: lib.difficultyMix(count, mix),
         ...(from === 'text' ? { text } : { topic, skillCodes: skills }),
       });
-      onDrafts(r.drafts, r.demo ? ['Chế độ demo: câu hỏi do máy soạn theo quy tắc đơn giản (bản mẫu), không phải AI thật.'] : [`AI soạn được ${r.drafts.length} câu. Thầy cô đọc kĩ từng câu và đáp án trước khi lưu nhé.`]);
+      onDrafts(r.drafts, r.demo ? ['Chế độ demo: câu hỏi do máy soạn theo quy tắc đơn giản (bản mẫu), không phải AI thật.'] : [`AI soạn được ${r.drafts.length} câu. Thầy/cô đọc kĩ từng câu và đáp án trước khi lưu nhé.`]);
     } catch (e) {
       setErr(aiNote(e));
     } finally {
@@ -361,7 +363,7 @@ function AiPane({ lib, def, onDrafts, goTab }: PaneProps & { goTab: (t: Tab) => 
   return (
     <div className="tc-qb-cols">
       <div className="tc-stack">
-        {ds.mode === 'demo' ? <div className="tc-alert tc-alert--info"><span><span className="tc-chip tc-qb-demo">bản mẫu (demo)</span> Chế độ demo soạn ngay trên máy: môn Toán ra phép tính có đáp án đúng; môn khác ra câu giữ chỗ để thầy cô sửa.</span></div> : null}
+        {ds.mode === 'demo' ? <div className="tc-alert tc-alert--info"><span><span className="tc-chip tc-qb-demo">bản mẫu (demo)</span> Chế độ demo soạn ngay trên máy: môn Toán ra phép tính có đáp án đúng; môn khác ra câu giữ chỗ để thầy/cô sửa.</span></div> : null}
         <Seg label="Soạn từ" value={from} onChange={setFrom} options={[{ value: 'topic', label: 'Chủ đề / kĩ năng' }, { value: 'text', label: 'Nội dung SGK dán vào' }]} />
         {from === 'text' ? (
           <Field label="Nội dung SGK" help="Dán đoạn bài học; AI chỉ hỏi trong phạm vi nội dung này.">
@@ -393,7 +395,7 @@ function AiPane({ lib, def, onDrafts, goTab }: PaneProps & { goTab: (t: Tab) => 
         <ul className="tc-small">
           <li>AI có thể sai — câu nào cũng phải qua bước soát.</li>
           <li>Chọn kĩ năng thì câu hỏi được gắn sẵn mã kĩ năng đó (để tính mức thành thạo).</li>
-          <li>Mỗi lần soạn tốn 1 lượt AI trong ngày (mặc định 60 lượt / thầy cô).</li>
+          <li>Mỗi lần soạn tốn 1 lượt AI trong ngày (mặc định 60 lượt / thầy/cô).</li>
         </ul>
       </div>
     </div>

@@ -90,7 +90,7 @@ function parseFiles(v: unknown, maxFiles: number): FileReq[] {
 
 serveJson(async (req) => {
   const caller = await requireCaller(req);
-  if (!isStaff(caller)) throw new HttpError(403, 'Chỉ thầy cô mới tải gói nội dung lên được.', 'forbidden');
+  if (!isStaff(caller)) throw new HttpError(403, 'Chỉ thầy/cô mới tải gói nội dung lên được.', 'forbidden');
 
   const body = await readJsonObject(req, 1_000_000);
   const packageId = requireString(body.packageId, 'packageId', 64);
@@ -121,7 +121,7 @@ serveJson(async (req) => {
   if (error) throw fromPgError(error);
   const existing = pkg as { id: string; owner_id: string | null } | null;
   if (existing && existing.owner_id !== caller.id && caller.role !== 'admin') {
-    throw new HttpError(403, 'Gói này thuộc thầy cô khác.', 'forbidden');
+    throw new HttpError(403, 'Gói này thuộc thầy/cô khác.', 'forbidden');
   }
 
   const accountId = env('R2_ACCOUNT_ID');

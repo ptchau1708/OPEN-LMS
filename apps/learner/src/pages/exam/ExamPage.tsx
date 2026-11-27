@@ -1,7 +1,7 @@
 /**
  * Làm bài kiểm tra trực tuyến: màn nội quy → làm bài (đồng hồ cả bài, bảng câu, đánh dấu xem lại, tự lưu) → nộp → kết quả
- * (theo cài đặt của cô). Chống gian lận NHẸ, thân thiện: ghi lại rời màn hình / thoát toàn màn hình / chặn dán ở ô gõ /
- * mở trùng — chỉ để cô xem, không trừ điểm, không doạ em.
+ * (theo cài đặt của thầy/cô). Chống gian lận NHẸ, thân thiện: ghi lại rời màn hình / thoát toàn màn hình / chặn dán ở ô gõ /
+ * mở trùng — chỉ để thầy/cô xem, không trừ điểm, không doạ em.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
@@ -250,7 +250,7 @@ export default function ExamPage() {
             <li>Đồng hồ chạy cho cả bài. Hết giờ, máy tự nộp bài giúp em.</li>
             <li>Em làm câu nào trước cũng được. Câu chưa chắc, bấm <b>Xem lại sau</b>.</li>
             <li>Bài tự lưu sau mỗi câu. Lỡ tắt máy, em mở lại là làm tiếp.</li>
-            <li>Em ở lại trong bài và tự làm nhé. Máy ghi lại nếu em rời màn hình để cô biết.</li>
+            <li>Em ở lại trong bài và tự làm nhé. Máy ghi lại nếu em rời màn hình để thầy/cô biết.</li>
             <li>Em chỉ làm <b>một lần</b>. Làm xong, bấm <b>Nộp bài</b>.</li>
           </ul>
           <SpeakButton text="Đồng hồ chạy cho cả bài. Em làm câu nào trước cũng được. Bài tự lưu. Em ở lại trong bài và tự làm nhé. Làm xong bấm Nộp bài." label="Nghe đọc nội quy" />
@@ -270,7 +270,7 @@ export default function ExamPage() {
         <TopBack title={s?.exam.title ?? 'Bài kiểm tra'} />
         <Confetti show={!!(r?.released && (r.score10 ?? 0) >= 5)} />
         <div className="ln-ex-introcard">
-          <MascotBubble mascot="nghe" mood="happy">{r?.released ? 'Em đã hoàn thành bài kiểm tra!' : 'Em đã nộp bài rồi. Cô sẽ báo điểm sau nhé!'}</MascotBubble>
+          <MascotBubble mascot="nghe" mood="happy">{r?.released ? 'Em đã hoàn thành bài kiểm tra!' : 'Em đã nộp bài rồi. Thầy/cô sẽ báo điểm sau nhé!'}</MascotBubble>
           {r?.released && r.score10 ? (
             <>
               <div className="ln-ex-score" aria-label={`Điểm ${r.score10}`}><b>{r.score10}</b><span>điểm</span></div>

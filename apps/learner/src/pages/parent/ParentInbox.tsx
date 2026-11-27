@@ -1,4 +1,4 @@
-/** Phụ huynh: "Thông báo của cô" (tin cả lớp / tin riêng, xác nhận), mục cô đã gửi kèm lời nhắn, ô "Nhắn cô". */
+/** Phụ huynh: "Thông báo của thầy/cô" (tin cả lớp / tin riêng, xác nhận), mục thầy/cô đã gửi kèm lời nhắn, ô "Nhắn thầy/cô". */
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import type { InboxPost, ParentInbox as Inbox, Profile } from '@openedu/contracts';
@@ -31,9 +31,9 @@ export function ParentInbox({ child, box }: { child: Profile; box: Inbox }) {
   };
   const t = box.thread;
   return (
-    <section className="ln-pp-card ln-pin" aria-label="Thông báo của cô" data-testid="pp-inbox">
-      <h2 className="ln-pp-h"><Icon name="bell" size={22} /> Thông báo của cô {newCount ? <span className="ln-pin__new">{newCount} mới</span> : null}</h2>
-      {box.posts.length === 0 && box.items.length === 0 ? <p className="ln-pp-muted">Chưa có thông báo nào của cô.</p> : null}
+    <section className="ln-pp-card ln-pin" aria-label="Thông báo của thầy/cô" data-testid="pp-inbox">
+      <h2 className="ln-pp-h"><Icon name="bell" size={22} /> Thông báo của thầy/cô {newCount ? <span className="ln-pin__new">{newCount} mới</span> : null}</h2>
+      {box.posts.length === 0 && box.items.length === 0 ? <p className="ln-pp-muted">Chưa có thông báo nào của thầy/cô.</p> : null}
       {box.posts.length ? (
         <ul className="ln-pin__list">
           {box.posts.slice(0, 20).map((p) => {
@@ -52,7 +52,7 @@ export function ParentInbox({ child, box }: { child: Profile; box: Inbox }) {
                       {p.ackRequired ? (p.ackedAt
                         ? <span className="ln-pin__ok"><Icon name="check" size={18} /> Đã xác nhận</span>
                         : <Button disabled={read.isPending} onClick={() => read.mutate({ postId: p.id, ack: true })} data-testid="pp-ack">Đã nhận</Button>) : null}
-                      {box.msg.enabled ? <Link className="k-btn k-btn--secondary k-btn--md" to={`/phu-huynh/nhan-tin?con=${child.id}&tin=${p.id}`}><span className="k-btn__label">Trả lời cô</span></Link> : null}
+                      {box.msg.enabled ? <Link className="k-btn k-btn--secondary k-btn--md" to={`/phu-huynh/nhan-tin?con=${child.id}&tin=${p.id}`}><span className="k-btn__label">Trả lời thầy/cô</span></Link> : null}
                     </div>
                   </div>
                 ) : null}
@@ -76,8 +76,8 @@ export function ParentInbox({ child, box }: { child: Profile; box: Inbox }) {
       <Link className={`ln-pin__chat${t.unread ? ' is-new' : ''}`} to={`/phu-huynh/nhan-tin?con=${child.id}`} data-testid="pp-chat-link">
         <Icon name="chat" size={24} />
         <span className="ln-pin__chatmain">
-          <strong>Nhắn tin với {box.teachers[0] ?? 'cô'}{t.unread ? ` · ${t.unread} tin mới` : ''}</strong>
-          <span className="ln-pp-muted">{t.last ? `${t.last.fromTeacher ? '' : 'Bạn: '}${t.last.body.slice(0, 80)}` : box.msg.enabled ? `Cô nhận tin từ ${box.msg.from} đến ${box.msg.to}.` : 'Lớp đang tắt nhắn tin.'}</span>
+          <strong>Nhắn tin với {box.teachers[0] ?? 'thầy/cô'}{t.unread ? ` · ${t.unread} tin mới` : ''}</strong>
+          <span className="ln-pp-muted">{t.last ? `${t.last.fromTeacher ? '' : 'Bạn: '}${t.last.body.slice(0, 80)}` : box.msg.enabled ? `Thầy/cô nhận tin từ ${box.msg.from} đến ${box.msg.to}.` : 'Lớp đang tắt nhắn tin.'}</span>
         </span>
         <Icon name="next" size={20} />
       </Link>

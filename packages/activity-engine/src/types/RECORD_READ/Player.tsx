@@ -18,8 +18,8 @@ function supportProblem(): string | null {
   const md = typeof navigator !== 'undefined' ? navigator.mediaDevices : undefined;
   if (typeof MediaRecorder === 'undefined' || !md || typeof md.getUserMedia !== 'function') {
     return window.isSecureContext === false
-      ? 'Trang cần mở bằng địa chỉ https:// thì mới dùng được micro. Em hãy đọc to cho thầy cô nghe nhé!'
-      : 'Máy này chưa ghi âm được. Em hãy đọc to cho thầy cô hoặc bố mẹ nghe nhé!';
+      ? 'Trang cần mở bằng địa chỉ https:// thì mới dùng được micro. Em hãy đọc to cho thầy/cô nghe nhé!'
+      : 'Máy này chưa ghi âm được. Em hãy đọc to cho thầy/cô hoặc bố mẹ nghe nhé!';
   }
   return null;
 }
@@ -27,7 +27,7 @@ function supportProblem(): string | null {
 function micError(e: unknown): string {
   const name = (e as { name?: string })?.name;
   if (name === 'NotAllowedError' || name === 'SecurityError' || name === 'PermissionDeniedError')
-    return 'Em cần cho phép dùng micro. Nhờ bố mẹ hoặc thầy cô bấm "Cho phép" rồi thử lại nhé.';
+    return 'Em cần cho phép dùng micro. Nhờ bố mẹ hoặc thầy/cô bấm "Cho phép" rồi thử lại nhé.';
   if (name === 'NotFoundError' || name === 'DevicesNotFoundError' || name === 'OverconstrainedError')
     return 'Không tìm thấy micro. Nhờ người lớn cắm tai nghe có micro rồi thử lại nhé.';
   if (name === 'NotReadableError' || name === 'TrackStartError')

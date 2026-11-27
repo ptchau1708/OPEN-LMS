@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { learnerLogin, spaGo, teacherLogin, watchErrors } from './helpers';
 
-test('HS: vào phòng thảo luận, chọn tab, đăng bài (chờ cô duyệt), thả tim, bình luận, phòng nhỏ của tổ', async ({ page }) => {
+test('HS: vào phòng thảo luận, chọn tab, đăng bài (chờ GV duyệt), thả tim, bình luận, phòng nhỏ của tổ', async ({ page }) => {
   const w = watchErrors(page);
   await learnerLogin(page);
   await page.getByTestId('home-discuss').click();
@@ -20,9 +20,9 @@ test('HS: vào phòng thảo luận, chọn tab, đăng bài (chờ cô duyệt)
   await page.getByRole('button', { name: 'Em muốn hỏi:' }).click();
   await page.getByTestId('dc-body').fill('Em muốn hỏi: rác nhựa tái chế thành gì ạ?');
   await page.getByTestId('dc-send').click();
-  await expect(page.getByTestId('dc-done')).toContainText('khi cô xem xong');
+  await expect(page.getByTestId('dc-done')).toContainText('khi thầy/cô xem xong');
   const mine = page.getByTestId('dc-card').filter({ hasText: 'rác nhựa' });
-  await expect(mine).toContainText('Đang chờ cô xem');
+  await expect(mine).toContainText('Đang chờ thầy/cô xem');
   // Bình luận dưới bài của bạn
   await page.getByRole('tab', { name: /Ý kiến/ }).click();
   await friend.getByTestId('dc-replies').click();
@@ -91,7 +91,7 @@ test('TV: bảng ý tưởng chữ to, mã QR, ẩn tên, xem dạng cột', asy
   w.expectClean();
 });
 
-test('HS trò chuyện nhóm theo tổ: thấy tin của cô, nhắn, trả lời nhanh; không thấy nhóm khác', async ({ page }) => {
+test('HS trò chuyện nhóm theo tổ: thấy tin của thầy/cô, nhắn, trả lời nhanh; không thấy nhóm khác', async ({ page }) => {
   const w = watchErrors(page);
   await learnerLogin(page);
   await page.getByTestId('home-discuss').click();
@@ -107,7 +107,7 @@ test('HS trò chuyện nhóm theo tổ: thấy tin của cô, nhắn, trả lờ
   await expect(page.getByTestId('chat-msg').filter({ hasText: 'Mình làm phần này nhé!' })).toBeVisible();
   await page.getByTestId('chat-input').fill('đồ ngu');
   await page.getByTestId('chat-send').click();
-  await expect(page.getByTestId('chat-msg').filter({ hasText: 'đồ ngu' })).toContainText('chờ cô xem');
+  await expect(page.getByTestId('chat-msg').filter({ hasText: 'đồ ngu' })).toContainText('chờ thầy/cô xem');
   w.expectClean();
 });
 

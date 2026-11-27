@@ -111,7 +111,7 @@ export default function LiveControl({ user }: { user: Profile }) {
   const giveStars = (n: number) => {
     if (!target) return;
     void send({ type: 'award', target, stars: n });
-    if (target.kind === 'student') award.mutate({ userId: target.id, stars: n, coins: n, xp: n * 10, reason: 'Thầy cô thưởng trong lớp học trực tiếp', sourceType: 'live', sourceId: state.sessionId });
+    if (target.kind === 'student') award.mutate({ userId: target.id, stars: n, coins: n, xp: n * 10, reason: 'Thầy/cô thưởng trong lớp học trực tiếp', sourceType: 'live', sourceId: state.sessionId });
     const name = target.kind === 'team' ? state.teams.find((t) => t.id === target.id)?.name : online.find((p) => p.userId === target.id)?.name;
     setToast(`+${n} sao cho ${name ?? ''}`);
   };

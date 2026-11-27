@@ -33,7 +33,7 @@ export function MessagesPanel({ cls }: { cls: ClassInfo }) {
                   {t.last ? <small className="tc-muted">{relTime(t.last.at)}</small> : null}
                 </span>
                 <small className="tc-muted">
-                  {t.last ? `${t.last.fromTeacher ? 'Cô: ' : ''}${shorten(t.last.body, 60)}` : t.parents ? `${t.parents} phụ huynh · chưa có tin nhắn` : 'Chưa có phụ huynh liên kết'}
+                  {t.last ? `${t.last.fromTeacher ? 'GV: ' : ''}${shorten(t.last.body, 60)}` : t.parents ? `${t.parents} phụ huynh · chưa có tin nhắn` : 'Chưa có phụ huynh liên kết'}
                 </small>
               </button>
             </li>
@@ -42,7 +42,7 @@ export function MessagesPanel({ cls }: { cls: ClassInfo }) {
       </aside>
       <section className="tc-card tc-ph-msg__pane">
         {sel ? <ThreadView key={sel} studentId={sel} onBack={() => setSp((p) => { const n = new URLSearchParams(p); n.delete('em'); return n; }, { replace: true })} />
-          : <Empty icon="chat" title="Chọn một em để xem tin nhắn">Phụ huynh nhắn cô về con nào sẽ hiện ở đầu danh sách. Cô cũng có thể nhắn trước cho phụ huynh của bất kì em nào.</Empty>}
+          : <Empty icon="chat" title="Chọn một em để xem tin nhắn">Phụ huynh nhắn thầy/cô về con nào sẽ hiện ở đầu danh sách. Thầy/cô cũng có thể nhắn trước cho phụ huynh của bất kì em nào.</Empty>}
       </section>
     </div>
   );
@@ -74,7 +74,7 @@ function ThreadView({ studentId, onBack }: { studentId: string; onBack: () => vo
         </div>
       </header>
       <div className="tc-ph-chat__body" aria-live="polite">
-        {t.messages.length === 0 ? <p className="tc-muted tc-small tc-ph-chat__empty">Chưa có tin nhắn. Mọi phụ huynh đã liên kết của em đều thấy tin cô gửi.</p> : null}
+        {t.messages.length === 0 ? <p className="tc-muted tc-small tc-ph-chat__empty">Chưa có tin nhắn. Mọi phụ huynh đã liên kết của em đều thấy tin thầy/cô gửi.</p> : null}
         {t.messages.map((m) => <Bubble key={m.id} m={m} onRemove={() => remove.mutate(m.id)} />)}
         <div ref={end} />
       </div>

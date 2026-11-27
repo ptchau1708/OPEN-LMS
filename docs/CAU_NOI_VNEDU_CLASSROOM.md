@@ -18,7 +18,7 @@ VnEdu (qua tệp Excel) và Google Classroom. Giáo viên thấy các lớp mìn
 | Nhập danh sách từ Google Classroom, đẩy điểm sang Classroom | `VITE_GOOGLE_CLIENT_ID` | **Chưa thử với Google thật** — chỉ kiểm thử bằng phản hồi giả |
 | Slide “Nhúng trang web” (Google Trang trình bày / Biểu mẫu, GeoGebra, Wordwall…) | Không | Có (chuyển link; khung nhúng chưa thử với từng trang thật) |
 
-## Hướng dẫn cho thầy cô
+## Hướng dẫn cho thầy/cô
 
 ### 1. Điền vào mẫu VnEdu
 
@@ -27,7 +27,7 @@ VnEdu (qua tệp Excel) và Google Classroom. Giáo viên thấy các lớp mìn
 | Tệp tải từ VnEdu | OPEN-EDU nhận ra | Điền gì |
 |---|---|---|
 | Sổ điểm các môn (`so_diem_cac_mon_lop_5a2.xls`, mỗi môn một trang tính) | Dòng 4 “BẢNG ĐIỂM CHI TIẾT - MÔN … - HỌC KỲ … - GIỮA/CUỐI KỲ … - NĂM HỌC …”, ô B6 là mã bảng của VnEdu (vd `5004627967-50-2-ck2-2026`, giữ nguyên), cột B “Mã học sinh” (ẩn), “Họ và tên” gộp 2 cột (họ đệm + tên) | Mọi trang cùng lúc: **Nhận xét**, **KT** (điểm nguyên 1–10 theo TT27), **XL** (T/H/C) từ đánh giá TT27 của OPEN-EDU. Cột “(Sau thi lại)” để nguyên. Môn OPEN-EDU chưa có (Lịch sử và Địa lí, Đạo đức, Tin học, Công nghệ, GD thể chất, HĐ trải nghiệm) được bỏ qua và ghi rõ. |
-| Mẫu nhận xét năng lực, phẩm chất (`mau_nhan_xet_nang_luc_pham_chat_1.xls`) | 2 dòng tiêu đề: Năng lực chung (3) · Năng lực đặc thù (7) · Phẩm chất (5), mỗi nhóm có cột “Nhận xét về …” | Mẫu trống → viết một dòng cho mỗi em **có mã học sinh VnEdu**: STT, mã, họ tên, Học kì, các mức **T/Đ/C**. Ba cột “Nhận xét về …” để trống cho thầy cô viết. Mẫu đã có dòng → ghép và điền. |
+| Mẫu nhận xét năng lực, phẩm chất (`mau_nhan_xet_nang_luc_pham_chat_1.xls`) | 2 dòng tiêu đề: Năng lực chung (3) · Năng lực đặc thù (7) · Phẩm chất (5), mỗi nhóm có cột “Nhận xét về …” | Mẫu trống → viết một dòng cho mỗi em **có mã học sinh VnEdu**: STT, mã, họ tên, Học kì, các mức **T/Đ/C**. Ba cột “Nhận xét về …” để trống cho thầy/cô viết. Mẫu đã có dòng → ghép và điền. |
 
 Cách làm: **Xuất / nhập dữ liệu → Điền vào mẫu** → chọn lớp và **Kì** cho đúng kì của tệp (trang báo nếu lệch) → chọn
 tệp → xem bảng “Các môn trong tệp” → **Tải tệp đã điền (.xls)** → trên VnEdu vào đúng màn hình nhập điểm / nhận xét
@@ -51,7 +51,7 @@ hai tệp trên):
    OPEN-EDU ghi tên ngắn). Dòng “Cần chọn” / “Chưa thấy”: chọn tay trong ô bên phải, hoặc để trống (dòng đó giữ nguyên).
 4. **Chọn dữ liệu cho từng cột**: mỗi cột của tệp có một ô chọn: điểm đề kiểm tra (thang 10) hoặc mức đạt T/H/C theo đề,
    điểm trung bình bài viết đã duyệt, TT27 theo môn (mức đạt, điểm KTĐK, nhận xét), năng lực, phẩm chất, nhận xét chung,
-   số buổi vắng có phép / không phép / đi muộn / có mặt trong tháng… OPEN-EDU gợi ý sẵn theo tên cột; thầy cô xem lại.
+   số buổi vắng có phép / không phép / đi muộn / có mặt trong tháng… OPEN-EDU gợi ý sẵn theo tên cột; thầy/cô xem lại.
    Tích “Giữ nguyên ô đã có dữ liệu” nếu chỉ muốn điền ô trống.
 5. **Xem trước** (ô xanh = sẽ điền; “–” = OPEN-EDU chưa có dữ liệu, ô để nguyên) rồi **Tải tệp đã điền**. Tệp mới tên
    `<tên cũ>-da-dien.xls` (hoặc `.xlsx`, cùng định dạng tệp gốc); mở kiểm tra rồi nhập vào VnEdu như bình thường.
@@ -81,7 +81,7 @@ Mọi bảng bắt đầu bằng **STT, Mã học sinh, Họ và tên**; dòng t
 
 ### 4. Chia sẻ lên Google Classroom
 Nút **Classroom** cạnh mỗi bài giảng đã xuất bản, bài đã giao, bài viết, đề kiểm tra đã phát hành mở trang chia sẻ
-của Google (`https://classroom.google.com/share?url=…&title=…`). Thầy cô chọn lớp Classroom và đăng dạng thông báo /
+của Google (`https://classroom.google.com/share?url=…&title=…`). Thầy/cô chọn lớp Classroom và đăng dạng thông báo /
 bài tập / tài liệu. Học sinh bấm link sẽ mở thẳng bài trong app học sinh:
 `/bai/<id>` (bài giảng), `/goi/<id>` (gói HTML5), `/bai-viet/<id>`, `/kiem-tra/<id>`. Địa chỉ app học sinh lấy từ
 `VITE_LEARNER_URL` — **phải đặt** ở bản chạy thật, nếu không link sẽ trỏ về `http://<máy>:5173`.

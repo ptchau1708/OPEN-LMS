@@ -18,7 +18,7 @@ export const BADGE_CATEGORIES: { id: BadgeCategory; name: string; color: string 
   { id: 'dau-truong', name: 'Đấu trường', color: '#e8485f' },
   { id: 'thi-dua', name: 'Thi đua lớp', color: '#f5b400' },
   { id: 'dac-biet', name: 'Đặc biệt', color: '#0ea5a4' },
-  { id: 'cua-co', name: 'Huy hiệu của cô', color: '#ff5d8f' },
+  { id: 'cua-co', name: 'Huy hiệu của thầy/cô', color: '#ff5d8f' },
 ];
 
 /** Hình vẽ chính giữa huy hiệu (packages/ui/src/badges). */
@@ -27,7 +27,7 @@ export type BadgeGlyph =
   | 'bandage' | 'wrench' | 'pencil' | 'quill' | 'crown' | 'bolt' | 'trophy' | 'tower' | 'flag'
   | 'star' | 'medal' | 'tv' | 'hands' | 'heart' | 'flower' | 'rainbow' | 'cup';
 
-/** Biểu tượng GV được chọn cho "Huy hiệu của cô" (bộ giới hạn). */
+/** Biểu tượng GV được chọn cho "Huy hiệu của thầy/cô" (bộ giới hạn). */
 export const TEACHER_BADGE_GLYPHS: BadgeGlyph[] = ['heart', 'star', 'flower', 'cup', 'rainbow', 'sun'];
 
 /** Loại số liệu mà quy tắc so với ngưỡng. */
@@ -67,15 +67,15 @@ export const BADGES: BadgeDef[] = [
   { id: 'tnxh-2', category: 'kham-pha', title: 'Nhà tự nhiên nhí', hint: 'Học xong 2 bài Tự nhiên và Xã hội', glyph: 'leaf', tier: 2, rule: { kind: 'lessons', min: 2, subject: 'tnxh' } },
   { id: 'rem-1', category: 'va-lo-hong', title: 'Vá lỗ hổng đầu tiên', hint: 'Ôn đạt 1 bộ “Ôn lại cho chắc”', glyph: 'bandage', tier: 1, rule: { kind: 'remediation', min: 1 } },
   { id: 'rem-5', category: 'va-lo-hong', title: 'Thợ vá siêu đẳng', hint: 'Ôn đạt 5 bộ “Ôn lại cho chắc”', glyph: 'wrench', tier: 3, rule: { kind: 'remediation', min: 5 } },
-  { id: 'work-1', category: 'bai-viet', title: 'Bài viết đầu tay', hint: 'Có 1 bài viết được thầy cô duyệt', glyph: 'pencil', tier: 1, rule: { kind: 'work', min: 1 } },
-  { id: 'work-5', category: 'bai-viet', title: 'Cây bút chăm chỉ', hint: 'Có 5 bài viết được thầy cô duyệt', glyph: 'quill', tier: 2, rule: { kind: 'work', min: 5 } },
+  { id: 'work-1', category: 'bai-viet', title: 'Bài viết đầu tay', hint: 'Có 1 bài viết được thầy/cô duyệt', glyph: 'pencil', tier: 1, rule: { kind: 'work', min: 1 } },
+  { id: 'work-5', category: 'bai-viet', title: 'Cây bút chăm chỉ', hint: 'Có 5 bài viết được thầy/cô duyệt', glyph: 'quill', tier: 2, rule: { kind: 'work', min: 5 } },
   { id: 'work-top', category: 'bai-viet', title: 'Ngòi bút vàng', hint: 'Có 1 bài viết đạt mức Hoàn thành tốt', glyph: 'crown', tier: 3, rule: { kind: 'workTop', min: 1 } },
   { id: 'duel-1', category: 'dau-truong', title: 'Trận đấu đầu tiên', hint: 'Chơi 1 trận Đấu 1–1', glyph: 'bolt', tier: 1, rule: { kind: 'duels', min: 1 } },
   { id: 'duel-win-3', category: 'dau-truong', title: 'Ba lần chiến thắng', hint: 'Thắng 3 trận Đấu 1–1', glyph: 'trophy', tier: 2, rule: { kind: 'duelWins', min: 3 } },
   { id: 'tower-10', category: 'dau-truong', title: 'Leo tháp', hint: 'Trả lời đúng 10 câu ở Leo tháp', glyph: 'tower', tier: 1, rule: { kind: 'tower', min: 10 } },
   { id: 'tower-50', category: 'dau-truong', title: 'Chinh phục đỉnh tháp', hint: 'Trả lời đúng 50 câu ở Leo tháp', glyph: 'flag', tier: 3, rule: { kind: 'tower', min: 50 } },
-  { id: 'behavior-10', category: 'thi-dua', title: 'Ngôi sao của lớp', hint: 'Được thầy cô khen 10 điểm thi đua', glyph: 'star', tier: 1, rule: { kind: 'behavior', min: 10 } },
-  { id: 'behavior-30', category: 'thi-dua', title: 'Tấm gương sáng', hint: 'Được thầy cô khen 30 điểm thi đua', glyph: 'medal', tier: 3, rule: { kind: 'behavior', min: 30 } },
+  { id: 'behavior-10', category: 'thi-dua', title: 'Ngôi sao của lớp', hint: 'Được thầy/cô khen 10 điểm thi đua', glyph: 'star', tier: 1, rule: { kind: 'behavior', min: 10 } },
+  { id: 'behavior-30', category: 'thi-dua', title: 'Tấm gương sáng', hint: 'Được thầy/cô khen 30 điểm thi đua', glyph: 'medal', tier: 3, rule: { kind: 'behavior', min: 30 } },
   { id: 'live-1', category: 'dac-biet', title: 'Lớp học trên TV', hint: 'Vào lớp học trực tiếp lần đầu', glyph: 'tv', tier: 1, rule: { kind: 'live', min: 1 } },
   { id: 'live-5', category: 'dac-biet', title: 'Bạn nhỏ hăng hái', hint: 'Vào lớp học trực tiếp 5 lần', glyph: 'rainbow', tier: 2, rule: { kind: 'live', min: 5 } },
   { id: 'help-1', category: 'dac-biet', title: 'Người bạn tốt', hint: 'Được khen vì giúp đỡ bạn', glyph: 'hands', tier: 1, rule: { kind: 'help', min: 1 } },
@@ -83,7 +83,7 @@ export const BADGES: BadgeDef[] = [
 ];
 
 export const BADGE_BY_ID: Record<string, BadgeDef> = /*#__PURE__*/ Object.fromEntries(BADGES.map((b) => [b.id, b]));
-/** id của mọi "Huy hiệu của cô" (một HS có thể có nhiều). */
+/** id của mọi "Huy hiệu của thầy/cô" (một HS có thể có nhiều). */
 export const TEACHER_BADGE_ID = 'cua-co';
 
 /** Số liệu đầu vào của quy tắc huy hiệu. */
@@ -110,7 +110,7 @@ export interface UserBadge {
   userId: string;
   badgeId: string;
   earnedAt: string;
-  /** Chỉ "Huy hiệu của cô". */
+  /** Chỉ "Huy hiệu của thầy/cô". */
   title?: string;
   glyph?: BadgeGlyph;
   note?: string;
@@ -264,12 +264,12 @@ export interface SetGardenGoalInput {
 /** Nguồn dữ liệu Phase 6 — lấy bằng getRewardsSource(ds) trong @openedu/data. */
 export interface RewardsSource {
   getBadgeShelf(userId: string): Promise<BadgeShelf>;
-  /** Xét huy hiệu (Supabase: RPC evaluate_badges). Trả về huy hiệu chưa xem màn chúc mừng (mới đạt + của cô). */
+  /** Xét huy hiệu (Supabase: RPC evaluate_badges). Trả về huy hiệu chưa xem màn chúc mừng (mới đạt + của thầy/cô). */
   evaluateBadges(userId: string): Promise<UserBadge[]>;
   markBadgesSeen(userId: string, ids: string[]): Promise<void>;
   grantTeacherBadge(input: GrantTeacherBadgeInput): Promise<UserBadge[]>;
   listTeacherBadges(classId: string): Promise<UserBadge[]>;
-  /** Thu hồi một "Huy hiệu của cô" đã tặng (tặng nhầm). Cần SQL 19 trên Supabase. */
+  /** Thu hồi một "Huy hiệu của thầy/cô" đã tặng (tặng nhầm). Cần SQL 19 trên Supabase. */
   revokeTeacherBadge(badgeId: string): Promise<void>;
   getShop(userId: string): Promise<ShopState>;
   buyItem(userId: string, itemId: string): Promise<ShopState>;

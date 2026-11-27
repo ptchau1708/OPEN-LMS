@@ -99,7 +99,7 @@ export function attendanceSheet(d: BridgeData): XSheetSpec {
 
 /**
  * (e) Bảng điểm theo bố cục gần với Google Classroom / Sheets: Họ và tên, Email, rồi mỗi đề một cột điểm,
- * dòng thứ hai ghi điểm tối đa. Lưu ý: Classroom KHÔNG có chức năng nhập điểm từ tệp — bảng này để thầy cô lưu,
+ * dòng thứ hai ghi điểm tối đa. Lưu ý: Classroom KHÔNG có chức năng nhập điểm từ tệp — bảng này để thầy/cô lưu,
  * mở bằng Google Sheets, hoặc đối chiếu khi nhập tay. Đẩy điểm tự động dùng thẻ Google Classroom (API).
  */
 export function classroomGradeRows(d: BridgeData, examIds: string[]): XCell[][] {

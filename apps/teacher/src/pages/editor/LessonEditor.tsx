@@ -5,7 +5,8 @@ import { scoreItem } from '@openedu/activity-engine';
 import { SelfPacedPlayer, SlideView, lessonMascot, resolveSlideItem } from '@openedu/lesson-player';
 import { Icon, KidShell } from '@openedu/ui';
 import { canEditLesson, copyLesson } from '../../lib/copyLesson';
-import { lessonItemIds, useClasses, useCreateLiveSession, useDeleteLesson, useItemsByIds, useLesson, usePackages, useSaveItem, useSaveLesson } from '@openedu/data';
+import { lessonItemIds, useCreateLiveSession, useDeleteLesson, useItemsByIds, useLesson, usePackages, useSaveItem, useSaveLesson } from '@openedu/data';
+import { useClasses } from '../../lib/focusGrade';
 import { Btn, Dialog, Empty, ErrorNote, Loading, Seg } from '../../components/common';
 import { FramePreview } from '../../components/FramePreview';
 import { ItemPickerDialog, ItemStudio, newItemOfType, TypePickerGrid } from '../../components/items';
@@ -209,7 +210,7 @@ export default function LessonEditor({ user }: { user: Profile }) {
       </header>
       {readOnly ? (
         <div className="tc-alert tc-alert--warn" role="status" data-testid="lesson-readonly">
-          <span>Đây là bài giảng của thầy cô khác (hoặc bài mẫu) — thầy cô xem và trình chiếu được; muốn sửa, hãy <strong>nhân bản</strong> thành bài của mình.</span>
+          <span>Đây là bài giảng của thầy/cô khác (hoặc bài mẫu) — thầy/cô xem và trình chiếu được; muốn sửa, hãy <strong>nhân bản</strong> thành bài của mình.</span>
           <Btn size="sm" kind="primary" icon="plus" disabled={saveLesson.isPending} onClick={() => draft && saveLesson.mutate(copyLesson(draft, user), { onSuccess: (l) => nav(`/bai-giang/${l.id}`) })} data-testid="lesson-duplicate">Nhân bản để sửa</Btn>
         </div>
       ) : null}

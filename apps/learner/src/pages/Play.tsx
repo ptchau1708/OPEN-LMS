@@ -47,7 +47,7 @@ export default function Play() {
           <div className="ln-arena__body">
             <span className="ln-arena__tag"><Icon name="team" size={18} /> Cả tổ</span>
             <h2 className="ln-arena__title">Đấu đội</h2>
-            <p>Cô mở trận đấu trên TV. Em vào lớp bằng mã 6 số, cùng tổ mình giành sao nhé!</p>
+            <p>Thầy/cô mở trận đấu trên TV. Em vào lớp bằng mã 6 số, cùng tổ mình giành sao nhé!</p>
             <Button size="lg" variant="subject" color="var(--k-eng)" icon={<Icon name="tv" size={26} />} onClick={() => nav('/lop')}>Vào lớp</Button>
           </div>
         </article>

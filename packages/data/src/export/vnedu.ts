@@ -60,7 +60,7 @@ export interface OpenedTemplate { wb: XWorkbook; sheetIndex: number; table: Dete
 export function openTemplate(file: Uint8Array): OpenedTemplate {
   const wb = readXlsx(file);
   const hit = detectWorkbook(wb.sheets);
-  if (!hit) throw new Error('Không thấy cột "Họ và tên" trong tệp. Thầy cô kiểm tra lại có đúng tệp danh sách / sổ điểm không nhé.');
+  if (!hit) throw new Error('Không thấy cột "Họ và tên" trong tệp. Thầy/cô kiểm tra lại có đúng tệp danh sách / sổ điểm không nhé.');
   return { wb, sheetIndex: hit.sheetIndex, table: hit.table };
 }
 

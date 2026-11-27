@@ -17,12 +17,12 @@ export const workPath = (taskId: string) => `/bai-viet/${encodeURIComponent(task
 export const LEVEL_STARS: Record<Tt27Level, number> = { T: 3, H: 2, C: 1 };
 export const LEVEL_CHEER: Record<Tt27Level, string> = { T: 'Tuyệt vời!', H: 'Làm tốt lắm!', C: 'Mình cùng cố thêm nhé!' };
 
-/** "Cô Thu" → "cô", "Thầy Nam" → "thầy", không rõ → "thầy cô". */
+/** "Cô Thu" → "cô", "Thầy Nam" → "thầy", không rõ → "thầy/cô". */
 export function teacherWord(name?: string): string {
   const n = (name ?? '').trim().toLowerCase();
   if (n.indexOf('cô') === 0) return 'cô';
   if (n.indexOf('thầy') === 0) return 'thầy';
-  return 'thầy cô';
+  return 'thầy/cô';
 }
 export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 

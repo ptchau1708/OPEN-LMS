@@ -197,7 +197,7 @@ export function LiveStudentView({ channel, items, me, settings, lesson: lessonPr
         <div className="lp-live__center">
           <BigEyes size={300} />
           <h1 className="lp-live__h lp-live__h--huge">Nhìn lên bảng nhé!</h1>
-          <p className="lp-live__p">Cô giáo đang nói điều quan trọng đó.</p>
+          <p className="lp-live__p">Thầy/cô đang nói điều quan trọng đó.</p>
         </div>
       </div>
     );
@@ -208,7 +208,7 @@ export function LiveStudentView({ channel, items, me, settings, lesson: lessonPr
     body = (
       <div className="lp-live__center">
         <MascotBubble mascot={myMascot} mood="wave" size={170} className="lp-live__lobby-bubble">
-          <strong>Chờ cô giáo bắt đầu nhé!</strong>
+          <strong>Chờ thầy/cô bắt đầu nhé!</strong>
         </MascotBubble>
         <p className="lp-live__p">
           Chào <strong>{me.name}</strong>! Em đã vào lớp rồi.
@@ -237,7 +237,7 @@ export function LiveStudentView({ channel, items, me, settings, lesson: lessonPr
     body = (
       <div className="lp-live__center">
         <Mascot id={myMascot} mood="happy" size={150} animate />
-        <h1 className="lp-live__h">Cùng nhìn lên bảng với cô nhé!</h1>
+        <h1 className="lp-live__h">Cùng nhìn lên bảng với thầy/cô nhé!</h1>
         <p className="lp-live__p">Khi có câu hỏi, câu hỏi sẽ hiện ở đây.</p>
       </div>
     );
@@ -287,7 +287,7 @@ export function LiveStudentView({ channel, items, me, settings, lesson: lessonPr
             <Icon name="check" size={64} />
           </div>
           <h1 className="lp-live__h">Đã gửi!</h1>
-          <p className="lp-live__p">{phase === 'activity-closed' ? 'Chờ cô công bố đáp án nhé!' : 'Chờ các bạn nhé!'}</p>
+          <p className="lp-live__p">{phase === 'activity-closed' ? 'Chờ thầy/cô công bố đáp án nhé!' : 'Chờ các bạn nhé!'}</p>
           {timer}
           <Mascot id={myMascot} mood="happy" size={110} animate />
         </div>

@@ -247,13 +247,13 @@ export class SupabaseScreenChannel implements StatusfulLiveChannel {
     return () => this.handlers.delete(handler);
   }
   async send(_cmd: LiveCommand): Promise<void> {
-    throw new Error('Màn hình lớp chỉ để xem — thầy cô điều khiển trên máy giáo viên.');
+    throw new Error('Màn hình lớp chỉ để xem — thầy/cô điều khiển trên máy giáo viên.');
   }
   async join(_p: LiveParticipant): Promise<void> {
     /* TV không tham gia */
   }
   async respond(): Promise<{ correct?: boolean; score?: number }> {
-    throw new Error('Màn hình lớp chỉ để xem — muốn cả lớp làm trên bảng, thầy cô đăng nhập ở máy này.');
+    throw new Error('Màn hình lớp chỉ để xem — muốn cả lớp làm trên bảng, thầy/cô đăng nhập ở máy này.');
   }
   responses(slideIndex: number): LiveResponse[] {
     return this.list.filter((r) => r.slideIndex === slideIndex).sort((a, b) => a.at.localeCompare(b.at));

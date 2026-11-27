@@ -119,7 +119,7 @@ export default function PageView() {
   const parent = path.length > 1 ? path[path.length - 2] : null;
   const back = <Button variant="secondary" size="md" onClick={() => nav(parent ? `/trang/${parent.id}` : '/ung-dung')} icon={<Icon name="back" />}>Về</Button>;
   if ((pageId && pageQ.isPending) || tools.isPending || sites.isPending) return <LoadingScreen />;
-  if (pageId && !page) return <div className="ln-page">{back}<EmptyState title="Không thấy trang này" text="Có thể thầy cô đã ẩn hoặc xóa trang." /></div>;
+  if (pageId && !page) return <div className="ln-page">{back}<EmptyState title="Không thấy trang này" text="Có thể thầy/cô đã ẩn hoặc xóa trang." /></div>;
 
   const title = page?.title ?? tool?.name ?? 'Ứng dụng';
   let src = '';

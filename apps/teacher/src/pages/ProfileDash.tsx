@@ -59,7 +59,7 @@ export function ProfileDash({ p }: { p: StudentProfile }) {
     next.push({ t: root ? `Ôn lại từ gốc “${root}” trước, rồi mới tới “${short(g.skillCode)}”` : `Giao bộ ôn “${short(g.skillCode)}”`, d: mis ? `Lỗi hay mắc: ${mis}` : `Đúng ${Math.round(g.p * 100)}% sau ${g.attempts} lần làm` });
   }
   if (overdue) next.push({ t: `Nhắc em làm ${overdue} bài đã quá hạn`, d: 'Xem mục “Bài giảng và bài được giao” bên dưới.' });
-  if (p.work.pending) next.push({ t: `Duyệt ${p.work.pending} bài viết em đã nộp`, d: 'Điểm và nhận xét chỉ vào hồ sơ sau khi thầy cô duyệt.' });
+  if (p.work.pending) next.push({ t: `Duyệt ${p.work.pending} bài viết em đã nộp`, d: 'Điểm và nhận xét chỉ vào hồ sơ sau khi thầy/cô duyệt.' });
   if (weeks[7]!.days === 0 && weeks[6]!.days === 0) next.push({ t: 'Hai tuần nay em chưa học trên app', d: 'Hỏi thăm em hoặc nhắn phụ huynh.' });
   if (next.length < 4 && p.strengths.length && !p.gaps.length) next.push({ t: `Giao bài nâng cao về “${p.strengths[0]!.short}”`, d: 'Em đã vững kĩ năng này — có thể nhờ em kèm bạn.' });
   if (next.length < 4 && p.attendance && p.attendance.rate !== null && p.attendance.rate < 0.9) next.push({ t: `Chuyên cần ${pctText(p.attendance.rate)} trong 30 ngày`, d: `Vắng không phép ${p.attendance.unexcused} buổi, có phép ${p.attendance.excused} buổi.` });

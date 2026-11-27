@@ -50,7 +50,7 @@ describe('smoke', async () => {
   it('LiveStudentView: các pha', () => {
     const me = { userId: 'u1', name: 'An' };
     expect(renderToString(<m.LiveStudentView channel={channel(null)} items={{}} me={me} />)).toContain('Đang vào lớp');
-    expect(renderToString(<m.LiveStudentView channel={channel(state('lobby'))} items={{}} me={me} />)).toContain('Chờ cô giáo bắt đầu nhé!');
+    expect(renderToString(<m.LiveStudentView channel={channel(state('lobby'))} items={{}} me={me} />)).toContain('Chờ thầy/cô bắt đầu nhé!');
     expect(renderToString(<m.LiveStudentView channel={channel(state('slide', { locked: true }))} items={{}} me={me} />)).toContain('Nhìn lên bảng nhé!');
     expect(renderToString(<m.LiveStudentView channel={channel(state('slide', { slideIndex: 0 }))} items={{}} me={me} />)).toContain('Trang <!-- -->1');
     expect(renderToString(<m.LiveStudentView channel={channel(state('activity-open'))} items={{}} me={me} />)).toContain('Gửi');

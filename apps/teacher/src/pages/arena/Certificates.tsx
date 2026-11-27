@@ -7,7 +7,8 @@
 import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import type { Profile } from '@openedu/contracts';
-import { useArenaBoard, useArenaSeasons, useClasses, useCup, useSchoolSettings } from '@openedu/data';
+import { useArenaBoard, useArenaSeasons, useCup, useSchoolSettings } from '@openedu/data';
+import { useClasses } from '../../lib/focusGrade';
 import { Btn, Empty, Field, Loading } from '../../components/common';
 import '../../styles/arena.css';
 

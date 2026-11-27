@@ -78,7 +78,7 @@ export function TemplateFill({ data, onChanged }: { data: BridgeData; onChanged:
           <li>Tải tệp đó lên đây. OPEN-EDU tự tìm dòng tiêu đề và ghép từng dòng với học sinh của lớp.</li>
           <li>Chọn dữ liệu cho từng cột, xem trước, rồi tải tệp đã điền về và nhập lại vào VnEdu.</li>
         </ol>
-        <ExcelPicker testId="br-fill-file" label="Chọn tệp Excel từ VnEdu" hint="Tệp .xls hoặc .xlsx. Sổ điểm các môn và mẫu nhận xét năng lực phẩm chất của VnEdu được nhận ra và điền tự động. Tệp giữ nguyên định dạng, không rời khỏi máy thầy cô." onOpen={(f) => { setManual(false); setFile(f); }} />
+        <ExcelPicker testId="br-fill-file" label="Chọn tệp Excel từ VnEdu" hint="Tệp .xls hoặc .xlsx. Sổ điểm các môn và mẫu nhận xét năng lực phẩm chất của VnEdu được nhận ra và điền tự động. Tệp giữ nguyên định dạng, không rời khỏi máy thầy/cô." onOpen={(f) => { setManual(false); setFile(f); }} />
       </section>
     );
   }
@@ -128,7 +128,7 @@ export function TemplateFill({ data, onChanged }: { data: BridgeData; onChanged:
         <header className="tc-card__head">
           <h2>2. Chọn dữ liệu cho từng cột</h2>
           <span className="tc-row tc-wrap">
-            {savedAt ? <span className="tc-chip tc-chip--ok" title="Mẫu này đã dùng trước đây">Đã nhớ cách ghép ({new Date(savedAt).toLocaleDateString('vi-VN')})</span> : mappedCols.length ? <span className="tc-chip">Gợi ý tự động — thầy cô xem lại</span> : null}
+            {savedAt ? <span className="tc-chip tc-chip--ok" title="Mẫu này đã dùng trước đây">Đã nhớ cách ghép ({new Date(savedAt).toLocaleDateString('vi-VN')})</span> : mappedCols.length ? <span className="tc-chip">Gợi ý tự động — thầy/cô xem lại</span> : null}
             {mappedCols.length ? <Btn size="sm" kind="ghost" onClick={() => { setMapping({}); if (savedAt) { bridge.forgetMapping(table); setSavedAt(null); } }}>Bỏ chọn tất cả</Btn> : null}
           </span>
         </header>
@@ -187,7 +187,7 @@ export function TemplateFill({ data, onChanged }: { data: BridgeData; onChanged:
           <div className={`tc-alert ${done.mode === 'patched' ? 'tc-alert--ok' : 'tc-alert--info'}`} role="status" data-testid="br-done">
             <span>
               Đã tải “{done.fileName}” với {done.filled} ô được điền. {done.mode === 'patched' ? 'Định dạng, ô gộp và các trang tính khác của tệp gốc được giữ nguyên.' : done.note}
-              {done.formulas ? ` Có ${done.formulas} ô công thức đã được thay bằng giá trị.` : ''} Thầy cô mở tệp kiểm tra lại trước khi nhập vào VnEdu nhé.
+              {done.formulas ? ` Có ${done.formulas} ô công thức đã được thay bằng giá trị.` : ''} Thầy/cô mở tệp kiểm tra lại trước khi nhập vào VnEdu nhé.
             </span>
           </div>
         ) : null}

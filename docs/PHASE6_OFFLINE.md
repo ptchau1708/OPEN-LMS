@@ -45,7 +45,7 @@ Cài đặt: `initDataSource({ offline: true })` (chỉ app học sinh). Supabas
 - Vỏ app đã precache; `navigateFallback` → mọi route SPA mở được offline; các chunk lười đều precache.
 - Câu có chấm mà máy không có đáp án → **"Đã lưu — sẽ chấm khi có mạng"** (linh vật, tông xanh, không sao ngay).
   Câu không chấm (vẽ, ghi âm, bình chọn) vẫn "Đã gửi rồi!". Có đáp án (demo/GV) → chấm tại máy như cũ.
-- Hoàn thành bài offline: "Đã lưu bài trên máy. Có mạng, cô chấm và sao sẽ về túi em nhé!".
+- Hoàn thành bài offline: "Đã lưu bài trên máy. Có mạng, thầy/cô chấm và sao sẽ về túi em nhé!".
 - Bài viết có ảnh: nén JPEG như cũ, cất Blob vào `blobs`, tải lên khi đồng bộ.
 - Thanh trên cùng: **"Đang học không cần mạng"** + huy hiệu **"N chờ gửi"**; có mạng lại: **"Đồng bộ ngay"**.
   Trình phát bài giảng (fixed) né thanh qua biến CSS `--ln-banner-h`.

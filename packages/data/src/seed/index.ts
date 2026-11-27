@@ -147,7 +147,7 @@ export function buildSeed(now: Date = new Date()): SeedData {
     r('u-chi2a3', 2, 16, 8, 'Hoàn thành bài: Số có hai chữ số', 'lesson', 'l-cu-so-hai-chu-so'),
     r('u-chi2a3', 1, 10, 8, 'Trả lời đúng trong lớp học trực tiếp', 'live', 'live-cu'),
     r('u-dung2a4', 1, 16, 6, 'Hoàn thành bài: Số có hai chữ số', 'lesson', 'l-cu-so-hai-chu-so'),
-    r('u-dung2a4', 1, 10, 2, 'Thầy cô khen: Em hăng hái phát biểu', 'behavior'),
+    r('u-dung2a4', 1, 10, 2, 'Thầy/cô khen: Em hăng hái phát biểu', 'behavior'),
     r('u-em1b1', 1, 15, 4, 'Hoàn thành bài: Làm quen với chữ cái', 'lesson', 'l-cu-chu-cai'),
     r('u-phuong3c1', 4, 16, 18, 'Hoàn thành bài: Bảng nhân 3', 'lesson', 'l-cu-nhan-3'),
     r('u-phuong3c1', 2, 16, 20, 'Hoàn thành bài: Bảng nhân 4', 'lesson', 'l-cu-nhan-4'),

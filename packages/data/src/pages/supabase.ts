@@ -6,7 +6,7 @@ interface PgError { message: string; code?: string }
 function fail(e: PgError, vi: string): never {
   if (e.code === '23505') throw new Error('Trang này đã có trong danh sách.');
   if (e.code === '23514') throw new Error('Địa chỉ chưa đúng: chỉ ghi phần đầu, https://… (không có đường dẫn).');
-  if (e.code === '42501') throw new Error('Thầy cô chưa có quyền làm việc này.');
+  if (e.code === '42501') throw new Error('Thầy/cô chưa có quyền làm việc này.');
   throw new Error(e.message && /[À-ỹ]/.test(e.message) ? e.message : vi);
 }
 interface SiteRow { origin: string; name: string; builtin: boolean; added_by: string | null; created_at: string }
@@ -37,7 +37,7 @@ export class SupabasePagesSource implements PagesSource {
     const sb = await this.clientP;
     const { data, error } = await sb.from('embed_sites').delete().eq('origin', origin).select('origin');
     if (error) fail(error, 'Chưa bớt được trang.');
-    if (!data?.length) throw new Error('Thầy cô chưa có quyền bớt trang này.');
+    if (!data?.length) throw new Error('Thầy/cô chưa có quyền bớt trang này.');
   }
   async listClassPages(classId: string): Promise<ClassPage[]> {
     const sb = await this.clientP;
@@ -64,7 +64,7 @@ export class SupabasePagesSource implements PagesSource {
     if (i.id) {
       const { data, error } = await sb.from('class_pages').update(row).eq('id', i.id).select(PAGE_COLS).maybeSingle();
       if (error) fail(error, 'Chưa lưu được trang.');
-      if (!data) throw new Error('Thầy cô chưa có quyền sửa trang này.');
+      if (!data) throw new Error('Thầy/cô chưa có quyền sửa trang này.');
       return toPage(data as unknown as PageRow);
     }
     const { data: s } = await sb.auth.getSession();

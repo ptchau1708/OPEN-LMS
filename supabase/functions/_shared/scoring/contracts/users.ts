@@ -20,7 +20,7 @@ export interface Profile {
   settings?: StudentSettings;
   /** Mã học sinh ở phần mềm quản lí trường (VnEdu / mã định danh) — để ghép khi xuất, nhập Excel. */
   externalCode?: string;
-  /** Đang dùng mật khẩu tạm do thầy cô / quản trị cấp → phải đổi trước khi dùng tiếp (docs/MAT_KHAU.md). */
+  /** Đang dùng mật khẩu tạm do thầy/cô / quản trị cấp → phải đổi trước khi dùng tiếp (docs/MAT_KHAU.md). */
   mustChangePassword?: boolean;
 }
 

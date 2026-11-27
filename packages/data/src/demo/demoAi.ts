@@ -29,7 +29,7 @@ export async function demoAiGrade(input: { task: WorkTask; rubric: Rubric; submi
       body: JSON.stringify(buildOpenRouterBody(prompt, images, model)),
       signal: ctrl.signal,
     });
-    if (!res.ok) throw new Error(`Trợ lý chấm bài đang bận (mã ${res.status}). Thầy cô thử lại sau nhé.`);
+    if (!res.ok) throw new Error(`Trợ lý chấm bài đang bận (mã ${res.status}). Thầy/cô thử lại sau nhé.`);
     const text = extractOpenRouterText(await res.json());
     return gradeFromModelText(text, { rubric, submissionId: submission.id, model, now: input.now, imageCount: submission.images.length }).grade;
   } finally {

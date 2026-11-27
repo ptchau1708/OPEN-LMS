@@ -24,7 +24,7 @@ declare v_key text;
 begin
   perform v2._require_user();
   if not v2.is_teacher_of_class(p_class) then
-    raise exception 'Chỉ thầy cô của lớp mới tạo được link TV.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô của lớp mới tạo được link TV.' using errcode = '42501';
   end if;
   if not p_new then
     select key into v_key from v2.garden_tv_keys where class_id = p_class;
@@ -42,7 +42,7 @@ language plpgsql security definer set search_path = v2, public as $$
 declare v jsonb;
 begin
   if p_key is null or length(p_key) < 40 or not exists (select 1 from v2.garden_tv_keys where class_id = p_class and key = p_key) then
-    raise exception 'Link TV không còn hiệu lực. Thầy cô mở lại từ Bàn làm việc giáo viên → Vườn lớp → Mở trên TV.' using errcode = '42501';
+    raise exception 'Link TV không còn hiệu lực. Thầy/cô mở lại từ Bàn làm việc giáo viên → Vườn lớp → Mở trên TV.' using errcode = '42501';
   end if;
   v := v2._garden_raw(p_class);
   -- Chắc chắn không lộ tên / từng học sinh dù người mở link là ai.

@@ -152,6 +152,6 @@ test('Danh mục kĩ năng: xuất Excel, nhập lại (sửa chữ, thêm mới
   await page.getByLabel('Lớp', { exact: true }).selectOption('4');
   await page.getByTestId('sk-subject').selectOption('khoa-hoc');
   await expect(page.getByTestId('sk-row').filter({ hasText: 'KH4.NL.ANH-SANG' })).toContainText('Ánh sáng quanh em');
-  await expect(page.getByTestId('sk-row').filter({ hasText: 'KH4.GV.TIET-KIEM-DIEN' })).toContainText('Thầy cô thêm');
+  await expect(page.getByTestId('sk-row').filter({ hasText: 'KH4.GV.TIET-KIEM-DIEN' })).toContainText('Thầy/cô thêm');
   w.expectClean();
 });

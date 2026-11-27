@@ -8,7 +8,7 @@ export function sample(): ItemOf<'RECORD_READ'> {
     grade: 1,
     subject: 'tieng-viet',
     difficulty: 'van-dung',
-    prompt: { text: 'Em hãy đọc to đoạn văn, rồi ghi âm gửi thầy cô nhé.' },
+    prompt: { text: 'Em hãy đọc to đoạn văn, rồi ghi âm gửi thầy/cô nhé.' },
     payload: {
       text: 'Nhà bà có cây bưởi.\nHè về, quả bưởi chín vàng.\nBé hái quả to nhất biếu bà.\nBà khen bé ngoan.',
       maxSeconds: 30,

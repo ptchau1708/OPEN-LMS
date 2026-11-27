@@ -43,7 +43,7 @@ export function Tt27BankDialog({ userId, subjects, initialScope, onClose }: { us
     </>}>
       <div className="tc-stack">
         <p className="tc-small tc-muted">
-          Câu trong ngân hàng hiện ra khi thầy cô bấm vào ô nhận xét — chọn để điền nhanh. Câu mới tự được lưu khi lưu bảng
+          Câu trong ngân hàng hiện ra khi thầy/cô bấm vào ô nhận xét — chọn để điền nhanh. Câu mới tự được lưu khi lưu bảng
           (bỏ qua câu có tên riêng của học sinh).{list.data && !list.data.synced ? ' Đang lưu trên trình duyệt này — chạy SQL 20 để dùng trên mọi máy.' : ''}
         </p>
         <div className="tc-row tc-wrap">
@@ -75,7 +75,7 @@ export function Tt27BankDialog({ userId, subjects, initialScope, onClose }: { us
                     <div className="tc-row"><Btn size="sm" kind="primary" disabled={!editing.text.trim()} onClick={() => upd.mutate({ id: c.id, text: editing.text }, { onSuccess: () => setEditing(null) })}>Lưu</Btn><Btn size="sm" onClick={() => setEditing(null)}>Hủy</Btn></div>
                   </div>
                 ) : (
-                  <span className="tc-grow">{c.level ? <b className={`tc-sugg__lv tc-pick--${c.level === 'Đ' ? 'D' : c.level}`}>{c.level}</b> : null} {c.text} <span className="tc-muted tc-small">· dùng {c.uses} lần{c.mine ? '' : ' · thầy cô khác chia sẻ'}</span></span>
+                  <span className="tc-grow">{c.level ? <b className={`tc-sugg__lv tc-pick--${c.level === 'Đ' ? 'D' : c.level}`}>{c.level}</b> : null} {c.text} <span className="tc-muted tc-small">· dùng {c.uses} lần{c.mine ? '' : ' · thầy/cô khác chia sẻ'}</span></span>
                 )}
                 {c.mine && editing?.id !== c.id ? (
                   <span className="tc-row">
@@ -83,7 +83,7 @@ export function Tt27BankDialog({ userId, subjects, initialScope, onClose }: { us
                       <option value="">Mọi mức</option>
                       {(['T', 'H', 'C', 'Đ'] as BankLevel[]).map((l) => <option key={l} value={l}>{l}</option>)}
                     </select>
-                    <label className="tc-switch tc-small" title="Chia sẻ câu này cho thầy cô khác trong trường"><input type="checkbox" checked={c.shared} onChange={(e) => upd.mutate({ id: c.id, shared: e.target.checked })} /> Chia sẻ</label>
+                    <label className="tc-switch tc-small" title="Chia sẻ câu này cho thầy/cô khác trong trường"><input type="checkbox" checked={c.shared} onChange={(e) => upd.mutate({ id: c.id, shared: e.target.checked })} /> Chia sẻ</label>
                     <Btn size="sm" kind="ghost" icon="pencil" aria-label={`Sửa câu: ${c.text}`} onClick={() => setEditing({ id: c.id, text: c.text })} />
                     <Btn size="sm" kind="ghost" icon="trash" aria-label={`Xoá câu: ${c.text}`} onClick={() => del.mutate(c.id)} data-testid="bank-del" />
                   </span>
@@ -113,7 +113,7 @@ export function Tt27ColumnsDialog({ grade, all, value, defaults, onSave, onClose
       <Btn kind="primary" disabled={!sel.size} onClick={() => onSave(all.filter((s) => sel.has(s)))} data-testid="tt27-cols-save">Lưu ({sel.size} môn)</Btn>
     </>}>
       <div className="tc-stack">
-        <p className="tc-small tc-muted">Thầy cô dạy môn nào thì tích môn đó. Môn bị ẩn chỉ không hiện cột — nhận xét đã nhập của môn đó vẫn giữ nguyên. Lưu riêng cho từng lớp, theo tài khoản.</p>
+        <p className="tc-small tc-muted">Thầy/cô dạy môn nào thì tích môn đó. Môn bị ẩn chỉ không hiện cột — nhận xét đã nhập của môn đó vẫn giữ nguyên. Lưu riêng cho từng lớp, theo tài khoản.</p>
         <div className="tc-row tc-wrap"><Btn size="sm" kind="ghost" onClick={() => setSel(new Set(all))}>Chọn tất cả</Btn><Btn size="sm" kind="ghost" onClick={() => setSel(new Set())}>Bỏ chọn hết</Btn></div>
         {groups.map(({ g, items }) => (
           <fieldset key={g} className="tc-fieldset">

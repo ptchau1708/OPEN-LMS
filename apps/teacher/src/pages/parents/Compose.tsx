@@ -11,11 +11,11 @@ const TEMPLATES: { id: string; label: string; title: string; body: string; ack?:
   { id: 'nghi', label: 'Lịch nghỉ học', title: 'Thông báo lịch nghỉ', body: 'Các con được nghỉ học từ ngày …… đến hết ngày ……. Các con đi học lại vào ngày …….\nKính mong quý phụ huynh nhắc các con ôn bài trong những ngày nghỉ.' },
   { id: 'do-dung', label: 'Chuẩn bị đồ dùng', title: 'Nhắc chuẩn bị đồ dùng học tập', body: 'Ngày ……, các con mang theo: …….\nCảm ơn quý phụ huynh đã nhắc con chuẩn bị.' },
   { id: 'tuan', label: 'Tình hình tuần', title: 'Tình hình lớp trong tuần', body: 'Tuần qua, lớp …….\nTuần tới, các con sẽ học …….\nKính mong quý phụ huynh tiếp tục đồng hành cùng các con.' },
-  { id: 'khen', label: 'Khen ngợi (gửi riêng)', title: 'Cô khen con', body: 'Chào gia đình, tuần này con đã …….\nCô rất vui và mong gia đình cùng động viên con.', one: true },
-  { id: 'trao-doi', label: 'Mời trao đổi (gửi riêng)', title: 'Cô muốn trao đổi về con', body: 'Chào gia đình, cô muốn trao đổi thêm về ……. Gia đình nhắn lại cho cô thời gian thuận tiện nhé.', one: true, ack: true },
+  { id: 'khen', label: 'Khen ngợi (gửi riêng)', title: 'Thầy/cô khen con', body: 'Chào gia đình, tuần này con đã …….\nThầy/cô rất vui và mong gia đình cùng động viên con.', one: true },
+  { id: 'trao-doi', label: 'Mời trao đổi (gửi riêng)', title: 'Thầy/cô muốn trao đổi về con', body: 'Chào gia đình, thầy/cô muốn trao đổi thêm về ……. Gia đình nhắn lại cho thầy/cô thời gian thuận tiện nhé.', one: true, ack: true },
 ];
 
-export function ComposePanel({ cls, onSent }: { cls: ClassInfo; onSent: () => void }) {
+export function ComposePanel({ cls, onSent, onLinks }: { cls: ClassInfo; onSent: () => void; onLinks: () => void }) {
   const { roster } = useRoster(cls);
   const links = useGuardianLinks(cls.id);
   const create = useCreateParentPost();
@@ -26,13 +26,14 @@ export function ComposePanel({ cls, onSent }: { cls: ClassInfo; onSent: () => vo
   const [ack, setAck] = useState(false);
   const [when, setWhen] = useState<'now' | 'later'>('now');
   const [at, setAt] = useState(() => { const d = new Date(Date.now() + 3_600_000); d.setMinutes(0, 0, 0); return toLocalInput(d); });
-  const [done, setDone] = useState<string | null>(null);
+  const [done, setDone] = useState<{ text: string; none?: boolean } | null>(null);
 
   const linked = useMemo(() => new Set((links.data ?? []).map((l) => l.studentId)), [links.data]);
   const parentsOf = (ids: string[]) => new Set((links.data ?? []).filter((l) => ids.includes(l.studentId)).map((l) => l.parentId)).size;
   const targets = audience === 'class' ? roster.map((s) => s.id) : picked;
   const reach = parentsOf(targets);
   const missing = targets.filter((id) => !linked.has(id)).length;
+  const noParents = !links.isLoading && !links.error && roster.length > 0 && linked.size === 0;
   const toggle = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
   const applyTpl = (id: string) => {
     const t = TEMPLATES.find((x) => x.id === id);
@@ -48,7 +49,9 @@ export function ComposePanel({ cls, onSent }: { cls: ClassInfo; onSent: () => vo
     sendAt: later ? later.toISOString() : undefined,
   }, {
     onSuccess: (p) => {
-      setDone(p.sent ? `Đã gửi “${p.title}” tới ${p.parents} phụ huynh.` : `Đã hẹn gửi “${p.title}” lúc ${fmtDateTime(p.sendAt)}.`);
+      if (!p.sent) setDone({ text: `Đã hẹn gửi “${p.title}” lúc ${fmtDateTime(p.sendAt)}.` });
+      else if (p.parents > 0) setDone({ text: `Đã gửi “${p.title}” tới ${p.parents} phụ huynh.` });
+      else setDone({ none: true, text: `Đã lưu “${p.title}”, nhưng chưa phụ huynh nào nhận được vì ${audience === 'class' ? `lớp ${cls.name}` : 'các em đã chọn'} chưa có phụ huynh liên kết tài khoản. Phụ huynh liên kết sau vẫn đọc được thông báo này trong hộp thư.` });
       setTitle(''); setBody(''); setAck(false); setPicked([]);
     },
   });
@@ -56,10 +59,19 @@ export function ComposePanel({ cls, onSent }: { cls: ClassInfo; onSent: () => vo
   return (
     <section className="tc-card tc-ph-compose" data-testid="ph-compose">
       {done ? (
-        <div className="tc-alert tc-alert--ok" role="status">
-          <span>{done}</span>
+        <div className={cx('tc-alert', done.none ? 'tc-alert--warn' : 'tc-alert--ok')} role="status" data-testid="ph-done">
+          <span>{done.text}</span>
+          {done.none ? <Btn size="sm" kind="primary" icon="qr" onClick={onLinks} data-testid="ph-go-links">Liên kết phụ huynh</Btn> : null}
           <Btn size="sm" onClick={onSent}>Xem đã gửi</Btn>
           <Btn size="sm" kind="ghost" onClick={() => setDone(null)}>Soạn tin khác</Btn>
+        </div>
+      ) : noParents ? (
+        <div className="tc-alert tc-alert--warn tc-ph-nolink" role="note" data-testid="ph-nolink">
+          <span>
+            <strong>Lớp {cls.name} chưa có phụ huynh nào liên kết tài khoản</strong> — thông báo gửi lúc này chưa đến được ai.
+            Thầy/cô tạo mã liên kết (in phiếu cho cả lớp), phụ huynh nhập mã trên app là nhận được thông báo, kể cả các thông báo đã gửi trước đó.
+          </span>
+          <Btn size="sm" kind="primary" icon="qr" onClick={onLinks} data-testid="ph-nolink-go">Tạo mã liên kết</Btn>
         </div>
       ) : null}
       <div className="tc-ph-compose__grid">
@@ -102,9 +114,10 @@ export function ComposePanel({ cls, onSent }: { cls: ClassInfo; onSent: () => vo
       </div>
       <ErrorNote error={create.error} />
       <div className="tc-row tc-wrap tc-ph-compose__foot">
-        <span className="tc-muted tc-small">
-          {targets.length ? `Tới ${reach} phụ huynh của ${targets.length} em.` : 'Chưa chọn em nào.'}
-          {missing ? ` ${missing} em chưa có phụ huynh liên kết.` : ''}
+        <span className={cx('tc-small', targets.length && !reach ? 'tc-ph-warn' : 'tc-muted')} data-testid="ph-reach">
+          {!targets.length ? 'Chưa chọn em nào.' : reach ? `Tới ${reach} phụ huynh của ${targets.length} em.` : `Chưa có phụ huynh nào nhận được (${targets.length} em chưa liên kết).`}
+          {missing && reach ? ` ${missing} em chưa có phụ huynh liên kết.` : ''}
+          {missing ? <> <button type="button" className="tc-linkbtn" onClick={onLinks}>Tạo mã liên kết</button></> : null}
         </span>
         <span className="tc-spacer" />
         <Btn kind="primary" icon="send" disabled={!canSend} onClick={send} data-testid="ph-send">{create.isPending ? 'Đang gửi…' : when === 'later' ? 'Hẹn gửi' : 'Gửi'}</Btn>

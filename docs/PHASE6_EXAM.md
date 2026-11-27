@@ -42,7 +42,7 @@ tổng theo mức/hàng); `/de-kiem-tra/ra-de?maTran=` và `/:id/sua` (thiếu c
 (A4, Times, khung điểm/nhận xét, Phần I TN / Phần II TL, đáp án + hướng dẫn chấm, CSS in); `/:id/ket-qua` (phổ điểm, % theo ô ma trận, độ khó p từng câu,
 danh sách HS + gợi ý mức T ≥ 9 / H ≥ 5 / C + ghi chú, Chi tiết mốc thời gian, Cho làm lại, Công bố kết quả, Xuất CSV).
 HS: thẻ "Bài kiểm tra" trên Hôm nay (tải lười), `/kiem-tra/:examId`: nội quy (+ nghe đọc) → Bắt đầu (toàn màn hình nếu máy hỗ trợ) → đồng hồ cả bài, bảng câu,
-"Xem lại sau", tự lưu, nhắc còn 5/1 phút, hết giờ tự nộp → xác nhận nộp (số câu chưa làm / đánh dấu) → điểm + từng câu (cam = cần ôn) hoặc "Cô sẽ báo điểm sau".
+"Xem lại sau", tự lưu, nhắc còn 5/1 phút, hết giờ tự nộp → xác nhận nộp (số câu chưa làm / đánh dấu) → điểm + từng câu (cam = cần ôn) hoặc "Thầy/cô sẽ báo điểm sau".
 
 ## 5. Supabase
 | Bảng | Quyền |

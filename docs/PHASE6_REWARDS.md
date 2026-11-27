@@ -11,12 +11,12 @@ Không có tiền thật: xu chỉ kiếm bằng học, chỉ tiêu trong cửa 
 | Nguồn dữ liệu | `getRewardsSource(ds)` (tải động `badges/demo.ts` hoặc `badges/supabase.ts`); hook trong `badges/react.tsx` (`useBadgeShelf`, `useEvaluateBadges`, `useShop`, `useBuyItem`, `useEquipItem`, `useClassGarden`, `useSetGardenGoal`, `useGrantTeacherBadge`, `useTeacherBadges`) |
 | Hình vẽ | `packages/ui/src/badges/BadgeArt.tsx`, `outfits/outfits.tsx` (`DressedMascot`, `outfitWear`, điểm neo), `garden/Plant.tsx`, `garden/GardenScene.tsx`; CSS `@openedu/ui/rewards.css` (nhập trong trang dùng tới) |
 | App HS | `/toi` (kệ huy hiệu, avatar mặc đồ), `/cua-hang`, `/vuon-lop`, `/qua` (lối vào), nút "Vườn lớp em" ở Hôm nay; `pages/rewards/BadgeWatcher.tsx` (tải lười) xét huy hiệu khi số sao đổi và hiện màn chúc mừng |
-| App GV | `/vuon-lop` — xem vườn (có tên từng HS), đặt mục tiêu tuần + loại cây, "Mở trên TV", tặng "Huy hiệu của cô" |
+| App GV | `/vuon-lop` — xem vườn (có tên từng HS), đặt mục tiêu tuần + loại cây, "Mở trên TV", tặng "Huy hiệu của thầy/cô" |
 | Màn hình lớp | `apps/present` `/vuon-lop?lop=<classId>` (chữ to, tự làm mới 60 giây, `&tinh=1` tắt chuyển động) |
 | CSDL | `supabase/migrations/20261113000009_v2_rewards.sql`, kiểm thử `supabase/tests/database/rls_rewards.test.sql` |
 
 ## Huy hiệu
-24 huy hiệu theo 7 nhóm (chăm chỉ, khám phá, vá lỗ hổng, bài viết, đấu trường, thi đua lớp, đặc biệt) + "Huy hiệu của cô".
+24 huy hiệu theo 7 nhóm (chăm chỉ, khám phá, vá lỗ hổng, bài viết, đấu trường, thi đua lớp, đặc biệt) + "Huy hiệu của thầy/cô".
 Quy tắc = `{ kind, min, subject? }`, đạt khi số liệu ≥ ngưỡng. Số liệu (`BadgeStats`):
 | kind | Nguồn |
 |---|---|
@@ -32,7 +32,7 @@ Quy tắc = `{ kind, min, subject? }`, đạt khi số liệu ≥ ngưỡng. S�
 Thời điểm trao: `BadgeWatcher` gọi `evaluateBadges` khi mở app và mỗi lần số sao đổi; trả về huy hiệu chưa xem → màn chúc mừng
 (tắt tia sáng/giấy màu khi "Giảm chuyển động") → `markBadgesSeen`. **Lần xét đầu tiên** của một HS coi mọi huy hiệu đã đủ điều kiện
 là đã xem (không dồn hàng chục màn chúc mừng). Huy hiệu chưa có hiện xám + gợi ý cách nhận + tiến độ.
-"Huy hiệu của cô": GV đặt tên (≤ 40 kí tự), chọn 1 trong 6 biểu tượng (`TEACHER_BADGE_GLYPHS`), lời khen (≤ 120 kí tự).
+"Huy hiệu của thầy/cô": GV đặt tên (≤ 40 kí tự), chọn 1 trong 6 biểu tượng (`TEACHER_BADGE_GLYPHS`), lời khen (≤ 120 kí tự).
 
 ## Xu và cửa hàng
 - **Kiếm xu: 1 sao = 1 xu.** Trước Phase 6 máy chủ hầu như không ghi xu (chỉ thi đua, Đấu 1–1). Migration vá `v2._award`: nơi gọi

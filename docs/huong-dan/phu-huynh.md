@@ -7,14 +7,14 @@
 ### 1. Vào app
 - Mở địa chỉ nhà trường gửi (vd **hoc.truong.edu.vn**) hoặc tải app **OPEN-EDU** trên CH Play / App Store.
 - Đăng nhập bằng **tài khoản phụ huynh** nhà trường cấp (vẫn dùng tài khoản app cũ nếu đã có).
-- Con đăng nhập bằng **tài khoản của con** (thầy cô cấp).
+- Con đăng nhập bằng **tài khoản của con** (thầy/cô cấp).
 
 ### 2. Phụ huynh xem được gì
 - ⭐ **Sao** con kiếm được và bạn linh vật con đã mở.
 - 📚 **Bài đã học**, kĩ năng con đã **vững** / **cần ôn**.
-- ✍️ **Bài viết** con nộp — chỉ sau khi **thầy cô đã duyệt**, kèm lời nhận xét và **một gợi ý giúp con ở nhà**.
+- ✍️ **Bài viết** con nộp — chỉ sau khi **thầy/cô đã duyệt**, kèm lời nhận xét và **một gợi ý giúp con ở nhà**.
 - 🏅 **Thi đua** và 📅 **điểm danh** của con.
-- 📝 **Nhận xét cuối kì (TT27)** khi thầy cô đã chốt.
+- 📝 **Nhận xét cuối kì (TT27)** khi thầy/cô đã chốt.
 
 Phụ huynh chỉ thấy **con mình**. Có nhiều con học ở trường → báo GVCN để liên kết thêm.
 

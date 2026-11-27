@@ -128,7 +128,7 @@ export function PackageHost({ pkg, allowedOrigin, onResult, height }: PackageHos
         <div className="lp-pkg__overlay lp-pkg__overlay--error" role="alert">
           <Mascot id="nghe" mood="think" size={120} />
           <p className="lp-pkg__msg">Ôi, bài chơi chưa mở được.</p>
-          <p className="lp-pkg__hint">{setup.error ?? problem ?? 'Em kiểm tra mạng rồi bấm “Thử lại” nhé. Nếu vẫn chưa được, em báo cô giáo nhé.'}</p>
+          <p className="lp-pkg__hint">{setup.error ?? problem ?? 'Em kiểm tra mạng rồi bấm “Thử lại” nhé. Nếu vẫn chưa được, em báo thầy/cô nhé.'}</p>
           {!setup.error && (
             <Button variant="primary" size="lg" icon={<Icon name="retry" size={24} />} onClick={() => setAttempt((a) => a + 1)}>
               Thử lại

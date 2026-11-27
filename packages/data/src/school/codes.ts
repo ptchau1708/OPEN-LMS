@@ -61,11 +61,11 @@ export type RedeemCheck = { ok: true } | { ok: false; reason: string };
 export function checkRedeem(code: GuardianCode | undefined, now: Date, ctx: { guardians: number; alreadyLinked: boolean }): RedeemCheck {
   if (!code) return { ok: false, reason: 'Mã chưa đúng. Bố mẹ kiểm tra lại 8 kí tự trên phiếu nhé.' };
   const st = codeStatus(code, now);
-  if (st === 'revoked') return { ok: false, reason: 'Mã này đã được thầy cô thu hồi. Xin nhờ thầy cô in mã mới.' };
-  if (st === 'used') return { ok: false, reason: 'Mã này đã được dùng. Mỗi mã chỉ dùng một lần — xin nhờ thầy cô cấp mã mới.' };
-  if (st === 'expired') return { ok: false, reason: 'Mã đã hết hạn (14 ngày). Xin nhờ thầy cô cấp mã mới.' };
+  if (st === 'revoked') return { ok: false, reason: 'Mã này đã được thầy/cô thu hồi. Xin nhờ thầy/cô in mã mới.' };
+  if (st === 'used') return { ok: false, reason: 'Mã này đã được dùng. Mỗi mã chỉ dùng một lần — xin nhờ thầy/cô cấp mã mới.' };
+  if (st === 'expired') return { ok: false, reason: 'Mã đã hết hạn (14 ngày). Xin nhờ thầy/cô cấp mã mới.' };
   if (ctx.alreadyLinked) return { ok: true };
-  if (ctx.guardians >= MAX_GUARDIANS_PER_CHILD) return { ok: false, reason: `Con đã có đủ ${MAX_GUARDIANS_PER_CHILD} tài khoản phụ huynh. Xin liên hệ thầy cô để gỡ bớt.` };
+  if (ctx.guardians >= MAX_GUARDIANS_PER_CHILD) return { ok: false, reason: `Con đã có đủ ${MAX_GUARDIANS_PER_CHILD} tài khoản phụ huynh. Xin liên hệ thầy/cô để gỡ bớt.` };
   return { ok: true };
 }
 

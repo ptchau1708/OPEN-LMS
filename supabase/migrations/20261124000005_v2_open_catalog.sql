@@ -1,9 +1,9 @@
 -- =============================================================================
--- OPEN-EDU · SQL 19 · Danh mục mở — thầy cô thêm / sửa / ẩn / xoá được nội dung trước đây cố định:
+-- OPEN-EDU · SQL 19 · Danh mục mở — thầy/cô thêm / sửa / ẩn / xoá được nội dung trước đây cố định:
 --   1) Kĩ năng (yêu cầu cần đạt): GV thêm kĩ năng mới, sửa chữ kĩ năng gốc (lưu ở cột edit_* — chạy lại SQL 18 /
 --      seed KHÔNG ghi đè phần đã sửa), ẩn / hiện, khôi phục bản gốc, xoá kĩ năng tự thêm (đã có dữ liệu → ẩn).
 --      Áp dụng chung toàn trường. RPC: save_skill(jsonb), delete_skill(text).
---   2) Thu hồi "Huy hiệu của cô" đã tặng nhầm: revoke_teacher_badge(uuid).
+--   2) Thu hồi "Huy hiệu của thầy/cô" đã tặng nhầm: revoke_teacher_badge(uuid).
 --   3) Môn học của trường (quản trị viên): đổi tên, tên ngắn, ẩn / hiện — school_settings.data.subjects.
 --   4) Phòng trò chuyện: câu trả lời nhanh do GV đặt — discussions.quick_replies.
 -- Cần chạy SAU SQL 18. Chạy lại được (idempotent).
@@ -47,7 +47,7 @@ declare
   v_grade smallint := v2.try_int(p ->> 'grade')::smallint;
 begin
   if not (select v2.is_staff()) then
-    raise exception 'Chỉ thầy cô mới sửa được danh mục kĩ năng.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô mới sửa được danh mục kĩ năng.' using errcode = '42501';
   end if;
   if v_code !~ '^[A-Z]+[1-5]\.[A-Z0-9-]+\.[A-Z0-9-]+$' then
     raise exception 'Mã kĩ năng không hợp lệ.' using errcode = '22023';
@@ -87,7 +87,7 @@ begin
   end if;
 
   if v_topic is null or v_text is null or v_short is null then
-    raise exception 'Thầy cô nhập đủ chủ đề, tên ngắn và mô tả nhé.' using errcode = '22023';
+    raise exception 'Thầy/cô nhập đủ chủ đề, tên ngắn và mô tả nhé.' using errcode = '22023';
   end if;
   if v_row.custom then
     update v2.skills set topic = v_topic, text = v_text, short = v_short, edited_by = auth.uid(), edited_at = now(), updated_at = now()
@@ -108,7 +108,7 @@ language plpgsql security definer set search_path = v2, public as $$
 declare v_row v2.skills; v_code text := upper(btrim(coalesce(p_code, '')));
 begin
   if not (select v2.is_staff()) then
-    raise exception 'Chỉ thầy cô mới sửa được danh mục kĩ năng.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô mới sửa được danh mục kĩ năng.' using errcode = '42501';
   end if;
   select * into v_row from v2.skills where code = v_code for update;
   if not found then raise exception 'Không tìm thấy kĩ năng này.' using errcode = 'P0002'; end if;
@@ -134,7 +134,7 @@ grant execute on function v2._clean(text, int) to authenticated;
 grant execute on function v2.save_skill(jsonb) to authenticated;
 grant execute on function v2.delete_skill(text) to authenticated;
 
--- 2) Thu hồi "Huy hiệu của cô" -------------------------------------------------------
+-- 2) Thu hồi "Huy hiệu của thầy/cô" -------------------------------------------------------
 create or replace function v2.revoke_teacher_badge(p_id uuid) returns void
 language plpgsql security definer set search_path = v2, public as $$
 declare b v2.user_badges;
@@ -145,7 +145,7 @@ begin
   end if;
   if not (b.granted_by = auth.uid() or (select v2.is_admin())
           or exists (select 1 from v2.class_ids_of(b.user_id) c where v2.is_teacher_of_class(c))) then
-    raise exception 'Thầy cô chỉ thu hồi huy hiệu của học sinh lớp mình.' using errcode = '42501';
+    raise exception 'Thầy/cô chỉ thu hồi huy hiệu của học sinh lớp mình.' using errcode = '42501';
   end if;
   delete from v2.user_badges where id = p_id;
 end $$;

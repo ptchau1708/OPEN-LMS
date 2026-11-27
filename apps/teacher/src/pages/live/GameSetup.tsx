@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Icon } from '@openedu/ui';
 import { SUBJECTS, uid, type Item, type Lesson, type LiveGameMode, type Profile } from '@openedu/contracts';
-import { GAME_MODE_LABEL, paperFriendly, useClasses, useCreateLiveSession, useSaveLesson } from '@openedu/data';
+import { GAME_MODE_LABEL, paperFriendly, useCreateLiveSession, useSaveLesson } from '@openedu/data';
+import { useClasses, useFocusGrade } from '../../lib/focusGrade';
 import { Btn, Dialog, ErrorNote, Field, Seg } from '../../components/common';
 import { cx, shorten } from '../../lib/format';
 
@@ -23,6 +24,7 @@ export function gameUrl(sessionId: string, mode: LiveGameMode, seconds: number, 
 export function GameSetupDialog({ user, items, lesson, onClose }: { user: Profile; items?: Item[]; lesson?: Lesson; onClose: () => void }) {
   const nav = useNavigate();
   const classes = useClasses(user.role === 'admin' ? undefined : user.id);
+  const focus = useFocusGrade().grade;
   const saveLesson = useSaveLesson();
   const create = useCreateLiveSession();
   const [classId, setClassId] = useState('');
@@ -46,7 +48,7 @@ export function GameSetupDialog({ user, items, lesson, onClose }: { user: Profil
       const use = mode === 'paper' ? list.filter(paperFriendly) : list;
       const id = uid('ls');
       const l: Lesson = {
-        id, title: title.trim() || 'Đố vui', subject: first?.subject ?? 'khac', grade: first?.grade ?? 1, ownerId: user.id, status: 'draft',
+        id, title: title.trim() || 'Đố vui', subject: first?.subject ?? 'khac', grade: first?.grade ?? focus, ownerId: user.id, status: 'draft',
         updatedAt: new Date().toISOString(), minutes: Math.max(5, Math.round(use.length * 1)),
         description: 'Đố vui trực tiếp — tạo từ Ngân hàng câu hỏi.',
         slides: [

@@ -1,7 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 export interface ErrorScreenProps {
-  /** 'kid': lời nhắn cho học sinh; 'staff': cho thầy cô, có nút chép chi tiết lỗi. */
+  /** 'kid': lời nhắn cho học sinh; 'staff': cho thầy/cô, có nút chép chi tiết lỗi. */
   tone?: 'kid' | 'staff';
   /** Lỗi do app vừa cập nhật (mảnh mã cũ không còn) — chỉ cần tải lại. */
   stale?: boolean;
@@ -21,8 +21,8 @@ export function ErrorScreen({ tone = 'kid', stale = false, detail, onRetry }: Er
     : stale
     ? 'Ứng dụng vừa được cập nhật. Bấm "Tải lại" để dùng bản mới nhé.'
     : tone === 'kid'
-      ? 'Bài của em vẫn được giữ. Em bấm "Thử lại" nhé. Nếu vẫn chưa được, em nhờ thầy cô giúp.'
-      : 'Dữ liệu đã lưu không bị ảnh hưởng. Thầy cô thử lại; nếu lỗi lặp lại, hãy chép chi tiết gửi quản trị.';
+      ? 'Bài của em vẫn được giữ. Em bấm "Thử lại" nhé. Nếu vẫn chưa được, em nhờ thầy/cô giúp.'
+      : 'Dữ liệu đã lưu không bị ảnh hưởng. Thầy/cô thử lại; nếu lỗi lặp lại, hãy chép chi tiết gửi quản trị.';
   const btn = { font: 'inherit', fontWeight: 700, fontSize: 18, padding: '14px 24px', minHeight: 52, borderRadius: 16, border: 0, cursor: 'pointer' } as const;
   return (
     <div role="alert" style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 24, fontFamily: 'var(--f-kid, system-ui, sans-serif)', background: 'var(--k-bg, #eaf4ff)', color: 'var(--k-ink, #22304a)', textAlign: 'center' }}>

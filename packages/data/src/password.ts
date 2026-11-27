@@ -26,4 +26,4 @@ export function isSystemEmail(login: string, domain = readEnv('VITE_STUDENT_EMAI
   return e.endsWith(`@${d}`) || e.endsWith(`@parent.${d}`);
 }
 
-export const NO_REAL_EMAIL_TEXT = 'Tài khoản này đăng nhập bằng tên đăng nhập hoặc số điện thoại nên không nhận được thư. Xin nhờ thầy cô chủ nhiệm (hoặc quản trị trường) cấp lại mật khẩu.';
+export const NO_REAL_EMAIL_TEXT = 'Tài khoản này đăng nhập bằng tên đăng nhập hoặc số điện thoại nên không nhận được thư. Xin nhờ thầy/cô chủ nhiệm (hoặc quản trị trường) cấp lại mật khẩu.';

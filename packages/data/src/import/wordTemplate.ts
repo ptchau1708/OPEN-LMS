@@ -26,7 +26,7 @@ export const WORD_TEMPLATE_EXAMPLES: { label: string; lines: string[] }[] = [
   { label: 'Nghe và chọn', lines: ['Câu 12: Em nghe rồi chọn hình đúng.', 'Dạng: Nghe và chọn', 'Đọc cho HS nghe: con mèo', 'A. Con mèo', 'B. Con chó', 'C. Con gà', 'Đáp án: A', 'Môn: Tiếng Việt', 'Lớp: 1'] },
   { label: 'Chạm vào hình', lines: ['Câu 13: Chạm vào dãy núi Hoàng Liên Sơn trên lược đồ.', 'Dạng: Chạm vào hình', 'Vùng đúng: dãy Hoàng Liên Sơn', 'Ghi chú: ảnh lược đồ và vùng chạm thêm ở bước soát (nút "Sửa chi tiết").', 'Môn: Lịch sử và Địa lí', 'Lớp: 4'] },
   { label: 'Vẽ và tô', lines: ['Câu 14: Em hãy vẽ và tô màu ngôi nhà của em.', 'Dạng: Vẽ và tô', 'Môn: Mĩ thuật', 'Lớp: 1'] },
-  { label: 'Ghi âm đọc to', lines: ['Câu 15: Em hãy đọc to đoạn văn rồi ghi âm gửi thầy cô.', 'Dạng: Ghi âm đọc to', 'Đoạn đọc: Nhà bà có cây bưởi. Hè về, quả bưởi chín vàng. Bé hái quả to nhất biếu bà.', 'Thời gian: 30', 'Môn: Tiếng Việt', 'Lớp: 1'] },
+  { label: 'Ghi âm đọc to', lines: ['Câu 15: Em hãy đọc to đoạn văn rồi ghi âm gửi thầy/cô.', 'Dạng: Ghi âm đọc to', 'Đoạn đọc: Nhà bà có cây bưởi. Hè về, quả bưởi chín vàng. Bé hái quả to nhất biếu bà.', 'Thời gian: 30', 'Môn: Tiếng Việt', 'Lớp: 1'] },
   { label: 'Đồ dùng toán (que tính)', lines: ['Câu 16: Em dùng que tính để tính: 26 + 7 = ?', 'Dạng: Đồ dùng toán', 'Que tính: 26 + 7', 'Lựa chọn: 31, 33, 23', 'Môn: Toán', 'Lớp: 2'] },
   { label: 'Đồ dùng toán (đồng hồ)', lines: ['Câu 17: Quay kim đồng hồ chỉ 3 giờ 30 phút.', 'Dạng: Đồ dùng toán', 'Đồng hồ: 3 giờ 30 phút', 'Môn: Toán', 'Lớp: 2'] },
   { label: 'Thăm dò ý kiến', lines: ['Câu 18: Em thích hoạt động trải nghiệm nào nhất?', 'Dạng: Thăm dò ý kiến', 'A. Trồng cây', 'B. Tham quan bảo tàng', 'C. Làm đồ thủ công', 'Môn: Hoạt động trải nghiệm', 'Lớp: 3'] },
@@ -34,7 +34,7 @@ export const WORD_TEMPLATE_EXAMPLES: { label: string; lines: string[] }[] = [
 
 const GUIDE: Para[] = [
   { kind: 'title', text: 'MẪU NHẬP CÂU HỎI TỪ WORD — OPEN-EDU' },
-  { kind: 'note', text: 'Cách dùng: giữ cách viết như ví dụ, xoá các câu ví dụ, soạn câu của thầy cô rồi lưu .docx. Vào Ngân hàng câu hỏi → Thêm nhanh nhiều câu → Từ tệp Excel / Word → chọn tệp. Máy đọc xong sẽ cho soát từng câu trước khi lưu.' },
+  { kind: 'note', text: 'Cách dùng: giữ cách viết như ví dụ, xoá các câu ví dụ, soạn câu của thầy/cô rồi lưu .docx. Vào Ngân hàng câu hỏi → Thêm nhanh nhiều câu → Từ tệp Excel / Word → chọn tệp. Máy đọc xong sẽ cho soát từng câu trước khi lưu.' },
   { kind: 'note', text: 'Mỗi câu bắt đầu bằng "Câu 1:", "Câu 2:"… (gõ số bằng tay, KHÔNG dùng đánh số tự động của Word). Dòng ngay sau là "Dạng: <tên dạng>". Viết mỗi ý trên một dòng.' },
   { kind: 'note', text: 'Các dạng: Chọn 1 đáp án · Chọn nhiều đáp án · Đúng – Sai · Điền ngắn · Nối cặp · Sắp xếp thứ tự · Kéo thả vào ô · Sắp xếp câu · Phân loại từ · Điền vào đoạn văn · Chọn trong câu · Nghe và chọn · Chạm vào hình · Vẽ và tô · Ghi âm đọc to · Đồ dùng toán · Thăm dò ý kiến.' },
   { kind: 'note', text: 'Dòng dùng chung (không bắt buộc): Gợi ý: … · Giải thích: … · Mức độ: Nhận biết | Kết nối | Vận dụng · Môn: … · Lớp: 1–5 · Mã kĩ năng: … Bỏ trống Môn, Lớp thì dùng môn, lớp chọn lúc tải lên.' },
@@ -44,7 +44,7 @@ const GUIDE: Para[] = [
 ];
 
 function paragraphs(): Para[] {
-  const out: Para[] = [...GUIDE, { kind: 'h', text: 'CÂU HỎI (ví dụ mỗi dạng một câu — xoá đi rồi soạn câu của thầy cô)' }];
+  const out: Para[] = [...GUIDE, { kind: 'h', text: 'CÂU HỎI (ví dụ mỗi dạng một câu — xoá đi rồi soạn câu của thầy/cô)' }];
   for (const ex of WORD_TEMPLATE_EXAMPLES) {
     ex.lines.forEach((t, i) => out.push({ kind: i === 0 ? 'q' : 'body', text: t }));
     out.push({ kind: 'body', text: '' });

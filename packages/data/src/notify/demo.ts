@@ -23,7 +23,7 @@ function seedFor(u: Profile): Omit<AppNotification, 'id'>[] {
   const n = (kind: string, title: string, body: string, link: string, h: number, ref: Record<string, unknown> = {}) => ({ kind, title, body, link, ref, count: 1, at: at(h), readAt: null });
   if (u.role === 'teacher' || u.role === 'admin') {
     return [
-      n('gv-tin-nhan', 'Bố bạn Ngọc Lan (phụ huynh Ngọc Lan)', 'Chào cô, sáng mai cháu Lan đi khám răng nên xin vào lớp muộn một tiết ạ.', '/phu-huynh?the=tin-nhan&em=u-lan4a2', 20, { studentId: 'u-lan4a2' }),
+      n('gv-tin-nhan', 'Bố bạn Ngọc Lan (phụ huynh Ngọc Lan)', 'Chào thầy/cô, sáng mai cháu Lan đi khám răng nên xin vào lớp muộn một tiết ạ.', '/phu-huynh?the=tin-nhan&em=u-lan4a2', 20, { studentId: 'u-lan4a2' }),
       n('gv-nop-bai', '3 bài mới cần chấm: Tả cây bàng', 'Minh Hải vừa nộp bài.', '/cham-bai', 26),
       n('gv-lien-ket', '1 phụ huynh mới liên kết', 'Bố bạn Ngọc Lan (Bố) của Ngọc Lan', '/phu-huynh?the=lien-ket', 48),
     ];
@@ -31,13 +31,13 @@ function seedFor(u: Profile): Omit<AppNotification, 'id'>[] {
   if (u.role === 'parent') {
     return [
       n('ph-thong-bao', 'Cô Thu: Họp phụ huynh cuối học kì I', 'Kính mời quý phụ huynh dự họp lúc 8:00 sáng thứ Bảy tuần sau.', '/phu-huynh?tin=ph-demo-1', 26, { postId: 'ph-demo-1' }),
-      n('ph-khen', 'Con được cô khen: Chú ý nghe giảng', '', '/phu-huynh', 30),
+      n('ph-khen', 'Con được thầy/cô khen: Chú ý nghe giảng', '', '/phu-huynh', 30),
       n('ph-ban-tin', 'Bản tin tuần của con đã có', 'Xem con học thế nào trong tuần.', '/phu-huynh', 70),
     ];
   }
   return [
     n('hs-bai-moi', 'Bài mới: Ôn tập cuối tuần', 'Hạn: 20:00 Chủ nhật', '/', 3),
-    n('hs-khen', 'Em được cô khen: Chú ý nghe giảng', '+1 điểm thi đua', '/toi', 26),
+    n('hs-khen', 'Em được thầy/cô khen: Chú ý nghe giảng', '+1 điểm thi đua', '/toi', 26),
   ];
 }
 

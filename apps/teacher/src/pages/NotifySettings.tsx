@@ -36,7 +36,7 @@ export default function NotifySettings() {
         <h2 className="tc-h2">Nhận trên máy này</h2>
         {ds.mode === 'demo' ? <p className="tc-alert tc-alert--info">Bản demo không gửi thông báo đẩy — thông báo chỉ hiện ở chuông.</p> : null}
         <p className="tc-small tc-muted">
-          {state.data === 'on' ? 'Máy này đang nhận thông báo.' : 'Máy này chưa nhận thông báo.'} Tài khoản của thầy cô đang nhận trên {draft.devices} máy.
+          {state.data === 'on' ? 'Máy này đang nhận thông báo.' : 'Máy này chưa nhận thông báo.'} Tài khoản của thầy/cô đang nhận trên {draft.devices} máy.
           {isIos() ? ' iPhone/iPad: cần iOS 16.4 trở lên và mở OPEN-EDU từ biểu tượng trên Màn hình chính.' : ''}
         </p>
         <div className="tc-row tc-wrap">

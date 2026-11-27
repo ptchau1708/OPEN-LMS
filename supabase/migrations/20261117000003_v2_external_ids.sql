@@ -63,7 +63,7 @@ declare
   v_n integer := 0;
 begin
   if auth.uid() is null or not v2.is_teacher_of_class(p_class) then
-    raise exception 'Thầy cô chỉ sửa mã cho học sinh lớp mình.' using errcode = '42501';
+    raise exception 'Thầy/cô chỉ sửa mã cho học sinh lớp mình.' using errcode = '42501';
   end if;
   if p_rows is null or jsonb_typeof(p_rows) <> 'array' then
     raise exception 'Danh sách mã không hợp lệ.' using errcode = '22023';

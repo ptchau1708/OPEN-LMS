@@ -1,5 +1,5 @@
 /**
- * Danh mục mở — kĩ năng do thầy cô sửa / thêm / ẩn / xoá.
+ * Danh mục mở — kĩ năng do thầy/cô sửa / thêm / ẩn / xoá.
  * - Supabase: cột custom / hidden / edit_* của v2.skills + RPC save_skill, delete_skill (SQL 19).
  *   Chưa chạy SQL 19: đọc trả về [] (dùng danh mục gốc), ghi báo cần chạy SQL 19.
  * - Demo: lưu trên trình duyệt (localStorage).
@@ -31,9 +31,9 @@ export interface CatalogSource {
 const lim = (v: string, n: number) => v.trim().replace(/\s+/g, ' ').slice(0, n);
 function validate(i: SkillInput): void {
   if (!/^[A-Z]+[1-5]\.[A-Z0-9-]+\.[A-Z0-9-]+$/.test(i.code)) throw new Error('Mã kĩ năng không hợp lệ.');
-  if (!i.short.trim()) throw new Error('Thầy cô nhập tên ngắn cho kĩ năng nhé.');
-  if (!i.text.trim()) throw new Error('Thầy cô nhập mô tả (yêu cầu cần đạt) nhé.');
-  if (!i.topic.trim()) throw new Error('Thầy cô nhập chủ đề / mạch nội dung nhé.');
+  if (!i.short.trim()) throw new Error('Thầy/cô nhập tên ngắn cho kĩ năng nhé.');
+  if (!i.text.trim()) throw new Error('Thầy/cô nhập mô tả (yêu cầu cần đạt) nhé.');
+  if (!i.topic.trim()) throw new Error('Thầy/cô nhập chủ đề / mạch nội dung nhé.');
 }
 
 /* ------------------------------- demo ------------------------------- */
@@ -48,7 +48,7 @@ class DemoCatalogSource implements CatalogSource {
   }
   private async me() {
     const u = await this.ds.getCurrentUser();
-    if (!u || (u.role !== 'teacher' && u.role !== 'admin')) throw new Error('Chỉ thầy cô mới sửa được danh mục kĩ năng.');
+    if (!u || (u.role !== 'teacher' && u.role !== 'admin')) throw new Error('Chỉ thầy/cô mới sửa được danh mục kĩ năng.');
     return u;
   }
   private put(o: SkillOverride): SkillOverride {
@@ -69,7 +69,7 @@ class DemoCatalogSource implements CatalogSource {
     }
     if (old?.custom) return this.put({ ...old, topic: lim(i.topic, 120), text: lim(i.text, 500), short: lim(i.short, 80) });
     if (SKILL_BY_CODE[i.code]) throw new Error('Mã kĩ năng đã có.');
-    if (!i.subject || !i.grade) throw new Error('Thầy cô chọn môn và lớp cho kĩ năng mới nhé.');
+    if (!i.subject || !i.grade) throw new Error('Thầy/cô chọn môn và lớp cho kĩ năng mới nhé.');
     return this.put({ code: i.code, subject: i.subject, grade: i.grade, topic: lim(i.topic, 120), text: lim(i.text, 500), short: lim(i.short, 80), custom: true, ownerId: me.id });
   }
   async setSkillHidden(code: string, hidden: boolean) {

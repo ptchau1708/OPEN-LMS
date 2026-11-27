@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router';
 import { Icon } from '@openedu/ui';
 import { uid, type Lesson, type Profile, subjectInGrade, subjectOptionsFor } from '@openedu/contracts';
 import { ACTIVITY_TYPES, SUBJECTS, type Grade, type Item, type ItemType, type SubjectId } from '@openedu/contracts';
-import { useClasses, useCurrentUser, useDataSource, useDeleteItem, useItems, useLessons, useSaveItem, useSaveLesson } from '@openedu/data';
+import { useCurrentUser, useDataSource, useDeleteItem, useItems, useLessons, useSaveItem, useSaveLesson } from '@openedu/data';
+import { useClasses } from '../lib/focusGrade';
 import { Btn, ConfirmBar, Dialog, Empty, ErrorNote, Field, Loading, PageHead } from '../components/common';
 import { SampleContent } from './admin/Admin';
 import { ItemPreview, ItemStudio, newItemOfType, TypeBadge, TypePickerDialog } from '../components/items';
@@ -11,6 +12,7 @@ import { cx, relTime, shorten } from '../lib/format';
 import { exportBankXlsx, QuickAddDialog } from './itembank/QuickAdd';
 import { GameSetupDialog } from './live/GameSetup';
 import { ArenaPoolDialog } from './arena/ArenaPoolDialog';
+import { byFocus, useFocusGrade } from '../lib/focusGrade';
 
 /** Giao các câu đã chọn: tạo một bài luyện tập (mỗi câu một trang hoạt động) rồi sang trang Giao bài để chọn lớp, hạn nộp. */
 function AssignDialog({ items, me, onClose }: { items: Item[]; me: Profile; onClose: () => void }) {
@@ -51,7 +53,9 @@ function AssignDialog({ items, me, onClose }: { items: Item[]; me: Profile; onCl
 
 export default function ItemBank() {
   const [subject, setSubject] = useState<SubjectId | ''>('');
-  const [grade, setGrade] = useState<Grade | 0>(0);
+  const focus = useFocusGrade().grade;
+  // Mặc định: khối ưu tiên (lớp 5); "Mọi lớp" xem hết, khối ưu tiên vẫn đứng đầu.
+  const [grade, setGrade] = useState<Grade | 0>(focus);
   const [type, setType] = useState<ItemType | ''>('');
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState<{ item: Item; mode: 'view' | 'edit'; isNew?: boolean } | null>(null);
@@ -81,7 +85,10 @@ export default function ItemBank() {
     }
     return m;
   }, [lessons.data]);
-  const list = q.data ? [...q.data].sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '')) : [];
+  const list = useMemo(() => {
+    const byTime = q.data ? [...q.data].sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '')) : [];
+    return grade ? byTime : byFocus(byTime, focus, (it) => it.grade);
+  }, [q.data, grade, focus]);
 
   const close = () => { setOpen(null); setConfirm(false); save.reset(); };
   const doSave = () => open && save.mutate(open.item, { onSuccess: (it) => setOpen({ item: it, mode: 'view' }) });
@@ -249,7 +256,7 @@ export default function ItemBank() {
       {arena && me ? <ArenaPoolDialog classes={myClasses} items={picked.map((id) => (q.data ?? []).find((it) => it.id === id)).filter((x): x is Item => !!x)} onClose={() => setArena(false)} onDone={(text) => { setArena(false); setToast({ text }); }} /> : null}
       {assign && me ? <AssignDialog items={picked.map((id) => (q.data ?? []).find((it) => it.id === id)).filter((x): x is Item => !!x)} me={me} onClose={() => setAssign(false)} /> : null}
       <QuickAddDialog open={quick} onClose={() => setQuick(false)} initial={{ ...(subject ? { subject } : {}), ...(grade ? { grade } : {}) }} onSaved={(n) => n > 0 && setToast({ text: `Đã lưu ${n} câu vào ngân hàng.` })} />
-      <TypePickerDialog open={typePick} onClose={() => setTypePick(false)} onPick={(t) => { setTypePick(false); setOpen({ item: newItemOfType(t, grade || undefined, subject || undefined), mode: 'edit', isNew: true }); }} />
+      <TypePickerDialog open={typePick} onClose={() => setTypePick(false)} onPick={(t) => { setTypePick(false); setOpen({ item: newItemOfType(t, grade || focus, subject || undefined), mode: 'edit', isNew: true }); }} />
     </div>
   );
 }

@@ -358,7 +358,7 @@ export function writeVnEduFill(original: Uint8Array, wb: XWorkbook, plan: VnEduF
     }
     return { bytes, ext: 'xlsx', filled: plan.filled };
   }
-  throw new Error('Tệp này là bảng dạng web nên không điền tự động được. Thầy cô dùng cách "ghép cột thủ công" bên dưới nhé.');
+  throw new Error('Tệp này là bảng dạng web nên không điền tự động được. Thầy/cô dùng cách "ghép cột thủ công" bên dưới nhé.');
 }
 
 /** Mô tả ngắn cho GV. */

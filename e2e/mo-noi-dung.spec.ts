@@ -18,7 +18,7 @@ test('Danh mục kĩ năng mở: thêm, sửa kĩ năng gốc, khôi phục, ẩ
   await expect(dlg.getByText('KH4.GV.TIET-KIEM-NUOC')).toBeVisible();
   await dlg.getByTestId('sk-save').click();
   const mine = page.getByTestId('sk-row').filter({ hasText: 'Tiết kiệm nước' });
-  await expect(mine).toContainText('Thầy cô thêm');
+  await expect(mine).toContainText('Thầy/cô thêm');
 
   // Sửa chữ kĩ năng gốc → "Đã sửa", khôi phục được
   const light = page.getByTestId('sk-row').filter({ hasText: 'KH4.NL.ANH-SANG' });
@@ -108,7 +108,7 @@ test('Xoá hành vi thi đua, xoá đề kiểm tra, thu hồi huy hiệu, nhân
   await page.getByRole('alertdialog').getByRole('button', { name: 'Xóa' }).click();
   await expect(page.getByTestId('exam-delete')).toHaveCount(ne - 1);
 
-  // Huy hiệu của cô: tặng rồi thu hồi
+  // Huy hiệu của thầy/cô: tặng rồi thu hồi
   await spaGo(page, '/vuon-lop');
   await page.getByLabel('Tên huy hiệu (tối đa 40 kí tự)').fill('Tặng nhầm');
   await page.locator('.tc-tbadge__st').first().click();
@@ -119,9 +119,10 @@ test('Xoá hành vi thi đua, xoá đề kiểm tra, thu hồi huy hiệu, nhân
   await given.getByRole('button', { name: 'Thu hồi' }).click();
   await expect(page.locator('.tc-tbadge__list li').filter({ hasText: 'Tặng nhầm' })).toHaveCount(0);
 
-  // Bài giảng của thầy cô khác: chỉ xem; nhân bản thành bài của mình
+  // Bài giảng của thầy/cô khác: chỉ xem; nhân bản thành bài của mình
   await spaGo(page, '/bai-giang');
   await page.getByText('Chỉ bài của tôi').click();
+  await page.getByLabel('Lớp', { exact: true }).selectOption('0'); // mặc định lọc khối ưu tiên (lớp 5)
   const other = page.locator('.br-cardwrap').filter({ hasText: 'Con vật sống ở đâu?' }).first();
   await other.locator('.tc-lessoncard').click();
   await expect(page.getByTestId('lesson-readonly')).toBeVisible();

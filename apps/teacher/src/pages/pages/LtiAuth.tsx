@@ -33,7 +33,7 @@ export default function TeacherLtiAuth() {
   }, [params, auth]);
   return (
     <div className="tc-app theme-pro tc-center">
-      {!params.client_id ? <p>Thiếu thông tin. Thầy cô mở lại từ mục “Trang học”.</p>
+      {!params.client_id ? <p>Thiếu thông tin. Thầy/cô mở lại từ mục “Trang học”.</p>
         : auth.isError ? <div className="tc-alert tc-alert--error" role="alert"><span data-testid="lti-auth-error">{auth.error instanceof Error ? auth.error.message : 'Chưa mở được ứng dụng.'}</span></div>
         : <Loading label="Đang mở ứng dụng…" />}
     </div>

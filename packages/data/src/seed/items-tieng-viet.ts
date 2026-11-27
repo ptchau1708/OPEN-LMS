@@ -261,7 +261,7 @@ export const TIENG_VIET_ITEMS: Item[] = [
     grade: 2,
     subject: 'tieng-viet',
     skill: 'Đọc trôi chảy đoạn văn ngắn',
-    prompt: { text: 'Em đọc to đoạn văn rồi gửi cho cô nghe nhé!' },
+    prompt: { text: 'Em đọc to đoạn văn rồi gửi cho thầy/cô nghe nhé!' },
     payload: {
       text: 'Buổi sáng, ông mặt trời thức dậy. Chim hót líu lo trên cành cây. Em chào mẹ rồi vui vẻ đến trường.',
       maxSeconds: 40,

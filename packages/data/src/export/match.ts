@@ -40,7 +40,7 @@ export const MATCH_STATUS_LABEL: Record<MatchStatus, string> = {
   loose: 'Khớp gần đúng theo tên',
   ambiguous: 'Cần chọn',
   missing: 'Chưa thấy trong lớp',
-  manual: 'Thầy cô đã chọn',
+  manual: 'Thầy/cô đã chọn',
 };
 
 export function normName(s: string): string {

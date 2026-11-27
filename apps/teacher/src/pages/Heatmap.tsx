@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router';
 import { MASTERY_LEVEL_LABEL, MISCONCEPTIONS, SKILL_BY_CODE, STRAND_LABEL, SUBJECTS, subjectsForGrade, type ClassHeatmap, type GapGroup, type HeatmapCell, type MascotId, type Profile, type SubjectId } from '@openedu/contracts';
-import { useClasses, useClassHeatmap, useGapGroups, useItemsByIds, useRemediationSets, useSkillMastery, useStudentProfile } from '@openedu/data';
+import { useClassHeatmap, useGapGroups, useItemsByIds, useRemediationSets, useSkillMastery, useStudentProfile } from '@openedu/data';
+import { useClasses, useFocusGrade } from '../lib/focusGrade';
 import { Avatar, Btn, Dialog, Empty, ErrorNote, Loading, PageHead, Seg } from '../components/common';
 import { cx, relTime, shorten } from '../lib/format';
 import { LevelLegend, LevelSwatch, pct } from '../lib/mastery';
@@ -30,6 +31,7 @@ export default function Heatmap({ user }: { user: Profile }) {
   const [open, setOpen] = useState<{ sid: string; code: string } | null>(null);
   const [tip, setTip] = useState<{ code: string; x: number; y: number } | null>(null);
   const cls = classes.data?.find((c) => c.id === classId);
+  const focus = useFocusGrade().grade;
   const mapSubj = useMapSubjects(user.id, classId, cls?.grade);
   const subjOpts = mapSubj.subjects;
   const subject: SubjectId = mapSubj.current ?? 'toan';
@@ -160,7 +162,7 @@ export default function Heatmap({ user }: { user: Profile }) {
         </div>
       ) : null}
 
-      <GapGroups user={user} classId={classId} subject={subject} grade={data?.grade ?? cls?.grade ?? 1} groups={groups.data} loading={groups.isLoading} error={groups.error} />
+      <GapGroups user={user} classId={classId} subject={subject} grade={data?.grade ?? cls?.grade ?? focus} groups={groups.data} loading={groups.isLoading} error={groups.error} />
 
       {open && data ? <CellPanel user={user} hm={data} sid={open.sid} code={open.code} onClose={() => setOpen(null)} /> : null}
     </div>
@@ -305,7 +307,7 @@ function MapSubjectPicker({ grade, className, value, custom, synced, onClose, on
       <Btn kind="primary" disabled={!sel.size} onClick={() => onSave(all.filter((s) => sel.has(s)))} data-testid="hm-pick-save">Lưu ({sel.size} môn)</Btn>
     </>}>
       <div className="tc-stack">
-        <p className="tc-small tc-muted">Thầy cô dạy môn nào thì tích môn đó. Lựa chọn lưu riêng cho từng lớp{synced ? ', theo tài khoản của thầy cô — máy nào đăng nhập cũng thấy' : ' trên trình duyệt này'}. Mặc định: {defaultMapSubjects(grade).map((s) => SUBJECTS[s].name).join(', ')}.</p>
+        <p className="tc-small tc-muted">Thầy/cô dạy môn nào thì tích môn đó. Lựa chọn lưu riêng cho từng lớp{synced ? ', theo tài khoản của thầy/cô — máy nào đăng nhập cũng thấy' : ' trên trình duyệt này'}. Mặc định: {defaultMapSubjects(grade).map((s) => SUBJECTS[s].name).join(', ')}.</p>
         <div className="tc-row tc-wrap">
           <Btn size="sm" kind="ghost" onClick={() => setSel(new Set(all))}>Chọn tất cả</Btn>
           <Btn size="sm" kind="ghost" onClick={() => setSel(new Set())}>Bỏ chọn hết</Btn>

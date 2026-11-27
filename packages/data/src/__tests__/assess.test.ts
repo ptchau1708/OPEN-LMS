@@ -193,7 +193,7 @@ describe('assess — duyệt bài → thành thạo, sao, hồ sơ', () => {
     expect(lan.work.latest.some((w) => w.thumbnail && w.kind === 'photo')).toBe(true);
     const ps = await ds.getParentSummary('u-lan4a2');
     expect(ps.work?.tip).toBeTruthy();
-    expect(ps.sentences.some((s) => s.includes('được thầy cô nhận xét'))).toBe(true);
+    expect(ps.sentences.some((s) => s.includes('được thầy/cô nhận xét'))).toBe(true);
     // phụ huynh không thấy bài chưa duyệt của bạn khác
     await ds.signIn('phuhuynh4a', '123456');
     const seen = await ds.listSubmissions();

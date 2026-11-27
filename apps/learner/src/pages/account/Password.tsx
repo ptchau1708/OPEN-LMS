@@ -68,7 +68,7 @@ function ChangeForm({ forced, onDone }: { forced?: boolean; onDone: () => void }
       {forced ? (
         <>
           <h2 className="ln-pp-h">Đặt mật khẩu của riêng mình</h2>
-          <p className="ln-pp-muted">Thầy cô vừa cấp cho tài khoản này một mật khẩu tạm. Để giữ an toàn, xin đặt mật khẩu mới trước khi dùng tiếp.</p>
+          <p className="ln-pp-muted">Thầy/cô vừa cấp cho tài khoản này một mật khẩu tạm. Để giữ an toàn, xin đặt mật khẩu mới trước khi dùng tiếp.</p>
         </>
       ) : <h2 className="ln-pp-h">Đổi mật khẩu</h2>}
       <PwField label={forced ? 'Mật khẩu tạm (trên phiếu)' : 'Mật khẩu đang dùng'} value={current} onChange={setCurrent} auto="current-password" testId="pw-current" />
@@ -147,9 +147,9 @@ export function ForgotPasswordPage() {
           {req.isError && !sys && <p className="ln-alert" role="alert"><Icon name="hint" size={22} /> {errText(req.error)}</p>}
           <Button type="submit" size="lg" block disabled={!login.trim() || sys || req.isPending}>{req.isPending ? 'Đang gửi…' : 'Gửi thư đặt lại mật khẩu'}</Button>
           <ul className="ln-pp-muted ln-pl__fine">
-            <li><strong>Học sinh</strong> quên mật khẩu: nhờ thầy cô chủ nhiệm in lại phiếu.</li>
-            <li><strong>Phụ huynh đăng kí bằng số điện thoại</strong>: nhờ thầy cô chủ nhiệm cấp mật khẩu tạm.</li>
-            <li><strong>Thầy cô</strong> đăng nhập bằng tên đăng nhập: nhờ quản trị trường cấp lại.</li>
+            <li><strong>Học sinh</strong> quên mật khẩu: nhờ thầy/cô chủ nhiệm in lại phiếu.</li>
+            <li><strong>Phụ huynh đăng kí bằng số điện thoại</strong>: nhờ thầy/cô chủ nhiệm cấp mật khẩu tạm.</li>
+            <li><strong>Thầy/cô</strong> đăng nhập bằng tên đăng nhập: nhờ quản trị trường cấp lại.</li>
           </ul>
           {isDemoMode() && <p className="ln-pp-muted ln-pl__demo">Bản thử không gửi thư thật.</p>}
         </form>

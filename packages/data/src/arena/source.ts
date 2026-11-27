@@ -1,7 +1,7 @@
 /**
  * Đấu trường — nguồn dữ liệu.
  *  - Supabase: các RPC của SQL 22 (arena_*, cup_*); câu trả lời trong trận chấm ở Edge Function `grade` (như Đấu 1–1).
- *  - Demo: lưu trên trình duyệt; chấm trên máy. Bản demo MÔ PHỎNG kết quả các bạn khác để thầy cô / học sinh
+ *  - Demo: lưu trên trình duyệt; chấm trên máy. Bản demo MÔ PHỎNG kết quả các bạn khác để thầy/cô / học sinh
  *    xem được cả giải (học sinh demo đấu xong là thấy ngay đối thủ, vòng sau mở luôn).
  */
 import {
@@ -175,7 +175,7 @@ class DemoArena implements ArenaSource {
   }
   private async teacher(): Promise<Profile> {
     const u = await this.me();
-    if (u.role !== 'teacher' && u.role !== 'admin') throw new Error('Chỉ thầy cô mới làm được việc này.');
+    if (u.role !== 'teacher' && u.role !== 'admin') throw new Error('Chỉ thầy/cô mới làm được việc này.');
     return u;
   }
   private settingsOf(s: DemoStore, classId?: string): ArenaSettings {
@@ -337,7 +337,7 @@ class DemoArena implements ArenaSource {
       id: uid('cup'), title: 'Giải thử sức (bản demo)', scope: 'class', classId: u.classId, ...(cls ? { className: cls.name } : {}),
       grade: u.grade as Grade, subject: subject as DemoCup['subject'], source: 'auto', itemIds: [], questions: Math.min(5, bySubject.get(subject) ?? 3),
       seeding: 'random', entry: 'all', startAt: nowIso(), roundMinutes: 1440, pace: 'continuous', status: 'signup', round: 0, rounds: 0,
-      thirds: [], createdBy: 'demo', createdByName: 'Cô giáo (demo)', createdAt: nowIso(), players: [], matches: [], demoAuto: true,
+      thirds: [], createdBy: 'demo', createdByName: 'GV (demo)', createdAt: nowIso(), players: [], matches: [], demoAuto: true,
     };
     s.cups.unshift(c);
   }
@@ -373,10 +373,10 @@ class DemoArena implements ArenaSource {
   async createCup(input: CupInput) {
     const u = await this.teacher();
     const title = input.title.trim();
-    if (!title) throw new Error('Thầy cô đặt tên cho giải đấu nhé.');
+    if (!title) throw new Error('Thầy/cô đặt tên cho giải đấu nhé.');
     const cls = await this.ds.getClass(input.classId);
-    if (!cls) throw new Error('Thầy cô chọn lớp cho giải đấu nhé.');
-    if (input.source === 'picked' && !input.itemIds.length) throw new Error('Thầy cô chọn câu hỏi cho giải (hoặc chọn "Tự động theo môn").');
+    if (!cls) throw new Error('Thầy/cô chọn lớp cho giải đấu nhé.');
+    if (input.source === 'picked' && !input.itemIds.length) throw new Error('Thầy/cô chọn câu hỏi cho giải (hoặc chọn "Tự động theo môn").');
     const c: DemoCup = {
       id: uid('cup'), title: title.slice(0, 80), scope: input.scope, classId: cls.id, className: cls.name, grade: cls.grade as Grade,
       subject: input.subject, source: input.source, itemIds: input.source === 'picked' ? [...new Set(input.itemIds)] : [],
@@ -421,14 +421,14 @@ class DemoArena implements ArenaSource {
   cancelCup(id: string) {
     return this.hostOp(id, (c) => {
       if (c.status === 'finished' || c.status === 'cancelled') throw new Error('Giải đã kết thúc.');
-      Object.assign(c, { status: 'cancelled', finishedAt: nowIso(), note: c.note ?? 'Thầy cô đã huỷ giải.' });
+      Object.assign(c, { status: 'cancelled', finishedAt: nowIso(), note: c.note ?? 'Thầy/cô đã huỷ giải.' });
     });
   }
   async deleteCup(id: string) {
     await this.teacher();
     const s = readStore();
     const c = s.cups.find((x) => x.id === id);
-    if (c?.status === 'running') throw new Error('Giải đang diễn ra — thầy cô huỷ giải trước khi xoá.');
+    if (c?.status === 'running') throw new Error('Giải đang diễn ra — thầy/cô huỷ giải trước khi xoá.');
     s.cups = s.cups.filter((x) => x.id !== id);
     writeStore(s);
   }

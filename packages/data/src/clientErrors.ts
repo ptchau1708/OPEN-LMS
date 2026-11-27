@@ -1,5 +1,5 @@
 /**
- * Ghi lỗi phía app: giữ 20 lỗi gần nhất trên máy (để thầy cô chép gửi quản trị) và, ở chế độ Supabase khi đã đăng nhập,
+ * Ghi lỗi phía app: giữ 20 lỗi gần nhất trên máy (để thầy/cô chép gửi quản trị) và, ở chế độ Supabase khi đã đăng nhập,
  * gửi về v2.client_errors (RPC log_client_error, tối đa 20 lỗi/người/ngày). Không bao giờ ném lỗi ra ngoài.
  */
 import { isDemoMode } from './env';

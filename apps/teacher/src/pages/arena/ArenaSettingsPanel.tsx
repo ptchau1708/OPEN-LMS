@@ -56,7 +56,7 @@ export function ArenaSettingsPanel({ cls }: { cls: ClassInfo }) {
       </GroupField>
       <GroupField label="Câu hỏi khi chơi tự do">
         <Seg label="Nguồn câu" value={draft.source} onChange={(v) => set({ source: v })} options={[
-          { value: 'auto', label: 'Tự động theo môn, khối' }, { value: 'picked', label: `Chỉ câu thầy cô đưa vào (${draft.itemIds.length})` },
+          { value: 'auto', label: 'Tự động theo môn, khối' }, { value: 'picked', label: `Chỉ câu thầy/cô đưa vào (${draft.itemIds.length})` },
         ]} />
       </GroupField>
       <div className="tc-arenapool">

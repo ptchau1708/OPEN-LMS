@@ -29,7 +29,7 @@ class DemoNotes implements NotesSource {
   }
   private async staff() {
     const u = await this.me();
-    if (u.role !== 'teacher' && u.role !== 'admin') throw new Error('Chỉ thầy cô mới nhập thông tin bổ sung được.');
+    if (u.role !== 'teacher' && u.role !== 'admin') throw new Error('Chỉ thầy/cô mới nhập thông tin bổ sung được.');
     return u;
   }
   async list(studentId: string) {
@@ -66,7 +66,7 @@ const toRow = (n: StudentNoteInput): Row => ({
 interface PgError { message?: string; code?: string }
 function fail(e: PgError, vi: string): never {
   if (e.code === '42P01' || e.code === 'PGRST205' || /student_notes|schema cache/i.test(e.message ?? '')) throw new Error('Cần chạy tệp SQL 20 trên Supabase để dùng Thông tin bổ sung.');
-  if (e.code === '42501' || /row-level security/i.test(e.message ?? '')) throw new Error('Thầy cô chỉ nhập thông tin cho học sinh lớp mình.');
+  if (e.code === '42501' || /row-level security/i.test(e.message ?? '')) throw new Error('Thầy/cô chỉ nhập thông tin cho học sinh lớp mình.');
   throw new Error(vi);
 }
 

@@ -26,7 +26,7 @@ export default function ParentHub({ user }: { user: Profile }) {
   const queue = useParentQueue(cls?.id);
   const threads = useParentThreads(cls?.id);
   if (classes.isLoading) return <Loading />;
-  if (!cls) return <Empty icon="parent" title="Chưa có lớp">Thầy cô cần có lớp để làm việc với phụ huynh.</Empty>;
+  if (!cls) return <Empty icon="parent" title="Chưa có lớp">Thầy/cô cần có lớp để làm việc với phụ huynh.</Empty>;
   const unread = (threads.data ?? []).reduce((n, t) => n + t.unread, 0);
   const waiting = queue.data?.length ?? 0;
   const badge = (n: number, label: string) => <>{label}{n ? <span className="tc-ph__count" aria-label={`${n} mục`}>{n}</span> : null}</>;
@@ -44,7 +44,7 @@ export default function ParentHub({ user }: { user: Profile }) {
           { value: 'lien-ket', label: 'Liên kết tài khoản' },
         ]} />
       </div>
-      {tab === 'gui' ? <ComposePanel key={cls.id} cls={cls} onSent={() => setTab('da-gui')} /> : null}
+      {tab === 'gui' ? <ComposePanel key={cls.id} cls={cls} onSent={() => setTab('da-gui')} onLinks={() => setTab('lien-ket')} /> : null}
       {tab === 'tin-nhan' ? <MessagesPanel key={cls.id} cls={cls} /> : null}
       {tab === 'cho-duyet' ? <QueuePanel key={cls.id} cls={cls} onSettings={() => setTab('thay-gi')} /> : null}
       {tab === 'da-gui' ? <SentPanel key={cls.id} cls={cls} onNew={() => setTab('gui')} /> : null}

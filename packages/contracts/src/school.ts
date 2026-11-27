@@ -94,7 +94,7 @@ export interface ParentTt27 {
   subjects: { subject: SubjectId; level: Tt27Level; comment: string; score?: number }[];
   qualities: { key: string; rating: Tt27Rating }[];
   competencies: { key: string; rating: Tt27Rating }[];
-  /** "Lời nhắn của cô" = generalComment. */
+  /** "Lời nhắn của thầy/cô" = generalComment. */
   generalComment: string;
   teacherName?: string;
   updatedAt?: string;

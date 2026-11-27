@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { SUBJECTS, TT27_TERM_LABEL, type Profile } from '@openedu/contracts';
-import { matrixTotals, useClasses, useDeleteExam, useExamMatrices, useExams } from '@openedu/data';
+import { matrixTotals, useDeleteExam, useExamMatrices, useExams } from '@openedu/data';
+import { byFocus, useClasses, useFocusGrade } from '../../lib/focusGrade';
 import { Btn, ConfirmBar, Empty, ErrorNote, Loading, PageHead } from '../../components/common';
 import { fmtDateTime } from '../../lib/format';
 import { ExamTabs, fmtPoints } from './shared';
@@ -14,6 +15,7 @@ export default function ExamHome({ user }: { user: Profile }) {
   const delExam = useDeleteExam();
   const [askDel, setAskDel] = useState<string | null>(null);
   const classes = useClasses(user.role === 'admin' ? undefined : user.id);
+  const focus = useFocusGrade().grade;
   const className = (id: string) => classes.data?.find((c) => c.id === id)?.name ?? id;
   const now = Date.now();
   return (
@@ -27,7 +29,7 @@ export default function ExamHome({ user }: { user: Profile }) {
           <Empty icon="map" title="Chưa có ma trận">Tạo ma trận: chọn mạch kiến thức, số câu mỗi mức và điểm.</Empty>
         ) : (
           <div className="ex-cards">
-            {mq.data.map((m) => {
+            {byFocus(mq.data, focus, (m) => m.grade).map((m) => {
               const tt = matrixTotals(m);
               return (
                 <article key={m.id} className="ex-mcard">

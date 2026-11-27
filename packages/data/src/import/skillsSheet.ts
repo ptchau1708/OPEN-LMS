@@ -20,7 +20,7 @@ const SHOWN = 'Đang dùng';
 const HIDDEN = 'Đã ẩn';
 
 function source(s: Skill): string {
-  if (s.custom) return 'Thầy cô thêm';
+  if (s.custom) return 'Thầy/cô thêm';
   if (s.edited) return 'Gốc – đã sửa';
   return s.provisional ? 'Gốc (tạm)' : 'Gốc';
 }
@@ -106,7 +106,7 @@ export function planSkillsRows(rows: XlsxCell[][]): SkillsImportPlan {
   const out: SkillPlanRow[] = [];
   const hi = rows.findIndex((r) => r.some((c) => f(c) === 'ma ki nang' || f(c) === 'ma ky nang'));
   if (hi < 0) {
-    return { rows: [], counts: { add: 0, edit: 0, hide: 0, show: 0, same: 0, error: 0 }, warnings: ['Không thấy dòng tiêu đề "Mã kĩ năng". Thầy cô dùng tệp xuất từ trang Danh mục kĩ năng nhé.'] };
+    return { rows: [], counts: { add: 0, edit: 0, hide: 0, show: 0, same: 0, error: 0 }, warnings: ['Không thấy dòng tiêu đề "Mã kĩ năng". Thầy/cô dùng tệp xuất từ trang Danh mục kĩ năng nhé.'] };
   }
   const head = rows[hi].map(f);
   const col = (k: keyof typeof COLS): number => head.findIndex((h) => COLS[k].includes(h));

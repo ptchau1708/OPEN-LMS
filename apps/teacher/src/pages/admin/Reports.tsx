@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { SUBJECTS, subjectsForGrade, TT27_TERM_LABEL, type Grade, type Profile, type SubjectId, type Tt27TermId } from '@openedu/contracts';
-import { csvFileName, downloadText, schoolReportCsv, toCsv, toTsv, tt27Rows, useClasses, useSchoolOverview, useSchoolSettings, useStudents, useTt27, vnWeekStart } from '@openedu/data';
+import { csvFileName, downloadText, schoolReportCsv, toCsv, toTsv, tt27Rows, useSchoolOverview, useSchoolSettings, useStudents, useTt27, vnWeekStart } from '@openedu/data';
+import { useClasses } from '../../lib/focusGrade';
 import { Btn, Empty, ErrorNote, Field, Loading, PageHead, Seg } from '../../components/common';
 import { Kpi, Meter, pct } from './util';
 import '../../styles/admin.css';
@@ -31,7 +32,7 @@ export default function Reports({ user }: { user: Profile }) {
     <div className="tc-page tc-page--wide ad-page">
       <PageHead
         title={admin ? 'Báo cáo trường' : 'Báo cáo lớp'}
-        sub={<>{settings?.schoolName ? `${settings.schoolName} · ` : ''}Năm học {o?.schoolYear ?? settings?.schoolYear ?? ''} · {TT27_TERM_LABEL[o?.termId ?? settings?.termId ?? 'GK1']}{admin ? '' : ' · chỉ lớp thầy cô chủ nhiệm'}</>}
+        sub={<>{settings?.schoolName ? `${settings.schoolName} · ` : ''}Năm học {o?.schoolYear ?? settings?.schoolYear ?? ''} · {TT27_TERM_LABEL[o?.termId ?? settings?.termId ?? 'GK1']}{admin ? '' : ' · chỉ lớp thầy/cô chủ nhiệm'}</>}
         actions={<>
           <Seg label="Khoảng thời gian" value={rk} onChange={setRk} options={(['tuan', '7', '30'] as RangeKey[]).map((k) => ({ value: k, label: RANGE_LABEL[k] }))} />
           <Btn icon="upload" disabled={!o} onClick={() => o && downloadText(csvFileName(`bao-cao-truong-${o.range.from.slice(0, 10)}`), schoolReportCsv(o))}>Xuất CSV</Btn>
@@ -121,7 +122,7 @@ function Tt27Export({ user }: { user: Profile }) {
   const done = (evals.data ?? []).filter((e) => e.status === 'final').length;
   const copy = async () => {
     try { await navigator.clipboard.writeText(toTsv(rows)); setMsg('Đã sao chép. Mở phần mềm quản lí trường / Excel, chọn ô đầu tiên rồi dán (Ctrl+V).'); }
-    catch { setMsg('Trình duyệt chưa cho sao chép. Thầy cô dùng nút “Tải CSV” nhé.'); }
+    catch { setMsg('Trình duyệt chưa cho sao chép. Thầy/cô dùng nút “Tải CSV” nhé.'); }
   };
   return (
     <section className="tc-card">
@@ -138,7 +139,7 @@ function Tt27Export({ user }: { user: Profile }) {
             <Btn icon="check" disabled={!rows.length || evals.isPending} onClick={() => void copy()}>Sao chép để dán</Btn>
           </div>
           {msg ? <p className="tc-alert tc-alert--info" role="status">{msg}</p> : null}
-          {done < students.length ? <p className="tc-field__help">Bản nháp vẫn được xuất (cột Trạng thái) — thầy cô nên chốt ở trang Nhận xét TT27 trước khi nộp.</p> : null}
+          {done < students.length ? <p className="tc-field__help">Bản nháp vẫn được xuất (cột Trạng thái) — thầy/cô nên chốt ở trang Nhận xét TT27 trước khi nộp.</p> : null}
         </div>
       )}
     </section>

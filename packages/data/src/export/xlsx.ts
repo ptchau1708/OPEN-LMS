@@ -116,7 +116,7 @@ export interface ZipFiles { [path: string]: Uint8Array }
 
 export function openZip(bytes: Uint8Array): ZipFiles {
   if (bytes.length >= 8 && bytes[0] === 0xd0 && bytes[1] === 0xcf && bytes[2] === 0x11 && bytes[3] === 0xe0) {
-    throw new XlsxError('Đây là tệp Excel kiểu cũ (.xls) hoặc tệp có mật khẩu. Thầy cô mở tệp bằng Excel, chọn Lưu thành → "Excel Workbook (.xlsx)" rồi tải lên lại nhé.', 'old-xls');
+    throw new XlsxError('Đây là tệp Excel kiểu cũ (.xls) hoặc tệp có mật khẩu. Thầy/cô mở tệp bằng Excel, chọn Lưu thành → "Excel Workbook (.xlsx)" rồi tải lên lại nhé.', 'old-xls');
   }
   if (!(bytes[0] === 0x50 && bytes[1] === 0x4b)) throw new XlsxError('Tệp này không phải tệp Excel .xlsx.', 'not-xlsx');
   try {
@@ -276,7 +276,7 @@ export function readXlsx(data: Uint8Array | ArrayBuffer): XWorkbook {
     return { sheets, format: 'html' };
   }
   const files = openZip(bytes);
-  if (files['EncryptedPackage']) throw new XlsxError('Tệp Excel đang đặt mật khẩu. Thầy cô bỏ mật khẩu rồi tải lên lại nhé.', 'encrypted');
+  if (files['EncryptedPackage']) throw new XlsxError('Tệp Excel đang đặt mật khẩu. Thầy/cô bỏ mật khẩu rồi tải lên lại nhé.', 'encrypted');
   const { sheets: entries, date1904 } = listSheetEntries(files);
   if (!entries.length) throw new XlsxError('Tệp Excel không có trang tính nào.', 'broken');
   const shared = readSharedStrings(files);

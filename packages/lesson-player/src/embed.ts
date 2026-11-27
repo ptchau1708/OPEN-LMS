@@ -59,7 +59,7 @@ export type EmbedResult =
   | { ok: true; provider: EmbedProvider; src: string; openUrl: string }
   | { ok: false; reason: string; openUrl?: string };
 
-/** Thầy cô hay dán cả mã <iframe …>: lấy src ra. */
+/** Thầy/cô hay dán cả mã <iframe …>: lấy src ra. */
 function extractUrl(input: string): string {
   const s = input.trim();
   const m = /<iframe\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i.exec(s);
@@ -76,7 +76,7 @@ export function toEmbed(input: string): EmbedResult {
   return { ok: false, reason: NOT_ALLOWED, openUrl: r.openUrl };
 }
 
-const NOT_ALLOWED = 'Trang này chưa có trong danh sách trang được phép nhúng. Thầy cô thêm ở mục “Trang học” → “Trang được phép nhúng”. Học sinh vẫn mở được bằng nút “Mở trong tab mới”.';
+const NOT_ALLOWED = 'Trang này chưa có trong danh sách trang được phép nhúng. Thầy/cô thêm ở mục “Trang học” → “Trang được phép nhúng”. Học sinh vẫn mở được bằng nút “Mở trong tab mới”.';
 
 function toEmbedRaw(input: string): EmbedResult {
   const raw = extractUrl(input ?? '');

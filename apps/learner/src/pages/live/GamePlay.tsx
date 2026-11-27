@@ -84,7 +84,7 @@ export function SelfPlay({ channel, state, lesson, items, me, mascot, bigText }:
   if (!g.startedAt) {
     return (
       <div className="ln-gamecenter">
-        <MascotBubble mascot={mascot as never} mood="wave" size={150}><strong>Chờ cô bấm “Bắt đầu” nhé!</strong></MascotBubble>
+        <MascotBubble mascot={mascot as never} mood="wave" size={150}><strong>Chờ thầy/cô bấm “Bắt đầu” nhé!</strong></MascotBubble>
         <p>Em sẽ tự làm {qs.length} câu. Đúng và nhanh được nhiều điểm!</p>
       </div>
     );

@@ -21,7 +21,7 @@ export function PaperScanner({ onHits, labels }: { onHits: (hits: PaperHit[]) =>
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     (async () => {
       try {
-        if (!navigator.mediaDevices?.getUserMedia) throw new Error('Trình duyệt này không mở được camera. Thầy cô dùng Chrome trên điện thoại nhé.');
+        if (!navigator.mediaDevices?.getUserMedia) throw new Error('Trình duyệt này không mở được camera. Thầy/cô dùng Chrome trên điện thoại nhé.');
         const [s, read] = await Promise.all([
           navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false }),
           loadPaperReader(),
@@ -52,7 +52,7 @@ export function PaperScanner({ onHits, labels }: { onHits: (hits: PaperHit[]) =>
         void tick();
       } catch (e) {
         const name = (e as { name?: string }).name;
-        setErr(name === 'NotAllowedError' ? 'Thầy cô chưa cho phép dùng camera. Bấm biểu tượng ổ khóa trên thanh địa chỉ → cho phép Camera.' : e instanceof Error ? e.message : 'Không mở được camera.');
+        setErr(name === 'NotAllowedError' ? 'Thầy/cô chưa cho phép dùng camera. Bấm biểu tượng ổ khóa trên thanh địa chỉ → cho phép Camera.' : e instanceof Error ? e.message : 'Không mở được camera.');
       }
     })();
     return () => {

@@ -20,7 +20,7 @@ export function VisibilityPanel({ cls }: { cls: ClassInfo }) {
         <h2 className="tc-h2">Mục phụ huynh lớp {cls.name} được xem</h2>
         <p className="tc-small tc-muted">
           Đã có {draft.parents} phụ huynh liên kết với {draft.linkedStudents}/{draft.students} em.
-          “Cô duyệt rồi mới gửi”: mục mới vào thẻ Chờ duyệt, phụ huynh chỉ thấy khi cô bấm Gửi. Tắt một mục thì phụ huynh không xem được (máy chủ chặn, không chỉ ẩn trên màn hình).
+          “GV duyệt rồi mới gửi”: mục mới vào thẻ Chờ duyệt, phụ huynh chỉ thấy khi thầy/cô bấm Gửi. Tắt một mục thì phụ huynh không xem được (máy chủ chặn, không chỉ ẩn trên màn hình).
         </p>
         <ul className="tc-ph-kinds">
           {SHARE_KINDS.map((k) => (
@@ -35,11 +35,11 @@ export function VisibilityPanel({ cls }: { cls: ClassInfo }) {
         </ul>
         <h3 className="tc-ph-sub">Tin nhắn của phụ huynh</h3>
         <div className="tc-row tc-wrap tc-ph-hours">
-          <label className="tc-check"><input type="checkbox" checked={draft.msgEnabled} onChange={(e) => { setSaved(false); setDraft({ ...draft, msgEnabled: e.target.checked }); }} data-testid="ph-msg-enabled" /> Cho phụ huynh nhắn tin cho cô</label>
+          <label className="tc-check"><input type="checkbox" checked={draft.msgEnabled} onChange={(e) => { setSaved(false); setDraft({ ...draft, msgEnabled: e.target.checked }); }} data-testid="ph-msg-enabled" /> Cho phụ huynh nhắn tin cho thầy/cô</label>
           <Field label="Nhận tin từ"><input type="time" className="tc-input tc-input--sm" value={draft.msgFrom} onChange={(e) => { setSaved(false); setDraft({ ...draft, msgFrom: e.target.value }); }} /></Field>
           <Field label="đến"><input type="time" className="tc-input tc-input--sm" value={draft.msgTo} onChange={(e) => { setSaved(false); setDraft({ ...draft, msgTo: e.target.value }); }} /></Field>
         </div>
-        <p className="tc-small tc-muted">Ngoài giờ này phụ huynh vẫn gửi được, nhưng cô chỉ nhận thông báo khi vào giờ (máy cô không reo lúc đêm).</p>
+        <p className="tc-small tc-muted">Ngoài giờ này phụ huynh vẫn gửi được, nhưng thầy/cô chỉ nhận thông báo khi vào giờ (máy thầy/cô không reo lúc đêm).</p>
         <ErrorNote error={save.error} />
         <div className="tc-row">
           <Btn kind="primary" disabled={!dirty || save.isPending} onClick={() => save.mutate({ classId: cls.id, patch: { modes: draft.modes, msgEnabled: draft.msgEnabled, msgFrom: draft.msgFrom, msgTo: draft.msgTo } }, { onSuccess: () => setSaved(true) })} data-testid="ph-vis-save">
@@ -70,7 +70,7 @@ function PreviewCard({ cls }: { cls: ClassInfo }) {
         <>
           <p className="tc-small">
             {q.data.parents.length ? <>Phụ huynh: {q.data.parents.map((p) => `${p.name}${p.relation ? ` (${p.relation})` : ''}`).join(', ')}</> : <span className="tc-chip tc-chip--warn">Chưa có phụ huynh liên kết</span>}
-            {q.data.waiting ? <> · <b>{q.data.waiting}</b> mục chờ cô duyệt</> : null}
+            {q.data.waiting ? <> · <b>{q.data.waiting}</b> mục chờ GV duyệt</> : null}
           </p>
           <ul className="tc-ph-prev">
             {q.data.items.map((it) => {
@@ -78,7 +78,7 @@ function PreviewCard({ cls }: { cls: ClassInfo }) {
               return (
                 <li key={it.kind} className={`is-${it.mode}`}>
                   <span>{k.label}</span>
-                  <span className="tc-small">{it.mode === 'off' ? 'Không gửi' : it.total ? `Thấy ${it.shown}/${it.total}${it.mode === 'review' ? ' · cô duyệt' : ''}` : it.mode === 'review' ? 'Cô duyệt rồi mới gửi' : 'Tự động'}</span>
+                  <span className="tc-small">{it.mode === 'off' ? 'Không gửi' : it.total ? `Thấy ${it.shown}/${it.total}${it.mode === 'review' ? ' · GV duyệt' : ''}` : it.mode === 'review' ? 'GV duyệt rồi mới gửi' : 'Tự động'}</span>
                 </li>
               );
             })}

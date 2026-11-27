@@ -78,7 +78,7 @@ async function registerParent(b: Record<string, unknown>) {
   if (error) throw fromPgError(error);
   const row = c as { used_at: string | null; revoked_at: string | null; expires_at: string } | null;
   if (!row || row.used_at || row.revoked_at || Date.parse(row.expires_at) <= Date.now()) {
-    throw new HttpError(400, !row ? 'Mã chưa đúng. Bố mẹ kiểm tra lại 8 kí tự trên phiếu nhé.' : row.used_at ? 'Mã này đã được dùng. Xin nhờ thầy cô cấp mã mới.' : 'Mã đã hết hạn hoặc bị thu hồi. Xin nhờ thầy cô cấp mã mới.', 'invalid_code');
+    throw new HttpError(400, !row ? 'Mã chưa đúng. Bố mẹ kiểm tra lại 8 kí tự trên phiếu nhé.' : row.used_at ? 'Mã này đã được dùng. Xin nhờ thầy/cô cấp mã mới.' : 'Mã đã hết hạn hoặc bị thu hồi. Xin nhờ thầy/cô cấp mã mới.', 'invalid_code');
   }
   if (await usernameTaken(login)) throw new HttpError(409, 'Email / số điện thoại này đã có tài khoản. Bố mẹ đăng nhập rồi nhập mã nhé.', 'exists');
   const email = login.includes('@') ? login : `${login}@parent.${DOMAIN}`;
@@ -126,7 +126,7 @@ async function createStudents(req: Request, b: Record<string, unknown>) {
   if (!cls) throw new HttpError(404, 'Không tìm thấy lớp này.', 'not_found');
   const { data: owner } = await db.from('classes').select('teacher_id').eq('id', classId).maybeSingle();
   const isOwner = caller.role === 'teacher' && (owner as { teacher_id: string | null } | null)?.teacher_id === caller.id;
-  if (caller.role !== 'admin' && !isOwner) throw new HttpError(403, 'Thầy cô chỉ tạo học sinh cho lớp mình chủ nhiệm.', 'forbidden');
+  if (caller.role !== 'admin' && !isOwner) throw new HttpError(403, 'Thầy/cô chỉ tạo học sinh cho lớp mình chủ nhiệm.', 'forbidden');
   const { count } = await db.from('profiles').select('id', { count: 'exact', head: true }).eq('class_id', classId).eq('role', 'student');
   const c = cls as { id: string; name: string; grade: number };
   const clsSlug = fold(c.name) || 'lop';
@@ -176,8 +176,8 @@ async function resetPassword(req: Request, b: Record<string, unknown>) {
       }
     }
   }
-  if (!ok) throw new HttpError(403, 'Thầy cô chỉ cấp lại mật khẩu cho học sinh lớp mình chủ nhiệm và phụ huynh của các em.', 'forbidden');
-  if (u.id === caller.id) throw new HttpError(400, 'Muốn đổi mật khẩu của chính mình, thầy cô dùng mục Đổi mật khẩu.', 'invalid');
+  if (!ok) throw new HttpError(403, 'Thầy/cô chỉ cấp lại mật khẩu cho học sinh lớp mình chủ nhiệm và phụ huynh của các em.', 'forbidden');
+  if (u.id === caller.id) throw new HttpError(400, 'Muốn đổi mật khẩu của chính mình, thầy/cô dùng mục Đổi mật khẩu.', 'invalid');
   const pw = password();
   const temp = u.role !== 'student';
   const { data: au, error: ge } = await db.auth.admin.getUserById(u.id);

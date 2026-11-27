@@ -151,7 +151,7 @@ function GradePush({ data, g }: { data: BridgeData; g: ReturnType<typeof useGoog
           {courseId ? <Btn disabled={g.busy} onClick={() => void g.run(gc.CLASSROOM_SCOPES.grades, async (a) => { const w = await gc.listCourseWork(a, courseId, true); setWorks(w); setWorkId(''); })}>Bài tập OPEN-EDU đã tạo</Btn> : null}
           {works ? <select className="tc-input tc-input--sm" aria-label="Bài tập trên Classroom" value={workId} onChange={(e) => setWorkId(e.target.value)}><option value="">+ Tạo bài tập mới “{title}”</option>{works.map((w) => <option key={w.id} value={w.id}>{w.title}</option>)}</select> : null}
         </div>
-        <label className="tc-row tc-small br-check"><input type="checkbox" checked={mode === 'assigned'} onChange={(e) => setMode(e.target.checked ? 'assigned' : 'draft')} /> Điền luôn điểm chính thức (bỏ chọn = chỉ điểm nháp, thầy cô bấm “Trả bài” trong Classroom để HS thấy)</label>
+        <label className="tc-row tc-small br-check"><input type="checkbox" checked={mode === 'assigned'} onChange={(e) => setMode(e.target.checked ? 'assigned' : 'draft')} /> Điền luôn điểm chính thức (bỏ chọn = chỉ điểm nháp, thầy/cô bấm “Trả bài” trong Classroom để HS thấy)</label>
         {noId !== null && noId > 0 ? <div className="tc-alert tc-alert--info"><span>{noId} em chưa ghép với tài khoản Google — sẽ bị bỏ qua.</span></div> : null}
         <div className="tc-row tc-wrap">
           <Btn kind="primary" icon="upload" disabled={g.busy || !courseId} onClick={() => void g.run(gc.CLASSROOM_SCOPES.grades, async (a) => {
@@ -183,7 +183,7 @@ export function ClassroomTab({ data, onChanged }: { data: BridgeData; onChanged:
     <div className="br-stack">
       <section className="tc-card br-step">
         <h2>Chia sẻ bài lên Classroom</h2>
-        <p className="tc-small">Ở trang <b>Bài giảng</b>, <b>Giao bài</b>, <b>Bài viết</b> và <b>Đề kiểm tra</b> có nút “Classroom”: bấm vào, Google mở trang chia sẻ để thầy cô đăng link bài lên lớp Classroom (thông báo, bài tập hoặc tài liệu). Học sinh bấm link sẽ mở thẳng bài trong OPEN-EDU. Không cần cài đặt gì.</p>
+        <p className="tc-small">Ở trang <b>Bài giảng</b>, <b>Giao bài</b>, <b>Bài viết</b> và <b>Đề kiểm tra</b> có nút “Classroom”: bấm vào, Google mở trang chia sẻ để thầy/cô đăng link bài lên lớp Classroom (thông báo, bài tập hoặc tài liệu). Học sinh bấm link sẽ mở thẳng bài trong OPEN-EDU. Không cần cài đặt gì.</p>
       </section>
       {enabled ? (
         <>
@@ -196,7 +196,7 @@ export function ClassroomTab({ data, onChanged }: { data: BridgeData; onChanged:
       ) : <SetupSteps />}
       <section className="tc-card br-step">
         <header className="tc-card__head"><h2>Bảng điểm theo bố cục Classroom / Google Sheets</h2></header>
-        <p className="tc-small">Google Classroom <b>không có</b> chức năng nhập điểm từ tệp. Bảng này (Mã HS, Họ tên, Email Google, mỗi đề một cột điểm thang 10, dòng 2 là điểm tối đa) để thầy cô lưu, mở bằng Google Sheets, hoặc đối chiếu khi nhập tay. Muốn điểm tự vào Classroom thì dùng “Đẩy điểm” ở trên.</p>
+        <p className="tc-small">Google Classroom <b>không có</b> chức năng nhập điểm từ tệp. Bảng này (Mã HS, Họ tên, Email Google, mỗi đề một cột điểm thang 10, dòng 2 là điểm tối đa) để thầy/cô lưu, mở bằng Google Sheets, hoặc đối chiếu khi nhập tay. Muốn điểm tự vào Classroom thì dùng “Đẩy điểm” ở trên.</p>
         <QuickExport data={data} only="classroom" />
       </section>
     </div>

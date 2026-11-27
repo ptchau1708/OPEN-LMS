@@ -33,7 +33,7 @@ begin
     raise exception 'Bài này chưa đến giờ mở.' using errcode = 'P0001';
   end if;
   if a.late_policy = 'lock' and a.due_at is not null and a.due_at < now() then
-    raise exception 'Bài này đã hết hạn nộp. Em hỏi thầy cô nhé.' using errcode = 'P0001';
+    raise exception 'Bài này đã hết hạn nộp. Em hỏi thầy/cô nhé.' using errcode = 'P0001';
   end if;
   if a.target_type = 'lesson' then
     update v2.lesson_progress

@@ -130,11 +130,11 @@ export class DemoRewardsSource implements RewardsSource {
 
   async grantTeacherBadge(input: GrantTeacherBadgeInput): Promise<UserBadge[]> {
     const me = await this.viewer();
-    if (!me || (me.role !== 'teacher' && me.role !== 'admin')) throw fail('Chỉ thầy cô mới tặng huy hiệu được.');
+    if (!me || (me.role !== 'teacher' && me.role !== 'admin')) throw fail('Chỉ thầy/cô mới tặng huy hiệu được.');
     const cls = await this.ds.getClass(input.classId);
-    if (!cls || (me.role !== 'admin' && cls.teacherId !== me.id)) throw fail('Thầy cô chỉ tặng huy hiệu cho học sinh lớp mình.');
+    if (!cls || (me.role !== 'admin' && cls.teacherId !== me.id)) throw fail('Thầy/cô chỉ tặng huy hiệu cho học sinh lớp mình.');
     const title = input.title.trim().slice(0, 40);
-    if (!title) throw fail('Thầy cô đặt tên cho huy hiệu nhé.');
+    if (!title) throw fail('Thầy/cô đặt tên cho huy hiệu nhé.');
     if (!TEACHER_BADGE_GLYPHS.includes(input.glyph)) throw fail('Biểu tượng này chưa có trong bộ huy hiệu.');
     const { store, now, save } = await this.kv();
     const out: UserBadge[] = [];
@@ -156,13 +156,13 @@ export class DemoRewardsSource implements RewardsSource {
 
   async revokeTeacherBadge(badgeId: string): Promise<void> {
     const me = await this.viewer();
-    if (!me || (me.role !== 'teacher' && me.role !== 'admin')) throw fail('Chỉ thầy cô mới thu hồi huy hiệu được.');
+    if (!me || (me.role !== 'teacher' && me.role !== 'admin')) throw fail('Chỉ thầy/cô mới thu hồi huy hiệu được.');
     const { store, save } = await this.kv();
     const b = store.badges.find((x) => x.id === badgeId && x.badgeId === TEACHER_BADGE_ID);
     if (!b) throw fail('Không tìm thấy huy hiệu này.');
     if (me.role !== 'admin' && b.grantedBy !== me.id) {
       const classes = await this.ds.listClasses(me.id);
-      if (!classes.some((c) => c.studentIds.includes(b.userId))) throw fail('Thầy cô chỉ thu hồi huy hiệu của học sinh lớp mình.');
+      if (!classes.some((c) => c.studentIds.includes(b.userId))) throw fail('Thầy/cô chỉ thu hồi huy hiệu của học sinh lớp mình.');
     }
     store.badges = store.badges.filter((x) => x.id !== badgeId);
     save(store);
@@ -247,7 +247,7 @@ export class DemoRewardsSource implements RewardsSource {
   async setGardenGoal(input: SetGardenGoalInput): Promise<ClassGarden> {
     const me = await this.viewer();
     const cls = await this.ds.getClass(input.classId);
-    if (!me || !cls || (me.role !== 'admin' && !(me.role === 'teacher' && cls.teacherId === me.id))) throw fail('Chỉ thầy cô của lớp mới đặt mục tiêu được.');
+    if (!me || !cls || (me.role !== 'admin' && !(me.role === 'teacher' && cls.teacherId === me.id))) throw fail('Chỉ thầy/cô của lớp mới đặt mục tiêu được.');
     const target = Math.round(input.targetStars);
     if (!(target >= 10 && target <= 5000)) throw fail('Mục tiêu nên từ 10 đến 5000 sao.');
     const { store, now, save } = await this.kv();

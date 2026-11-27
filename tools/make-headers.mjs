@@ -72,7 +72,7 @@ export function buildCsp(env, opts = {}) {
     `script-src 'self'${opts.app === 'teacher' ? " 'wasm-unsafe-eval'" : ''}${google ? ' https://accounts.google.com/gsi/client' : ''}`,
     // React đặt style nội tuyến (vị trí kéo–thả, màu theo môn) nên phải cho 'unsafe-inline' với style; script thì KHÔNG.
     google ? "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style" : "style-src 'self' 'unsafe-inline'",
-    // Ảnh / âm thanh / video bài giảng do thầy cô dán link từ nhiều nơi.
+    // Ảnh / âm thanh / video bài giảng do thầy/cô dán link từ nhiều nơi.
     `img-src 'self' data: blob: https: ${extra('CSP_EXTRA_IMG').join(' ')}`.trim(),
     "media-src 'self' data: blob: https:",
     "font-src 'self'",

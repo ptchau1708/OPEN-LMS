@@ -8,12 +8,14 @@ import {
 import { Btn, Dialog, Empty, ErrorNote, Field, Loading, PageHead, Seg } from '../../components/common';
 import { AccountSlipCard } from './util';
 import '../../styles/admin.css';
+import { useFocusGrade } from '../../lib/focusGrade';
 
 const GRADES: Grade[] = [1, 2, 3, 4, 5];
 
 /* ======================= Lớp học ======================= */
 export function AdminClasses() {
   const classes = useClasses();
+  const focus = useFocusGrade().grade;
   const teachers = useSchoolUsers({ role: 'teacher' });
   const save = useSaveClass();
   const [edit, setEdit] = useState<{ id?: string; name: string; grade: Grade; teacherId: string } | null>(null);
@@ -21,7 +23,7 @@ export function AdminClasses() {
   const list = [...(classes.data ?? [])].sort((a, b) => a.grade - b.grade || a.name.localeCompare(b.name, 'vi'));
   return (
     <div className="tc-page ad-page">
-      <PageHead title="Lớp học" sub="Tạo lớp, đổi tên / khối, phân công giáo viên chủ nhiệm." actions={<Btn kind="primary" icon="plus" onClick={() => setEdit({ name: '', grade: 1, teacherId: '' })}>Thêm lớp</Btn>} />
+      <PageHead title="Lớp học" sub="Tạo lớp, đổi tên / khối, phân công giáo viên chủ nhiệm." actions={<Btn kind="primary" icon="plus" onClick={() => setEdit({ name: '', grade: focus, teacherId: '' })}>Thêm lớp</Btn>} />
       <ErrorNote error={classes.error} onRetry={() => void classes.refetch()} />
       {classes.isPending ? <Loading /> : !list.length ? <Empty icon="team" title="Chưa có lớp" /> : (
         <section className="tc-card tc-card--flush">
@@ -275,7 +277,7 @@ export function SampleContent() {
   return (
     <section className="tc-card tc-stack">
       <header className="tc-card__head"><h2 className="ad-h2">Kho nội dung mẫu</h2></header>
-      <p className="tc-muted">Nạp khoảng 120 câu hỏi mẫu (Toán, Tiếng Việt, Tự nhiên và Xã hội, Tiếng Anh lớp 1–5, đã gắn mã kĩ năng), 6 bài giảng mẫu và tiêu chí chấm bài viết vào Ngân hàng câu hỏi. Chạy lại không tạo bản trùng. Thầy cô sửa, xóa hoặc thêm câu của mình sau.</p>
+      <p className="tc-muted">Nạp khoảng 120 câu hỏi mẫu (Toán, Tiếng Việt, Tự nhiên và Xã hội, Tiếng Anh lớp 1–5, đã gắn mã kĩ năng), 6 bài giảng mẫu và tiêu chí chấm bài viết vào Ngân hàng câu hỏi. Chạy lại không tạo bản trùng. Thầy/cô sửa, xóa hoặc thêm câu của mình sau.</p>
       <p className="tc-small">Ngân hàng hiện có: <strong>{items.isLoading ? '…' : (items.data?.length ?? 0)}{(items.data?.length ?? 0) >= 500 ? '+' : ''}</strong> câu hỏi.</p>
       <ErrorNote error={err} />
       {busy && prog ? (

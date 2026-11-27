@@ -1,8 +1,8 @@
 -- =============================================================================
 -- OPEN-EDU · SQL 23 · Phụ huynh + Thông báo
---   1. Phụ huynh thấy gì: mỗi lớp chọn cho từng mục "Tự động" / "Cô duyệt rồi mới gửi" / "Không gửi".
+--   1. Phụ huynh thấy gì: mỗi lớp chọn cho từng mục "Tự động" / "GV duyệt rồi mới gửi" / "Không gửi".
 --      Chặn ở máy chủ: quyền đọc bảng (RLS) và các hàm hồ sơ (get_student_extras, get_student_profile, get_parent_summary)
---      đều xét cài đặt này khi người xem là phụ huynh. Mục "Cô duyệt" chỉ hiện khi GV đã gửi (v2.parent_releases).
+--      đều xét cài đặt này khi người xem là phụ huynh. Mục "GV duyệt" chỉ hiện khi GV đã gửi (v2.parent_releases).
 --   2. Gửi phụ huynh: thông báo cả lớp / từng em, hẹn giờ, cần xác nhận, thu hồi, nhắc lại.
 --   3. Nhắn tin hai chiều GV ↔ phụ huynh theo từng em; GV đặt giờ nhận tin (ngoài giờ vẫn gửi được, thông báo đến khi vào giờ).
 --   4. Thông báo cho HS, GV, PH (chuông trong app) do trigger sinh ra; giờ yên lặng; gộp tin cùng loại.
@@ -41,7 +41,7 @@ $$;
 
 create or replace function v2._ph_name(p_id uuid) returns text
 language sql stable security definer set search_path = v2, public as $$
-  select coalesce((select nullif(btrim(p.name), '') from v2.profiles p where p.id = p_id), 'Thầy cô')
+  select coalesce((select nullif(btrim(p.name), '') from v2.profiles p where p.id = p_id), 'Thầy/cô')
 $$;
 
 create or replace function v2._ph_ddmm(p_at timestamptz) returns text
@@ -82,7 +82,7 @@ create table if not exists v2.parent_share_settings (
 alter table v2.parent_share_settings enable row level security;
 comment on table v2.parent_share_settings is 'Mỗi lớp: mục nào phụ huynh thấy (auto/review/off) + giờ nhận tin nhắn của phụ huynh. Đọc/ghi qua RPC.';
 
--- Mục "Cô duyệt rồi mới gửi" đã gửi (state = sent) hoặc bỏ qua (skipped).
+-- Mục "GV duyệt rồi mới gửi" đã gửi (state = sent) hoặc bỏ qua (skipped).
 create table if not exists v2.parent_releases (
   kind text not null check (kind in ('works', 'tt27', 'praise', 'reminders', 'attendance')),
   ref_id text not null check (length(ref_id) between 1 and 200),
@@ -739,7 +739,7 @@ begin
                     jsonb_build_object('postId', p_id));
 end $$;
 
--- Phụ huynh: thông báo của cô + mục cô đã gửi + tóm tắt tin nhắn của một con.
+-- Phụ huynh: thông báo của thầy/cô + mục thầy/cô đã gửi + tóm tắt tin nhắn của một con.
 create or replace function v2.parent_inbox(p_child uuid) returns jsonb
 language plpgsql stable security definer set search_path = v2, public as $$
 declare
@@ -856,7 +856,7 @@ begin
   if length(v_body) > 2000 then raise exception 'Tin nhắn tối đa 2000 kí tự.' using errcode = '22023'; end if;
   if not v_teacher then
     if not (v_msg ->> 'enabled')::boolean then
-      raise exception 'Lớp đang tắt nhắn tin với thầy cô.' using errcode = '42501';
+      raise exception 'Lớp đang tắt nhắn tin với thầy/cô.' using errcode = '42501';
     end if;
     if (select count(*) from v2.parent_messages m where m.sender_id = auth.uid() and m.created_at > now() - interval '1 day') >= 30 then
       raise exception 'Mỗi ngày gửi tối đa 30 tin nhắn.' using errcode = '22023';
@@ -1249,7 +1249,7 @@ begin
        and new.date >= v2.today_vn() - 1 and v2._ps_mode(new.class_id, 'attendance') = 'auto' then
       perform v2._notify(v2._ph_guardians(array[new.student_id]), 'ph-chuyen-can',
                          v2._ph_name(new.student_id) || ': ' || v2._ps_att_label(new.status) || ' ngày ' || to_char(new.date, 'DD/MM'),
-                         'Thầy cô vừa điểm danh.', '/phu-huynh', jsonb_build_object('studentId', new.student_id, 'date', new.date), true);
+                         'Thầy/cô vừa điểm danh.', '/phu-huynh', jsonb_build_object('studentId', new.student_id, 'date', new.date), true);
     end if;
   exception when others then raise warning 'thông báo (điểm danh): %', sqlerrm;
   end;
@@ -1271,14 +1271,14 @@ begin
     end if;
     if tg_op = 'UPDATE' and new.status is distinct from old.status then
       if new.status = 'approved' then
-        perform v2._notify(array[new.student_id], 'hs-bai-cham', 'Cô đã chấm bài: ' || v_task, 'Em vào xem nhận xét của cô nhé.',
+        perform v2._notify(array[new.student_id], 'hs-bai-cham', 'Thầy/cô đã chấm bài: ' || v_task, 'Em vào xem nhận xét của thầy/cô nhé.',
                            '/bai-viet/' || new.task_id, jsonb_build_object('taskId', new.task_id));
         if v2._ps_mode(new.class_id, 'works') = 'auto' then
           perform v2._notify(v2._ph_guardians(array[new.student_id]), 'ph-bai-viet', v2._ph_name(new.student_id) || ': bài viết đã được chấm',
                              v_task, '/phu-huynh', jsonb_build_object('studentId', new.student_id, 'submissionId', new.id));
         end if;
       elsif new.status = 'returned' then
-        perform v2._notify(array[new.student_id], 'hs-bai-cham', 'Cô trả bài để em sửa: ' || v_task, 'Em đọc lời cô dặn rồi nộp lại nhé.',
+        perform v2._notify(array[new.student_id], 'hs-bai-cham', 'Thầy/cô trả bài để em sửa: ' || v_task, 'Em đọc lời thầy/cô dặn rồi nộp lại nhé.',
                            '/bai-viet/' || new.task_id, jsonb_build_object('taskId', new.task_id));
       end if;
     end if;
@@ -1316,14 +1316,14 @@ begin
     select b.label into v_label from v2.behaviors b where b.class_id = new.class_id and b.id = new.behavior_id;
     v_label := coalesce(v_label, nullif(btrim(new.note), ''), case when v_kind = 'praise' then 'thi đua' else 'nề nếp' end);
     if v_kind = 'praise' then
-      perform v2._notify(array[new.student_id], 'hs-khen', 'Em được cô khen: ' || v_label,
+      perform v2._notify(array[new.student_id], 'hs-khen', 'Em được thầy/cô khen: ' || v_label,
                          case when new.points > 0 then '+' || new.points || ' điểm thi đua' else '' end, '/toi', '{}'::jsonb);
       if v2._ps_mode(new.class_id, 'praise') = 'auto' then
-        perform v2._notify(v2._ph_guardians(array[new.student_id]), 'ph-khen', v2._ph_name(new.student_id) || ' được cô khen: ' || v_label,
+        perform v2._notify(v2._ph_guardians(array[new.student_id]), 'ph-khen', v2._ph_name(new.student_id) || ' được thầy/cô khen: ' || v_label,
                            coalesce(nullif(btrim(new.note), ''), ''), '/phu-huynh', jsonb_build_object('studentId', new.student_id));
       end if;
     elsif v2._ps_mode(new.class_id, 'reminders') = 'auto' then
-      perform v2._notify(v2._ph_guardians(array[new.student_id]), 'ph-nhac-nho', v2._ph_name(new.student_id) || ': cô nhắc nhở ' || v_label,
+      perform v2._notify(v2._ph_guardians(array[new.student_id]), 'ph-nhac-nho', v2._ph_name(new.student_id) || ': thầy/cô nhắc nhở ' || v_label,
                          coalesce(nullif(btrim(new.note), ''), ''), '/phu-huynh', jsonb_build_object('studentId', new.student_id), true);
     end if;
   exception when others then raise warning 'thông báo (thi đua): %', sqlerrm;
@@ -1339,7 +1339,7 @@ begin
   begin
     if new.share_parent and (tg_op = 'INSERT' or not old.share_parent)
        and v2._ps_mode(v2._class_of_student(new.student_id), 'notes') = 'auto' then
-      perform v2._notify(v2._ph_guardians(array[new.student_id]), 'ph-ghi-chep', 'Thầy cô ghi chép về ' || v2._ph_name(new.student_id),
+      perform v2._notify(v2._ph_guardians(array[new.student_id]), 'ph-ghi-chep', 'Thầy/cô ghi chép về ' || v2._ph_name(new.student_id),
                          new.title, '/phu-huynh', jsonb_build_object('studentId', new.student_id), true, 'note:' || new.student_id);
     end if;
   exception when others then raise warning 'thông báo (ghi chép): %', sqlerrm;
@@ -1473,10 +1473,10 @@ begin
   begin
     select x.* into d from v2.discussions x join v2.discussion_posts p on p.discussion_id = x.id where p.id = new.post_id;
     if found then
-      perform v2._notify(v2._ph_teachers(d.class_id), 'gv-thao-luan', '%s bài bị báo cần cô xem', d.title,
+      perform v2._notify(v2._ph_teachers(d.class_id), 'gv-thao-luan', '%s bài bị báo cần thầy/cô xem', d.title,
                          '/thao-luan/' || d.id, jsonb_build_object('discussionId', d.id), false, 'report:' || d.id);
     end if;
-  exception when others then raise warning 'thông báo (báo cô): %', sqlerrm;
+  exception when others then raise warning 'thông báo (báo thầy/cô): %', sqlerrm;
   end;
   return null;
 end $$;

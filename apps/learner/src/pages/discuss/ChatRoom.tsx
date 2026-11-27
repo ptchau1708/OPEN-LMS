@@ -1,4 +1,4 @@
-/** Trò chuyện nhóm (HS): tin nhắn của nhóm em, nhắn bằng chữ hoặc giọng nói, tin có từ chưa phù hợp chờ cô xem. */
+/** Trò chuyện nhóm (HS): tin nhắn của nhóm em, nhắn bằng chữ hoặc giọng nói, tin có từ chưa phù hợp chờ thầy/cô xem. */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MascotId } from '@openedu/contracts';
 import { DEFAULT_QUICK_REPLIES, discussionState, roomsFor, STATE_LABEL, useDiscussionPosts, usePostDiscussion, useReportPost, type Discussion } from '@openedu/data';
@@ -42,7 +42,7 @@ export function ChatRoom({ d }: { d: Discussion }) {
           {myRooms.map((r) => <button key={r.id} type="button" role="tab" aria-selected={r.id === roomId} className={`ln-droom${r.id === roomId ? ' is-on' : ''}`} onClick={() => setRoom(r.id)}>👥 {r.name}</button>)}
         </div>
       ) : myRooms[0] ? <p className="ln-chat__room">👥 Nhóm <b>{myRooms[0].name}</b></p> : null}
-      {!roomId ? <EmptyState title="Em chưa được xếp vào nhóm nào" text="Em hỏi cô để được vào nhóm nhé." /> : (
+      {!roomId ? <EmptyState title="Em chưa được xếp vào nhóm nào" text="Em hỏi thầy/cô để được vào nhóm nhé." /> : (
         <>
           <div className="ln-chat__list" ref={listRef} aria-live="polite" data-testid="chat-list">
             {!msgs.length ? <p className="ln-chat__empty">Nhóm chưa có tin nhắn. Em chào các bạn trước nhé!</p> : msgs.map((p) => {
@@ -55,9 +55,9 @@ export function ChatRoom({ d }: { d: Discussion }) {
                     {!mine ? <span className="ln-msg__who">{p.author.name}{teacher ? ' 👩‍🏫' : ''}</span> : null}
                     <span className="ln-msg__body">{p.body}</span>
                     <span className="ln-msg__meta">
-                      {hhmm(p.createdAt)}{p.status === 'pending' ? ' · chờ cô xem' : ''}
+                      {hhmm(p.createdAt)}{p.status === 'pending' ? ' · chờ thầy/cô xem' : ''}
                       {!mine && !teacher && p.status === 'visible' ? (
-                        <button type="button" className="ln-dlink" disabled={p.reports > 0} onClick={() => report.mutate({ postId: p.id, reason: 'Trò chuyện nhóm' })}>{p.reports ? 'Đã báo cô' : '⚑'}</button>
+                        <button type="button" className="ln-dlink" disabled={p.reports > 0} onClick={() => report.mutate({ postId: p.id, reason: 'Trò chuyện nhóm' })}>{p.reports ? 'Đã báo thầy/cô' : '⚑'}</button>
                       ) : null}
                     </span>
                   </div>
@@ -76,7 +76,7 @@ export function ChatRoom({ d }: { d: Discussion }) {
               {send.isError ? <p className="ln-derr" role="alert">{(send.error as Error).message}</p> : null}
             </div>
           ) : (
-            <p className={`ln-dstate is-${st} ln-dstate--big`} role="status">{STATE_LABEL[st]}{st === 'not-yet' && d.opensAt ? ` — mở lúc ${hhmm(d.opensAt)}` : ''}. Cô mở thì em nhắn được nhé.</p>
+            <p className={`ln-dstate is-${st} ln-dstate--big`} role="status">{STATE_LABEL[st]}{st === 'not-yet' && d.opensAt ? ` — mở lúc ${hhmm(d.opensAt)}` : ''}. Thầy/cô mở thì em nhắn được nhé.</p>
           )}
         </>
       )}

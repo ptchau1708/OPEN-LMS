@@ -1,5 +1,5 @@
 /**
- * Ngân hàng nhận xét của thầy cô (gợi ý khi nhập nhận xét TT27 …).
+ * Ngân hàng nhận xét của thầy/cô (gợi ý khi nhập nhận xét TT27 …).
  * - Supabase: bảng v2.comment_bank + RPC bank_add_comments (SQL 20). Chưa chạy SQL 20 → lưu trên trình duyệt.
  * - Demo: lưu trên trình duyệt.
  */
@@ -16,7 +16,7 @@ export interface BankComment {
   text: string;
   /** Số lần đã dùng (tăng khi lưu lại cùng câu). */
   uses: number;
-  /** Chia sẻ cho thầy cô khác trong trường. */
+  /** Chia sẻ cho thầy/cô khác trong trường. */
   shared: boolean;
   ownerId: string;
   /** Câu của chính mình (sửa / xoá được). */

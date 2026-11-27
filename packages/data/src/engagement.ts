@@ -122,7 +122,7 @@ export function behaviorSummary(logs: BehaviorLog[], behaviors: Behavior[], now:
       .slice(0, 10)
       .map((l) => {
         const b = by.get(l.behaviorId);
-        return { at: l.at, label: b?.label ?? 'Thầy cô ghi nhận', icon: b?.icon ?? '⭐', points: l.points, ...(l.note ? { note: l.note } : {}) };
+        return { at: l.at, label: b?.label ?? 'Thầy/cô ghi nhận', icon: b?.icon ?? '⭐', points: l.points, ...(l.note ? { note: l.note } : {}) };
       }),
   };
 }
@@ -315,7 +315,7 @@ export function suggestTt27(input: SuggestTt27Input): Tt27Suggestion {
     `${name} ngoan, ${qualities['cham-chi'] === 'T' ? 'chăm chỉ' : 'có ý thức'} trong học tập.`,
     pos.length ? `Em ${lowerFirst(pos[0])}${pos[1] ? `, ${lowerFirst(pos[1])}` : ''}.` : '',
     tLevels ? `Hoàn thành tốt ${tLevels} môn học.` : '',
-    cLevels.length ? `Cần cố gắng thêm ở môn ${joinVi(cLevels)}; cô sẽ cùng em ôn lại.` : 'Tiếp tục phát huy em nhé!',
+    cLevels.length ? `Cần cố gắng thêm ở môn ${joinVi(cLevels)}; thầy/cô sẽ cùng em ôn lại.` : 'Tiếp tục phát huy em nhé!',
   ]
     .filter(Boolean)
     .join(' ');
@@ -330,6 +330,6 @@ export function suggestTt27(input: SuggestTt27Input): Tt27Suggestion {
     competencies: comp,
     generalComment: general,
     status: 'draft',
-    basis: basis.length ? basis : ['Chưa có dữ liệu học tập — thầy cô tự đánh giá.'],
+    basis: basis.length ? basis : ['Chưa có dữ liệu học tập — thầy/cô tự đánh giá.'],
   };
 }

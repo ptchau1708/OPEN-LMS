@@ -517,8 +517,8 @@ export async function acceptDeepLink(deps: LtiDeps, jwt: string): Promise<DeepLi
   if (p[`${LTI_CLAIM}deployment_id`] !== tool.deploymentId) throw new LtiError(400, 'deployment_id không khớp.');
   const key = await deps.store.platformKey();
   let st: Json;
-  try { st = await verifyJwt(str(p[`${DL_CLAIM}data`], 4000), key.publicJwk); } catch { throw new LtiError(400, 'Phiên chọn bài không hợp lệ. Thầy cô mở lại từ OPEN-EDU nhé.'); }
-  if (st.typ !== 'lti-dl' || st.app !== tool.appId || Number(st.exp) < now) throw new LtiError(400, 'Phiên chọn bài đã hết hạn. Thầy cô mở lại từ OPEN-EDU nhé.');
+  try { st = await verifyJwt(str(p[`${DL_CLAIM}data`], 4000), key.publicJwk); } catch { throw new LtiError(400, 'Phiên chọn bài không hợp lệ. Thầy/cô mở lại từ OPEN-EDU nhé.'); }
+  if (st.typ !== 'lti-dl' || st.app !== tool.appId || Number(st.exp) < now) throw new LtiError(400, 'Phiên chọn bài đã hết hạn. Thầy/cô mở lại từ OPEN-EDU nhé.');
   const ctxId = str(st.ctx, 200);
   const uid = str(st.uid, 80);
   if (!(await deps.store.canTeach(uid, ctxId))) throw new LtiError(403, 'Chỉ giáo viên của lớp mới giao bài cho lớp.', 'access_denied');
@@ -717,7 +717,7 @@ export async function handleLti(req: Request, deps: LtiDeps): Promise<Response> 
           u.searchParams.set('lti_dl', String(r.created));
           return new Response(null, { status: 303, headers: { Location: u.toString(), 'Cache-Control': 'no-store' } });
         }
-        return htmlPage('Đã giao bài', `Đã thêm ${r.created} bài vào Trang học của lớp. Thầy cô quay lại OPEN-EDU nhé.`);
+        return htmlPage('Đã giao bài', `Đã thêm ${r.created} bài vào Trang học của lớp. Thầy/cô quay lại OPEN-EDU nhé.`);
       } catch (e) {
         if (e instanceof LtiError) return htmlPage('Chưa giao được bài', e.message, e.status);
         throw e;

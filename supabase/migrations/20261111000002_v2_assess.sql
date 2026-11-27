@@ -329,7 +329,7 @@ begin
             (select m.team_id from v2.class_members m where m.class_id = p_class and m.user_id = v_sid), auth.uid())
     returning * into v_log;
     if v_points > 0 then
-      perform v2._award(v_sid, v_points, v_points, v_points * 10, 'Thầy cô khen: ' || v_label, 'behavior', v_log.id::text,
+      perform v2._award(v_sid, v_points, v_points, v_points * 10, 'Thầy/cô khen: ' || v_label, 'behavior', v_log.id::text,
                         'behavior:' || v_log.id::text, auth.uid());
     end if;
     v_out := v_out || jsonb_build_object('id', v_log.id, 'studentId', v_log.student_id, 'classId', v_log.class_id,

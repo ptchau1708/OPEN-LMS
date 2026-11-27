@@ -106,7 +106,7 @@ export default function Learn() {
       )}
 
       {!subject ? (
-        <EmptyState title="Bản đồ đang được vẽ" text="Thầy cô sắp giao bài mới. Em quay lại sau nhé!" mascot={companion} />
+        <EmptyState title="Bản đồ đang được vẽ" text="Thầy/cô sắp giao bài mới. Em quay lại sau nhé!" mascot={companion} />
       ) : (
         <div className="ln-map" style={{ paddingTop: `${(H / W) * 100}%` }}>
           <svg className="ln-map__svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMin meet" aria-hidden="true">

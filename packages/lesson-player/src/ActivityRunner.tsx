@@ -246,7 +246,7 @@ function Feedback({ phase, item, mascot, stars, onRetry, onContinue, attempts, c
     body = item.explanation ?? null;
   } else if (phase === 'sent') {
     head = 'Đã gửi rồi!';
-    body = 'Cảm ơn em nhé. Cô giáo sẽ xem bài của em.';
+    body = 'Cảm ơn em nhé. Thầy/cô sẽ xem bài của em.';
     mood = 'happy';
   } else if (phase === 'saved') {
     head = 'Đã lưu — sẽ chấm khi có mạng';

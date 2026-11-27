@@ -60,7 +60,7 @@ reset role;
 
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"0000005d-0000-0000-0000-000000000002","role":"authenticated"}', true);
-select throws_ok($$ select v2.redeem_guardian_code((select code from p5_code)) $$, 'P0001', 'Mã này đã được dùng. Mỗi mã chỉ dùng một lần — xin nhờ thầy cô cấp mã mới.', 'mã chỉ dùng một lần');
+select throws_ok($$ select v2.redeem_guardian_code((select code from p5_code)) $$, 'P0001', 'Mã này đã được dùng. Mỗi mã chỉ dùng một lần — xin nhờ thầy/cô cấp mã mới.', 'mã chỉ dùng một lần');
 reset role;
 
 -- Giới hạn 4 phụ huynh / HS.

@@ -1,5 +1,5 @@
 /**
- * Danh mục kĩ năng (yêu cầu cần đạt) — danh mục MỞ: thầy cô thêm kĩ năng, sửa chữ, ẩn / hiện, khôi phục bản gốc,
+ * Danh mục kĩ năng (yêu cầu cần đạt) — danh mục MỞ: thầy/cô thêm kĩ năng, sửa chữ, ẩn / hiện, khôi phục bản gốc,
  * xoá kĩ năng tự thêm. Áp dụng chung toàn trường (SQL 19); bản demo lưu trên trình duyệt.
  */
 import { useMemo, useState } from 'react';
@@ -13,6 +13,7 @@ import { Btn, ConfirmBar, Dialog, Empty, ErrorNote, Field, PageHead } from '../c
 import { cx } from '../lib/format';
 import { SubjectOptions } from '../components/SubjectOptions';
 import { exportSkillsXlsx, SkillsImportDialog } from './SkillCatalogExcel';
+import { useFocusGrade } from '../lib/focusGrade';
 
 const GRADES: Grade[] = [1, 2, 3, 4, 5];
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
@@ -20,7 +21,7 @@ const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
 export default function SkillCatalog({ user }: { user: Profile }) {
   const ver = useCatalogVersion();
   const ov = useSkillOverrides();
-  const [grade, setGrade] = useState<Grade>(4);
+  const [grade, setGrade] = useState<Grade>(useFocusGrade().grade);
   const [subject, setSubject] = useState<SubjectId>('toan');
   const [q, setQ] = useState('');
   const [showHidden, setShowHidden] = useState(false);
@@ -57,7 +58,7 @@ export default function SkillCatalog({ user }: { user: Profile }) {
 
   return (
     <div className="tc-page tc-skillcat">
-      <PageHead title="Danh mục kĩ năng" sub="Yêu cầu cần đạt dùng để gắn vào câu hỏi, tính mức thành thạo và vẽ bản đồ kiến thức. Thầy cô thêm, sửa chữ, ẩn hoặc xoá được — áp dụng chung toàn trường; kĩ năng gốc luôn khôi phục được." actions={<>
+      <PageHead title="Danh mục kĩ năng" sub="Yêu cầu cần đạt dùng để gắn vào câu hỏi, tính mức thành thạo và vẽ bản đồ kiến thức. Thầy/cô thêm, sửa chữ, ẩn hoặc xoá được — áp dụng chung toàn trường; kĩ năng gốc luôn khôi phục được." actions={<>
         <Link className="tc-btn tc-btn--ghost" to="/kien-thuc"><span>Bản đồ kiến thức</span></Link>
         <Btn icon="upload" disabled={exporting} onClick={() => { setExporting(true); exportSkillsXlsx().then(() => setToast('Đã xuất toàn bộ danh mục kĩ năng ra Excel (mọi môn, lớp 1–5, kể cả kĩ năng đã ẩn).'), (e: unknown) => setToast(e instanceof Error ? e.message : String(e))).finally(() => setExporting(false)); }} data-testid="sk-export" title="Tải toàn bộ danh mục (mã, môn, lớp, chủ đề, tên, yêu cầu cần đạt) để tra mã khi soạn câu hỏi hoặc rà soát">Xuất Excel</Btn>
         <Btn icon="plus" onClick={() => setImporting(true)} data-testid="sk-import" title="Thêm nhiều kĩ năng, sửa chữ, ẩn / hiện bằng tệp Excel">Nhập từ Excel</Btn>
@@ -85,7 +86,7 @@ export default function SkillCatalog({ user }: { user: Profile }) {
                 <div className="tc-grow">
                   <div className="tc-row tc-wrap">
                     <strong>{s.short}</strong>
-                    {s.custom ? <span className="tc-chip tc-chip--ok">Thầy cô thêm</span> : null}
+                    {s.custom ? <span className="tc-chip tc-chip--ok">Thầy/cô thêm</span> : null}
                     {s.edited ? <span className="tc-chip tc-chip--warn">Đã sửa</span> : null}
                     {s.hidden ? <span className="tc-chip">Đã ẩn</span> : null}
                     {s.provisional && !s.custom ? <span className="tc-chip" title="Mô tả tóm lược — tổ chuyên môn đối chiếu chương trình">tạm</span> : null}
@@ -139,7 +140,7 @@ function SkillDialog({ me, skill, grade: g0, subject: s0, onClose, onSaved }: { 
             <Field label="Lớp"><select className="tc-input" value={grade} onChange={(e) => setGrade(Number(e.target.value) as Grade)}>{GRADES.map((x) => <option key={x} value={x}>Lớp {x}</option>)}</select></Field>
             <Field label="Môn"><select className="tc-input" value={subject} onChange={(e) => setSubject(e.target.value as SubjectId)}><SubjectOptions grade={grade} present={[subject]} /></select></Field>
           </div>
-        ) : <p className="tc-small tc-muted">{SUBJECTS[skill.subject]?.name} · Lớp {skill.grade} · <code>{skill.code}</code>{skill.custom ? ' · do thầy cô thêm' : ''}</p>}
+        ) : <p className="tc-small tc-muted">{SUBJECTS[skill.subject]?.name} · Lớp {skill.grade} · <code>{skill.code}</code>{skill.custom ? ' · do thầy/cô thêm' : ''}</p>}
         <Field label="Chủ đề / mạch nội dung">
           <input className="tc-input" list="sk-topics" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="vd: Năng lượng" />
           <datalist id="sk-topics">{topics.map((t) => <option key={t} value={t} />)}</datalist>

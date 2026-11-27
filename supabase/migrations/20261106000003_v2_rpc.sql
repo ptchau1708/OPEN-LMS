@@ -25,7 +25,7 @@ begin
   end if;
   select p.role into v_role from v2.profiles p where p.id = auth.uid();
   if v_role is null then
-    raise exception 'Tài khoản chưa có hồ sơ trên hệ thống mới. Hãy báo thầy cô hoặc quản trị viên.' using errcode = '42501';
+    raise exception 'Tài khoản chưa có hồ sơ trên hệ thống mới. Hãy báo thầy/cô hoặc quản trị viên.' using errcode = '42501';
   end if;
   return v_role;
 end $$;
@@ -212,7 +212,7 @@ begin
 
   select * into v_existing from v2.items where id = v_id for update;
   if found and v_existing.owner_id is distinct from p_caller and not p_is_admin then
-    raise exception 'Câu hỏi "%" thuộc thầy cô khác nên không sửa được. Hãy nhân bản để dùng.', v_id using errcode = '42501';
+    raise exception 'Câu hỏi "%" thuộc thầy/cô khác nên không sửa được. Hãy nhân bản để dùng.', v_id using errcode = '42501';
   end if;
 
   insert into v2.items as i (id, type, grade, subject, skill, difficulty, prompt, payload, hint, explanation, stars, tags, owner_id)
@@ -246,7 +246,7 @@ begin
     return null;
   end if;
   if not v2.lesson_visible(v_l.id, v_l.owner_id, v_l.status, v_l.grade) then
-    raise exception 'Bài học này chưa được mở cho em. Hãy hỏi thầy cô nhé.' using errcode = '42501';
+    raise exception 'Bài học này chưa được mở cho em. Hãy hỏi thầy/cô nhé.' using errcode = '42501';
   end if;
   return v2.lesson_to_json(v_l, v_role in ('teacher', 'admin'));
 end $$;
@@ -276,7 +276,7 @@ declare
   v_row v2.lessons;
 begin
   if v_role not in ('teacher', 'admin') then
-    raise exception 'Chỉ thầy cô mới lưu được bài giảng.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô mới lưu được bài giảng.' using errcode = '42501';
   end if;
   if jsonb_typeof(p_lesson) is distinct from 'object' then
     raise exception 'Dữ liệu bài giảng không hợp lệ.' using errcode = '22023';
@@ -315,7 +315,7 @@ begin
   select * into v_existing from v2.lessons where id = v_id for update;
   if found then
     if v_existing.owner_id is distinct from v_uid and v_role <> 'admin' then
-      raise exception 'Thầy cô chỉ sửa được bài giảng của mình. Hãy nhân bản bài này để chỉnh sửa.' using errcode = '42501';
+      raise exception 'Thầy/cô chỉ sửa được bài giảng của mình. Hãy nhân bản bài này để chỉnh sửa.' using errcode = '42501';
     end if;
     v_owner := v_existing.owner_id;
   else
@@ -396,7 +396,7 @@ declare
   v_role text := v2._require_user();
 begin
   if v_role not in ('teacher', 'admin') then
-    raise exception 'Chỉ thầy cô mới lưu được câu hỏi.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô mới lưu được câu hỏi.' using errcode = '42501';
   end if;
   return v2._upsert_item(p_item, auth.uid(), auth.uid(), v_role = 'admin');
 end $$;
@@ -417,7 +417,7 @@ declare
   v_res jsonb;
 begin
   if v_role not in ('teacher', 'admin') then
-    raise exception 'Chỉ thầy cô mới thưởng sao được.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô mới thưởng sao được.' using errcode = '42501';
   end if;
   select role into v_target_role from v2.profiles where id = p_user;
   if v_target_role is null then
@@ -437,11 +437,11 @@ begin
         and exists (select 1 from v2.learning_events e where e.user_id = p_user and e.live_session_id = s.id and e.verb = 'joined'));
   end if;
   if not v_allowed then
-    raise exception 'Thầy cô chỉ thưởng sao được cho học sinh lớp mình.' using errcode = '42501';
+    raise exception 'Thầy/cô chỉ thưởng sao được cho học sinh lớp mình.' using errcode = '42501';
   end if;
 
   v_res := v2._award(p_user, p_stars, 0, 0,
-    left(coalesce(nullif(btrim(coalesce(p_reason, '')), ''), 'Thầy cô khen thưởng'), 200),
+    left(coalesce(nullif(btrim(coalesce(p_reason, '')), ''), 'Thầy/cô khen thưởng'), 200),
     case when p_live_session_id is not null then 'live' else 'bonus' end,
     p_live_session_id::text, null, v_uid);
   if p_live_session_id is not null then
@@ -526,7 +526,7 @@ declare
 begin
   select role into v_role from v2.profiles where id = p_user;
   if v_role is null then
-    raise exception 'Tài khoản của em chưa có trên hệ thống mới. Hãy báo thầy cô nhé.' using errcode = '42501';
+    raise exception 'Tài khoản của em chưa có trên hệ thống mới. Hãy báo thầy/cô nhé.' using errcode = '42501';
   end if;
   select * into v_item from v2.items where id = p_item_id;
   if not found then
@@ -714,21 +714,21 @@ declare
   v_teams jsonb;
 begin
   if v_role not in ('teacher', 'admin') then
-    raise exception 'Chỉ thầy cô mới mở được lớp học trực tiếp.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô mới mở được lớp học trực tiếp.' using errcode = '42501';
   end if;
   select * into v_l from v2.lessons where id = p_lesson_id;
   if not found then
     raise exception 'Không tìm thấy bài giảng.' using errcode = 'P0002';
   end if;
   if not v2.lesson_visible(v_l.id, v_l.owner_id, v_l.status, v_l.grade) then
-    raise exception 'Thầy cô chưa dùng được bài giảng này (bài nháp của người khác).' using errcode = '42501';
+    raise exception 'Thầy/cô chưa dùng được bài giảng này (bài nháp của người khác).' using errcode = '42501';
   end if;
   if v_class is not null then
     if not exists (select 1 from v2.classes where id = v_class) then
       raise exception 'Không tìm thấy lớp.' using errcode = 'P0002';
     end if;
     if not v2.is_teacher_of_class(v_class) then
-      raise exception 'Thầy cô chỉ mở lớp trực tiếp cho lớp mình phụ trách.' using errcode = '42501';
+      raise exception 'Thầy/cô chỉ mở lớp trực tiếp cho lớp mình phụ trách.' using errcode = '42501';
     end if;
   end if;
 
@@ -745,7 +745,7 @@ begin
     exception when unique_violation then
       v_try := v_try + 1;
       if v_try >= 20 then
-        raise exception 'Chưa tạo được mã PIN, thầy cô thử lại nhé.';
+        raise exception 'Chưa tạo được mã PIN, thầy/cô thử lại nhé.';
       end if;
     end;
   end loop;
@@ -800,7 +800,7 @@ begin
     raise exception 'Không tìm thấy lớp học trực tiếp.' using errcode = 'P0002';
   end if;
   if v_s.teacher_id is distinct from auth.uid() and not v2.is_admin() then
-    raise exception 'Chỉ thầy cô mở lớp mới điều khiển được.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô mở lớp mới điều khiển được.' using errcode = '42501';
   end if;
   if v_s.ended_at is not null then
     return; -- đã kết thúc: bỏ qua êm (GV có thể gửi lại lệnh 'end')

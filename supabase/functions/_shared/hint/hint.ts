@@ -422,7 +422,7 @@ export interface FallbackHintInput {
 
 /**
  * Gợi ý theo quy tắc, tăng dần theo mức. Khi item có key, mọi mảnh ghép đều qua leaksAnswer trước khi dùng:
- *  1: gợi ý của thầy cô (item.hint) hoặc lời nhắc đọc lại đề theo dạng câu hỏi;
+ *  1: gợi ý của thầy/cô (item.hint) hoặc lời nhắc đọc lại đề theo dạng câu hỏi;
  *  2: lời nhắc quan niệm sai (nếu câu trả lời khớp), không thì bước đầu tiên;
  *  3: cách làm từng bước (thử với ví dụ nhỏ hơn).
  */
@@ -602,7 +602,7 @@ export function buildHintPrompt({ item, response, level, misconception }: HintPr
   if (right) lines.push(`Đáp án đúng (CHỈ để bạn hiểu bài — tuyệt đối không nhắc lại, không viết ra): ${right}`);
   if (misconception) lines.push(`Lỗi thường gặp ứng với câu trả lời này: ${misconception.text ?? misconception.kidHint}${misconception.text ? ` (lời nhắc gợi ý: ${misconception.kidHint})` : ''}`);
   const own = (item.hint ?? '').trim();
-  if (own) lines.push(`Gợi ý thầy cô đã soạn sẵn (em có thể đã đọc): ${clip(own, 300)}`);
+  if (own) lines.push(`Gợi ý thầy/cô đã soạn sẵn (em có thể đã đọc): ${clip(own, 300)}`);
   lines.push(LEVEL_RULES[level], 'Hãy viết lời gợi ý.');
   return { system: HINT_SYSTEM_PROMPT, user: lines.join('\n') };
 }

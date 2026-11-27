@@ -85,3 +85,8 @@
   .tc-ph-chat__back { display: inline-flex; }
   .tc-ph-preview { position: static; }
 }
+
+/* Lớp chưa có phụ huynh liên kết: nhắc ngay trên khung soạn tin */
+.tc-ph-nolink { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tc-ph-nolink > span { flex: 1 1 320px; line-height: 1.5; }
+.tc-ph-warn { color: var(--tc-warn); font-weight: 600; }

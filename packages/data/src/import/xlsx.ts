@@ -175,7 +175,7 @@ function normPath(p: string): string {
 export function readXlsx(data: Uint8Array, opts: { sheet?: string | number } = {}): ReadXlsxResult {
   if (data.length > XLSX_MAX_BYTES) throw new Error('Tệp Excel quá lớn (tối đa 8 MB).');
   if (data.length < 4 || data[0] !== 0x50 || data[1] !== 0x4b) {
-    throw new Error('Đây không phải tệp Excel .xlsx. Nếu là tệp .xls đời cũ, thầy cô mở bằng Excel rồi "Lưu thành" .xlsx nhé.');
+    throw new Error('Đây không phải tệp Excel .xlsx. Nếu là tệp .xls đời cũ, thầy/cô mở bằng Excel rồi "Lưu thành" .xlsx nhé.');
   }
   let files: Record<string, Uint8Array>;
   try {

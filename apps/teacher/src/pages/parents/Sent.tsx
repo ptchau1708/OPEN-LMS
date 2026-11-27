@@ -8,6 +8,7 @@ import { fmtDateTime } from '../../lib/format';
 function Status({ p }: { p: ParentPost }) {
   if (p.recalled) return <span className="tc-chip">Đã thu hồi</span>;
   if (!p.sent) return <span className="tc-chip tc-chip--warn">Hẹn {fmtDateTime(p.sendAt)}</span>;
+  if (p.parents === 0) return <span className="tc-chip tc-chip--warn" title="Chưa có phụ huynh liên kết tài khoản">Chưa có phụ huynh nhận</span>;
   const n = p.ackRequired ? p.acks : p.reads;
   const all = p.parents > 0 && n >= p.parents;
   return <span className={`tc-chip ${all ? 'tc-chip--ok' : ''}`}>{p.ackRequired ? 'Đã xác nhận' : 'Đã xem'} {n}/{p.parents}</span>;

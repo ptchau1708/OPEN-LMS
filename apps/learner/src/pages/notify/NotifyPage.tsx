@@ -90,7 +90,7 @@ function PushSettings({ role }: { role: 'hs' | 'ph' }) {
       <h2 className="ln-ntf__h"><Icon name="bell" size={22} /> Nhận thông báo trên điện thoại</h2>
       {ds.mode === 'demo' ? <p className="ln-ntf__note">Bản demo không gửi thông báo lên điện thoại — tin chỉ hiện ở trang này.</p> : null}
       <p className="ln-ntf__note">
-        {state.data === 'on' ? 'Máy này đang nhận thông báo.' : role === 'ph' ? 'Bật để biết ngay khi cô gửi thông báo, nhắn tin, hay khi con vắng học.' : 'Bật để biết ngay khi cô giao bài mới, chấm bài, hay đến lượt em đấu.'}
+        {state.data === 'on' ? 'Máy này đang nhận thông báo.' : role === 'ph' ? 'Bật để biết ngay khi thầy/cô gửi thông báo, nhắn tin, hay khi con vắng học.' : 'Bật để biết ngay khi thầy/cô giao bài mới, chấm bài, hay đến lượt em đấu.'}
       </p>
       <div className="ln-row ln-row--wrap">
         {state.data === 'on'

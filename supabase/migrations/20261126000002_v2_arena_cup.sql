@@ -102,13 +102,13 @@ language plpgsql stable security definer set search_path = v2, public as $$
 declare s v2.arena_settings := v2._arena_settings(p_class);
 begin
   if not s.enabled then
-    raise exception 'Thầy cô đang tạm đóng Đấu trường. Em quay lại sau nhé!' using errcode = '42501';
+    raise exception 'Thầy/cô đang tạm đóng Đấu trường. Em quay lại sau nhé!' using errcode = '42501';
   end if;
   if not v2._arena_open(s.hours) then
     raise exception 'Đấu trường đang đóng cửa. Em xem giờ mở ở trang Đấu trường nhé!' using errcode = '42501';
   end if;
   if p_mode is not null and not (p_mode = any (s.modes)) then
-    raise exception '%', case when p_mode = 'duel' then 'Thầy cô đang tạm tắt Đấu 1–1.' else 'Thầy cô đang tạm tắt Leo tháp.' end using errcode = '42501';
+    raise exception '%', case when p_mode = 'duel' then 'Thầy/cô đang tạm tắt Đấu 1–1.' else 'Thầy/cô đang tạm tắt Leo tháp.' end using errcode = '42501';
   end if;
   return s;
 end $$;
@@ -118,7 +118,7 @@ language plpgsql stable security definer set search_path = v2, public as $$
 begin
   perform v2._require_user();
   if not v2.is_teacher_of_class(p_class) then
-    raise exception 'Chỉ thầy cô của lớp mới xem được cài đặt Đấu trường.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô của lớp mới xem được cài đặt Đấu trường.' using errcode = '42501';
   end if;
   return v2._arena_json(v2._arena_settings(p_class));
 end $$;
@@ -133,7 +133,7 @@ declare
 begin
   perform v2._require_user();
   if not v2.is_teacher_of_class(p_class) then
-    raise exception 'Chỉ thầy cô của lớp mới đổi được cài đặt Đấu trường.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô của lớp mới đổi được cài đặt Đấu trường.' using errcode = '42501';
   end if;
   if jsonb_typeof(p) is distinct from 'object' then raise exception 'Cài đặt không hợp lệ.' using errcode = '22023'; end if;
   s := v2._arena_settings(p_class);
@@ -191,7 +191,7 @@ declare s v2.arena_settings; v_items text[];
 begin
   perform v2._require_user();
   if not v2.is_teacher_of_class(p_class) then
-    raise exception 'Chỉ thầy cô của lớp mới thêm câu vào Đấu trường.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô của lớp mới thêm câu vào Đấu trường.' using errcode = '42501';
   end if;
   s := v2._arena_settings(p_class);
   select coalesce(array_agg(distinct x), '{}') into v_items
@@ -250,7 +250,7 @@ declare
 begin
   if v_role <> 'student' then raise exception 'Đấu 1–1 dành cho học sinh.' using errcode = '42501'; end if;
   select * into v_me from v2.profiles where id = v_uid;
-  if v_me.grade is null then raise exception 'Tài khoản của em chưa có khối lớp. Em báo thầy cô nhé.' using errcode = '22023'; end if;
+  if v_me.grade is null then raise exception 'Tài khoản của em chưa có khối lớp. Em báo thầy/cô nhé.' using errcode = '22023'; end if;
   v_set := v2._arena_require(v_me.class_id, 'duel');
   if (select count(*) from v2.duels where created_by = v_uid and created_at > now() - interval '1 hour') >= 40 then
     raise exception 'Em đấu nhiều quá rồi! Nghỉ một chút rồi chơi tiếp nhé.' using errcode = '54000';
@@ -738,11 +738,11 @@ declare
   v_grade int;
   v_items text[];
 begin
-  if v_role not in ('teacher', 'admin') then raise exception 'Chỉ thầy cô mới mở được giải đấu.' using errcode = '42501'; end if;
+  if v_role not in ('teacher', 'admin') then raise exception 'Chỉ thầy/cô mới mở được giải đấu.' using errcode = '42501'; end if;
   if jsonb_typeof(p) is distinct from 'object' then raise exception 'Thông tin giải không hợp lệ.' using errcode = '22023'; end if;
   if v_scope not in ('class', 'grade') then raise exception 'Phạm vi chỉ là "class" hoặc "grade".' using errcode = '22023'; end if;
-  if v_class is null then raise exception 'Thầy cô chọn lớp cho giải đấu nhé.' using errcode = '22023'; end if;
-  if not v2.is_teacher_of_class(v_class) then raise exception 'Thầy cô chỉ mở giải cho lớp mình phụ trách.' using errcode = '42501'; end if;
+  if v_class is null then raise exception 'Thầy/cô chọn lớp cho giải đấu nhé.' using errcode = '22023'; end if;
+  if not v2.is_teacher_of_class(v_class) then raise exception 'Thầy/cô chỉ mở giải cho lớp mình phụ trách.' using errcode = '42501'; end if;
   select grade into v_grade from v2.classes where id = v_class;
   if v_grade is null then raise exception 'Không tìm thấy lớp.' using errcode = 'P0002'; end if;
   if jsonb_typeof(coalesce(p -> 'itemIds', '[]'::jsonb)) <> 'array' then raise exception 'Danh sách câu không hợp lệ.' using errcode = '22023'; end if;
@@ -756,7 +756,7 @@ begin
           coalesce(nullif(p ->> 'pace', ''), 'continuous'), auth.uid())
   returning * into c;
   if c.source = 'picked' and cardinality(c.item_ids) = 0 then
-    raise exception 'Thầy cô chọn câu hỏi cho giải (hoặc chọn "Tự động theo môn").' using errcode = '22023';
+    raise exception 'Thầy/cô chọn câu hỏi cho giải (hoặc chọn "Tự động theo môn").' using errcode = '22023';
   end if;
   if v2._cup_pool_size(c) < c.questions then
     raise exception 'Chưa đủ câu hỏi: mỗi trận cần % câu dạng trả lời nhanh có đáp án, hiện có % câu.', c.questions, v2._cup_pool_size(c) using errcode = '22023';
@@ -800,7 +800,7 @@ begin
   perform v2._require_user();
   select * into c from v2.cups where id = p_id;
   if not found then raise exception 'Không tìm thấy giải đấu.' using errcode = 'P0002'; end if;
-  if p_host and not v2._cup_host(c) then raise exception 'Chỉ thầy cô mở giải mới làm được việc này.' using errcode = '42501'; end if;
+  if p_host and not v2._cup_host(c) then raise exception 'Chỉ thầy/cô mở giải mới làm được việc này.' using errcode = '42501'; end if;
   if not p_host and not (v2._cup_host(c) or v2._cup_eligible(c, auth.uid())
                          or exists (select 1 from v2.cup_players cp where cp.cup_id = c.id and cp.user_id = auth.uid())) then
     raise exception 'Em không thuộc giải đấu này.' using errcode = '42501';
@@ -861,7 +861,7 @@ language plpgsql volatile security definer set search_path = v2, public as $$
 declare c v2.cups := v2._cup_load(p_id, true);
 begin
   if c.status in ('finished', 'cancelled') then raise exception 'Giải đã kết thúc.' using errcode = '22023'; end if;
-  update v2.cups set status = 'cancelled', finished_at = now(), note = coalesce(note, 'Thầy cô đã huỷ giải.') where id = c.id returning * into c;
+  update v2.cups set status = 'cancelled', finished_at = now(), note = coalesce(note, 'Thầy/cô đã huỷ giải.') where id = c.id returning * into c;
   update v2.duels set status = 'cancelled', ended_at = now()
    where id in (select duel_id from v2.cup_matches where cup_id = c.id and status = 'open' and duel_id is not null) and status = 'playing';
   return v2._cup_json(c);
@@ -871,7 +871,7 @@ create or replace function v2.cup_delete(p_id uuid) returns void
 language plpgsql volatile security definer set search_path = v2, public as $$
 declare c v2.cups := v2._cup_load(p_id, true);
 begin
-  if c.status = 'running' then raise exception 'Giải đang diễn ra — thầy cô huỷ giải trước khi xoá.' using errcode = '22023'; end if;
+  if c.status = 'running' then raise exception 'Giải đang diễn ra — thầy/cô huỷ giải trước khi xoá.' using errcode = '22023'; end if;
   update v2.duels set status = 'cancelled', ended_at = now()
    where id in (select duel_id from v2.cup_matches where cup_id = c.id and duel_id is not null) and status = 'playing';
   delete from v2.cups where id = c.id;
@@ -932,7 +932,7 @@ begin
        to_char(m.opens_at at time zone 'Asia/Ho_Chi_Minh', 'HH24:MI DD/MM') using errcode = '22023'; end if;
   if m.duel_id is null then
     v_items := v2._cup_items(c, m.p1, m.p2);
-    if cardinality(v_items) < 3 then raise exception 'Giải chưa đủ câu hỏi. Em báo thầy cô nhé.' using errcode = 'P0002'; end if;
+    if cardinality(v_items) < 3 then raise exception 'Giải chưa đủ câu hỏi. Em báo thầy/cô nhé.' using errcode = 'P0002'; end if;
     loop
       v_code := (1000 + floor(random() * 9000))::int::text;
       exit when not exists (select 1 from v2.duels where code = v_code and status in ('waiting', 'playing'));
@@ -1042,7 +1042,7 @@ begin
       'me', v_me);
   end if;
   if v_class is null or not v2.is_teacher_of_class(v_class) then
-    raise exception 'Chỉ thầy cô của lớp mới xem được bảng xếp hạng đầy đủ.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô của lớp mới xem được bảng xếp hạng đầy đủ.' using errcode = '42501';
   end if;
   return v2._arena_board(v_class);
 end $$;
@@ -1062,7 +1062,7 @@ declare
   v_date text := to_char(now() at time zone 'Asia/Ho_Chi_Minh', 'DD/MM/YYYY');
 begin
   perform v2._require_user();
-  if not v2.is_teacher_of_class(p_class) then raise exception 'Chỉ thầy cô của lớp mới kết thúc mùa.' using errcode = '42501'; end if;
+  if not v2.is_teacher_of_class(p_class) then raise exception 'Chỉ thầy/cô của lớp mới kết thúc mùa.' using errcode = '42501'; end if;
   s := v2._arena_settings(p_class);
   v_title := coalesce(nullif(left(btrim(coalesce(p_title, '')), 80), ''), s.season_title,
                       'Mùa ' || to_char(now() at time zone 'Asia/Ho_Chi_Minh', 'MM/YYYY'));

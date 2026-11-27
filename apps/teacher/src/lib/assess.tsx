@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 import { SUBMISSION_STATUS_LABEL, TT27_LEVEL_LABEL, type ClassInfo, type Profile, type SubmissionStatus, type Tt27Level } from '@openedu/contracts';
-import { useClasses, useStudents } from '@openedu/data';
+import { useStudents } from '@openedu/data';
+import { useClasses } from './focusGrade';
 import { Seg } from '../components/common';
 import { cx } from './format';
 

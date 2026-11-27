@@ -4,6 +4,7 @@ import { EXAM_LEVELS, SUBJECTS, fitSubjectToGrade, subjectsForGrade, TT27_TERM_L
 import { defaultRows, itemLevel, itemQType, matrixTotals, skillLabel, useDeleteMatrix, useExamMatrices, useItems, useSaveMatrix, validateMatrix } from '@openedu/data';
 import { Btn, ConfirmBar, Dialog, ErrorNote, Field, Loading, PageHead } from '../../components/common';
 import { ExamTabs, LevelTag, fmtPoints } from './shared';
+import { useFocusGrade } from '../../lib/focusGrade';
 
 const GRADES: Grade[] = [1, 2, 3, 4, 5];
 const TERMS: Tt27TermId[] = ['GK1', 'CK1', 'GK2', 'CN'];
@@ -19,15 +20,16 @@ export default function MatrixEditor() {
   const mq = useExamMatrices();
   const save = useSaveMatrix();
   const del = useDeleteMatrix();
+  const focus = useFocusGrade().grade;
   const [m, setM] = useState<ExamMatrix | null>(null);
   const [skillRow, setSkillRow] = useState<string | null>(null);
   const [confirmDel, setConfirmDel] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   useEffect(() => {
     if (m) return;
-    if (id === 'moi') setM(blank());
-    else if (mq.data) setM(mq.data.find((x) => x.id === id) ?? blank());
-  }, [id, mq.data, m]);
+    if (id === 'moi') setM(blank('toan', focus));
+    else if (mq.data) setM(mq.data.find((x) => x.id === id) ?? blank('toan', focus));
+  }, [id, mq.data, m, focus]);
   const bank = useItems(m ? { subject: m.subject, grade: m.grade } : undefined);
   /** Số câu có trong ngân hàng cho từng ô (TN/TL). */
   const avail = useMemo(() => {
@@ -134,7 +136,7 @@ export default function MatrixEditor() {
       </section>
       <details className="tc-card ex-help">
         <summary>Mức của câu hỏi được tính thế nào?</summary>
-        <p className="tc-small">Mức 1 (nhận biết) ← độ khó “nhận biết”, Mức 2 (kết nối) ← “kết nối”, Mức 3 (vận dụng) ← “vận dụng”. Thầy cô có thể gắn thẻ <code>muc:1</code>, <code>muc:2</code>, <code>muc:3</code> trong Ngân hàng câu hỏi để đặt mức khác. Câu chưa có độ khó được coi là Mức 1. TN = chọn, nối, sắp xếp, kéo thả…; TL = điền số / từ.</p>
+        <p className="tc-small">Mức 1 (nhận biết) ← độ khó “nhận biết”, Mức 2 (kết nối) ← “kết nối”, Mức 3 (vận dụng) ← “vận dụng”. Thầy/cô có thể gắn thẻ <code>muc:1</code>, <code>muc:2</code>, <code>muc:3</code> trong Ngân hàng câu hỏi để đặt mức khác. Câu chưa có độ khó được coi là Mức 1. TN = chọn, nối, sắp xếp, kéo thả…; TL = điền số / từ.</p>
       </details>
       {m.id ? (confirmDel ? <ConfirmBar text="Xóa ma trận này? Các đề đã ra vẫn giữ nguyên." onCancel={() => setConfirmDel(false)} onConfirm={() => del.mutate(m.id, { onSuccess: () => nav('/de-kiem-tra') })} busy={del.isPending} /> : <div><Btn kind="danger" icon="trash" onClick={() => setConfirmDel(true)}>Xóa ma trận</Btn></div>) : null}
       {save.error ? <ErrorNote error={save.error} /> : null}

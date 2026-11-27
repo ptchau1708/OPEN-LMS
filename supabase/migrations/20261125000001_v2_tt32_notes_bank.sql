@@ -70,7 +70,7 @@ create or replace function v2._comment_bank_limit() returns trigger
 language plpgsql security definer set search_path = v2, public as $$
 begin
   if (select count(*) from v2.comment_bank where owner_id = new.owner_id) >= 3000 then
-    raise exception 'Ngân hàng nhận xét đã đủ 3000 câu — thầy cô xoá bớt câu ít dùng nhé.' using errcode = '54000';
+    raise exception 'Ngân hàng nhận xét đã đủ 3000 câu — thầy/cô xoá bớt câu ít dùng nhé.' using errcode = '54000';
   end if;
   return new;
 end $$;
@@ -100,7 +100,7 @@ language plpgsql security definer set search_path = v2, public as $$
 declare e jsonb; n int := 0; v_text text; v_scope text; v_level text;
 begin
   if not (select v2.is_staff()) then
-    raise exception 'Chỉ thầy cô mới dùng ngân hàng nhận xét.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô mới dùng ngân hàng nhận xét.' using errcode = '42501';
   end if;
   if jsonb_typeof(p) <> 'array' or jsonb_array_length(p) > 500 then
     raise exception 'Danh sách nhận xét không hợp lệ (tối đa 500 câu một lần).' using errcode = '22023';

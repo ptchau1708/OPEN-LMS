@@ -520,14 +520,14 @@ function parseBlock(b: Block, answers: Map<number, string>, d0: ImportDefaults, 
     return [finish(item, { notes, ...(empty ? { review: 'Có lựa chọn đọc ra bị trống' } : !prompt ? { review: 'Không đọc được câu hỏi' } : {}) })];
   }
   if (opts.length === 1) {
-    return [finish(makeShort(raw, [], d), { review: 'Chỉ đọc được 1 lựa chọn — thầy cô xem lại' })];
+    return [finish(makeShort(raw, [], d), { review: 'Chỉ đọc được 1 lựa chọn — thầy/cô xem lại' })];
   }
 
   /* --- điền đáp án --- */
   const letterOnly = !!given && /^[A-Ha-h]$/.test(given);
   const item = makeShort(prompt, given && !letterOnly ? splitAnswers(given) : [], d);
   const notes = letterOnly ? [`Đáp án ghi «${given}» nhưng không đọc được các lựa chọn A, B, C…`] : [];
-  if (!numbered && !given) return [finish(item, { notes, review: 'Không nhận ra dạng câu hỏi — thầy cô xem lại' })];
+  if (!numbered && !given) return [finish(item, { notes, review: 'Không nhận ra dạng câu hỏi — thầy/cô xem lại' })];
   return [finish(item, { notes, ...(letterOnly ? { review: 'Không đọc được các lựa chọn' } : {}) })];
 }
 

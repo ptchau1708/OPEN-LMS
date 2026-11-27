@@ -33,7 +33,7 @@ export interface ImportDefaults {
   skills?: string[];
 }
 
-export const DEFAULT_IMPORT: ImportDefaults = { grade: 3, subject: 'toan' };
+export const DEFAULT_IMPORT: ImportDefaults = { grade: 5, subject: 'toan' };
 
 export const DIFFICULTY_LABEL: Record<NonNullable<ItemBase['difficulty']>, string> = {
   'nhan-biet': 'Nhận biết',

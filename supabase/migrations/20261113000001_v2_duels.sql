@@ -116,7 +116,7 @@ declare
 begin
   if v_role <> 'student' then raise exception 'Đấu 1–1 dành cho học sinh.' using errcode = '42501'; end if;
   select * into v_me from v2.profiles where id = v_uid;
-  if v_me.grade is null then raise exception 'Tài khoản của em chưa có khối lớp. Em báo thầy cô nhé.' using errcode = '22023'; end if;
+  if v_me.grade is null then raise exception 'Tài khoản của em chưa có khối lớp. Em báo thầy/cô nhé.' using errcode = '22023'; end if;
   if (select count(*) from v2.duels where created_by = v_uid and created_at > now() - interval '1 hour') >= 40 then
     raise exception 'Em đấu nhiều quá rồi! Nghỉ một chút rồi chơi tiếp nhé.' using errcode = '54000';
   end if;

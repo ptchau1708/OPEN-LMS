@@ -21,7 +21,7 @@ export default function ArenaHome({ user }: { user: Profile }) {
   const setTab = (t: Tab) => setSp((p) => { const n = new URLSearchParams(p); n.set('the', t); return n; }, { replace: true });
   const [creating, setCreating] = useState(false);
   if (classes.isLoading) return <Loading />;
-  if (!cls) return <Empty icon="trophy" title="Chưa có lớp">Thầy cô cần có lớp để mở Đấu trường.</Empty>;
+  if (!cls) return <Empty icon="trophy" title="Chưa có lớp">Thầy/cô cần có lớp để mở Đấu trường.</Empty>;
   return (
     <div className="tc-page tc-arena">
       <PageHead title="Đấu trường" sub="Giải đấu loại trực tiếp nhiều vòng, bảng xếp hạng theo mùa, giờ mở cửa và câu hỏi cho phần chơi tự do (Đấu 1–1, Leo tháp)." actions={

@@ -136,7 +136,7 @@ create or replace function v2.check_guardian_limit() returns trigger
 language plpgsql set search_path = v2, public as $$
 begin
   if (select count(*) from v2.guardian_links g where g.student_id = new.student_id and g.parent_id <> new.parent_id) >= 4 then
-    raise exception 'Con đã có đủ 4 tài khoản phụ huynh. Xin liên hệ thầy cô để gỡ bớt.' using errcode = 'P0001';
+    raise exception 'Con đã có đủ 4 tài khoản phụ huynh. Xin liên hệ thầy/cô để gỡ bớt.' using errcode = 'P0001';
   end if;
   if not exists (select 1 from v2.profiles p where p.id = new.parent_id and p.role = 'parent') then
     raise exception 'Chỉ tài khoản phụ huynh mới liên kết được với học sinh.' using errcode = 'P0001';
@@ -187,7 +187,7 @@ declare
   v_row v2.guardian_codes;
 begin
   if not v2.is_teacher_of_class(p_class) then
-    raise exception 'Thầy cô chỉ quản lí được lớp mình chủ nhiệm.' using errcode = '42501';
+    raise exception 'Thầy/cô chỉ quản lí được lớp mình chủ nhiệm.' using errcode = '42501';
   end if;
   select array_agg(s) into v_ids from v2._class_students(p_class) s
   where p_students is null or s = any (p_students);
@@ -207,7 +207,7 @@ create or replace function v2.list_guardian_codes(p_class text) returns jsonb
 language plpgsql stable security definer set search_path = v2, public as $$
 begin
   if not v2.is_teacher_of_class(p_class) then
-    raise exception 'Thầy cô chỉ quản lí được lớp mình chủ nhiệm.' using errcode = '42501';
+    raise exception 'Thầy/cô chỉ quản lí được lớp mình chủ nhiệm.' using errcode = '42501';
   end if;
   return coalesce((select jsonb_agg(v2._code_json(c) order by c.created_at desc) from v2.guardian_codes c where c.class_id = p_class), '[]'::jsonb);
 end $$;
@@ -219,7 +219,7 @@ begin
   select class_id into v_class from v2.guardian_codes where code = upper(p_code);
   if v_class is null then raise exception 'Không tìm thấy mã này.' using errcode = 'P0002'; end if;
   if not v2.is_teacher_of_class(v_class) then
-    raise exception 'Thầy cô chỉ quản lí được lớp mình chủ nhiệm.' using errcode = '42501';
+    raise exception 'Thầy/cô chỉ quản lí được lớp mình chủ nhiệm.' using errcode = '42501';
   end if;
   update v2.guardian_codes set revoked_at = now() where code = upper(p_code) and used_at is null and revoked_at is null;
 end $$;
@@ -240,7 +240,7 @@ begin
   end if;
   select failures into v_fail from v2.guardian_code_attempts where user_id = v_parent and day = v2.today_vn();
   if coalesce(v_fail, 0) >= 10 then
-    raise exception 'Bố mẹ đã nhập sai quá nhiều lần hôm nay. Xin thử lại vào ngày mai hoặc nhờ thầy cô kiểm tra mã.' using errcode = 'P0001';
+    raise exception 'Bố mẹ đã nhập sai quá nhiều lần hôm nay. Xin thử lại vào ngày mai hoặc nhờ thầy/cô kiểm tra mã.' using errcode = 'P0001';
   end if;
   select * into v_code from v2.guardian_codes where code = upper(regexp_replace(coalesce(p_code, ''), '[^A-Za-z0-9]', '', 'g')) for update;
   v_found := found;
@@ -252,9 +252,9 @@ begin
     on conflict (user_id, day) do update set failures = a.failures + 1;
     raise exception '%', case
       when not v_found then 'Mã chưa đúng. Bố mẹ kiểm tra lại 8 kí tự trên phiếu nhé.'
-      when v_code.revoked_at is not null then 'Mã này đã được thầy cô thu hồi. Xin nhờ thầy cô in mã mới.'
-      when v_code.used_at is not null then 'Mã này đã được dùng. Mỗi mã chỉ dùng một lần — xin nhờ thầy cô cấp mã mới.'
-      else 'Mã đã hết hạn (14 ngày). Xin nhờ thầy cô cấp mã mới.' end using errcode = 'P0001';
+      when v_code.revoked_at is not null then 'Mã này đã được thầy/cô thu hồi. Xin nhờ thầy/cô in mã mới.'
+      when v_code.used_at is not null then 'Mã này đã được dùng. Mỗi mã chỉ dùng một lần — xin nhờ thầy/cô cấp mã mới.'
+      else 'Mã đã hết hạn (14 ngày). Xin nhờ thầy/cô cấp mã mới.' end using errcode = 'P0001';
   else
     if not v_linked then
       insert into v2.guardian_links (parent_id, student_id, relation) values (v_parent, v_code.student_id, nullif(btrim(coalesce(p_relation, '')), ''));
@@ -270,7 +270,7 @@ create or replace function v2.list_guardian_links(p_class text) returns jsonb
 language plpgsql stable security definer set search_path = v2, public, auth as $$
 begin
   if not v2.is_teacher_of_class(p_class) then
-    raise exception 'Thầy cô chỉ quản lí được lớp mình chủ nhiệm.' using errcode = '42501';
+    raise exception 'Thầy/cô chỉ quản lí được lớp mình chủ nhiệm.' using errcode = '42501';
   end if;
   return coalesce((
     select jsonb_agg(jsonb_build_object(
@@ -292,7 +292,7 @@ create or replace function v2.revoke_guardian_link(p_parent uuid, p_student uuid
 language plpgsql security definer set search_path = v2, public as $$
 begin
   if not (v2.is_admin() or v2.is_teacher_of_student(p_student)) then
-    raise exception 'Thầy cô chỉ quản lí được lớp mình chủ nhiệm.' using errcode = '42501';
+    raise exception 'Thầy/cô chỉ quản lí được lớp mình chủ nhiệm.' using errcode = '42501';
   end if;
   delete from v2.guardian_links where parent_id = p_parent and student_id = p_student;
 end $$;
@@ -325,7 +325,7 @@ declare
   v_mastery jsonb;
 begin
   if not v2.is_staff() then
-    raise exception 'Chỉ thầy cô và quản trị xem được báo cáo.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô và quản trị xem được báo cáo.' using errcode = '42501';
   end if;
 
   select coalesce(jsonb_agg(row_to_json(r)::jsonb order by r.grade, r.name), '[]'::jsonb) into v_classes from (
@@ -381,7 +381,7 @@ create or replace function v2.grade_skill_report(p_grade smallint, p_subject tex
 language plpgsql stable security definer set search_path = v2, public as $$
 begin
   if not v2.is_staff() then
-    raise exception 'Chỉ thầy cô và quản trị xem được báo cáo.' using errcode = '42501';
+    raise exception 'Chỉ thầy/cô và quản trị xem được báo cáo.' using errcode = '42501';
   end if;
   return jsonb_build_object(
     'classes', coalesce((select jsonb_agg(jsonb_build_object('id', c.id, 'name', c.name,
@@ -470,7 +470,7 @@ end $$;
 create or replace function v2.admin_list_users(p_role text default null, p_class text default null) returns jsonb
 language plpgsql stable security definer set search_path = v2, public as $$
 begin
-  if not v2.is_staff() then raise exception 'Chỉ thầy cô và quản trị xem được danh sách này.' using errcode = '42501'; end if;
+  if not v2.is_staff() then raise exception 'Chỉ thầy/cô và quản trị xem được danh sách này.' using errcode = '42501'; end if;
   return coalesce((
     select jsonb_agg(jsonb_build_object('id', p.id, 'role', p.role, 'name', p.name, 'username', p.username, 'grade', p.grade,
       'class_id', p.class_id, 'class_name', c.name,

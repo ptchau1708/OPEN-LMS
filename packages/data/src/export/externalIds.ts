@@ -62,7 +62,7 @@ class DemoBridgeSource implements BridgeSource {
     if (!cls) throw new Error('Không tìm thấy lớp này.');
     const sess = readJson<{ userId: string } | null>(s, 'session', null);
     const me = sess ? users.find((u) => u.id === sess.userId) : undefined;
-    if (me && me.role !== 'admin' && !(me.role === 'teacher' && cls.teacherId === me.id)) throw new Error('Thầy cô chỉ sửa mã cho học sinh lớp mình.');
+    if (me && me.role !== 'admin' && !(me.role === 'teacher' && cls.teacherId === me.id)) throw new Error('Thầy/cô chỉ sửa mã cho học sinh lớp mình.');
     const google = readJson<Record<string, GoogleIdentity>>(s, 'googleIds', {});
     let n = 0;
     for (const r of rows) {

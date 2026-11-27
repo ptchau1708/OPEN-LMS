@@ -62,7 +62,7 @@ function ListenButton({ text, lang, audio, autoPlay, accent }: { text: string; l
       </button>
       {noVoice ? (
         <MascotBubble mascot="nghe" mood="think" size={56} className="ae-lc__novoice">
-          Máy chưa đọc được. Em nhờ thầy cô hoặc bố mẹ đọc giúp nhé!
+          Máy chưa đọc được. Em nhờ thầy/cô hoặc bố mẹ đọc giúp nhé!
         </MascotBubble>
       ) : null}
     </div>

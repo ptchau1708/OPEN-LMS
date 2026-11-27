@@ -25,7 +25,7 @@ function PinEntry({ onFound }: { onFound: (sessionId: string, pin: string) => vo
     if (p.length !== 6 || find.isPending) return;
     setMsg(null);
     find.mutate(p, {
-      onSuccess: (info) => (info ? onFound(info.sessionId, info.pin || p) : setMsg('Chưa thấy lớp nào có mã này. Thầy cô xem lại mã trên máy giáo viên nhé!')),
+      onSuccess: (info) => (info ? onFound(info.sessionId, info.pin || p) : setMsg('Chưa thấy lớp nào có mã này. Thầy/cô xem lại mã trên máy giáo viên nhé!')),
       onError: (e) => setMsg(e instanceof Error ? e.message : 'Chưa kết nối được máy chủ lớp học. Thử lại nhé!'),
     });
   };
@@ -67,7 +67,7 @@ function PinEntry({ onFound }: { onFound: (sessionId: string, pin: string) => vo
         <Mascot id="nghe" mood="wave" size={120} animate className="pr-start__mascot" />
         <div>
           <h1 className="pr-start__title">Màn hình lớp</h1>
-          <p className="pr-start__sub">Nhập mã lớp 6 số trên máy của thầy cô</p>
+          <p className="pr-start__sub">Nhập mã lớp 6 số trên máy của thầy/cô</p>
         </div>
       </div>
       <div className="pr-pin" aria-label={`Mã đã nhập: ${pin.split('').join(' ')}`} role="status">

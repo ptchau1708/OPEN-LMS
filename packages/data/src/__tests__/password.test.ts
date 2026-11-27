@@ -70,8 +70,8 @@ describe('cấp lại mật khẩu (bản demo)', () => {
     expect((await ds.signIn('colan', t.password)).mustChangePassword).toBe(true);
   });
 
-  it('quên mật khẩu: tài khoản không có email thật được hướng dẫn nhờ thầy cô', async () => {
+  it('quên mật khẩu: tài khoản không có email thật được hướng dẫn nhờ thầy/cô', async () => {
     const { ds } = setup();
-    await expect(ds.requestPasswordReset('0912345678', 'http://x/dat-lai-mat-khau')).rejects.toThrow(/thầy cô chủ nhiệm/);
+    await expect(ds.requestPasswordReset('0912345678', 'http://x/dat-lai-mat-khau')).rejects.toThrow(/thầy\/cô chủ nhiệm/);
   });
 });

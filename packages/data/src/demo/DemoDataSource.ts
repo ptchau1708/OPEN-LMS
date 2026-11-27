@@ -551,7 +551,7 @@ export class DemoDataSource implements DataSource {
     const s = this.get<{ userId: string } | null>(K.session, null);
     const a = this.get<Assignment[]>(K.assignments, []).find((x) => x.id === assignmentId);
     if (!s || !a) return;
-    if (a.latePolicy === 'lock' && a.dueAt && Date.parse(a.dueAt) < this.now().getTime()) throw friendly('Bài này đã hết hạn nộp. Em hỏi thầy cô nhé.');
+    if (a.latePolicy === 'lock' && a.dueAt && Date.parse(a.dueAt) < this.now().getTime()) throw friendly('Bài này đã hết hạn nộp. Em hỏi thầy/cô nhé.');
     if (a.targetType !== 'lesson') return;
     const key = `${s.userId}|${a.targetId}`;
     const all = this.get<Record<string, LessonProgress>>(K.progress, {});
@@ -992,7 +992,7 @@ export class DemoDataSource implements DataSource {
     return !v || v.role === 'teacher' || v.role === 'admin';
   }
   private requireStaff(): void {
-    if (!this.viewerIsStaff()) throw friendly('Chỉ thầy cô mới làm được việc này.');
+    if (!this.viewerIsStaff()) throw friendly('Chỉ thầy/cô mới làm được việc này.');
   }
   private rubricsList(): Rubric[] {
     return this.get<Rubric[]>(K.rubrics, []);
@@ -1062,7 +1062,7 @@ export class DemoDataSource implements DataSource {
   async saveRubric(r: Rubric): Promise<Rubric> {
     await this.ready();
     this.requireStaff();
-    if (!r.title?.trim()) throw friendly('Thầy cô đặt tên cho tiêu chí chấm nhé.');
+    if (!r.title?.trim()) throw friendly('Thầy/cô đặt tên cho tiêu chí chấm nhé.');
     if (!r.criteria?.length) throw friendly('Cần ít nhất một tiêu chí chấm.');
     const saved: Rubric = {
       ...r,
@@ -1082,7 +1082,7 @@ export class DemoDataSource implements DataSource {
   async deleteRubric(id: string): Promise<void> {
     await this.ready();
     this.requireStaff();
-    if (this.tasksList().some((t) => t.rubricId === id)) throw friendly('Tiêu chí này đang dùng cho một bài làm — thầy cô xoá bài làm trước nhé.');
+    if (this.tasksList().some((t) => t.rubricId === id)) throw friendly('Tiêu chí này đang dùng cho một bài làm — thầy/cô xoá bài làm trước nhé.');
     this.put(K.rubrics, this.rubricsList().filter((r) => r.id !== id));
   }
 
@@ -1107,8 +1107,8 @@ export class DemoDataSource implements DataSource {
   async saveWorkTask(t: WorkTask): Promise<WorkTask> {
     await this.ready();
     this.requireStaff();
-    if (!t.title?.trim() || !t.prompt?.text?.trim()) throw friendly('Thầy cô nhập tên bài và đề bài nhé.');
-    if (!this.rubricsList().some((r) => r.id === t.rubricId)) throw friendly('Thầy cô chọn tiêu chí chấm (rubric) cho bài này nhé.');
+    if (!t.title?.trim() || !t.prompt?.text?.trim()) throw friendly('Thầy/cô nhập tên bài và đề bài nhé.');
+    if (!this.rubricsList().some((r) => r.id === t.rubricId)) throw friendly('Thầy/cô chọn tiêu chí chấm (rubric) cho bài này nhé.');
     if (!t.allowPhoto && !t.allowText) throw friendly('Cần cho phép nộp ảnh hoặc đánh máy (ít nhất một cách).');
     const saved: WorkTask = { ...t, id: t.id || uid('wt'), studentIds: t.studentIds ?? [], createdBy: t.createdBy || this.viewer()?.id || '', createdAt: t.createdAt || this.now().toISOString() };
     const list = this.tasksList().filter((x) => x.id !== saved.id);
@@ -1179,7 +1179,7 @@ export class DemoDataSource implements DataSource {
     if (!sub) throw friendly('Không tìm thấy bài nộp này.');
     const viewer = this.viewer();
     if (viewer && viewer.role !== 'teacher' && viewer.role !== 'admin' && viewer.id !== sub.studentId) throw friendly('Không có quyền chấm bài này.');
-    if (sub.status === 'approved') throw friendly('Bài đã được duyệt — muốn chấm lại, thầy cô chọn "Chấm lại" khi duyệt.');
+    if (sub.status === 'approved') throw friendly('Bài đã được duyệt — muốn chấm lại, thầy/cô chọn "Chấm lại" khi duyệt.');
     const task = this.tasksList().find((t) => t.id === sub.taskId);
     const rubric = task ? this.rubricsList().find((r) => r.id === task.rubricId) : undefined;
     if (!task || !rubric) throw friendly('Bài này chưa có tiêu chí chấm.');
@@ -1274,7 +1274,7 @@ export class DemoDataSource implements DataSource {
       this.put(K.gradeReviews, rv);
     }
     const grade = this.gradesMap()[sub.id];
-    if (!grade) throw friendly('Bài chưa được chấm — thầy cô bấm "Tự chấm" hoặc "Chấm bằng AI" trước nhé.');
+    if (!grade) throw friendly('Bài chưa được chấm — thầy/cô bấm "Tự chấm" hoặc "Chấm bằng AI" trước nhé.');
     const final = mergeFinal(grade, rv[sub.id], rubric);
     this.removeWorkEvents(sub.id);
     for (const e of approvalEvents({ submissionId: sub.id, studentId: sub.studentId, taskId: sub.taskId, taskTitle: task?.title ?? 'Bài làm', rubric: rubric ?? { skills: [] }, grade, final })) {
@@ -1386,7 +1386,7 @@ export class DemoDataSource implements DataSource {
   async saveBehavior(b: Behavior): Promise<Behavior> {
     await this.ready();
     this.requireStaff();
-    if (!b.label?.trim()) throw friendly('Thầy cô nhập tên hành vi nhé.');
+    if (!b.label?.trim()) throw friendly('Thầy/cô nhập tên hành vi nhé.');
     const all = this.get<Behavior[]>(K.behaviors, []);
     // Lớp chưa có danh sách riêng: chép danh sách mặc định trước.
     if (!all.some((x) => x.classId === b.classId)) all.push(...defaultBehaviors(b.classId));
@@ -1417,7 +1417,7 @@ export class DemoDataSource implements DataSource {
     const cls = this.classOrThrow(input.classId);
     const b = this.behaviorsOf(cls.id).find((x) => x.id === input.behaviorId);
     if (!b) throw friendly('Không tìm thấy hành vi này.');
-    if (!input.studentIds?.length) throw friendly('Thầy cô chọn ít nhất một học sinh nhé.');
+    if (!input.studentIds?.length) throw friendly('Thầy/cô chọn ít nhất một học sinh nhé.');
     const nowIso = this.now().toISOString();
     const logs = this.behaviorLogs();
     const out: BehaviorLog[] = [];
@@ -1430,7 +1430,7 @@ export class DemoDataSource implements DataSource {
     }
     this.put(K.behaviorLogs, logs);
     if (b.points > 0) {
-      for (const l of out) await this.award({ userId: l.studentId, stars: b.points, coins: b.points, xp: b.points * 10, reason: `Thầy cô khen: ${b.label}`, sourceType: 'behavior', sourceId: l.id });
+      for (const l of out) await this.award({ userId: l.studentId, stars: b.points, coins: b.points, xp: b.points * 10, reason: `Thầy/cô khen: ${b.label}`, sourceType: 'behavior', sourceId: l.id });
     }
     return clone(out);
   }
@@ -1528,7 +1528,7 @@ export class DemoDataSource implements DataSource {
     try {
       res = await fetch(`${relayHttpUrl(this.relayUrl)}/pin/${clean}`, { cache: 'no-store' });
     } catch {
-      throw friendly('Chưa kết nối được máy chủ lớp học. Em nhờ thầy cô kiểm tra Wi-Fi và máy chủ lớp (pnpm relay) nhé!');
+      throw friendly('Chưa kết nối được máy chủ lớp học. Em nhờ thầy/cô kiểm tra Wi-Fi và máy chủ lớp (pnpm relay) nhé!');
     }
     if (res.status === 404) return null;
     if (!res.ok) throw friendly('Máy chủ lớp học đang bận, em thử lại sau một chút nhé.');

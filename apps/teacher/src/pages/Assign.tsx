@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import type { Assignment, LatePolicy, Profile } from '@openedu/contracts';
-import { roundsOf, useAssignments, useClasses, useCreateAssignment, useDeleteAssignment, useLessons, usePackages, useStudents, useUpdateAssignment } from '@openedu/data';
+import type { Assignment, Grade, LatePolicy, Profile } from '@openedu/contracts';
+import { roundsOf, useAssignments, useCreateAssignment, useDeleteAssignment, useLessons, usePackages, useStudents, useUpdateAssignment } from '@openedu/data';
+import { byFocus, useClasses, useFocusGrade } from '../lib/focusGrade';
 import { Avatar, Btn, ConfirmBar, Dialog, Empty, ErrorNote, Field, Loading, PageHead, Seg } from '../components/common';
 import { cx, fmtDateTime, toLocalInput } from '../lib/format';
 import { ShareClassroomButton } from './bridge/ShareClassroom';
@@ -34,7 +35,9 @@ export default function Assign({ user }: { user: Profile }) {
   const [delId, setDelId] = useState<string | null>(null);
   const del = useDeleteAssignment();
   const reports = useAssignmentReports(list.data ?? [], students.data ?? [], lessons.data ?? []);
-  const targets = kind === 'lesson' ? (lessons.data ?? []).map((l) => ({ id: l.id, title: l.title, sub: `Lớp ${l.grade} · ${l.slides.length} slide${l.status === 'draft' ? ' · nháp' : ''}` })) : (pkgs.data ?? []).map((p) => ({ id: p.id, title: p.title, sub: p.kind.toUpperCase() }));
+  const focus = useFocusGrade().grade;
+  const clsGrade = classes.data?.find((c) => c.id === classId)?.grade;
+  const targets = kind === 'lesson' ? byFocus(lessons.data ?? [], (clsGrade ?? focus) as Grade, (l) => l.grade).map((l) => ({ id: l.id, title: l.title, sub: `Lớp ${l.grade} · ${l.slides.length} slide${l.status === 'draft' ? ' · nháp' : ''}` })) : (pkgs.data ?? []).map((p) => ({ id: p.id, title: p.title, sub: p.kind.toUpperCase() }));
   const lessonById = useMemo(() => Object.fromEntries((lessons.data ?? []).map((l) => [l.id, l])), [lessons.data]);
 
   const submit = () => {

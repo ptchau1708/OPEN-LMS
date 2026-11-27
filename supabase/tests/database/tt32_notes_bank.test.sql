@@ -56,7 +56,7 @@ select set_config('request.jwt.claims', '{"sub":"000000ea-0000-0000-0000-0000000
 select is((select array_agg(title)::text from v2.student_notes), '{"Năng khiếu vẽ"}', 'phụ huynh chỉ thấy ghi chép được chia sẻ');
 delete from v2.student_notes;
 select set_config('request.jwt.claims', '{"sub":"000000ea-0000-0000-0000-000000000003","role":"authenticated"}', true);
-select is((select count(*)::int from v2.student_notes), 0, 'học sinh không xem ghi chép của thầy cô');
+select is((select count(*)::int from v2.student_notes), 0, 'học sinh không xem ghi chép của thầy/cô');
 select set_config('request.jwt.claims', '{"sub":"000000ea-0000-0000-0000-000000000009","role":"authenticated"}', true);
 select is((select count(*)::int from v2.student_notes), 2, 'phụ huynh không xoá được; quản trị thấy đủ');
 select lives_ok($$ delete from v2.student_notes where title = 'Khám sức khoẻ' $$, 'quản trị xoá được');

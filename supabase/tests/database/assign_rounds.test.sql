@@ -28,7 +28,7 @@ select is((v2.start_assignment('ar-a2'))->>'reset', 'true', 'lượt mới: ti�
 select is((select completed_slides from v2.lesson_progress where lesson_id = 'ar-l1'), '{}'::text[], 'tiến độ về 0');
 select is((select answers from v2.lesson_progress where lesson_id = 'ar-l1'), '{}'::jsonb, 'câu trả lời cũ của bài được xóa (kết quả cũ vẫn trong learning_events)');
 select is((v2.start_assignment('ar-a2'))->>'reset', 'false', 'mở lại lượt đang làm: không xóa nữa');
-select throws_ok($$ select v2.start_assignment('ar-a3') $$, 'P0001', 'Bài này đã hết hạn nộp. Em hỏi thầy cô nhé.', 'quá hạn + khóa → không mở được');
+select throws_ok($$ select v2.start_assignment('ar-a3') $$, 'P0001', 'Bài này đã hết hạn nộp. Em hỏi thầy/cô nhé.', 'quá hạn + khóa → không mở được');
 
 select set_config('request.jwt.claims', '{"sub":"000000d3-0000-0000-0000-000000000002","role":"authenticated"}', true);
 select throws_ok($$ select v2.start_assignment('ar-a2') $$, 'P0002', null, 'HS lớp khác không mở được');

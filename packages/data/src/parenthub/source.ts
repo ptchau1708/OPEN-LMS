@@ -2,7 +2,7 @@
  * Phụ huynh — nguồn dữ liệu (SQL 23).
  *  - Supabase: RPC parent_* (cài đặt "phụ huynh thấy gì", hàng chờ duyệt, thông báo gửi phụ huynh, nhắn tin hai chiều).
  *  - Demo: lưu trên trình duyệt. App GV và app HS/PH là hai trang khác nhau nên bản demo không chuyển tin qua lại;
- *    trang phụ huynh demo có sẵn vài thông báo mẫu của cô để xem thử.
+ *    trang phụ huynh demo có sẵn vài thông báo mẫu của thầy/cô để xem thử.
  */
 import {
   defaultShareModes, SHARE_KINDS, uid,
@@ -81,7 +81,7 @@ class SupabaseParentHub implements ParentHubSource {
   }
   async removeMessage(id: string) { await this.rpc('parent_message_delete', { p_id: id }, 'Chưa gỡ được tin nhắn.'); }
   async inbox(childId: string) {
-    const r = await this.rpc<ParentInbox>('parent_inbox', { p_child: childId }, 'Chưa tải được thông báo của cô.');
+    const r = await this.rpc<ParentInbox>('parent_inbox', { p_child: childId }, 'Chưa tải được thông báo của thầy/cô.');
     return { ...r, modes: { ...defaultShareModes(), ...(r.modes ?? {}) } };
   }
   async readPost(postId: string, ack = false) { return this.rpc<{ readAt?: string; ackedAt?: string }>('parent_post_read', { p_post: postId, p_ack: ack }, 'Chưa ghi nhận được.'); }
@@ -130,7 +130,7 @@ class DemoParentHub implements ParentHubSource {
   }
   private async teacher(): Promise<Profile> {
     const u = await this.me();
-    if (u.role !== 'teacher' && u.role !== 'admin') throw new Error('Chỉ thầy cô mới làm được việc này.');
+    if (u.role !== 'teacher' && u.role !== 'admin') throw new Error('Chỉ thầy/cô mới làm được việc này.');
     return u;
   }
   private settings(s: DemoStore, classId: string): ParentShareSettings {
@@ -284,7 +284,7 @@ class DemoParentHub implements ParentHubSource {
       ackRequired: input.ackRequired, sendAt: input.sendAt && Date.parse(input.sendAt) > Date.now() ? input.sendAt : nowIso(),
       recalled: false, createdAt: nowIso(), reads: {},
     };
-    // Bản demo: phụ huynh "đọc" ngay một nửa để thầy cô thấy cột đã xem / xác nhận.
+    // Bản demo: phụ huynh "đọc" ngay một nửa để thầy/cô thấy cột đã xem / xác nhận.
     const links = await this.links(input.classId);
     links.slice(0, Math.ceil(links.length / 2)).forEach((l) => { p.reads[l.parentId] = { readAt: nowIso(), ackedAt: input.ackRequired ? nowIso() : null }; });
     s.posts.unshift(p);
@@ -363,7 +363,7 @@ class DemoParentHub implements ParentHubSource {
     const fromTeacher = u.role === 'teacher' || u.role === 'admin';
     const classId = await this.classOf(studentId);
     const s = readStore();
-    if (!fromTeacher && !this.settings(s, classId).msgEnabled) throw new Error('Lớp đang tắt nhắn tin với thầy cô.');
+    if (!fromTeacher && !this.settings(s, classId).msgEnabled) throw new Error('Lớp đang tắt nhắn tin với thầy/cô.');
     const m: DemoMsg = { id: uid('msg'), classId, studentId, senderId: u.id, senderName: u.name, fromTeacher, body: text, at: nowIso(), postId: postId ?? null };
     s.msgs.push(m);
     writeStore(s);
@@ -385,7 +385,7 @@ class DemoParentHub implements ParentHubSource {
     s.seeded = true;
     const at = (h: number) => new Date(Date.now() - h * 3_600_000).toISOString();
     s.msgs.push(
-      { id: 'msg-demo-1', classId: 'c-4a', studentId: 'u-lan4a2', senderId: 'u-phuhuynh4a', senderName: 'Bố bạn Ngọc Lan', fromTeacher: false, body: 'Chào cô, sáng mai cháu Lan đi khám răng nên xin vào lớp muộn một tiết ạ.', at: at(20), readAt: null },
+      { id: 'msg-demo-1', classId: 'c-4a', studentId: 'u-lan4a2', senderId: 'u-phuhuynh4a', senderName: 'Bố bạn Ngọc Lan', fromTeacher: false, body: 'Chào thầy/cô, sáng mai cháu Lan đi khám răng nên xin vào lớp muộn một tiết ạ.', at: at(20), readAt: null },
       { id: 'msg-demo-2', classId: 'c-2a', studentId: 'u-an2a1', senderId: 'u-colan', senderName: 'Cô Lan', fromTeacher: true, body: 'Chào chị, tuần này An đọc to, rõ hơn nhiều. Chị cho cháu đọc thêm 10 phút mỗi tối nhé.', at: at(30), readAt: null },
     );
     s.posts.push(

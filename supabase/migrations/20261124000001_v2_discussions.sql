@@ -305,7 +305,7 @@ begin
   from v2.discussions d
   where p.id = any (coalesce(p_ids, '{}')) and d.id = p.discussion_id and v2.is_teacher_of_class(d.class_id) and p.status <> 'removed';
   get diagnostics v_n = row_count;
-  if v_n = 0 and cardinality(coalesce(p_ids, '{}')) > 0 then raise exception 'Thầy cô chưa có quyền với các bài này.' using errcode = '42501'; end if;
+  if v_n = 0 and cardinality(coalesce(p_ids, '{}')) > 0 then raise exception 'Thầy/cô chưa có quyền với các bài này.' using errcode = '42501'; end if;
   update v2.discussion_reports r set resolved_at = now() where r.post_id = any (p_ids) and r.resolved_at is null and p_status in ('visible', 'hidden');
   return v_n;
 end $$;

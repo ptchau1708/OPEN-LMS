@@ -1,7 +1,7 @@
-# Nội dung mở — thầy cô thêm / sửa / xoá được
+# Nội dung mở — thầy/cô thêm / sửa / xoá được
 
-Nguyên tắc: mọi nội dung thầy cô dùng hằng ngày đều có thao tác **thêm, sửa, xoá** (hoặc ẩn khi cần giữ lịch sử).
-Danh mục có sẵn trong mã (kĩ năng, môn học, câu mẫu…) là **bản gốc**: phần thầy cô sửa được lưu riêng và áp lên khi mở
+Nguyên tắc: mọi nội dung thầy/cô dùng hằng ngày đều có thao tác **thêm, sửa, xoá** (hoặc ẩn khi cần giữ lịch sử).
+Danh mục có sẵn trong mã (kĩ năng, môn học, câu mẫu…) là **bản gốc**: phần thầy/cô sửa được lưu riêng và áp lên khi mở
 ứng dụng (`CatalogGate` trong `packages/data/src/catalog`), nên luôn **khôi phục bản gốc** được.
 
 ## Bảng rà soát (24/11/2026)
@@ -15,7 +15,7 @@ Danh mục có sẵn trong mã (kĩ năng, môn học, câu mẫu…) là **bả
 | Tiêu chí chấm, bài viết, ma trận đề | ✓ | ✓ | ✓ | |
 | **Đề kiểm tra đã ra** | ✓ | ✓ | **Mới** | Xoá kèm bài làm của đề |
 | **Hành vi thi đua** | ✓ | ✓ | **Mới** | Điểm đã ghi giữ nguyên (nhật kí ghi “hành vi đã xoá”) |
-| **Huy hiệu của cô** | ✓ | — | **Mới: thu hồi** | GV lớp / người tặng / quản trị |
+| **Huy hiệu của thầy/cô** | ✓ | — | **Mới: thu hồi** | GV lớp / người tặng / quản trị |
 | **Danh mục kĩ năng** | **Mới** | **Mới** | **Mới** | Trang “Danh mục kĩ năng” (`/ki-nang`): thêm, sửa chữ, ẩn/hiện, khôi phục gốc, xoá kĩ năng tự thêm |
 | **Môn học** | — | **Mới (quản trị)** | **Mới: ẩn/hiện** | Quản trị → Năm học & kì: đổi tên (vd “Khác” → “Giáo dục địa phương”), tên ngắn, ẩn môn |
 | **Mẫu nhận xét khi tự chấm** | **Mới** | **Mới** | **Mới** | Theo mức T/H/C, cho HS và phụ huynh; riêng từng GV; bấm để chèn |

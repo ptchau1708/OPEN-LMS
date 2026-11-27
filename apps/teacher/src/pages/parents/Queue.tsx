@@ -1,4 +1,4 @@
-/** Mục chờ duyệt: cô xem từng mục (nhắc nhở, vắng học…), gửi kèm lời nhắn hoặc bỏ qua. */
+/** Mục chờ duyệt: thầy/cô xem từng mục (nhắc nhở, vắng học…), gửi kèm lời nhắn hoặc bỏ qua. */
 import { useMemo, useState } from 'react';
 import type { ClassInfo, ReviewItem } from '@openedu/contracts';
 import { useParentQueue, useReleaseItems } from '@openedu/data';
@@ -20,7 +20,7 @@ export function QueuePanel({ cls, onSettings }: { cls: ClassInfo; onSettings: ()
   if (!items.length) {
     return (
       <Empty icon="check" title="Không có mục nào chờ duyệt">
-        <p>Mục để ở chế độ “Cô duyệt rồi mới gửi” (mặc định: nhắc nhở nề nếp) sẽ hiện ở đây trong 30 ngày.</p>
+        <p>Mục để ở chế độ “GV duyệt rồi mới gửi” (mặc định: nhắc nhở nề nếp) sẽ hiện ở đây trong 30 ngày.</p>
         <Btn onClick={onSettings}>Chọn phụ huynh thấy gì</Btn>
         {msg ? <p className="tc-alert tc-alert--ok" role="status">{msg}</p> : null}
       </Empty>
@@ -63,8 +63,8 @@ export function QueuePanel({ cls, onSettings }: { cls: ClassInfo; onSettings: ()
         </div>
       </section>
       <section className="tc-card tc-ph-queue__act">
-        <Field label={`Lời nhắn kèm khi gửi ${picked.length ? `${picked.length} mục đã chọn` : '(chọn mục ở bảng trên)'}`} help="Không bắt buộc. Phụ huynh thấy lời nhắn ngay dưới mục cô gửi.">
-          <textarea className="tc-input" rows={2} value={note} maxLength={1000} onChange={(e) => setNote(e.target.value)} placeholder="Ví dụ: Cô nhờ bố mẹ nhắc con giữ trật tự trong giờ học." data-testid="ph-queue-note" />
+        <Field label={`Lời nhắn kèm khi gửi ${picked.length ? `${picked.length} mục đã chọn` : '(chọn mục ở bảng trên)'}`} help="Không bắt buộc. Phụ huynh thấy lời nhắn ngay dưới mục thầy/cô gửi.">
+          <textarea className="tc-input" rows={2} value={note} maxLength={1000} onChange={(e) => setNote(e.target.value)} placeholder="Ví dụ: Nhờ bố mẹ nhắc con giữ trật tự trong giờ học." data-testid="ph-queue-note" />
         </Field>
         <div className="tc-row">
           <Btn kind="primary" icon="send" disabled={!picked.length || rel.isPending} onClick={() => act(picked, 'sent')} data-testid="ph-queue-send">Gửi {picked.length || ''} mục</Btn>

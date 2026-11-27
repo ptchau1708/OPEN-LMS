@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { LEARNER, TEACHER, watchErrors } from './helpers';
 
-test('đăng nhập chung: thầy cô đăng nhập ở app học sinh → tự sang app giáo viên, không hỏi lại mật khẩu', async ({ page }) => {
+test('đăng nhập chung: thầy/cô đăng nhập ở app học sinh → tự sang app giáo viên, không hỏi lại mật khẩu', async ({ page }) => {
   const w = watchErrors(page);
   await page.goto(`${LEARNER}/`);
   await expect(page.getByTestId('login-staff-note')).toBeVisible();
@@ -10,7 +10,7 @@ test('đăng nhập chung: thầy cô đăng nhập ở app học sinh → tự 
   await expect(page.getByRole('navigation', { name: 'Điều hướng chính' })).toBeVisible();
   // Phiên đã được đọc và xóa khỏi thanh địa chỉ.
   expect(new URL(page.url()).hash).toBe('');
-  // App học sinh đã bỏ phiên của thầy cô.
+  // App học sinh đã bỏ phiên của thầy/cô.
   await page.goto(`${LEARNER}/`);
   await expect(page.getByTestId('login-staff-note')).toBeVisible();
   w.expectClean();

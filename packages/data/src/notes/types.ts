@@ -1,4 +1,4 @@
-/** Thông tin bổ sung của học sinh do thầy cô nhập (dữ liệu thu thập bên ngoài ứng dụng). */
+/** Thông tin bổ sung của học sinh do thầy/cô nhập (dữ liệu thu thập bên ngoài ứng dụng). */
 export type NoteCategory = 'quan-sat' | 'hoc-tap' | 'suc-khoe' | 'gia-dinh' | 'nang-khieu' | 'khen-thuong' | 'khac';
 export const NOTE_CATEGORY_LABEL: Record<NoteCategory, string> = {
   'quan-sat': 'Quan sát, nhận xét',
@@ -27,7 +27,7 @@ export interface StudentNote {
   source: NoteSource;
   /** Tên tệp Word / Excel đã nhập. */
   sourceName?: string;
-  /** Phụ huynh xem được. Mặc định: chỉ thầy cô. */
+  /** Phụ huynh xem được. Mặc định: chỉ thầy/cô. */
   shareParent: boolean;
   createdBy?: string;
   createdAt?: string;
@@ -40,7 +40,7 @@ export const NOTE_LIMITS = { title: 200, body: 20000, fields: 60, fieldText: 500
 /** Làm sạch trước khi lưu; trả lỗi tiếng Việt nếu thiếu. */
 export function cleanNote(i: StudentNoteInput): StudentNoteInput {
   const title = i.title.replace(/\s+/g, ' ').trim().slice(0, NOTE_LIMITS.title);
-  if (!title) throw new Error('Thầy cô nhập tiêu đề cho ghi chép nhé.');
+  if (!title) throw new Error('Thầy/cô nhập tiêu đề cho ghi chép nhé.');
   const fields: Record<string, string> = {};
   for (const [k, v] of Object.entries(i.fields ?? {}).slice(0, NOTE_LIMITS.fields)) {
     const key = k.replace(/\s+/g, ' ').trim().slice(0, 80);

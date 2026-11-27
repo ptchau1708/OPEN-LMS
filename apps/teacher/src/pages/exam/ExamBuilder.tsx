@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { EXAM_QTYPE_LABEL, type Exam, type ExamMatrix, type ExamShortfall, type ExamSlot, type ExamVariant, type Item, type Profile } from '@openedu/contracts';
-import { openSlots, paperPoints, swapSlot, useClasses, useExam, useExamMatrices, useExamService, useItemsByIds, useSaveExam } from '@openedu/data';
+import { openSlots, paperPoints, swapSlot, useExam, useExamMatrices, useExamService, useItemsByIds, useSaveExam } from '@openedu/data';
+import { useClasses } from '../../lib/focusGrade';
 import { Btn, Dialog, Empty, ErrorNote, Field, Loading, PageHead, Seg } from '../../components/common';
 import { ItemPreview, TypeBadge } from '../../components/items';
 import { shorten, toLocalInput } from '../../lib/format';
@@ -82,7 +83,7 @@ export default function ExamBuilder({ user }: { user: Profile }) {
     setCands(await svc.candidates(matrix, s, slots.map((x) => x.itemId).filter((x): x is string => !!x)));
   };
   const doSave = (status: Exam['status']) => {
-    if (status === 'published' && missing.length) { setMsg({ ok: false, text: `Còn ${missing.length} ô chưa có câu. Thầy cô chọn câu (nút “Chọn câu”) hoặc giảm số câu trong ma trận.` }); return; }
+    if (status === 'published' && missing.length) { setMsg({ ok: false, text: `Còn ${missing.length} ô chưa có câu. Thầy/cô chọn câu (nút “Chọn câu”) hoặc giảm số câu trong ma trận.` }); return; }
     if (!exam.classId) { setMsg({ ok: false, text: 'Chọn lớp làm bài.' }); return; }
     save.mutate({ ...exam, status }, {
       onSuccess: (saved) => {
@@ -147,7 +148,7 @@ export default function ExamBuilder({ user }: { user: Profile }) {
             <Field label="Đóng đề"><input type="datetime-local" className="tc-input" value={toLocalInput(new Date(exam.closeAt))} onChange={(e) => e.target.value && set({ closeAt: new Date(e.target.value).toISOString() })} /></Field>
           </div>
           <Field label="Thời gian làm bài (phút)"><input className="tc-input tc-input--num" inputMode="numeric" value={exam.durationMin} onChange={(e) => set({ durationMin: Math.max(5, Math.min(180, Number(e.target.value) || 5)) })} /></Field>
-          <Field label="Điểm hiện cho học sinh"><Seg label="Khi nào hiện điểm" value={exam.resultsPolicy} onChange={(v) => set({ resultsPolicy: v })} options={[{ value: 'immediate', label: 'Ngay khi nộp' }, { value: 'after-release', label: 'Khi cô công bố' }]} /></Field>
+          <Field label="Điểm hiện cho học sinh"><Seg label="Khi nào hiện điểm" value={exam.resultsPolicy} onChange={(v) => set({ resultsPolicy: v })} options={[{ value: 'immediate', label: 'Ngay khi nộp' }, { value: 'after-release', label: 'Khi GV công bố' }]} /></Field>
           <Field label="Làm trực tuyến" help="Đề A/B: máy chia ngẫu nhiên đề cho từng em (bạn ngồi cạnh thường khác đề).">
             <Seg label="Đề trực tuyến" value={exam.onlineVariants} onChange={(v) => set({ onlineVariants: v })} options={[{ value: 'A', label: 'Chỉ đề A' }, { value: 'AB', label: 'Đề A và B' }]} />
           </Field>

@@ -135,7 +135,7 @@ export function buildTimeline(events: LearningEvent[], rewards: RewardEntry[], l
   for (const [id, g] of live) out.push({ at: g.at, kind: 'live', title: `Trả lời ${g.n} câu trong lớp trực tiếp`, detail: `Đúng ${g.ok}/${g.n} câu`, refId: id });
   for (const r of rewards) {
     if (r.sourceType === 'arena') out.push({ at: r.at, kind: 'arena', title: r.reason || 'Đấu trường', stars: r.stars });
-    else if (r.sourceType === 'behavior' || r.sourceType === 'bonus') out.push({ at: r.at, kind: 'reward', title: r.reason || 'Được thầy cô khen', stars: r.stars });
+    else if (r.sourceType === 'behavior' || r.sourceType === 'bonus') out.push({ at: r.at, kind: 'reward', title: r.reason || 'Được thầy/cô khen', stars: r.stars });
   }
   return out.sort((a, b) => b.at.localeCompare(a.at)).slice(0, limit);
 }
@@ -318,14 +318,14 @@ export function buildParentSummary(input: ParentInput): ParentSummary {
   let work: ParentSummary['work'] = null;
   if (latestWork) {
     const tip = tipOf(latestWork.parentComment);
-    const sentence = `Bài “${latestWork.title}” được thầy cô nhận xét: ${lowerFirst(TT27_LEVEL_LABEL[latestWork.level])} (${fmtScore(latestWork.total)}/${fmtScore(latestWork.max)} điểm).`;
+    const sentence = `Bài “${latestWork.title}” được thầy/cô nhận xét: ${lowerFirst(TT27_LEVEL_LABEL[latestWork.level])} (${fmtScore(latestWork.total)}/${fmtScore(latestWork.max)} điểm).`;
     work = { title: latestWork.title, level: latestWork.level, sentence, tip, at: latestWork.at };
     sentences.push(`${sentence} Gợi ý: ${tip}`);
   }
   const beh = behaviorSummary(input.behaviorLogs ?? [], input.behaviors ?? [], now);
   if (beh && (beh.weekPositive || beh.weekNeedsWork)) {
     const good = beh.topPositive[0] ? ` (nhất là “${lowerFirst(beh.topPositive[0])}”)` : '';
-    const nw = beh.weekNeedsWork ? ` Thầy cô nhắc con: ${lowerFirst(beh.topNeedsWork[0] ?? 'giữ nề nếp')}.` : '';
+    const nw = beh.weekNeedsWork ? ` Thầy/cô nhắc con: ${lowerFirst(beh.topNeedsWork[0] ?? 'giữ nề nếp')}.` : '';
     sentences.push(`Tuần này con được khen ${beh.weekPositive} điểm thi đua${good}.${nw}`);
   }
   const att = attendanceSummary(input.attendance ?? [], child.id, now);

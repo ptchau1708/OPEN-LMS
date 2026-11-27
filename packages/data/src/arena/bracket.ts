@@ -119,5 +119,5 @@ export function roundName(round: number, rounds: number): string {
 }
 
 export const DECISION_TEXT: Record<CupDecision, string> = {
-  play: 'thi đấu', bye: 'miễn đấu', walkover: 'bạn kia chưa đấu', seed: 'cả hai chưa đấu — hạt giống cao hơn đi tiếp', teacher: 'thầy cô chọn',
+  play: 'thi đấu', bye: 'miễn đấu', walkover: 'bạn kia chưa đấu', seed: 'cả hai chưa đấu — hạt giống cao hơn đi tiếp', teacher: 'thầy/cô chọn',
 };

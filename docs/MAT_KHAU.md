@@ -16,7 +16,7 @@ nên khôi phục chủ yếu nhờ người khác cấp lại.
 - **Tự đổi**: phụ huynh — nút *Đổi mật khẩu* trên trang phụ huynh; giáo viên — menu tên mình → *Đổi mật khẩu*.
   Phải nhập đúng mật khẩu đang dùng. Học sinh không có nút này (tránh các em tự đổi rồi quên); địa chỉ `/doi-mat-khau` vẫn dùng được nếu cần.
 - **Quên mật khẩu** (`/quen-mat-khau`, link ở trang đăng nhập chung và app giáo viên): chỉ nhận **email thật**. Nhập tên
-  đăng nhập / số điện thoại / địa chỉ hệ thống tự ghép → trang hướng dẫn nhờ thầy cô, **không gửi thư**.
+  đăng nhập / số điện thoại / địa chỉ hệ thống tự ghép → trang hướng dẫn nhờ thầy/cô, **không gửi thư**.
 - GVCN chỉ cấp lại được cho học sinh lớp mình chủ nhiệm và phụ huynh của các em; quản trị cấp cho mọi người. Không tự
   cấp cho chính mình.
 
