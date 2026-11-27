@@ -6,6 +6,7 @@ import { useAssignments, useAttendance, useClassGarden, useClassHeatmap, useClas
 import { useClasses } from '../lib/focusGrade';
 import { Avatar, Empty, Loading, Seg, SubjectDot } from '../components/common';
 import { cx, fmtDate, relTime } from '../lib/format';
+import { useTodayWork, type ClassWork } from '../lib/todayWork';
 import '../styles/dashboard.css';
 
 /* ======================= tiện ích ======================= */
@@ -406,6 +407,55 @@ function ClassBoard({ cls }: { cls: ClassInfo }) {
   );
 }
 
+/* ======================= việc hôm nay ======================= */
+interface Todo { key: string; icon: IconName; n: number; label: string; doneLabel: string; to: string; per: (c: ClassWork) => number; value?: ReactNode }
+
+function TodayPanel() {
+  const w = useTodayWork();
+  const t = w.total;
+  const many = w.classes.length > 1;
+  const todos: Todo[] = [
+    { key: 'review', icon: 'eye', n: t.review, label: 'bài viết chờ chấm hoặc duyệt', doneLabel: 'Chấm bài', to: '/cham-bai', per: (c) => c.review },
+    { key: 'att', icon: 'clock', n: t.attendanceTodo, label: many ? 'lớp chưa điểm danh hôm nay' : 'Chưa điểm danh hôm nay', doneLabel: 'Điểm danh', to: '/diem-danh', per: (c) => (c.attendanceTodo ? 1 : 0), value: many ? undefined : <Icon name="clock" size={22} /> },
+    { key: 'msg', icon: 'chat', n: t.parentUnread, label: 'tin nhắn phụ huynh chưa đọc', doneLabel: 'Tin nhắn phụ huynh', to: '/phu-huynh?the=tin-nhan', per: (c) => c.parentUnread },
+    { key: 'queue', icon: 'parent', n: t.parentQueue, label: 'mục chờ duyệt để gửi phụ huynh', doneLabel: 'Duyệt gửi phụ huynh', to: '/phu-huynh?the=cho-duyet', per: (c) => c.parentQueue },
+    { key: 'due', icon: 'check', n: t.dueSoon, label: 'bài giao hết hạn trong 2 ngày', doneLabel: 'Bài sắp hết hạn', to: '/bao-cao-bai-giao', per: (c) => c.dueSoon },
+  ];
+  const open = todos.filter((x) => x.n > 0);
+  const done = todos.filter((x) => x.n === 0);
+  const today = new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'numeric' });
+  return (
+    <section className="db-today" aria-labelledby="db-today-h" data-testid="today-work">
+      <header className="db-today__head">
+        <h2 id="db-today-h">Việc hôm nay</h2>
+        <span className="tc-muted">{today}</span>
+        <span className="tc-spacer" />
+        {w.loading && !open.length ? <span className="tc-muted tc-small">Đang xem…</span> : open.length ? <span className="db-today__count">{open.length} việc cần làm</span> : null}
+      </header>
+      {open.length ? (
+        <div className="db-today__grid">
+          {open.map((x) => (
+            <Link key={x.key} to={x.to} className={cx('db-todo', `db-todo--${x.key}`)} data-testid={`todo-${x.key}`}>
+              <span className="db-todo__icon" aria-hidden="true"><Icon name={x.icon} size={18} /></span>
+              <span className="db-todo__main">
+                {x.value ?? <strong className="db-todo__n">{x.n}</strong>}
+                <span className="db-todo__label">{x.label}</span>
+                {many ? <small className="db-todo__per">{w.classes.filter((c) => x.per(c) > 0).map((c) => `${c.className}${x.key === 'att' ? '' : `: ${x.per(c)}`}`).join(' · ')}</small> : null}
+              </span>
+              <Icon name="chevron" size={18} />
+            </Link>
+          ))}
+        </div>
+      ) : !w.loading ? (
+        <p className="db-today__clear"><Icon name="check" size={18} /> Hôm nay chưa có việc gấp. Thầy/cô có thể soạn bài mới hoặc mở lớp trực tiếp.</p>
+      ) : null}
+      {open.length && done.length ? (
+        <p className="db-today__done"><Icon name="check" size={14} /> Đã ổn: {done.map((x) => x.doneLabel).join(' · ')}</p>
+      ) : null}
+    </section>
+  );
+}
+
 /* ======================= trang ======================= */
 export function Dashboard({ user }: { user: Profile }) {
   const nav = useNavigate();
@@ -424,6 +474,8 @@ export function Dashboard({ user }: { user: Profile }) {
         </div>
         <Mascot id={user.avatarMascot} mood="wave" size={72} />
       </header>
+
+      <TodayPanel />
 
       <section className="tc-actions">
         <button type="button" className="tc-action" onClick={() => nav('/bai-giang?tao=1')}><Icon name="plus" size={22} /><span><strong>Soạn bài giảng mới</strong><small>Slide, hoạt động, trò chơi</small></span></button>

@@ -1,43 +1,22 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import type { Profile } from '@openedu/contracts';
-import { Icon, type IconName } from '@openedu/ui';
+import { Icon } from '@openedu/ui';
 import { useDataSource, useNotifications, usePushSync, useSignOut } from '@openedu/data';
 import { Avatar } from './common';
 import { NotifyBell } from './NotifyBell';
 import { useFocusGrade } from '../lib/focusGrade';
 import { cx } from '../lib/format';
+import { NAV_GROUPS, NAV_HOME, type NavGroup, type NavItem } from '../lib/nav';
+import { navBadge, TodayWorkProvider, useTodayWork } from '../lib/todayWork';
 
-const NAV: { to: string; label: string; icon: IconName; end?: boolean; match?: RegExp; section?: string; admin?: boolean }[] = [
-  { to: '/', label: 'Tổng quan', icon: 'home', end: true },
-  { to: '/bai-giang', label: 'Bài giảng', icon: 'book' },
-  { to: '/ngan-hang', label: 'Ngân hàng câu hỏi', icon: 'puzzle' },
-  { to: '/giao-bai', label: 'Giao bài', icon: 'check' },
-  { to: '/bao-cao-bai-giao', label: 'Báo cáo bài giao', icon: 'map' },
-  { to: '/lop', label: 'Lớp học', icon: 'team', match: /^\/lop(?!\/[^/]+\/ban-do)/ },
-  { to: '/hoc-sinh', label: 'Hồ sơ học sinh', icon: 'user', match: /^\/hoc-sinh/ },
-  { to: '/kien-thuc', label: 'Kiến thức', icon: 'map', match: /^\/(kien-thuc|lop\/[^/]+\/ban-do-kien-thuc)/ },
-  { to: '/ki-nang', label: 'Danh mục kĩ năng', icon: 'puzzle' },
-  { to: '/truc-tiep', label: 'Trực tiếp', icon: 'tv' },
-  { to: '/dau-truong', label: 'Đấu trường', icon: 'trophy', match: /^\/dau-truong/ },
-  { to: '/trang-hoc', label: 'Trang học', icon: 'puzzle' },
-  { to: '/thao-luan', label: 'Thảo luận', icon: 'team', match: /^\/thao-luan/ },
-  { to: '/phu-huynh', label: 'Phụ huynh', icon: 'parent', match: /^\/phu-huynh/ },
-  { to: '/bai-viet', label: 'Bài viết', icon: 'pencil', section: 'Đánh giá', match: /^\/bai-viet/ },
-  { to: '/cham-bai', label: 'Chấm bài', icon: 'eye', match: /^\/cham-bai/ },
-  { to: '/de-kiem-tra', label: 'Đề kiểm tra', icon: 'check', match: /^\/de-kiem-tra/ },
-  { to: '/rubric', label: 'Tiêu chí chấm', icon: 'settings' },
-  { to: '/tt27', label: 'Nhận xét TT27', icon: 'passport' },
-  { to: '/thi-dua', label: 'Thi đua', icon: 'trophy', match: /^\/thi-dua/ },
-  { to: '/vuon-lop', label: 'Vườn lớp & huy hiệu', icon: 'star' },
-  { to: '/diem-danh', label: 'Điểm danh', icon: 'clock' },
-  { to: '/bao-cao', label: 'Báo cáo', icon: 'map', section: 'Trường', match: /^\/bao-cao/ },
-  { to: '/xuat-nhap', label: 'Xuất / nhập dữ liệu', icon: 'upload' },
-  { to: '/quan-tri/lop', label: 'Quản lí lớp', icon: 'team', admin: true, section: 'Quản trị' },
-  { to: '/quan-tri/tai-khoan', label: 'Tài khoản', icon: 'user', admin: true },
-  { to: '/quan-tri/cai-dat', label: 'Năm học & kì', icon: 'settings', admin: true },
-  { to: '/quan-tri/ung-dung', label: 'Ứng dụng kết nối', icon: 'puzzle', admin: true },
-];
+const CommandPalette = lazy(() => import('./CommandPalette').then((m) => ({ default: m.CommandPalette })));
+
+const GROUPS_KEY = 'tc-nav-groups';
+function readGroups(): Record<string, boolean> {
+  try { return JSON.parse(window.localStorage.getItem(GROUPS_KEY) ?? '{}') as Record<string, boolean>; } catch { return {}; }
+}
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
 export function Brand() {
   return (
@@ -49,17 +28,58 @@ export function Brand() {
 }
 
 export function Layout({ user }: { user: Profile }) {
+  return <TodayWorkProvider user={user}><Shell user={user} /></TodayWorkProvider>;
+}
+
+function NavRow({ n, active, badge }: { n: NavItem; active: boolean; badge: number }) {
+  // Tên đọc của liên kết giữ nguyên (ví dụ "Phụ huynh"); số việc đọc như phần mô tả.
+  const descId = badge ? `nav-d${n.to.replace(/[^a-z0-9]/gi, '-')}` : undefined;
+  return (
+    <NavLink to={n.to} end={n.end} className={cx('tc-nav__link', active && 'is-active')} title={n.label} aria-describedby={descId}>
+      <Icon name={n.icon} size={20} />
+      <span>{n.label}</span>
+      {badge ? <b className="tc-nav__badge" aria-hidden="true">{badge > 99 ? '99+' : badge}</b> : null}
+      {badge ? <span id={descId} hidden>{badge} việc cần làm</span> : null}
+    </NavLink>
+  );
+}
+
+function Shell({ user }: { user: Profile }) {
   const loc = useLocation();
   const nav = useNavigate();
   const ds = useDataSource();
   const signOut = useSignOut();
   const [menu, setMenu] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
+  const [cmdk, setCmdk] = useState(false);
+  const [groups, setGroups] = useState<Record<string, boolean>>(readGroups);
+  const work = useTodayWork();
   const rail = /^\/bai-giang\/[^/]+/.test(loc.pathname);
   const notes = useNotifications();
   const focus = useFocusGrade().grade;
   usePushSync('gv');
   useEffect(() => { setMenu(false); setUserMenu(false); }, [loc.pathname]);
+  // Ctrl+K / ⌘K: mở ô tìm nhanh ở mọi trang.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); setCmdk((v) => !v); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const isActive = (n: NavItem) => (n.match ? n.match.test(loc.pathname) : n.end ? loc.pathname === n.to : loc.pathname === n.to || loc.pathname.indexOf(n.to + '/') === 0);
+  // Nhóm mặc định: mở hết, trừ "Trường & thiết lập" với giáo viên (quản trị thì mở). Nhóm có trang đang xem luôn mở.
+  const isOpen = (g: NavGroup) => {
+    if (g.items.some(isActive)) return true;
+    if (groups[g.id] !== undefined) return groups[g.id];
+    return g.id !== 'truong' || user.role === 'admin';
+  };
+  const toggle = (g: NavGroup) => {
+    const next = { ...groups, [g.id]: !isOpen(g) };
+    setGroups(next);
+    try { window.localStorage.setItem(GROUPS_KEY, JSON.stringify(next)); } catch { /* bỏ qua */ }
+  };
 
   const userBox = (
     <div className="tc-user">
@@ -90,14 +110,29 @@ export function Layout({ user }: { user: Profile }) {
           <Brand />
           <NotifyBell data={notes.data} id="bell-side" />
         </div>
+        <button type="button" className="tc-search" onClick={() => setCmdk(true)} data-testid="cmdk-open" title="Tìm nhanh (Ctrl+K)">
+          <Icon name="search" size={16} />
+          <span className="tc-search__text">Tìm nhanh…</span>
+          <kbd className="tc-search__kbd">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
+        </button>
         <nav className="tc-nav" aria-label="Điều hướng chính">
-          {NAV.filter((n) => !n.admin || user.role === 'admin').map((n) => [
-            n.section ? <span key={`s-${n.section}`} className="tc-nav__section">{n.section}</span> : null,
-            <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => cx('tc-nav__link', (n.match ? n.match.test(loc.pathname) : isActive) && 'is-active')} title={n.label}>
-              <Icon name={n.icon} size={20} />
-              <span>{n.label}</span>
-            </NavLink>,
-          ])}
+          <NavRow n={NAV_HOME} active={isActive(NAV_HOME)} badge={0} />
+          {NAV_GROUPS.map((g) => {
+            const items = g.items.filter((n) => !n.admin || user.role === 'admin');
+            if (!items.length) return null;
+            const open = rail || isOpen(g);
+            const hidden = open ? 0 : items.reduce((t, n) => t + navBadge(work, n.badge), 0);
+            return (
+              <div key={g.id} className={cx('tc-nav__group', open && 'is-open')}>
+                <button type="button" className="tc-nav__head" aria-expanded={open} onClick={() => toggle(g)} data-testid={`nav-group-${g.id}`}>
+                  <Icon name="chevron" size={14} />
+                  <span>{g.label}</span>
+                  {hidden ? <b className="tc-nav__badge" aria-label={`${hidden} việc cần làm trong nhóm`}>{hidden}</b> : null}
+                </button>
+                {open ? items.map((n) => <NavRow key={n.to} n={n} active={isActive(n)} badge={navBadge(work, n.badge)} />) : null}
+              </div>
+            );
+          })}
         </nav>
         <div className="tc-side__bottom">{userBox}</div>
       </aside>
@@ -107,12 +142,14 @@ export function Layout({ user }: { user: Profile }) {
         </button>
         <Brand />
         <span className="tc-spacer" />
+        <button type="button" className="tc-btn tc-btn--ghost tc-btn--icon" aria-label="Tìm nhanh" onClick={() => setCmdk(true)}><Icon name="search" size={20} /></button>
         <NotifyBell data={notes.data} id="bell-top" testId="notify-bell-m" />
       </header>
       {menu ? <div className="tc-side-scrim" onClick={() => setMenu(false)} /> : null}
       <main className="tc-main">
         <Outlet />
       </main>
+      {cmdk ? <Suspense fallback={null}><CommandPalette user={user} open={cmdk} onClose={() => setCmdk(false)} /></Suspense> : null}
     </div>
   );
 }

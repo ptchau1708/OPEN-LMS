@@ -48,6 +48,40 @@ Chữ trắng trên nút màu đạt tối thiểu 3:1 (chữ lớn, đậm); ch
 
 Triển khai: chạy `25_linh-vat-moi.sql` trong SQL Editor (thêm 4 dòng vào `v2.mascots`). Chưa chạy thì app vẫn chạy, chỉ chưa mở khóa được 4 bạn mới.
 
-## Giai đoạn tiếp theo
+# App giáo viên (giai đoạn 3)
 
-App giáo viên: gom thanh bên thành 5 nhóm, ô tìm nhanh Ctrl+K, Tổng quan "Việc hôm nay".
+## Thanh bên theo nhóm (`apps/teacher/src/lib/nav.ts`, `components/Layout.tsx`)
+
+"Tổng quan" ở trên cùng, rồi 5 nhóm bấm để thu gọn / mở:
+
+| Nhóm | Mục |
+|---|---|
+| Dạy học | Bài giảng, Ngân hàng câu hỏi, Danh mục kĩ năng, Trang học, Trực tiếp, Đấu trường |
+| Giao & chấm | Giao bài, Báo cáo bài giao, Chấm bài, Bài viết, Đề kiểm tra, Tiêu chí chấm, Nhận xét TT27 |
+| Lớp & học sinh | Lớp học, Hồ sơ học sinh, Kiến thức, Điểm danh, Thi đua, Vườn lớp & huy hiệu |
+| Kết nối | Phụ huynh, Thảo luận |
+| Trường & thiết lập | Báo cáo, Xuất / nhập dữ liệu, (quản trị) Quản lí lớp, Tài khoản, Năm học & kì, Ứng dụng kết nối |
+
+- Máy nhớ nhóm nào thầy/cô thu gọn. Nhóm chứa trang đang xem luôn mở. "Trường & thiết lập" thu gọn sẵn với giáo viên, mở sẵn với quản trị.
+- Số việc hiện cạnh mục: **Chấm bài** (bài viết chờ chấm/duyệt), **Phụ huynh** (tin chưa đọc + mục chờ duyệt gửi), **Điểm danh** (lớp chưa điểm danh hôm nay). Nhóm đang thu gọn hiện tổng số việc bên trong.
+- Màu nhấn đổi sang xanh trời đậm `#1f63cf`, cùng họ màu với app học sinh.
+
+## Tìm nhanh — Ctrl+K (⌘K trên Mac)
+
+- Mở bằng Ctrl+K ở mọi trang, nút "Tìm nhanh…" trên thanh bên, hoặc biểu tượng kính lúp trên điện thoại.
+- Gõ không dấu cũng được ("diem danh", "ngoc lan", "phan so").
+- Tìm được: việc cần làm, thao tác nhanh (soạn bài, mở lớp trực tiếp, giao bài, gửi phụ huynh, điểm danh, ghi thi đua, ra đề…), mọi trang, lớp, học sinh, bài giảng.
+- ↑ ↓ chọn, Enter mở, Esc đóng.
+
+## Tổng quan: "Việc hôm nay" (`lib/todayWork.tsx`)
+
+Ngay dưới lời chào, gộp cho mọi lớp của thầy/cô:
+
+- bài viết chờ chấm hoặc duyệt → Chấm bài;
+- lớp chưa điểm danh hôm nay (thứ Hai – thứ Sáu) → Điểm danh;
+- tin nhắn phụ huynh chưa đọc → Phụ huynh / Tin nhắn;
+- mục chờ duyệt để gửi phụ huynh → Phụ huynh / Chờ duyệt;
+- bài giao hết hạn trong 2 ngày → Báo cáo bài giao.
+
+Mỗi việc là một ô bấm tới đúng chỗ cần làm; việc đã ổn gom thành một dòng "Đã ổn: …". Dạy nhiều lớp thì ô ghi số theo từng lớp.
+Chưa chạy SQL 23 thì phần tin nhắn / chờ duyệt phụ huynh tính là 0, các phần khác vẫn chạy.
