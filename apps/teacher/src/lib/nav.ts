@@ -41,6 +41,7 @@ export const NAV: NavItem[] = [
   { to: '/ki-nang', label: 'Danh mục kĩ năng', icon: 'puzzle', color: C.violet, keywords: 'ky nang chuong trinh' },
   { to: '/truc-tiep', label: 'Trực tiếp', icon: 'tv', color: C.red, match: /^\/truc-tiep/, keywords: 'lop truc tiep tv trinh chieu' },
   { to: '/dau-truong', label: 'Đấu trường', icon: 'trophy', color: C.orange, match: /^\/dau-truong/, keywords: 'giai dau leo thap doi khang' },
+  { to: '/on-thi', label: 'Ôn thi', icon: 'scroll', color: C.amber, match: /^\/on-thi/, keywords: 'on thi trang nguyen vioedu violympic luyen thi de word' },
   { to: '/trang-hoc', label: 'Trang học', icon: 'puzzle', color: C.indigo, keywords: 'trang noi dung nhung web' },
   { to: '/thao-luan', label: 'Thảo luận', icon: 'team', color: C.cyan, match: /^\/thao-luan/, keywords: 'thao luan tro chuyen y kien' },
   { to: '/phu-huynh', label: 'Phụ huynh', icon: 'parent', color: C.pink, match: /^\/phu-huynh/, badge: 'parents', keywords: 'phu huynh tin nhan thong bao lien ket' },

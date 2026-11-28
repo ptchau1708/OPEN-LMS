@@ -31,6 +31,11 @@ const ForcedChange = lazy(() => import('./pages/account/Password').then((m) => (
 const Remediation = lazy(() => import('./pages/Remediation'));
 const WorkPage = lazy(() => import('./pages/WorkPage'));
 const ExamPage = lazy(() => import('./pages/exam/ExamPage'));
+const OnThiHub = lazy(() => import('./pages/onthi/OnThiHub'));
+const OnThiStyle = lazy(() => import('./pages/onthi/OnThiStyle'));
+const OnThiRoom = lazy(() => import('./pages/onthi/OnThiRoom'));
+const OnThiResult = lazy(() => import('./pages/onthi/OnThiResult'));
+const OnThiPractice = lazy(() => import('./pages/onthi/OnThiPractice'));
 const Downloads = lazy(() => import('./pages/Downloads'));
 const OfflineHost = lazy(() => import('./offline/OfflineHost'));
 const Shop = lazy(() => import('./pages/rewards/Shop'));
@@ -82,6 +87,11 @@ export function App() {
             <Route path="on-tap/:setId" element={<Remediation />} />
             <Route path="bai-viet/:taskId" element={<WorkPage />} />
             <Route path="kiem-tra/:examId" element={<ExamPage />} />
+            <Route path="on-thi" element={<OnThiHub />} />
+            <Route path="on-thi/:style" element={<OnThiStyle />} />
+            <Route path="on-thi/:style/bai/:setId" element={<OnThiRoom />} />
+            <Route path="on-thi/:style/ket-qua/:attemptId" element={<OnThiResult />} />
+            <Route path="on-thi/:style/dang/:type" element={<OnThiPractice />} />
             <Route path="lop" element={<LiveJoin />} />
             <Route path="lop/:sessionId" element={<LiveRoom />} />
             <Route path="ung-dung" element={<LtiApps />} />

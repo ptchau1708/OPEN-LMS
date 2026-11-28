@@ -61,6 +61,11 @@ export default function Play() {
           </div>
         </article>
       </div>
+      <button type="button" className="ln-play-onthi" onClick={() => nav('/on-thi')} data-testid="play-onthi">
+        <span className="ln-play-onthi__ico" aria-hidden="true"><Icon name="scroll" size={28} /></span>
+        <span className="ln-play-onthi__text"><b>Ôn thi Trạng Nguyên, Đấu trường VIOEDU</b><span>Luyện các dạng câu hỏi giống sân chơi thật</span></span>
+        <Icon name="next" size={24} />
+      </button>
       <BoardCard />
       <AppTabs active="play" />
     </div>

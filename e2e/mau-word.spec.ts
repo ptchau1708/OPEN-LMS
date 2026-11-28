@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { spaGo, teacherLogin, watchErrors } from './helpers';
 
-test('Ngân hàng: tải mẫu Word đủ các dạng, tải lên lại → 18 câu đủ 16 dạng, lưu vào ngân hàng; môn học CT 2018', async ({ page }) => {
+test('Ngân hàng: tải mẫu Word đủ các dạng, tải lên lại → 20 câu đủ 17 dạng, lưu vào ngân hàng; môn học CT 2018', async ({ page }) => {
   const w = watchErrors(page);
   await teacherLogin(page, 'cothu');
   await spaGo(page, '/ngan-hang');
@@ -21,10 +21,10 @@ test('Ngân hàng: tải mẫu Word đủ các dạng, tải lên lại → 18 c
   expect(file.suggestedFilename()).toBe('mau-cau-hoi-word.docx');
   const path = await file.path();
   await page.getByTestId('qb-file').setInputFiles({ name: 'mau-cau-hoi-word.docx', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', buffer: (await import('node:fs')).readFileSync(path) });
-  await expect(page.getByTestId('qb-row')).toHaveCount(18);
-  await expect(page.getByTestId('qb-save')).toContainText('17 câu');
+  await expect(page.getByTestId('qb-row')).toHaveCount(20);
+  await expect(page.getByTestId('qb-save')).toContainText('19 câu');
   await page.getByTestId('qb-save').click();
-  await expect(page.getByText(/Đã lưu 17 câu/)).toBeVisible();
+  await expect(page.getByText(/Đã lưu 19 câu/)).toBeVisible();
   w.expectClean();
 });
 

@@ -23,7 +23,8 @@ export type ItemType =
   | 'DRAW'
   | 'RECORD_READ'
   | 'MATH_MANIPULATIVE'
-  | 'POLL';
+  | 'POLL'
+  | 'TRUE_FALSE_MULTI';
 
 /** Một lựa chọn / thẻ / từ. `image` là URL hoặc "emoji:🐟" (hiển thị emoji cỡ lớn). */
 export interface Choice {
@@ -74,7 +75,11 @@ export interface PayloadMap {
   DRAG_DROP: { tokens: Choice[]; zones: { id: string; label: string; image?: string }[] };
   SHORT_ANSWER: { placeholder?: string; inputMode?: 'text' | 'numeric'; unit?: string };
   SENTENCE_SCRAMBLE: { words: Choice[] };
-  WORD_CLASSIFY: { words: Choice[]; groups: { id: string; label: string; color?: string }[] };
+  /**
+   * distractors: có thẻ nhiễu (thẻ không thuộc nhóm nào — key.placement không có id đó). HS để thẻ nhiễu ở lại khay;
+   * không bắt buộc xếp hết thẻ mới được nộp.
+   */
+  WORD_CLASSIFY: { words: Choice[]; groups: { id: string; label: string; color?: string }[]; distractors?: boolean };
   /** passage chứa chỗ trống dạng {{b1}}. bank: kho từ để kéo vào (nếu có); không có bank thì học sinh gõ. */
   FILL_IN_PASSAGE: { passage: string; bank?: Choice[] };
   /** passage chứa {{d1}}; mỗi ô là một danh sách chọn. */
@@ -91,6 +96,8 @@ export interface PayloadMap {
     | { kind: 'sticks'; operands: number[]; op: '+' | '-'; choices?: number[] }
     | { kind: 'clock'; showDigital?: boolean };
   POLL: { options: Choice[] };
+  /** 2–6 nhận định; với mỗi nhận định HS chọn Đúng hoặc Sai. */
+  TRUE_FALSE_MULTI: { statements: Choice[] };
 }
 
 /* ---------- đáp án theo dạng ---------- */
@@ -122,6 +129,8 @@ export interface KeyMap {
   RECORD_READ: null;
   MATH_MANIPULATIVE: { value: number } & KeyExtras;
   POLL: null;
+  /** id nhận định → true (Đúng) / false (Sai). */
+  TRUE_FALSE_MULTI: { truth: Record<string, boolean> } & KeyExtras;
 }
 
 /* ---------- câu trả lời theo dạng ---------- */
@@ -142,6 +151,7 @@ export interface ResponseMap {
   RECORD_READ: { audioUrl?: string; durationSec: number };
   MATH_MANIPULATIVE: { value: number };
   POLL: { choice: string };
+  TRUE_FALSE_MULTI: { picks: Record<string, boolean> };
 }
 
 export interface ItemBase<T extends ItemType = ItemType> {
@@ -208,4 +218,5 @@ export const ACTIVITY_TYPES: ActivityMeta[] = [
   { type: 'RECORD_READ', label: 'Ghi âm đọc to', description: 'Đọc to đoạn văn, ghi âm gửi GV nghe.', graded: false, isNew: true },
   { type: 'MATH_MANIPULATIVE', label: 'Đồ dùng toán', description: 'Que tính, đồng hồ kim.', graded: true, isNew: true },
   { type: 'POLL', label: 'Thăm dò ý kiến', description: 'Không chấm; cả lớp cùng chọn khi trình chiếu.', graded: false, isNew: true },
+  { type: 'TRUE_FALSE_MULTI', label: 'Đúng – Sai nhiều ý', description: 'Mỗi nhận định chọn Đúng hoặc Sai (2–6 ý).', graded: true, isNew: true },
 ];

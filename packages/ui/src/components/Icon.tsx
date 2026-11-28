@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 export type IconName = 'home' | 'book' | 'play' | 'gift' | 'user' | 'speaker' | 'star' | 'close' | 'back' | 'next' | 'check' | 'retry'
   | 'lock' | 'tv' | 'pencil' | 'mic' | 'stop' | 'clock' | 'trophy' | 'map' | 'passport' | 'team' | 'plus' | 'trash' | 'eye'
   | 'settings' | 'upload' | 'image' | 'video' | 'puzzle' | 'wheel' | 'hint' | 'flame' | 'tower' | 'qr' | 'parent' | 'menu' | 'drag' | 'camera' | 'print'
-  | 'bell' | 'chat' | 'send' | 'sprout' | 'search' | 'chevron';
+  | 'bell' | 'chat' | 'send' | 'sprout' | 'search' | 'chevron' | 'bolt' | 'scroll';
 
 export interface IconProps {
   name: IconName;
@@ -45,6 +45,8 @@ const ICONS: Record<IconName, Def> = {
   star: 'M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z',
   search: C(10.5, 10.5, 6.5) + 'M15.4 15.4 20.5 20.5',
   chevron: 'M9 6l6 6-6 6',
+  bolt: 'M13.5 3 5 13.5h6L10 21l9-11h-6.2z',
+  scroll: 'M7 4h11a2 2 0 0 1 2 2v1.5h-4M7 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7.5M7 4a2 2 0 0 1 2 2v.5M9 10h6M9 13.5h6M9 17h4',
   sprout: 'M12 21v-8.5M12 12.5c0-4.2 3-7 7.5-7 0 4.2-3 7-7.5 7zM12 15c0-3.2-2.5-5.5-6-5.5 0 3.2 2.5 5.5 6 5.5zM7.5 21h9',
   close: 'M6.5 6.5l11 11M17.5 6.5l-11 11',
   back: 'M19 12H5.5M11 6l-6 6 6 6',

@@ -18,6 +18,7 @@
  *    của câu bằng mã thuần _shared/mastery (chép từ packages/data/src/mastery). Lỗi ở bước này không làm hỏng việc chấm.
  *
  * Bài kiểm tra (Phase 6) — Vào: { action: 'exam-finalize', attemptId } → grade/exam.ts (chấm + nộp, điểm thang 10, sự kiện 'exam').
+ * Ôn thi — Vào: { action: 'onthi-finalize', attemptId } → grade/onthi.ts (chấm + nộp bài luyện, xem docs/ON_THI.md).
  * Chế độ bộ ôn tập — Vào: { action: 'remediation', setId, itemIds: string[], rootSkill? }
  *   Server tự đếm đúng/sai từ câu trả lời GẦN NHẤT (≤ 3 giờ) của từng item, ghi learning_events
  *   (completed/remediation), tính lại skill_mastery. Ra: { setId, skillCode, passed, correct, total, mastery, message }.
@@ -37,6 +38,7 @@ import {
 import { adminClient, fromPgError, requireCaller } from '../_shared/supabase.ts';
 import { knownSkillCodes, refreshMastery } from '../_shared/mastery-store.ts';
 import { handleExamFinalize } from './exam.ts';
+import { handleOnThiFinalize } from './onthi.ts';
 import { checkAnsweredAt, validClientEventId } from '../_shared/offline.ts';
 import type { SkillMastery } from '../_shared/scoring/contracts.ts';
 import {
@@ -92,7 +94,7 @@ async function handleRemediation(admin: Admin, userId: string, body: Record<stri
 
 const ITEM_TYPES: ReadonlySet<string> = new Set<ItemType>([
   'MCQ', 'MCQ_MULTIPLE', 'MATCHING', 'ORDERING', 'DRAG_DROP', 'SHORT_ANSWER', 'SENTENCE_SCRAMBLE', 'WORD_CLASSIFY',
-  'FILL_IN_PASSAGE', 'INLINE_DROPDOWN', 'LISTEN_CHOOSE', 'HOTSPOT', 'DRAW', 'RECORD_READ', 'MATH_MANIPULATIVE', 'POLL',
+  'FILL_IN_PASSAGE', 'INLINE_DROPDOWN', 'LISTEN_CHOOSE', 'HOTSPOT', 'DRAW', 'RECORD_READ', 'MATH_MANIPULATIVE', 'POLL', 'TRUE_FALSE_MULTI',
 ]);
 
 /** Hình vẽ (DRAW) gửi dạng dataUrl nên cho phép thân yêu cầu tới ~600 KB. */
@@ -159,6 +161,7 @@ serveJson(async (req) => {
   const body = await readJsonObject(req, MAX_BODY_BYTES);
   if (body.action === 'remediation') return handleRemediation(adminClient(), caller.id, body);
   if (body.action === 'exam-finalize') return handleExamFinalize(adminClient(), caller, body);
+  if (body.action === 'onthi-finalize') return handleOnThiFinalize(adminClient(), caller, body);
 
   const itemId = requireString(body.itemId, 'itemId');
   if (!('response' in body) || body.response === undefined || body.response === null) {

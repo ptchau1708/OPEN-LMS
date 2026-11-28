@@ -60,7 +60,10 @@ function keyErrors(it: Item): string[] {
     case 'WORD_CLASSIFY': {
       const pl = it.key?.placement ?? {};
       need(uniqueIds(it.payload.words) && uniqueIds(it.payload.groups), 'id trùng');
-      need(sameSet(Object.keys(pl), it.payload.words.map((t) => t.id)), 'placement phải phủ đủ words');
+      if (it.payload.distractors) {
+        const ids = it.payload.words.map((t) => t.id);
+        need(Object.keys(pl).every((k) => ids.includes(k)) && Object.keys(pl).length < ids.length, 'thẻ nhiễu: placement là tập con thật sự của words');
+      } else need(sameSet(Object.keys(pl), it.payload.words.map((t) => t.id)), 'placement phải phủ đủ words');
       need(Object.values(pl).every((g) => it.payload.groups.some((x) => x.id === g)), 'group không tồn tại');
       need(it.payload.groups.every((g) => Object.values(pl).includes(g.id)), 'có nhóm rỗng');
       break;
@@ -112,6 +115,13 @@ function keyErrors(it: Item): string[] {
     case 'POLL':
       need(it.key === null || it.key === undefined, 'dạng không chấm không có key');
       break;
+    case 'TRUE_FALSE_MULTI': {
+      const st = it.payload.statements;
+      need(st.length >= 2 && st.length <= 6, '2–6 nhận định');
+      need(st.every((s) => typeof it.key?.truth[s.id] === 'boolean'), 'nhận định thiếu Đúng/Sai');
+      need(new Set(st.map((s) => s.id)).size === st.length, 'id nhận định trùng');
+      break;
+    }
   }
   return e;
 }
@@ -148,11 +158,13 @@ function correctResponse(it: Item): AnyResponse {
       return { durationSec: 5 };
     case 'POLL':
       return { choice: it.payload.options[0].id };
+    case 'TRUE_FALSE_MULTI':
+      return { picks: { ...it.key!.truth } };
   }
 }
 
 describe('nội dung mẫu', () => {
-  it('≥ 40 item, đủ 16 dạng, lớp 1–3, id không trùng', () => {
+  it('≥ 40 item, đủ 17 dạng, lớp 1–3, id không trùng', () => {
     expect(SEED_ITEMS.length).toBeGreaterThanOrEqual(40);
     expect(new Set(SEED_ITEMS.map((i) => i.id)).size).toBe(SEED_ITEMS.length);
     for (const t of ACTIVITY_TYPES) expect(SEED_ITEMS.some((i) => i.type === t.type), t.type).toBe(true);

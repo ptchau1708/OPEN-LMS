@@ -28,6 +28,7 @@ export function Player({ item, value, onChange, disabled, reveal, result, mode, 
       bigText={bigText}
       mode={mode}
       noun="từ"
+      leftover={!!item.payload.distractors}
     />
   );
 }

@@ -1,0 +1,49 @@
+/* TRUE_FALSE_MULTI: mỗi nhận định một hàng, hai nút Đúng / Sai. Tiền tố ae-tfm. */
+.ae-tfm { display: flex; flex-direction: column; gap: var(--ae-gap); }
+.ae-tfm__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ae-tfm__list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.ae-tfm__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 3px solid var(--k-line);
+  border-radius: var(--ae-radius);
+  background: var(--k-card);
+  box-shadow: 0 4px 0 var(--k-press);
+}
+.ae-tfm__row.is-ok, .ae-tfm__row.is-try { border-color: var(--ae-state); background: var(--ae-state-soft); }
+.ae-tfm__lbl { font-weight: 900; color: var(--k-sub); min-width: 1.6em; }
+.ae-tfm__text { font-size: var(--ae-fs-opt); font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+.ae-tfm__img { display: block; max-width: 100%; max-height: 120px; margin-bottom: 6px; border-radius: 10px; }
+.ae-tfm__pick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ae-tfm__btn {
+  min-width: 76px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 3px solid var(--k-line);
+  border-radius: 14px;
+  background: var(--k-card);
+  color: var(--k-ink);
+  font-size: var(--ae-fs-small);
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform .12s ease, background-color .12s ease, border-color .12s ease;
+}
+.ae-tfm__btn:focus-visible { outline: 4px solid var(--k-focus); outline-offset: 2px; }
+.ae-tfm__btn.is-on { background: var(--k-sky-deep); border-color: var(--k-sky-deep); color: #fff; }
+.ae-tfm__btn.is-on { animation: ae-select .3s var(--k-ease); }
+.ae-tfm__btn[aria-disabled="true"] { cursor: default; }
+@media (hover: hover) {
+  .ae-tfm__btn:not([aria-disabled="true"]):not(.is-on):hover { transform: translateY(-2px); border-color: var(--ae-accent); }
+}
+/* Màn hình hẹp: nút Đúng/Sai xuống dòng dưới nhận định. */
+@media (max-width: 520px) {
+  .ae-tfm__row { grid-template-columns: auto minmax(0, 1fr); }
+  .ae-tfm__pick { grid-column: 1 / -1; }
+}
+.ae-tfm--big .ae-tfm__text { font-size: calc(var(--ae-fs-opt) * 1.15); }
+@media (prefers-reduced-motion: reduce) {
+  .ae-tfm__btn, .ae-tfm__btn.is-on { transition: none; animation: none; }
+}

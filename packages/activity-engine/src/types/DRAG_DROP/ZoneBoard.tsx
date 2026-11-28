@@ -36,6 +36,8 @@ export interface ZoneBoardProps {
   mode: ActivityMode;
   /** Tên gọi thẻ trong câu thông báo ("thẻ" / "từ"). */
   noun?: string;
+  /** Có thẻ nhiễu: được để thẻ lại khay (thẻ nhiễu ở khay là đúng). */
+  leftover?: boolean;
 }
 
 const TRAY = '__tray';
@@ -80,8 +82,9 @@ export function ZoneBoard(p: ZoneBoardProps) {
 
   const renderToken = (t: Choice, where: 'tray' | 'zone') => {
     const sel = dnd.selected === t.id;
-    const mark = p.reveal && parts && where === 'zone' ? (parts[t.id] ? 'ok' : 'try') : p.reveal && parts && where === 'tray' ? 'try' : null;
+    const mark = p.reveal && parts ? (parts[t.id] ? 'ok' : 'try') : null;
     const fixZone = mark === 'try' && correct ? zoneById.get(correct[t.id]) : undefined;
+    const fixOut = mark === 'try' && correct && p.leftover && where === 'zone' && correct[t.id] === undefined;
     const cls = [
       'ae-tok',
       'ae-zb-tok',
@@ -126,6 +129,7 @@ export function ZoneBoard(p: ZoneBoardProps) {
         {t.image ? <Media src={t.image} alt={label} /> : null}
         {label ? <span className="ae-zb-tok__text">{label}</span> : null}
         {fixZone ? <span className="ae-zb-tok__fix">→ {fixZone.label}</span> : null}
+        {fixOut ? <span className="ae-zb-tok__fix">→ không thuộc nhóm nào</span> : null}
         {mark ? <span className="ae-tok__mark" aria-hidden="true">{mark === 'ok' ? '✓' : '↻'}</span> : null}
       </button>
     );
@@ -158,6 +162,7 @@ export function ZoneBoard(p: ZoneBoardProps) {
           <span className="ae-zb-tray__done ae-pop-in">{p.reveal ? '' : `Em đã xếp hết ${noun} rồi! 🎉`}</span>
         ) : null}
       </div>
+      {p.leftover && !p.reveal ? <p className="ae-tip ae-zb-note">Có {noun} không thuộc nhóm nào. Em để {noun} đó lại trong khay nhé.</p> : null}
 
       <p className="ae-zb-status" aria-live="polite">
         {dnd.selected ? `Chạm vào ô để đặt ${noun} nhé` : `Đã xếp ${placedCount}/${tokens.length} ${noun}`}

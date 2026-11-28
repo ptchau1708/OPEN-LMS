@@ -20,7 +20,14 @@ export function Editor({ item, onChange }: TypeEditorProps<'WORD_CLASSIFY'>) {
   const fromRows = (rows: Choice[]): Group[] =>
     rows.map((r, i) => ({ id: r.id, label: r.text ?? '', color: colorById.get(r.id) ?? COLOR_OPTIONS[i % COLOR_OPTIONS.length].value }));
   const setColor = (id: string, color: string) => update(words, groups.map((g) => (g.id === id ? { ...g, color } : g)), placement);
+  const extra = !!item.payload.distractors;
   const missing = words.filter((w) => !placement[w.id]);
+  const setExtra = (on: boolean) => {
+    const payload = { ...item.payload };
+    if (on) payload.distractors = true;
+    else delete payload.distractors;
+    onChange({ ...item, payload });
+  };
 
   return (
     <EdRoot type="WORD_CLASSIFY">
@@ -76,13 +83,19 @@ export function Editor({ item, onChange }: TypeEditorProps<'WORD_CLASSIFY'>) {
                 update(words, groups, next);
               }}
             >
-              <option value="">— chọn nhóm —</option>
+              <option value="">{extra ? 'Thẻ nhiễu (không thuộc nhóm nào)' : '— chọn nhóm —'}</option>
               {groups.map((g, i) => <option key={g.id} value={g.id}>{g.label || `Nhóm ${i + 1}`}</option>)}
             </select>
           )}
         />
       </EdSection>
-      {missing.length ? <EdWarn>Còn {missing.length} từ chưa chọn nhóm.</EdWarn> : null}
+      <EdSection title="Thẻ nhiễu" hint="Bật khi có từ không thuộc nhóm nào. Học sinh phải để các từ đó lại trong khay và không cần xếp hết mới được nộp.">
+        <label className="ae-ed-check">
+          <input type="checkbox" checked={extra} onChange={(e) => setExtra(e.target.checked)} /> Có thẻ nhiễu (từ không chọn nhóm là thẻ nhiễu)
+        </label>
+      </EdSection>
+      {missing.length && !extra ? <EdWarn>Còn {missing.length} từ chưa chọn nhóm.</EdWarn> : null}
+      {extra && !missing.length ? <EdWarn>Đã bật thẻ nhiễu nhưng từ nào cũng có nhóm. Để trống nhóm ở từ là thẻ nhiễu.</EdWarn> : null}
       {groups.some((g) => !g.label.trim()) ? <EdWarn>Có nhóm chưa đặt tên.</EdWarn> : null}
     </EdRoot>
   );

@@ -34,6 +34,12 @@ export const DEMO_USERS: Profile[] = [
   student('nam4a7', 'Hoài Nam', 4, 'c-4a', 'ga', '#64748b'),
   student('thao4a8', 'Phương Thảo', 4, 'c-4a', 'capybara', '#0ea5a4'),
   { id: 'u-phuhuynh4a', role: 'parent', name: 'Bố bạn Ngọc Lan', username: 'phuhuynh4a', avatarMascot: 'cong', avatarColor: '#ff8a3d' },
+  /* ---- Lớp 5A (Ôn thi: Tiếng Việt, Toán lớp 5) ---- */
+  { id: 'u-thayquang', role: 'teacher', name: 'Thầy Quang', username: 'thayquang', classId: 'c-5a', avatarMascot: 'panda', avatarColor: '#1f63cf' },
+  student('khang5a1', 'Minh Khang', 5, 'c-5a', 'shiba', '#1f63cf'),
+  student('ngan5a2', 'Bảo Ngân', 5, 'c-5a', 'koala', '#0b9494'),
+  student('phuc5a3', 'Hồng Phúc', 5, 'c-5a', 'kiwi', '#ff8a3d'),
+  student('trang5a4', 'Thu Trang', 5, 'c-5a', 'nghe', '#8b5cf6'),
 ];
 
 /** Phụ huynh → các con. */
@@ -64,6 +70,7 @@ export const DEMO_CLASSES: ClassInfo[] = [
       { id: 't-4a-son-ca', name: 'Tổ Sơn Ca', color: '#ff8a3d', studentIds: ['u-tuan4a5', 'u-vy4a6', 'u-nam4a7', 'u-thao4a8'] },
     ],
   },
+  { id: 'c-5a', name: '5A', grade: 5, teacherId: 'u-thayquang', studentIds: ['u-khang5a1', 'u-ngan5a2', 'u-phuc5a3', 'u-trang5a4'], teams: [] },
 ];
 
 /** Tên HS lớp 2A (vòng quay trong bài Toán). */

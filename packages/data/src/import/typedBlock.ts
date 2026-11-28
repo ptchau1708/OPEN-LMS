@@ -9,6 +9,9 @@
  *   Nối cặp                        : A. vế trái = vế phải (dấu = hoặc → hoặc |)
  *   Sắp xếp câu                    : "Câu đúng: Em / đi học / đúng giờ / ."
  *   Phân loại từ / Kéo thả vào ô   : "Nhóm Vần ang: cây bàng, cá vàng" / "Ô Dưới nước: con cá, con tôm"
+ *                                    + "Thẻ nhiễu: và, nhưng" (Phân loại từ: thẻ không thuộc nhóm nào, tuỳ chọn)
+ *   Đúng – Sai nhiều ý             : a) … b) … (mỗi nhận định một dòng) + "Đáp án: Đ, S, Đ, S"
+ *                                    (hoặc ghi (Đ) / (S) ở cuối mỗi nhận định)
  *   Điền vào đoạn văn              : "Đoạn văn: Cây cối [đâm] chồi …" (nhiều cách đúng: [đâm|nảy]) + "Kho từ: …" (tuỳ chọn)
  *   Chọn trong câu                 : "Đoạn văn: My name [am|*is|are] Mai." (dấu * trước lựa chọn đúng)
  *   Nghe và chọn                   : + "Đọc cho HS nghe: con mèo", "Giọng: Tiếng Anh" (tuỳ chọn)
@@ -33,6 +36,7 @@ const KIND_NAMES: [TypedKind, string[]][] = [
   ['MCQ', ['trac nghiem', 'trac nghiem 1 dap an', 'chon mot dap an', 'mot dap an', 'mcq']],
   ['MCQ_MULTIPLE', ['nhieu dap an', 'chon nhieu', 'trac nghiem nhieu dap an']],
   ['TRUE_FALSE', ['dung sai', 'dung hay sai', 'dung hoac sai', 'd s', 'true false']],
+  ['TRUE_FALSE_MULTI', ['dung sai nhieu y', 'dung sai phuc hop', 'dung sai 4 y', 'dung sai nhieu nhan dinh', 'nhieu nhan dinh', 'dung sai tung y']],
   ['SHORT_ANSWER', ['dien dap an', 'dien so', 'tra loi ngan', 'dien']],
   ['ORDERING', ['sap xep', 'xep thu tu']],
   ['MATCHING', ['noi', 'noi cot', 'ghep cap', 'ghep doi']],
@@ -69,7 +73,7 @@ export const isTypedBlock = (lines: string[]): boolean => lines.some((l) => TYPE
 
 type Field =
   | 'answer' | 'hint' | 'expl' | 'difficulty' | 'subject' | 'grade' | 'skills' | 'unit' | 'passage' | 'bank' | 'listen' | 'lang'
-  | 'sentence' | 'seconds' | 'sticks' | 'clock' | 'choices' | 'regions' | 'colors' | 'note';
+  | 'sentence' | 'seconds' | 'sticks' | 'clock' | 'choices' | 'regions' | 'colors' | 'note' | 'extra';
 const FIELDS: [Field, string[]][] = [
   ['answer', ['dap an', 'dap an dung', 'd a', 'da', 'ket qua', 'dap so', 'thu tu dung']],
   ['hint', ['goi y', 'huong dan']],
@@ -91,6 +95,7 @@ const FIELDS: [Field, string[]][] = [
   ['regions', ['vung dung', 'vung cham']],
   ['colors', ['mau', 'mau to']],
   ['note', ['ghi chu', 'luu y', 'chu y']],
+  ['extra', ['the nhieu', 'tu nhieu', 'the gay nhieu', 'khong thuoc nhom nao', 'the khong thuoc nhom nao']],
 ];
 const FIELD_INDEX = new Map<string, Field>();
 for (const [k, list] of FIELDS) for (const n of list) FIELD_INDEX.set(n, k);
@@ -249,6 +254,25 @@ export function parseTypedBlock(lines: string[], d0: ImportDefaults, source: Dra
       item = makeTrueFalse(prompt, v, d);
       break;
     }
+    case 'TRUE_FALSE_MULTI': {
+      // Mỗi nhận định: "a) …" / "A. …", có thể ghi (Đ) / (S) ở cuối. Hoặc "Đáp án: Đ, S, Đ, S".
+      const rows = (opts.length ? opts : p.bullets).map((t) => {
+        const m = t.match(/\s*[([]\s*(đúng|sai|đ|s|d)\s*[)\]]\s*$/i);
+        return { text: m ? t.slice(0, m.index).trim() : t.trim(), mark: m ? truth(m[1]) : null };
+      });
+      const statements: Choice[] = rows.map((r, i) => ({ id: letterId(i), text: r.text }));
+      const truthMap: Record<string, boolean> = {};
+      const tokens = answer ? answer.split(/[\s,;/|]+/).map((x) => x.trim()).filter(Boolean) : [];
+      if (tokens.length) {
+        const vals = tokens.map((x) => truth(x.replace(/^[a-h]\s*[).:=-]\s*/i, '')));
+        if (vals.length === statements.length && vals.every((v) => v !== null)) vals.forEach((v, i) => { truthMap[statements[i].id] = v as boolean; });
+        else notes.push(`Không hiểu đáp án «${answer}» — ghi Đ hoặc S cho từng nhận định, ví dụ "Đ, S, Đ, S"`);
+      } else rows.forEach((r, i) => { if (r.mark !== null) truthMap[statements[i].id] = r.mark; });
+      item = { ...base, type: 'TRUE_FALSE_MULTI', payload: { statements }, key: { truth: truthMap } };
+      if (statements.length < 2) review = 'Cần ít nhất 2 nhận định (a) …, b) …), mỗi nhận định một dòng';
+      else if (statements.length > 6) review = 'Tối đa 6 nhận định';
+      break;
+    }
     case 'SHORT_ANSWER':
       item = makeShort(prompt, answer.split(/\s*[;|]\s*|\s+hoặc\s+/i), d, F.unit);
       break;
@@ -311,8 +335,18 @@ export function parseTypedBlock(lines: string[], d0: ImportDefaults, source: Dra
         tokens.push({ id, text });
         placement[id] = `${gid}${gi + 1}`;
       }));
-      if (kind === 'DRAG_DROP') item = { ...base, type: 'DRAG_DROP', payload: { tokens, zones: groups.map((g, i) => ({ id: `z${i + 1}`, label: g.label })) }, key: { placement } };
-      else item = { ...base, type: 'WORD_CLASSIFY', payload: { words: tokens, groups: groups.map((g, i) => ({ id: `g${i + 1}`, label: g.label })) }, key: { placement } };
+      const extras = (F.extra ?? '').split(/\s*[,;]\s*/).map((x) => x.trim()).filter(Boolean);
+      if (kind === 'DRAG_DROP') {
+        item = { ...base, type: 'DRAG_DROP', payload: { tokens, zones: groups.map((g, i) => ({ id: `z${i + 1}`, label: g.label })) }, key: { placement } };
+        if (extras.length) notes.push('Dạng Kéo thả vào ô không dùng thẻ nhiễu — đã bỏ dòng "Thẻ nhiễu"');
+      } else {
+        for (const text of extras) tokens.push({ id: `${tid}${tokens.length + 1}`, text });
+        item = {
+          ...base, type: 'WORD_CLASSIFY',
+          payload: { words: tokens, groups: groups.map((g, i) => ({ id: `g${i + 1}`, label: g.label })), ...(extras.length ? { distractors: true } : {}) },
+          key: { placement },
+        };
+      }
       break;
     }
     case 'FILL_IN_PASSAGE': {

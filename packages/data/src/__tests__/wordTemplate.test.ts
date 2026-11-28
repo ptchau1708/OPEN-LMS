@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SUBJECT_LIST, fitSubjectToGrade, isPeriodicAt, subjectGradeNote, subjectLabelFor, subjectOptions, subjectOptionsFor, subjectsForGrade } from '@openedu/contracts';
-import { buildWordTemplateDocx, checkItem, docxToText, draftStatus, parseQuestionText, subjectGradeWarning, WORD_TEMPLATE_EXAMPLES } from '../import';
+import { buildOnThiTemplateDocx, buildWordTemplateDocx, checkItem, docxToText, draftStatus, ONTHI_TEMPLATE_EXAMPLES, parseQuestionText, subjectGradeWarning, WORD_TEMPLATE_EXAMPLES } from '../import';
 import { parseSubject } from '../import/template';
 
 const D = { grade: 3 as const, subject: 'toan' as const };
@@ -10,16 +10,17 @@ describe('Mẫu Word đủ các dạng', () => {
   const text = docxToText(docx);
   const res = parseQuestionText(text.text, D, 'docx');
 
-  it('đọc lại tệp mẫu: đủ 18 câu ví dụ, đúng dạng, không coi phần hướng dẫn là bài đọc', () => {
+  it('đọc lại tệp mẫu: đủ 20 câu ví dụ, đúng dạng, không coi phần hướng dẫn là bài đọc', () => {
     expect(res.preamble).toBeUndefined();
     expect(res.drafts.length).toBe(WORD_TEMPLATE_EXAMPLES.length);
     const types = res.drafts.map((d) => d.item.type);
     expect(types).toEqual([
       'MCQ', 'MCQ_MULTIPLE', 'MCQ', 'SHORT_ANSWER', 'MATCHING', 'ORDERING', 'DRAG_DROP', 'SENTENCE_SCRAMBLE', 'WORD_CLASSIFY',
       'FILL_IN_PASSAGE', 'INLINE_DROPDOWN', 'LISTEN_CHOOSE', 'HOTSPOT', 'DRAW', 'RECORD_READ', 'MATH_MANIPULATIVE', 'MATH_MANIPULATIVE', 'POLL',
+      'TRUE_FALSE_MULTI', 'WORD_CLASSIFY',
     ]);
-    // đủ 16 dạng của ngân hàng
-    expect(new Set(types).size).toBe(16);
+    // đủ 17 dạng của ngân hàng
+    expect(new Set(types).size).toBe(17);
   });
 
   it('mọi câu (trừ Chạm vào hình) sẵn sàng lưu, có đáp án đúng', () => {
@@ -56,12 +57,42 @@ describe('Mẫu Word đủ các dạng', () => {
     expect(res.drafts[5].item.subject).toBe('cong-nghe');
     expect(res.drafts[6].item.subject).toBe('dao-duc');
     expect(res.drafts[17].item.subject).toBe('hdtn');
+    expect([by(18).payload.statements.length, by(18).key.truth]).toEqual([4, { a: true, b: false, c: true, d: true }]);
+    expect([by(19).payload.distractors, by(19).payload.words.length, Object.keys(by(19).key.placement).length]).toEqual([true, 5, 4]);
+  });
+
+  it('Đúng – Sai nhiều ý: ghi (Đ)/(S) cuối nhận định cũng được; đáp án thiếu ý thì báo', () => {
+    const r = parseQuestionText('Câu 1: Xét các nhận định\nDạng: Đúng – Sai nhiều ý\na) 2 + 2 = 4 (Đ)\nb) 3 > 5 (S)\nc) 1 = 1 (đúng)', D);
+    const it = r.drafts[0].item as never as { type: string; payload: { statements: { text: string }[] }; key: { truth: Record<string, boolean> } };
+    expect(it.type).toBe('TRUE_FALSE_MULTI');
+    expect(it.payload.statements.map((x) => x.text)).toEqual(['2 + 2 = 4', '3 > 5', '1 = 1']);
+    expect(it.key.truth).toEqual({ a: true, b: false, c: true });
+    expect(draftStatus(r.drafts[0])).toBe('ready');
+    const bad = parseQuestionText('Câu 1: X\nDạng: Đúng – Sai nhiều ý\na) một\nb) hai\nĐáp án: Đ', D);
+    expect(draftStatus(bad.drafts[0])).toBe('missing-answer');
+    expect(bad.drafts[0].notes.join(' ')).toMatch(/Không hiểu đáp án/);
   });
 
   it('dán văn bản cũng hiểu "Dạng:"; đề kiểu cũ (không có Dạng:) vẫn đọc như trước', () => {
     const r = parseQuestionText('Câu 1: Xếp nhóm\nDạng: Phân loại từ\nNhóm Con vật: mèo, chó\nNhóm Đồ vật: bàn, ghế\n\nCâu 2: 2 + 3 = ?\nA. 4\nB. 5\nĐáp án: B', D);
     expect(r.drafts.map((d) => d.item.type)).toEqual(['WORD_CLASSIFY', 'MCQ']);
   });
+});
+
+describe('Mẫu Word Ôn thi', () => {
+  for (const style of ['tn', 'vio'] as const) {
+    it(`${style}: đọc lại đủ câu, sẵn sàng lưu, lấy môn và lớp ở đầu tệp`, () => {
+      const t = docxToText(buildOnThiTemplateDocx(style));
+      const r = parseQuestionText(t.text, D, 'docx');
+      expect(r.drafts.length).toBe(ONTHI_TEMPLATE_EXAMPLES[style].length);
+      for (const d of r.drafts) {
+        expect({ t: d.item.type, s: draftStatus(d), n: d.notes }).toEqual({ t: d.item.type, s: 'ready', n: [] });
+        expect(d.item.grade).toBe(5);
+        expect(d.item.subject).toBe(style === 'tn' ? 'tieng-viet' : 'toan');
+        expect(d.item.explanation).toBeTruthy();
+      }
+    });
+  }
 });
 
 describe('Môn học CT GDPT 2018', () => {

@@ -1,0 +1,36 @@
+/* Ôn thi — app GV (tiền tố ot-) */
+.ot-filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 8px; }
+.ot-rule { margin: 0 0 12px; max-width: 900px; }
+.ot-steps { text-align: left; margin: 8px auto 0; padding-left: 20px; max-width: 560px; display: grid; gap: 6px; }
+.ot-ml { margin-left: 6px; }
+.ot-right { text-align: right; }
+.ot-endrow { justify-content: flex-end; }
+.ot-pad { padding-left: 16px; padding-right: 16px; }
+.ot-h2 { margin: 0; font-size: 16px; }
+.ot-stats { gap: 6px; flex-wrap: wrap; }
+.ot-foot { margin-right: auto; }
+.ot-import { display: grid; gap: 12px; }
+.ot-import__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.ot-import__form { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--p-line); border-radius: 10px; background: var(--tc-surface-2); }
+.ot-drop { padding: 18px; border: 2px dashed var(--p-line); border-radius: 12px; display: grid; gap: 10px; justify-items: start; }
+.ot-drop p { margin: 0; }
+.ot-qhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 6px; }
+.ot-qlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 360px; overflow: auto; }
+.ot-qlist--pick { max-height: 52vh; }
+.ot-q { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--p-line); border-radius: 8px; background: var(--p-surface); }
+.ot-q--missing-answer, .ot-q--review { border-color: var(--tc-warn); background: var(--tc-warn-soft); }
+.ot-q.is-on { border-color: var(--p-accent); background: var(--p-accent-soft); }
+.ot-qlist--pick .ot-q { grid-template-columns: 1fr; }
+.ot-q__pick { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.ot-q__no { font-weight: 700; color: var(--p-muted); text-align: right; }
+.ot-q__main { display: grid; gap: 2px; min-width: 0; }
+.ot-q__type { font-size: 12px; font-weight: 700; color: var(--p-accent); }
+.ot-q__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ot-q__why { font-size: 12px; color: var(--tc-warn); }
+.ot-pick-filter { gap: 10px; margin-bottom: 10px; }
+.ot-prompt { max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ot-barcol { width: 180px; }
+.ot-bar { position: relative; display: block; height: 18px; border-radius: 9px; background: var(--p-line); overflow: hidden; }
+.ot-bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--p-accent); opacity: 0.85; }
+.ot-bar b { position: relative; display: block; font-size: 12px; line-height: 18px; padding-left: 8px; color: var(--p-ink); }
+tr.ot-worst td { background: var(--tc-warn-soft); }

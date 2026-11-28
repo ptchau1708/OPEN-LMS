@@ -19,6 +19,7 @@ import * as DRAW from './types/DRAW/score';
 import * as RECORD_READ from './types/RECORD_READ/score';
 import * as MATH_MANIPULATIVE from './types/MATH_MANIPULATIVE/score';
 import * as POLL from './types/POLL/score';
+import * as TRUE_FALSE_MULTI from './types/TRUE_FALSE_MULTI/score';
 
 interface Scorer<T extends ItemType> {
   score: (item: ItemOf<T>, r: ResponseOf<T> | undefined) => ScoreResult;
@@ -42,6 +43,7 @@ export const SCORERS: { [K in ItemType]: Scorer<K> } = {
   RECORD_READ: RECORD_READ as unknown as Scorer<'RECORD_READ'>,
   MATH_MANIPULATIVE: MATH_MANIPULATIVE as unknown as Scorer<'MATH_MANIPULATIVE'>,
   POLL: POLL as unknown as Scorer<'POLL'>,
+  TRUE_FALSE_MULTI: TRUE_FALSE_MULTI as unknown as Scorer<'TRUE_FALSE_MULTI'>,
 };
 
 const UNGRADED: ItemType[] = ['DRAW', 'RECORD_READ', 'POLL'];

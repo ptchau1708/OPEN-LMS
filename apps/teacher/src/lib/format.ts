@@ -16,7 +16,7 @@ export const layoutMeta = (id: SlideLayout) => LAYOUTS.find((l) => l.id === id) 
 export const TYPE_ICON: Record<ItemType, IconName> = {
   MCQ: 'check', MCQ_MULTIPLE: 'check', MATCHING: 'puzzle', ORDERING: 'drag', DRAG_DROP: 'drag', SHORT_ANSWER: 'pencil',
   SENTENCE_SCRAMBLE: 'book', WORD_CLASSIFY: 'puzzle', FILL_IN_PASSAGE: 'pencil', INLINE_DROPDOWN: 'menu', LISTEN_CHOOSE: 'speaker',
-  HOTSPOT: 'eye', DRAW: 'pencil', RECORD_READ: 'mic', MATH_MANIPULATIVE: 'clock', POLL: 'team',
+  HOTSPOT: 'eye', DRAW: 'pencil', RECORD_READ: 'mic', MATH_MANIPULATIVE: 'clock', POLL: 'team', TRUE_FALSE_MULTI: 'check',
 };
 export const typeLabel = (t: ItemType) => ACTIVITY_TYPES.find((a) => a.type === t)?.label ?? t;
 

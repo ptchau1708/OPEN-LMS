@@ -30,6 +30,7 @@ export * from './react';
 export * from './duel';
 export * from './school';
 export * from './exam';
+export * from './onthi';
 export * from './badges';
 export { reportClientError, installClientErrorHandlers, readClientErrors, isChunkLoadError, toClientError, type ClientApp, type ClientErrorEntry } from './clientErrors';
 export { importSampleContent, type ImportProgress, type ImportReport } from './seed/importer';

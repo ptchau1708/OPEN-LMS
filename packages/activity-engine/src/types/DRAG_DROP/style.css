@@ -74,3 +74,4 @@
 .ae-activity--bigscreen .ae-zb-tok--card { min-width: 150px; min-height: 140px; font-size: 26px; }
 .ae-activity--bigscreen .ae-zb-tok--card .k-media--emoji { font-size: 72px; }
 .ae-activity--bigscreen .ae-zb-status { font-size: 24px; }
+.ae-zb-note { justify-self: center; margin: 0; text-align: center; }

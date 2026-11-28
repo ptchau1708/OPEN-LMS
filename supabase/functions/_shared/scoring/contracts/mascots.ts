@@ -4,7 +4,8 @@
  * mỗi bạn đại diện một nước. Học sinh mở khóa dần trong "Hộ chiếu khám phá" bằng sao tích lũy —
  * mở khóa theo mốc cố định, không quay ngẫu nhiên, không dùng tiền thật.
  */
-export type MascotId = 'nghe' | 'shiba' | 'panda' | 'capybara' | 'koala' | 'voi' | 'kiwi' | 'ho' | 'ga' | 'cong';
+export type MascotId = 'nghe' | 'shiba' | 'panda' | 'capybara' | 'koala' | 'voi' | 'kiwi' | 'ho' | 'ga' | 'cong'
+  | 'sutu' | 'gautuyet' | 'canhcut' | 'lacda';
 
 export interface MascotMeta {
   id: MascotId;
@@ -34,6 +35,11 @@ export const MASCOTS: MascotMeta[] = [
   { id: 'ho', name: 'Hổ Bum', animal: 'hổ', country: 'Hàn Quốc', greeting: 'Annyeong!', greetingMeaning: 'Xin chào', funFact: 'Trong truyện cổ Hàn Quốc, con hổ thường xuất hiện cùng thỏ và các bà cụ.', unlockStars: 350, color: '#f08a24' },
   { id: 'ga', name: 'Gà trống Coco', animal: 'gà trống', country: 'Pháp', greeting: 'Bonjour!', greetingMeaning: 'Chào buổi sáng', funFact: 'Bánh mì baguette của Pháp thường dài hơn cả cánh tay của em.', unlockStars: 440, color: '#e2453c' },
   { id: 'cong', name: 'Công Múa', animal: 'chim công', country: 'Ấn Độ', greeting: 'Namaste!', greetingMeaning: 'Xin chào', funFact: 'Chim công đực xòe đuôi có hàng trăm “con mắt” màu xanh.', unlockStars: 540, color: '#1f8a8a' },
+  // Bạn mới (2026-11, SQL 25)
+  { id: 'sutu', name: 'Sư tử Leo', animal: 'sư tử', country: 'Kenya', greeting: 'Jambo!', greetingMeaning: 'Xin chào', funFact: 'Tiếng gầm của sư tử có thể nghe thấy từ xa tới 8 ki-lô-mét.', unlockStars: 650, color: '#d9952c' },
+  { id: 'gautuyet', name: 'Gấu Tuyết', animal: 'gấu Bắc Cực', country: 'Canada', greeting: 'Hello! Bonjour!', greetingMeaning: 'Xin chào (tiếng Anh và tiếng Pháp)', funFact: 'Nhiều người Canada nói cả tiếng Anh lẫn tiếng Pháp. Lá cờ Canada có hình chiếc lá phong đỏ.', unlockStars: 780, color: '#6f97c9' },
+  { id: 'canhcut', name: 'Cánh Cụt Pip', animal: 'chim cánh cụt', country: 'Ác-hen-ti-na', greeting: '¡Hola!', greetingMeaning: 'Xin chào', funFact: 'Chim cánh cụt không bay được nhưng bơi rất nhanh dưới làn nước biển lạnh.', unlockStars: 920, color: '#2b3a55' },
+  { id: 'lacda', name: 'Lạc đà Sa Sa', animal: 'lạc đà', country: 'Ai Cập', greeting: 'Ahlan!', greetingMeaning: 'Xin chào', funFact: 'Lạc đà có thể đi nhiều ngày trên sa mạc mà không cần uống nước.', unlockStars: 1080, color: '#c99a5c' },
 ];
 
 export const MASCOT_BY_ID: Record<MascotId, MascotMeta> = Object.fromEntries(MASCOTS.map((m) => [m.id, m])) as Record<MascotId, MascotMeta>;

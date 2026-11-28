@@ -38,6 +38,8 @@ const MatrixEditor = lazy(() => import('./pages/exam/MatrixEditor'));
 const ExamBuilder = lazy(() => import('./pages/exam/ExamBuilder'));
 const ExamPrint = lazy(() => import('./pages/exam/ExamPrint'));
 const ExamResults = lazy(() => import('./pages/exam/ExamResults'));
+const OnThiHome = lazy(() => import('./pages/onthi/OnThiHome'));
+const OnThiDetail = lazy(() => import('./pages/onthi/OnThiDetail'));
 const Reports = lazy(() => import('./pages/admin/Reports'));
 const GradeMap = lazy(() => import('./pages/admin/GradeMap'));
 const ParentHub = lazy(() => import('./pages/parents/ParentHub'));
@@ -91,6 +93,8 @@ export function App() {
         <Route path="dau-truong" element={<Suspense fallback={<Loading />}><ArenaHome user={user} /></Suspense>} />
         <Route path="dau-truong/giai/:id" element={<Suspense fallback={<Loading />}><CupDetail user={user} /></Suspense>} />
         <Route path="dau-truong/giay-khen" element={<Suspense fallback={<Loading />}><Certificates user={user} /></Suspense>} />
+        <Route path="on-thi" element={<Suspense fallback={<Loading />}><OnThiHome user={user} /></Suspense>} />
+        <Route path="on-thi/:id" element={<Suspense fallback={<Loading />}><OnThiDetail user={user} /></Suspense>} />
         <Route path="thao-luan" element={<Suspense fallback={<Loading />}><DiscussList user={user} /></Suspense>} />
         <Route path="thao-luan/:id" element={<Suspense fallback={<Loading />}><DiscussBoard user={user} /></Suspense>} />
         <Route path="truc-tiep/the-giay" element={<Suspense fallback={<Loading />}><PaperCards user={user} /></Suspense>} />

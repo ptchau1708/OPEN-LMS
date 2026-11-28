@@ -30,26 +30,77 @@ export const WORD_TEMPLATE_EXAMPLES: { label: string; lines: string[] }[] = [
   { label: 'Đồ dùng toán (que tính)', lines: ['Câu 16: Em dùng que tính để tính: 26 + 7 = ?', 'Dạng: Đồ dùng toán', 'Que tính: 26 + 7', 'Lựa chọn: 31, 33, 23', 'Môn: Toán', 'Lớp: 2'] },
   { label: 'Đồ dùng toán (đồng hồ)', lines: ['Câu 17: Quay kim đồng hồ chỉ 3 giờ 30 phút.', 'Dạng: Đồ dùng toán', 'Đồng hồ: 3 giờ 30 phút', 'Môn: Toán', 'Lớp: 2'] },
   { label: 'Thăm dò ý kiến', lines: ['Câu 18: Em thích hoạt động trải nghiệm nào nhất?', 'Dạng: Thăm dò ý kiến', 'A. Trồng cây', 'B. Tham quan bảo tàng', 'C. Làm đồ thủ công', 'Môn: Hoạt động trải nghiệm', 'Lớp: 3'] },
+  { label: 'Đúng – Sai nhiều ý', lines: ['Câu 19: Cho số thập phân 7,08. Mỗi nhận định sau đúng hay sai?', 'Dạng: Đúng – Sai nhiều ý', 'a) Phần nguyên của số là 7.', 'b) Chữ số 8 ở hàng phần mười.', 'c) 7,08 bé hơn 7,1.', 'd) 7,08 = 7,080.', 'Đáp án: Đ, S, Đ, Đ', 'Giải thích: Chữ số 8 ở hàng phần trăm; 7,08 < 7,10; thêm chữ số 0 vào cuối phần thập phân, số không đổi.', 'Môn: Toán', 'Lớp: 5'] },
+  { label: 'Phân loại từ (có thẻ nhiễu)', lines: ['Câu 20: Xếp các từ vào nhóm thích hợp. Có một từ không thuộc nhóm nào.', 'Dạng: Phân loại từ', 'Nhóm Từ chỉ màu sắc: đỏ thắm, xanh lơ', 'Nhóm Từ chỉ hình dáng: tròn xoe, cao vút', 'Thẻ nhiễu: hoặc', 'Giải thích: "hoặc" là kết từ, không chỉ màu sắc hay hình dáng.', 'Môn: Tiếng Việt', 'Lớp: 4'] },
 ];
+
+type Example = { label: string; lines: string[] };
+
+/** Mẫu Word riêng cho trang Ôn thi: mỗi tệp là một bài luyện, chỉ gồm các dạng câu của trang đó. */
+export const ONTHI_TEMPLATE_EXAMPLES: Record<'tn' | 'vio', Example[]> = {
+  tn: [
+    { label: 'Chọn 1 đáp án', lines: ['Câu 1: Từ nào đồng nghĩa với từ "siêng năng"?', 'Dạng: Chọn 1 đáp án', 'A. chăm chỉ', 'B. lười biếng', 'C. thông minh', 'D. nhanh nhẹn', 'Đáp án: A', 'Giải thích: "Siêng năng" và "chăm chỉ" cùng chỉ người chịu khó.'] },
+    { label: 'Điền ngắn', lines: ['Câu 2: Điền chữ l hoặc n vào chỗ trống: …ũy tre làng', 'Dạng: Điền ngắn', 'Đáp án: l', 'Giải thích: Viết đúng là "lũy tre làng".'] },
+    { label: 'Điền vào đoạn văn (gõ chữ)', lines: ['Câu 3: Điền s hoặc x vào mỗi chỗ trống.', 'Dạng: Điền vào đoạn văn', 'Đoạn văn: Mùa thu, lá vàng [x]ào [x]ạc rơi trên [s]ân trường.', 'Giải thích: Viết đúng là "xào xạc", "sân trường".'] },
+    { label: 'Nối cặp', lines: ['Câu 4: Nối mỗi từ với nghĩa phù hợp.', 'Dạng: Nối cặp', 'A. nhân hậu = thương người, sống có tình nghĩa', 'B. trung thực = ngay thẳng, thật thà', 'C. dũng cảm = không sợ nguy hiểm, gian khổ', 'Giải thích: Mỗi từ ghép với nghĩa của nó.'] },
+    { label: 'Sắp xếp thứ tự', lines: ['Câu 5: Sắp xếp các chữ cái thành một từ có nghĩa.', 'Dạng: Sắp xếp thứ tự', 'A. t', 'B. r', 'C. ư', 'D. ờ', 'E. n', 'F. g', 'Ghi chú: ghi các thẻ theo ĐÚNG thứ tự, máy tự xáo trộn khi học sinh làm.', 'Giải thích: Ghép thành từ "trường".'] },
+    { label: 'Sắp xếp câu', lines: ['Câu 6: Sắp xếp các từ thành câu hoàn chỉnh.', 'Dạng: Sắp xếp câu', 'Câu đúng: Em / luôn / giữ gìn / sách vở / sạch đẹp / .', 'Giải thích: Câu đúng là "Em luôn giữ gìn sách vở sạch đẹp."'] },
+    { label: 'Phân loại từ (có thẻ nhiễu)', lines: ['Câu 7: Xếp các từ vào đúng nhóm từ loại. Có từ không thuộc nhóm nào.', 'Dạng: Phân loại từ', 'Nhóm Danh từ: dòng sông, quyển sách', 'Nhóm Động từ: suy nghĩ, chạy nhảy', 'Nhóm Tính từ: xanh biếc, thật thà', 'Thẻ nhiễu: và, nhưng', 'Giải thích: "và", "nhưng" là kết từ.'] },
+    { label: 'Kéo từ vào chỗ trống', lines: ['Câu 8: Kéo kết từ thích hợp vào mỗi chỗ trống.', 'Dạng: Điền vào đoạn văn', 'Đoạn văn: Trời đã tối [nhưng] bố vẫn chưa về. Em làm bài xong [rồi] mới đi ngủ.', 'Kho từ: hoặc, vì', 'Giải thích: "nhưng" nối hai ý trái ngược; "rồi" nối hai việc nối tiếp.'] },
+    { label: 'Chọn trong câu', lines: ['Câu 9: Chọn từ viết đúng chính tả.', 'Dạng: Chọn trong câu', 'Đoạn văn: Hôm nay trời [*nắng|nắn|lắng] chang chang, em đội [mủ|*mũ] khi đi học.', 'Giải thích: Viết đúng là "nắng chang chang", "đội mũ".'] },
+  ],
+  vio: [
+    { label: 'Chọn 1 đáp án', lines: ['Câu 1: 25% của 80 là:', 'Dạng: Chọn 1 đáp án', 'A. 20', 'B. 25', 'C. 40', 'D. 2', 'Đáp án: A', 'Giải thích: 80 × 25 : 100 = 20.'] },
+    { label: 'Chọn nhiều đáp án', lines: ['Câu 2: Chọn tất cả các số lớn hơn 2,5.', 'Dạng: Chọn nhiều đáp án', 'A. 2,49', 'B. 2,6', 'C. 2,51', 'D. 2,05', 'E. 3', 'Đáp án: B, C, E', 'Giải thích: 2,6; 2,51 và 3 đều lớn hơn 2,5.'] },
+    { label: 'Điền ngắn (có đơn vị)', lines: ['Câu 3: Hình chữ nhật có chiều dài 8 cm, chiều rộng 5 cm. Diện tích hình chữ nhật là bao nhiêu?', 'Dạng: Điền ngắn', 'Đáp án: 40', 'Đơn vị: cm²', 'Giải thích: 8 × 5 = 40 (cm²).'] },
+    { label: 'Chọn trong câu', lines: ['Câu 4: Chọn dấu >, <, = thích hợp.', 'Dạng: Chọn trong câu', 'Đoạn văn: 4,07 [<|*>|=] 4,007      0,5 [<|>|*=] 0,50', 'Giải thích: 4,070 > 4,007; 0,5 = 0,50.'] },
+    { label: 'Nối cặp', lines: ['Câu 5: Nối mỗi phép tính với kết quả đúng.', 'Dạng: Nối cặp', 'A. 0,25 × 4 = 1', 'B. 3 : 4 = 0,75', 'C. 1,5 + 2,5 = 4', 'Giải thích: Tính từng phép tính rồi nối với kết quả.'] },
+    { label: 'Kéo số vào chỗ trống', lines: ['Câu 6: Kéo số thích hợp vào chỗ trống.', 'Dạng: Điền vào đoạn văn', 'Đoạn văn: 1 giờ = [60] phút. 2 giờ 15 phút = [135] phút.', 'Kho từ: 45, 120', 'Giải thích: 1 giờ = 60 phút; 2 giờ 15 phút = 135 phút.'] },
+    { label: 'Đúng – Sai nhiều ý', lines: ['Câu 7: Cho số thập phân 4,25. Mỗi nhận định sau đúng hay sai?', 'Dạng: Đúng – Sai nhiều ý', 'a) Chữ số 2 ở hàng phần mười.', 'b) 4,25 lớn hơn 4,3.', 'c) 4,25 = 4 + 0,25.', 'd) Làm tròn 4,25 đến hàng đơn vị được 5.', 'Đáp án: Đ, S, Đ, S', 'Giải thích: 4,25 < 4,3; làm tròn đến hàng đơn vị được 4.'] },
+  ],
+};
+
+const NOTE_REMEMBER = 'Ghi nhớ: Nối cặp viết "vế trái = vế phải". Điền vào đoạn văn đặt từ đúng trong [ngoặc vuông], nhiều cách đúng ngăn bằng | ; thêm dòng "Kho từ:" thì học sinh kéo từ vào chỗ trống thay vì gõ. Chọn trong câu viết [lựa chọn 1|*lựa chọn đúng|lựa chọn 3] (dấu * trước lựa chọn đúng). Phân loại từ viết "Nhóm <tên>: từ 1, từ 2", từ không thuộc nhóm nào ghi ở dòng "Thẻ nhiễu: …"; Kéo thả viết "Ô <tên>: thẻ 1, thẻ 2". Đúng – Sai nhiều ý: mỗi nhận định một dòng a), b), c)… rồi "Đáp án: Đ, S, Đ, S".';
+
+const ALL_TYPES = 'Chọn 1 đáp án · Chọn nhiều đáp án · Đúng – Sai · Đúng – Sai nhiều ý · Điền ngắn · Nối cặp · Sắp xếp thứ tự · Kéo thả vào ô · Sắp xếp câu · Phân loại từ · Điền vào đoạn văn · Chọn trong câu · Nghe và chọn · Chạm vào hình · Vẽ và tô · Ghi âm đọc to · Đồ dùng toán · Thăm dò ý kiến';
 
 const GUIDE: Para[] = [
   { kind: 'title', text: 'MẪU NHẬP CÂU HỎI TỪ WORD — OPEN-EDU' },
   { kind: 'note', text: 'Cách dùng: giữ cách viết như ví dụ, xoá các câu ví dụ, soạn câu của thầy/cô rồi lưu .docx. Vào Ngân hàng câu hỏi → Thêm nhanh nhiều câu → Từ tệp Excel / Word → chọn tệp. Máy đọc xong sẽ cho soát từng câu trước khi lưu.' },
   { kind: 'note', text: 'Mỗi câu bắt đầu bằng "Câu 1:", "Câu 2:"… (gõ số bằng tay, KHÔNG dùng đánh số tự động của Word). Dòng ngay sau là "Dạng: <tên dạng>". Viết mỗi ý trên một dòng.' },
-  { kind: 'note', text: 'Các dạng: Chọn 1 đáp án · Chọn nhiều đáp án · Đúng – Sai · Điền ngắn · Nối cặp · Sắp xếp thứ tự · Kéo thả vào ô · Sắp xếp câu · Phân loại từ · Điền vào đoạn văn · Chọn trong câu · Nghe và chọn · Chạm vào hình · Vẽ và tô · Ghi âm đọc to · Đồ dùng toán · Thăm dò ý kiến.' },
+  { kind: 'note', text: `Các dạng: ${ALL_TYPES}.` },
   { kind: 'note', text: 'Dòng dùng chung (không bắt buộc): Gợi ý: … · Giải thích: … · Mức độ: Nhận biết | Kết nối | Vận dụng · Môn: … · Lớp: 1–5 · Mã kĩ năng: … Bỏ trống Môn, Lớp thì dùng môn, lớp chọn lúc tải lên.' },
   { kind: 'note', text: 'Cả đề cùng môn, lớp, kĩ năng: ghi một lần ở ĐẦU tệp (trước Câu 1), ví dụ "Môn: Lịch sử và Địa lí", "Lớp: 5", "Mã kĩ năng: LSDL5.XDBV.LY-TRAN" — hoặc tiêu đề kiểu "ĐỀ ÔN TẬP MÔN TOÁN – LỚP 3". Mã kĩ năng tra ở trang Danh mục kĩ năng (nút "Xuất Excel"); ghi đúng tên ngắn của kĩ năng cũng được.' },
   { kind: 'note', text: `Môn học theo lớp (CT GDPT 2018): ${SUBJECT_LIST.filter((s) => s.id !== 'khac').map((s) => `${s.name} (${subjectGradeNote(s.id)})`).join(' · ')} · Khác.` },
-  { kind: 'note', text: 'Ghi nhớ: Nối cặp viết "vế trái = vế phải". Điền vào đoạn văn đặt từ đúng trong [ngoặc vuông], nhiều cách đúng ngăn bằng | . Chọn trong câu viết [lựa chọn 1|*lựa chọn đúng|lựa chọn 3] (dấu * trước lựa chọn đúng). Phân loại từ viết "Nhóm <tên>: từ 1, từ 2"; Kéo thả viết "Ô <tên>: thẻ 1, thẻ 2".' },
+  { kind: 'note', text: NOTE_REMEMBER },
 ];
 
-function paragraphs(): Para[] {
-  const out: Para[] = [...GUIDE, { kind: 'h', text: 'CÂU HỎI (ví dụ mỗi dạng một câu — xoá đi rồi soạn câu của thầy/cô)' }];
-  for (const ex of WORD_TEMPLATE_EXAMPLES) {
+function paragraphs(guide: Para[], examples: Example[], head: Para[] = []): Para[] {
+  const out: Para[] = [...guide, { kind: 'h', text: 'CÂU HỎI (ví dụ mỗi dạng một câu — xoá đi rồi soạn câu của thầy/cô)' }, ...head];
+  for (const ex of examples) {
     ex.lines.forEach((t, i) => out.push({ kind: i === 0 ? 'q' : 'body', text: t }));
     out.push({ kind: 'body', text: '' });
   }
   return out;
+}
+
+const ONTHI_TITLE: Record<'tn' | 'vio', string> = { tn: 'MẪU ĐỀ ÔN THI TRẠNG NGUYÊN — OPEN-EDU', vio: 'MẪU ĐỀ ÔN THI ĐẤU TRƯỜNG VIOEDU — OPEN-EDU' };
+const ONTHI_HEAD: Record<'tn' | 'vio', string[]> = { tn: ['Môn: Tiếng Việt', 'Lớp: 5'], vio: ['Môn: Toán', 'Lớp: 5'] };
+
+function onThiGuide(style: 'tn' | 'vio'): Para[] {
+  const kinds = [...new Set(ONTHI_TEMPLATE_EXAMPLES[style].map((e) => e.lines[1].replace(/^Dạng:\s*/, '')))].join(' · ');
+  return [
+    { kind: 'title', text: ONTHI_TITLE[style] },
+    { kind: 'note', text: 'Mỗi tệp là MỘT bài luyện. Soạn câu theo đúng cách viết của các ví dụ, xoá các câu ví dụ, lưu .docx. Vào app giáo viên → Ôn thi → Tạo bài luyện từ tệp Word → chọn tệp. Máy đọc xong cho thầy/cô soát từng câu, rồi tạo bài luyện theo đúng thứ tự câu trong tệp.' },
+    { kind: 'note', text: 'Mỗi câu bắt đầu bằng "Câu 1:", "Câu 2:"… (gõ số bằng tay, KHÔNG dùng đánh số tự động của Word). Dòng ngay sau là "Dạng: <tên dạng>". Viết mỗi ý trên một dòng. Nên có dòng "Giải thích:" để học sinh xem lại sau khi nộp bài.' },
+    { kind: 'note', text: `Các dạng hay dùng ở trang này: ${kinds}. Vẫn dùng được mọi dạng khác của ngân hàng câu hỏi: ${ALL_TYPES}.` },
+    { kind: 'note', text: 'Môn và lớp ghi một lần ở đầu tệp (hai dòng "Môn:", "Lớp:" ngay dưới đây). Đổi lại nếu bài luyện dành cho môn hoặc lớp khác.' },
+    { kind: 'note', text: NOTE_REMEMBER },
+  ];
+}
+
+function headLines(style: 'tn' | 'vio'): Para[] {
+  return ONTHI_HEAD[style].map((text) => ({ kind: 'body' as const, text }));
 }
 
 function pXml(p: Para): string {
@@ -65,8 +116,18 @@ function pXml(p: Para): string {
 
 /** Tệp mẫu Word để GV tải về. */
 export function buildWordTemplateDocx(): Uint8Array {
+  return docxOf(paragraphs(GUIDE, WORD_TEMPLATE_EXAMPLES));
+}
+
+/** Tệp mẫu Word cho trang Ôn thi (một tệp = một bài luyện). Môn, lớp ghi ở đầu tệp, trước Câu 1. */
+export function buildOnThiTemplateDocx(style: 'tn' | 'vio'): Uint8Array {
+  const g = onThiGuide(style);
+  return docxOf([...g, ...headLines(style), { kind: 'body', text: '' }, ...paragraphs([], ONTHI_TEMPLATE_EXAMPLES[style])]);
+}
+
+function docxOf(paras: Para[]): Uint8Array {
   const H = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
-  const body = paragraphs().map(pXml).join('');
+  const body = paras.map(pXml).join('');
   const files: Record<string, Uint8Array> = {
     '[Content_Types].xml': strToU8(`${H}<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>`),
     '_rels/.rels': strToU8(`${H}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`),

@@ -67,6 +67,8 @@ export function PrintBody({ item }: { item: Item }): ReactNode {
       return <p className="ex-note">Em khoanh vào phần đúng trên hình.</p>;
     case 'MATH_MANIPULATIVE':
       return item.payload.kind === 'sticks' ? <p>{item.payload.operands.join(` ${item.payload.op} `)} = <span className="ex-dots" /></p> : <p>Vẽ kim đồng hồ. Giờ: <span className="ex-dots" /></p>;
+    case 'TRUE_FALSE_MULTI':
+      return <ol type="a">{item.payload.statements.map((c) => <li key={c.id}>{t(c)} <span className="ex-note">(Đ / S)</span> <span className="ex-dots" /></li>)}</ol>;
     default:
       return null;
   }
@@ -92,8 +94,12 @@ export function keyText(item: Item): string {
       return (item.key?.order ?? []).map((id) => t(item.payload.words.find((c) => c.id === id))).join(' ');
     case 'DRAG_DROP':
       return Object.entries(item.key?.placement ?? {}).map(([tk, z]) => `${t(item.payload.tokens.find((c) => c.id === tk))} → ${item.payload.zones.find((x) => x.id === z)?.label ?? z}`).join('; ');
-    case 'WORD_CLASSIFY':
-      return Object.entries(item.key?.placement ?? {}).map(([w, g]) => `${t(item.payload.words.find((c) => c.id === w))} → ${item.payload.groups.find((x) => x.id === g)?.label ?? g}`).join('; ');
+    case 'WORD_CLASSIFY': {
+      const pl = item.key?.placement ?? {};
+      const main = Object.entries(pl).map(([w, g]) => `${t(item.payload.words.find((c) => c.id === w))} → ${item.payload.groups.find((x) => x.id === g)?.label ?? g}`).join('; ');
+      const extra = item.payload.distractors ? item.payload.words.filter((c) => !pl[c.id]).map(t) : [];
+      return extra.length ? `${main}; thẻ nhiễu: ${extra.join(', ')}` : main;
+    }
     case 'MATCHING':
       return Object.entries(item.key?.pairs ?? {}).map(([l, r]) => `${item.payload.left.findIndex((c) => c.id === l) + 1}–${LETTERS[item.payload.right.findIndex((c) => c.id === r)]?.toLowerCase()}`).join(', ');
     case 'FILL_IN_PASSAGE':
@@ -104,6 +110,8 @@ export function keyText(item: Item): string {
       return (item.key?.correct ?? []).map((id) => item.payload.regions.find((r) => r.id === id)?.label ?? id).join(', ');
     case 'MATH_MANIPULATIVE':
       return String(item.key?.value ?? '');
+    case 'TRUE_FALSE_MULTI':
+      return item.payload.statements.map((c, i) => `${LETTERS[i]?.toLowerCase() ?? i + 1}) ${item.key?.truth[c.id] === true ? 'Đ' : item.key?.truth[c.id] === false ? 'S' : '?'}`).join(', ');
     default:
       return '';
   }

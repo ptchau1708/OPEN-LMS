@@ -16,6 +16,7 @@ import * as DRAW from './types/DRAW/index';
 import * as RECORD_READ from './types/RECORD_READ/index';
 import * as MATH_MANIPULATIVE from './types/MATH_MANIPULATIVE/index';
 import * as POLL from './types/POLL/index';
+import * as TRUE_FALSE_MULTI from './types/TRUE_FALSE_MULTI/index';
 
 export const REGISTRY: { [K in ItemType]: TypeModule<K> } = {
   MCQ: MCQ as unknown as TypeModule<'MCQ'>,
@@ -34,4 +35,5 @@ export const REGISTRY: { [K in ItemType]: TypeModule<K> } = {
   RECORD_READ: RECORD_READ as unknown as TypeModule<'RECORD_READ'>,
   MATH_MANIPULATIVE: MATH_MANIPULATIVE as unknown as TypeModule<'MATH_MANIPULATIVE'>,
   POLL: POLL as unknown as TypeModule<'POLL'>,
+  TRUE_FALSE_MULTI: TRUE_FALSE_MULTI as unknown as TypeModule<'TRUE_FALSE_MULTI'>,
 };

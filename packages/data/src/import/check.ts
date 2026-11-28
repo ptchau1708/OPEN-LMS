@@ -60,6 +60,15 @@ export function checkItem(item: Item): ItemCheck {
       missingAnswer = !l.every((c) => r.some((x) => x.id === p[c.id]));
       break;
     }
+    case 'TRUE_FALSE_MULTI': {
+      const st = item.payload.statements ?? [];
+      if (st.length < 2) problems.push('Cần ít nhất 2 nhận định');
+      else if (st.length > 6) problems.push('Tối đa 6 nhận định');
+      else if (!st.every(hasText)) problems.push('Có nhận định còn trống');
+      const t = item.key?.truth ?? {};
+      missingAnswer = !st.length || !st.every((c) => typeof t[c.id] === 'boolean');
+      break;
+    }
     case 'DRAW':
     case 'RECORD_READ':
     case 'POLL':

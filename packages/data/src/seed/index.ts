@@ -13,6 +13,7 @@ import { TIENG_VIET_ITEMS } from './items-tieng-viet';
 import { TNXH_ITEMS } from './items-tnxh';
 import { TOAN_ITEMS } from './items-toan';
 import { TOAN45_ITEMS } from './items-toan45';
+import { ONTHI_ITEMS } from './items-onthi';
 import { LEGACY_MISCONCEPTIONS, LEGACY_SKILL_TAGS } from './skill-tags';
 import { buildSynthetic4A } from './synthetic-4a';
 import { buildLessons, LESSON_IDS, SAMPLE_PACKAGE_ID } from './lessons';
@@ -22,12 +23,13 @@ export { DEMO_CLASSES, DEMO_GUARDIANS, DEMO_PASSWORD, DEMO_USERS, defaultSetting
 export { LESSON_IDS, SAMPLE_PACKAGE_ID } from './lessons';
 export { MASCOT_COUNTRY_EN } from './items-tieng-anh';
 export { TOAN45_ITEMS } from './items-toan45';
+export { ONTHI_ITEMS, ONTHI_TOAN5_ITEMS, ONTHI_TV5_ITEMS } from './items-onthi';
 export { LEGACY_SKILL_TAGS } from './skill-tags';
 export { PLANS_4A, correctResponse as syntheticCorrectResponse } from './synthetic-4a';
 export { SEED_RUBRICS, WORK_TASK_IDS } from './work';
 
 /** Tăng khi đổi nội dung mẫu: máy đã lưu bản cũ sẽ được tạo lại. */
-export const SEED_VERSION = 3;
+export const SEED_VERSION = 4;
 
 /** Đặt trong baseUrl; DemoDataSource thay bằng VITE_CONTENT_ORIGIN lúc đọc. */
 export const CONTENT_ORIGIN_TOKEN = '{{CONTENT_ORIGIN}}';
@@ -40,7 +42,7 @@ function tagLegacy(it: Item): Item {
   return { ...it, ...(skills ? { skills } : {}), ...(key !== undefined ? { key } : {}) } as Item;
 }
 
-export const SEED_ITEMS: Item[] = [...TOAN_ITEMS, ...TIENG_VIET_ITEMS, ...TNXH_ITEMS, ...TIENG_ANH_ITEMS].map(tagLegacy).concat(TOAN45_ITEMS);
+export const SEED_ITEMS: Item[] = [...TOAN_ITEMS, ...TIENG_VIET_ITEMS, ...TNXH_ITEMS, ...TIENG_ANH_ITEMS].map(tagLegacy).concat(TOAN45_ITEMS, ONTHI_ITEMS);
 
 export interface SeedData {
   users: typeof DEMO_USERS;

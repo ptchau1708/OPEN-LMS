@@ -10,7 +10,7 @@ export { detectDocMeta, nearestGradeFor, type DocMeta } from './meta';
 export { buildSkillsXlsx, planSkillsImport, planSkillsRows, skillsSheet, SKILL_SHEET_NAME, type SkillPlanKind, type SkillPlanRow, type SkillsImportPlan } from './skillsSheet';
 export * from './ai';
 export { parseTypedBlock, parseTypedKind, isTypedBlock, TYPED_KIND_LABEL, type TypedKind } from './typedBlock';
-export { buildWordTemplateDocx, WORD_TEMPLATE_EXAMPLES, DOCX_MIME } from './wordTemplate';
+export { buildOnThiTemplateDocx, buildWordTemplateDocx, ONTHI_TEMPLATE_EXAMPLES, WORD_TEMPLATE_EXAMPLES, DOCX_MIME } from './wordTemplate';
 
 // Thông tin bổ sung của học sinh: mẫu Excel + đọc tệp (tải lười cùng mã nhập liệu).
 export { buildNotesTemplate, parseNotesSheet, type NotesSheet, type NotesSheetRow } from '../notes/excel';

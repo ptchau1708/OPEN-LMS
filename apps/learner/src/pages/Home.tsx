@@ -124,8 +124,9 @@ export default function Home() {
           </span>
           <span className="ln-live-card__go" aria-hidden="true"><Icon name="next" size={24} /></span>
         </button>
-        {me.classId || ltiCount > 0 ? (
+        {me.classId || ltiCount > 0 || me.role === 'student' ? (
           <div className="ln-quick">
+            {me.role === 'student' && <QuickTile icon="scroll" label="Ôn thi" color="var(--k-navy)" onClick={() => { sfx.tap(); nav('/on-thi'); }} testId="home-onthi" />}
             {me.classId && <QuickTile icon="sprout" label="Vườn lớp em" color="var(--k-ok)" onClick={() => { sfx.tap(); nav('/vuon-lop'); }} />}
             {me.classId && <QuickTile icon="team" label="Thảo luận" color="var(--k-sky)" count={openDisc} onClick={() => { sfx.tap(); nav('/thao-luan'); }} testId="home-discuss" />}
             {ltiCount > 0 && <QuickTile icon="puzzle" label="Ứng dụng học" color="var(--k-sea)" onClick={() => { sfx.tap(); nav('/ung-dung'); }} testId="home-lti" />}
