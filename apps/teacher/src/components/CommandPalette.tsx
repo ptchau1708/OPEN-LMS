@@ -2,19 +2,19 @@
  * Ô tìm nhanh (Ctrl+K / ⌘K): gõ để mở trang, làm thao tác nhanh, tới lớp, học sinh, bài giảng.
  * Tìm không cần dấu ("diem danh" ra "Điểm danh"). Bàn phím: ↑ ↓ chọn, Enter mở, Esc đóng.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router';
 import { useQueries } from '@tanstack/react-query';
 import type { Profile } from '@openedu/contracts';
 import { SUBJECTS } from '@openedu/contracts';
 import { useDataSource, useLessons } from '@openedu/data';
 import { Icon, type IconName } from '@openedu/ui';
-import { NAV_GROUPS, NAV_HOME, fold } from '../lib/nav';
+import { C, NAV, fold, tint } from '../lib/nav';
 import { useClasses } from '../lib/focusGrade';
 import { useTodayWork } from '../lib/todayWork';
 import { cx } from '../lib/format';
 
-interface Entry { id: string; group: string; label: string; sub?: string; icon: IconName; to: string; hay: string; count?: number }
+interface Entry { id: string; group: string; label: string; sub?: string; icon: IconName; to: string; hay: string; count?: number; color?: string }
 
 const ACTIONS: { label: string; to: string; icon: IconName; keywords: string }[] = [
   { label: 'Soạn bài giảng mới', to: '/bai-giang?tao=1', icon: 'plus', keywords: 'tao bai giang moi slide' },
@@ -72,12 +72,15 @@ export function CommandPalette({ user, open, onClose }: { user: Profile; open: b
     if (w.attendanceTodo) todo.push({ id: 'w-att', group: 'Việc cần làm', label: 'Điểm danh hôm nay', icon: 'clock', to: '/diem-danh', hay: 'diem danh hom nay' });
     out.push(...todo);
     ACTIONS.forEach((a) => out.push({ id: `a-${a.to}`, group: 'Thao tác nhanh', label: a.label, icon: a.icon, to: a.to, hay: fold(`${a.label} ${a.keywords}`) }));
-    [{ ...NAV_HOME, group: 'Trang' }, ...NAV_GROUPS.flatMap((g) => g.items.map((i) => ({ ...i, group: g.label })))]
-      .filter((i) => !i.admin || user.role === 'admin')
-      .forEach((i) => out.push({ id: `p-${i.to}`, group: 'Trang', label: i.label, sub: i.group === 'Trang' ? undefined : i.group, icon: i.icon, to: i.to, hay: fold(`${i.label} ${i.keywords ?? ''} ${i.group}`) }));
-    clsList.forEach((c) => out.push({ id: `c-${c.id}`, group: 'Lớp', label: `Lớp ${c.name}`, sub: `Khối ${c.grade} · bản đồ kiến thức`, icon: 'team', to: `/lop/${c.id}/ban-do-kien-thuc`, hay: fold(`lop ${c.name} khoi ${c.grade}`) }));
-    studentQs.forEach((sq, i) => (sq.data ?? []).forEach((s) => out.push({ id: `s-${s.id}`, group: 'Học sinh', label: s.name, sub: `Lớp ${clsList[i]?.name ?? ''}`, icon: 'user', to: `/hoc-sinh/${s.id}`, hay: fold(`${s.name} hoc sinh ${clsList[i]?.name ?? ''}`) })));
-    (lessons.data ?? []).slice(0, 200).forEach((l) => out.push({ id: `l-${l.id}`, group: 'Bài giảng', label: l.title, sub: `${(SUBJECTS[l.subject] ?? SUBJECTS.khac).name} · lớp ${l.grade}`, icon: 'book', to: `/bai-giang/${l.id}`, hay: fold(`${l.title} ${(SUBJECTS[l.subject] ?? SUBJECTS.khac).name} lop ${l.grade}`) }));
+    let section = '';
+    NAV.forEach((i) => {
+      if (i.section) section = i.section;
+      if (i.admin && user.role !== 'admin') return;
+      out.push({ id: `p-${i.to}`, group: 'Trang', label: i.label, sub: section || undefined, icon: i.icon, color: i.color, to: i.to, hay: fold(`${i.label} ${i.keywords ?? ''} ${section}`) });
+    });
+    clsList.forEach((c) => out.push({ id: `c-${c.id}`, group: 'Lớp', label: `Lớp ${c.name}`, sub: `Khối ${c.grade} · bản đồ kiến thức`, icon: 'team', color: C.sky, to: `/lop/${c.id}/ban-do-kien-thuc`, hay: fold(`lop ${c.name} khoi ${c.grade}`) }));
+    studentQs.forEach((sq, i) => (sq.data ?? []).forEach((s) => out.push({ id: `s-${s.id}`, group: 'Học sinh', label: s.name, sub: `Lớp ${clsList[i]?.name ?? ''}`, icon: 'user', color: C.cyan, to: `/hoc-sinh/${s.id}`, hay: fold(`${s.name} hoc sinh ${clsList[i]?.name ?? ''}`) })));
+    (lessons.data ?? []).slice(0, 200).forEach((l) => out.push({ id: `l-${l.id}`, group: 'Bài giảng', label: l.title, sub: `${(SUBJECTS[l.subject] ?? SUBJECTS.khac).name} · lớp ${l.grade}`, icon: 'book', color: C.indigo, to: `/bai-giang/${l.id}`, hay: fold(`${l.title} ${(SUBJECTS[l.subject] ?? SUBJECTS.khac).name} lop ${l.grade}`) }));
     return out;
   }, [open, work.total, clsList, studentQs, lessons.data, user.role]);
 
@@ -148,7 +151,7 @@ export function CommandPalette({ user, open, onClose }: { user: Profile; open: b
                 onMouseMove={() => setSel(i)}
                 onClick={() => go(e)}
               >
-                <span className="tc-cmdk__icon"><Icon name={e.icon} size={16} /></span>
+                <span className="tc-cmdk__icon" style={e.color ? ({ ['--c' as string]: e.color, ['--c-soft' as string]: tint(e.color, 0.14) } as CSSProperties) : undefined}><Icon name={e.icon} size={16} /></span>
                 <span className="tc-cmdk__text"><strong>{e.label}</strong>{e.sub ? <small>{e.sub}</small> : null}</span>
                 {i === sel ? <kbd className="tc-cmdk__kbd">Enter</kbd> : null}
               </li>,

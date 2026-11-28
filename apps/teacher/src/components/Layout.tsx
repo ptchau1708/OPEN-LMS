@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState, type CSSProperties } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import type { Profile } from '@openedu/contracts';
 import { Icon } from '@openedu/ui';
@@ -7,14 +7,20 @@ import { Avatar } from './common';
 import { NotifyBell } from './NotifyBell';
 import { useFocusGrade } from '../lib/focusGrade';
 import { cx } from '../lib/format';
-import { NAV_GROUPS, NAV_HOME, type NavGroup, type NavItem } from '../lib/nav';
+import { NAV, tint, type NavItem } from '../lib/nav';
 import { navBadge, TodayWorkProvider, useTodayWork } from '../lib/todayWork';
 
 const CommandPalette = lazy(() => import('./CommandPalette').then((m) => ({ default: m.CommandPalette })));
 
-const GROUPS_KEY = 'tc-nav-groups';
-function readGroups(): Record<string, boolean> {
-  try { return JSON.parse(window.localStorage.getItem(GROUPS_KEY) ?? '{}') as Record<string, boolean>; } catch { return {}; }
+/** Thanh bên: "full" = hiện đầy đủ; "mini" = ẩn chữ, chỉ còn dải biểu tượng (rê chuột / Tab vào thì tạm hiện đầy đủ). */
+const SIDE_KEY = 'tc-side';
+function readSide(): 'full' | 'mini' {
+  try { return window.localStorage.getItem(SIDE_KEY) === 'mini' ? 'mini' : 'full'; } catch { return 'full'; }
+}
+function flipSide(v: 'full' | 'mini'): 'full' | 'mini' {
+  const next = v === 'mini' ? 'full' : 'mini';
+  try { window.localStorage.setItem(SIDE_KEY, next); } catch { /* bỏ qua */ }
+  return next;
 }
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
@@ -34,9 +40,10 @@ export function Layout({ user }: { user: Profile }) {
 function NavRow({ n, active, badge }: { n: NavItem; active: boolean; badge: number }) {
   // Tên đọc của liên kết giữ nguyên (ví dụ "Phụ huynh"); số việc đọc như phần mô tả.
   const descId = badge ? `nav-d${n.to.replace(/[^a-z0-9]/gi, '-')}` : undefined;
+  const style = { ['--c' as string]: n.color, ['--c-soft' as string]: tint(n.color, 0.2) } as CSSProperties;
   return (
-    <NavLink to={n.to} end={n.end} className={cx('tc-nav__link', active && 'is-active')} title={n.label} aria-describedby={descId}>
-      <Icon name={n.icon} size={20} />
+    <NavLink to={n.to} end={n.end} className={cx('tc-nav__link', active && 'is-active')} title={n.label} aria-describedby={descId} style={style}>
+      <span className="tc-nav__ico" aria-hidden="true"><Icon name={n.icon} size={18} /></span>
       <span>{n.label}</span>
       {badge ? <b className="tc-nav__badge" aria-hidden="true">{badge > 99 ? '99+' : badge}</b> : null}
       {badge ? <span id={descId} hidden>{badge} việc cần làm</span> : null}
@@ -52,9 +59,14 @@ function Shell({ user }: { user: Profile }) {
   const [menu, setMenu] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
   const [cmdk, setCmdk] = useState(false);
-  const [groups, setGroups] = useState<Record<string, boolean>>(readGroups);
+  const [side, setSide] = useState<'full' | 'mini'>(readSide);
+  // Thanh bên đang ẩn mà người dùng Tab (bàn phím) vào → tạm hiện đầy đủ; rời ra thì ẩn lại. Chuột thì dùng :hover trong CSS.
+  const [peek, setPeek] = useState(false);
   const work = useTodayWork();
-  const rail = /^\/bai-giang\/[^/]+/.test(loc.pathname);
+  // Trình soạn bài giảng luôn thu gọn thanh bên cho rộng chỗ soạn.
+  const editor = /^\/bai-giang\/[^/]+/.test(loc.pathname);
+  const rail = editor || side === 'mini';
+  const toggleSide = () => setSide(flipSide);
   const notes = useNotifications();
   const focus = useFocusGrade().grade;
   usePushSync('gv');
@@ -63,24 +75,14 @@ function Shell({ user }: { user: Profile }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); setCmdk((v) => !v); }
+      // Ctrl+\ : ẩn / hiện thanh bên.
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key === '\\') { e.preventDefault(); setSide(flipSide); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
   const isActive = (n: NavItem) => (n.match ? n.match.test(loc.pathname) : n.end ? loc.pathname === n.to : loc.pathname === n.to || loc.pathname.indexOf(n.to + '/') === 0);
-  // Nhóm mặc định: mở hết, trừ "Trường & thiết lập" với giáo viên (quản trị thì mở). Nhóm có trang đang xem luôn mở.
-  const isOpen = (g: NavGroup) => {
-    if (g.items.some(isActive)) return true;
-    if (groups[g.id] !== undefined) return groups[g.id];
-    return g.id !== 'truong' || user.role === 'admin';
-  };
-  const toggle = (g: NavGroup) => {
-    const next = { ...groups, [g.id]: !isOpen(g) };
-    setGroups(next);
-    try { window.localStorage.setItem(GROUPS_KEY, JSON.stringify(next)); } catch { /* bỏ qua */ }
-  };
-
   const userBox = (
     <div className="tc-user">
       <button type="button" className="tc-user__btn" aria-expanded={userMenu} onClick={() => setUserMenu((v) => !v)}>
@@ -105,7 +107,12 @@ function Shell({ user }: { user: Profile }) {
 
   return (
     <div className={cx('tc-app theme-pro', rail && 'tc-app--rail')}>
-      <aside className={cx('tc-side', menu && 'is-open')}>
+      <aside
+        className={cx('tc-side', menu && 'is-open', peek && 'is-peek')}
+        data-testid="side"
+        onFocus={(e) => { if (rail && (e.target as HTMLElement).matches?.(':focus-visible')) setPeek(true); }}
+        onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setPeek(false); }}
+      >
         <div className="tc-side__top">
           <Brand />
           <NotifyBell data={notes.data} id="bell-side" />
@@ -116,25 +123,22 @@ function Shell({ user }: { user: Profile }) {
           <kbd className="tc-search__kbd">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
         </button>
         <nav className="tc-nav" aria-label="Điều hướng chính">
-          <NavRow n={NAV_HOME} active={isActive(NAV_HOME)} badge={0} />
-          {NAV_GROUPS.map((g) => {
-            const items = g.items.filter((n) => !n.admin || user.role === 'admin');
-            if (!items.length) return null;
-            const open = rail || isOpen(g);
-            const hidden = open ? 0 : items.reduce((t, n) => t + navBadge(work, n.badge), 0);
-            return (
-              <div key={g.id} className={cx('tc-nav__group', open && 'is-open')}>
-                <button type="button" className="tc-nav__head" aria-expanded={open} onClick={() => toggle(g)} data-testid={`nav-group-${g.id}`}>
-                  <Icon name="chevron" size={14} />
-                  <span>{g.label}</span>
-                  {hidden ? <b className="tc-nav__badge" aria-label={`${hidden} việc cần làm trong nhóm`}>{hidden}</b> : null}
-                </button>
-                {open ? items.map((n) => <NavRow key={n.to} n={n} active={isActive(n)} badge={navBadge(work, n.badge)} />) : null}
-              </div>
-            );
-          })}
+          {NAV.filter((n) => !n.admin || user.role === 'admin').map((n) => [
+            n.section ? <span key={`s-${n.section}`} className="tc-nav__section">{n.section}</span> : null,
+            <NavRow key={n.to} n={n} active={isActive(n)} badge={navBadge(work, n.badge)} />,
+          ])}
         </nav>
-        <div className="tc-side__bottom">{userBox}</div>
+        <div className="tc-side__bottom">
+          {editor ? null : (
+            <button type="button" className="tc-side__toggle" onClick={(e) => { toggleSide(); if (e.detail > 0) e.currentTarget.blur(); }} aria-pressed={side === 'mini'} data-testid="side-toggle"
+              aria-label={side === 'mini' ? 'Hiện thanh bên' : 'Ẩn thanh bên'} title={`${side === 'mini' ? 'Hiện' : 'Ẩn'} thanh bên (Ctrl+\\)`}>
+              <Icon name={side === 'mini' ? 'next' : 'back'} size={16} />
+              <span>{side === 'mini' ? 'Hiện thanh bên' : 'Ẩn thanh bên'}</span>
+              <kbd>{'Ctrl+\\'}</kbd>
+            </button>
+          )}
+          {userBox}
+        </div>
       </aside>
       <header className="tc-topbar">
         <button type="button" className="tc-btn tc-btn--ghost tc-btn--icon" aria-label="Mở menu" aria-expanded={menu} onClick={() => setMenu((v) => !v)}>

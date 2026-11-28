@@ -1,5 +1,7 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
+import { useLocation } from 'react-router';
 import { Icon, Mascot, type IconName } from '@openedu/ui';
+import { navFor, tint } from '../lib/nav';
 import type { MascotId } from '@openedu/contracts';
 import { cx } from '../lib/format';
 
@@ -115,12 +117,19 @@ export function GroupField({ label, help, children }: { label: string; help?: Re
   );
 }
 
-export function PageHead({ title, sub, actions }: { title: string; sub?: ReactNode; actions?: ReactNode }) {
+export function PageHead({ title, sub, actions, icon, color }: { title: string; sub?: ReactNode; actions?: ReactNode; icon?: IconName; color?: string }) {
+  // Ô biểu tượng màu ở đầu trang: lấy theo mục thanh bên của trang đang xem (lib/nav.ts).
+  const item = navFor(useLocation().pathname);
+  const ic = icon ?? item?.icon;
+  const c = color ?? item?.color;
   return (
     <header className="tc-pagehead">
-      <div>
-        <h1>{title}</h1>
-        {sub ? <p className="tc-muted">{sub}</p> : null}
+      <div className="tc-pagehead__title">
+        {ic && c ? <span className="tc-pagehead__ico" aria-hidden="true" style={{ ['--c' as string]: c, ['--c-soft' as string]: tint(c, 0.14) } as CSSProperties}><Icon name={ic} size={22} /></span> : null}
+        <div>
+          <h1>{title}</h1>
+          {sub ? <p className="tc-muted">{sub}</p> : null}
+        </div>
       </div>
       {actions ? <div className="tc-row tc-wrap">{actions}</div> : null}
     </header>

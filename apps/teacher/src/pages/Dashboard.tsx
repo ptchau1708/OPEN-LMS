@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { ATTENDANCE_LABEL, MASTERY_LEVEL_LABEL, SUBJECTS, type AttendanceStatus, type ClassInfo, type MascotId, type MasteryLevel, type Profile, type SubmissionStatus } from '@openedu/contracts';
 import { Icon, Mascot, type IconName } from '@openedu/ui';
@@ -7,6 +7,10 @@ import { useClasses } from '../lib/focusGrade';
 import { Avatar, Empty, Loading, Seg, SubjectDot } from '../components/common';
 import { cx, fmtDate, relTime } from '../lib/format';
 import { useTodayWork, type ClassWork } from '../lib/todayWork';
+import { C, tint } from '../lib/nav';
+
+/** Biến màu cho một ô: --c (đậm) và --c-soft (nhạt). */
+const cvars = (c?: string) => (c ? ({ ['--c' as string]: c, ['--c-soft' as string]: tint(c, 0.14) } as CSSProperties) : undefined);
 import '../styles/dashboard.css';
 
 /* ======================= tiện ích ======================= */
@@ -23,7 +27,7 @@ function greet(): string {
 }
 
 /* ======================= mảnh ghép giao diện ======================= */
-export function Tile({ icon, label, value, sub, to, tone }: { icon: IconName; label: string; value: ReactNode; sub?: ReactNode; to?: string; tone?: 'warn' | 'ok' }) {
+export function Tile({ icon, label, value, sub, to, tone, color }: { icon: IconName; label: string; value: ReactNode; sub?: ReactNode; to?: string; tone?: 'warn' | 'ok'; color?: string }) {
   const body = (
     <>
       <span className="db-tile__icon"><Icon name={icon} size={18} /></span>
@@ -32,7 +36,8 @@ export function Tile({ icon, label, value, sub, to, tone }: { icon: IconName; la
       {sub ? <small className="db-tile__sub">{sub}</small> : null}
     </>
   );
-  return to ? <Link to={to} className={cx('db-tile', tone && `db-tile--${tone}`)}>{body}</Link> : <div className={cx('db-tile', tone && `db-tile--${tone}`)}>{body}</div>;
+  const cls = cx('db-tile', tone && `db-tile--${tone}`, color && 'db-tile--color');
+  return to ? <Link to={to} className={cls} style={cvars(color)}>{body}</Link> : <div className={cls} style={cvars(color)}>{body}</div>;
 }
 
 export function Card({ title, sub, link, children, wide }: { title: string; sub?: string; link?: { to: string; label: string }; children: ReactNode; wide?: boolean }) {
@@ -248,12 +253,12 @@ function ClassBoard({ cls }: { cls: ClassInfo }) {
     <>
       {/* ---------- chỉ số chính ---------- */}
       <section className="db-tiles" aria-label={`Chỉ số chính lớp ${cls.name}`}>
-        <Tile icon="team" label="Sĩ số" value={n} sub={cls.teams.length ? `${cls.teams.length} tổ` : 'Chưa chia tổ'} to={`/lop?c=${cls.id}`} />
-        <Tile icon="clock" label="Học trong 7 ngày" value={<>{act.weekUsers.size}<em>/{n}</em></>} sub={n ? `${n - act.weekUsers.size} em chưa học` : 'Chưa có học sinh'} tone={n && act.weekUsers.size < n / 2 ? 'warn' : undefined} />
-        <Tile icon="check" label="Trả lời đúng" value={pctText(act.weekAcc)} sub={`${act.weekAnswers} câu trong 7 ngày`} />
-        <Tile icon="eye" label="Bài chờ duyệt" value={subStat.review} sub={subStat.review ? 'Bấm để chấm' : 'Không còn bài chờ'} to="/cham-bai" tone={subStat.review ? 'warn' : undefined} />
-        <Tile icon="passport" label="Chuyên cần" value={pctText(att.rate)} sub={att.today ? `Hôm nay vắng ${att.today.c['vang-co-phep'] + att.today.c['vang-khong-phep']} em` : 'Hôm nay chưa điểm danh'} to="/diem-danh" />
-        <Tile icon="star" label="Sao cả lớp tuần này" value={garden.data?.classStars ?? '—'} sub={garden.data ? `Mục tiêu ${garden.data.goal.targetStars} sao` : undefined} to="/vuon-lop" />
+        <Tile color={C.sky} icon="team" label="Sĩ số" value={n} sub={cls.teams.length ? `${cls.teams.length} tổ` : 'Chưa chia tổ'} to={`/lop?c=${cls.id}`} />
+        <Tile color={C.teal} icon="clock" label="Học trong 7 ngày" value={<>{act.weekUsers.size}<em>/{n}</em></>} sub={n ? `${n - act.weekUsers.size} em chưa học` : 'Chưa có học sinh'} tone={n && act.weekUsers.size < n / 2 ? 'warn' : undefined} />
+        <Tile color={C.green} icon="check" label="Trả lời đúng" value={pctText(act.weekAcc)} sub={`${act.weekAnswers} câu trong 7 ngày`} />
+        <Tile color={C.amber} icon="eye" label="Bài chờ duyệt" value={subStat.review} sub={subStat.review ? 'Bấm để chấm' : 'Không còn bài chờ'} to="/cham-bai" tone={subStat.review ? 'warn' : undefined} />
+        <Tile color={C.violet} icon="passport" label="Chuyên cần" value={pctText(att.rate)} sub={att.today ? `Hôm nay vắng ${att.today.c['vang-co-phep'] + att.today.c['vang-khong-phep']} em` : 'Hôm nay chưa điểm danh'} to="/diem-danh" />
+        <Tile color={C.orange} icon="star" label="Sao cả lớp tuần này" value={garden.data?.classStars ?? '—'} sub={garden.data ? `Mục tiêu ${garden.data.goal.targetStars} sao` : undefined} to="/vuon-lop" />
       </section>
 
       <div className="db-grid">
@@ -408,18 +413,18 @@ function ClassBoard({ cls }: { cls: ClassInfo }) {
 }
 
 /* ======================= việc hôm nay ======================= */
-interface Todo { key: string; icon: IconName; n: number; label: string; doneLabel: string; to: string; per: (c: ClassWork) => number; value?: ReactNode }
+interface Todo { key: string; icon: IconName; color: string; n: number; label: string; doneLabel: string; to: string; per: (c: ClassWork) => number; value?: ReactNode }
 
 function TodayPanel() {
   const w = useTodayWork();
   const t = w.total;
   const many = w.classes.length > 1;
   const todos: Todo[] = [
-    { key: 'review', icon: 'eye', n: t.review, label: 'bài viết chờ chấm hoặc duyệt', doneLabel: 'Chấm bài', to: '/cham-bai', per: (c) => c.review },
-    { key: 'att', icon: 'clock', n: t.attendanceTodo, label: many ? 'lớp chưa điểm danh hôm nay' : 'Chưa điểm danh hôm nay', doneLabel: 'Điểm danh', to: '/diem-danh', per: (c) => (c.attendanceTodo ? 1 : 0), value: many ? undefined : <Icon name="clock" size={22} /> },
-    { key: 'msg', icon: 'chat', n: t.parentUnread, label: 'tin nhắn phụ huynh chưa đọc', doneLabel: 'Tin nhắn phụ huynh', to: '/phu-huynh?the=tin-nhan', per: (c) => c.parentUnread },
-    { key: 'queue', icon: 'parent', n: t.parentQueue, label: 'mục chờ duyệt để gửi phụ huynh', doneLabel: 'Duyệt gửi phụ huynh', to: '/phu-huynh?the=cho-duyet', per: (c) => c.parentQueue },
-    { key: 'due', icon: 'check', n: t.dueSoon, label: 'bài giao hết hạn trong 2 ngày', doneLabel: 'Bài sắp hết hạn', to: '/bao-cao-bai-giao', per: (c) => c.dueSoon },
+    { key: 'review', icon: 'eye', color: C.amber, n: t.review, label: 'bài viết chờ chấm hoặc duyệt', doneLabel: 'Chấm bài', to: '/cham-bai', per: (c) => c.review },
+    { key: 'att', icon: 'clock', color: C.teal, n: t.attendanceTodo, label: many ? 'lớp chưa điểm danh hôm nay' : 'Chưa điểm danh hôm nay', doneLabel: 'Điểm danh', to: '/diem-danh', per: (c) => (c.attendanceTodo ? 1 : 0), value: many ? undefined : <Icon name="clock" size={22} /> },
+    { key: 'msg', icon: 'chat', color: C.pink, n: t.parentUnread, label: 'tin nhắn phụ huynh chưa đọc', doneLabel: 'Tin nhắn phụ huynh', to: '/phu-huynh?the=tin-nhan', per: (c) => c.parentUnread },
+    { key: 'queue', icon: 'parent', color: C.violet, n: t.parentQueue, label: 'mục chờ duyệt để gửi phụ huynh', doneLabel: 'Duyệt gửi phụ huynh', to: '/phu-huynh?the=cho-duyet', per: (c) => c.parentQueue },
+    { key: 'due', icon: 'check', color: C.green, n: t.dueSoon, label: 'bài giao hết hạn trong 2 ngày', doneLabel: 'Bài sắp hết hạn', to: '/bao-cao-bai-giao', per: (c) => c.dueSoon },
   ];
   const open = todos.filter((x) => x.n > 0);
   const done = todos.filter((x) => x.n === 0);
@@ -435,7 +440,7 @@ function TodayPanel() {
       {open.length ? (
         <div className="db-today__grid">
           {open.map((x) => (
-            <Link key={x.key} to={x.to} className={cx('db-todo', `db-todo--${x.key}`)} data-testid={`todo-${x.key}`}>
+            <Link key={x.key} to={x.to} className={cx('db-todo', `db-todo--${x.key}`)} style={cvars(x.color)} data-testid={`todo-${x.key}`}>
               <span className="db-todo__icon" aria-hidden="true"><Icon name={x.icon} size={18} /></span>
               <span className="db-todo__main">
                 {x.value ?? <strong className="db-todo__n">{x.n}</strong>}
@@ -478,9 +483,9 @@ export function Dashboard({ user }: { user: Profile }) {
       <TodayPanel />
 
       <section className="tc-actions">
-        <button type="button" className="tc-action" onClick={() => nav('/bai-giang?tao=1')}><Icon name="plus" size={22} /><span><strong>Soạn bài giảng mới</strong><small>Slide, hoạt động, trò chơi</small></span></button>
-        <button type="button" className="tc-action" onClick={() => nav('/truc-tiep')}><Icon name="tv" size={22} /><span><strong>Mở lớp trực tiếp</strong><small>Trình chiếu lên TV, HS trả lời trên máy</small></span></button>
-        <button type="button" className="tc-action" onClick={() => nav('/giao-bai')}><Icon name="check" size={22} /><span><strong>Giao bài</strong><small>Tự học ở nhà, có hạn nộp</small></span></button>
+        <button type="button" className="tc-action" style={cvars(C.indigo)} onClick={() => nav('/bai-giang?tao=1')}><Icon name="plus" size={22} /><span><strong>Soạn bài giảng mới</strong><small>Slide, hoạt động, trò chơi</small></span></button>
+        <button type="button" className="tc-action" style={cvars(C.red)} onClick={() => nav('/truc-tiep')}><Icon name="tv" size={22} /><span><strong>Mở lớp trực tiếp</strong><small>Trình chiếu lên TV, HS trả lời trên máy</small></span></button>
+        <button type="button" className="tc-action" style={cvars(C.green)} onClick={() => nav('/giao-bai')}><Icon name="check" size={22} /><span><strong>Giao bài</strong><small>Tự học ở nhà, có hạn nộp</small></span></button>
       </section>
 
       {classes.isLoading ? <Loading /> : !cls ? (

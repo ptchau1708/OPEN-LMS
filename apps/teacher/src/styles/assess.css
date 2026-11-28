@@ -10,7 +10,6 @@
 }
 
 .tc-nav__section { display: block; margin: 14px 10px 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--p-muted); }
-.tc-app--rail .tc-nav__section { display: none; }
 .tc-page--narrow { max-width: 760px; }
 .tc-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .tc-app kbd { font-family: var(--f-mono); font-size: 11px; padding: 0 5px; border: 1px solid var(--p-line); border-bottom-width: 2px; border-radius: 4px; background: var(--p-surface); }

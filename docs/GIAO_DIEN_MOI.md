@@ -50,21 +50,18 @@ Triển khai: chạy `25_linh-vat-moi.sql` trong SQL Editor (thêm 4 dòng vào 
 
 # App giáo viên (giai đoạn 3)
 
-## Thanh bên theo nhóm (`apps/teacher/src/lib/nav.ts`, `components/Layout.tsx`)
+## Thanh bên (`apps/teacher/src/lib/nav.ts`, `components/Layout.tsx`)
 
-"Tổng quan" ở trên cùng, rồi 5 nhóm bấm để thu gọn / mở:
-
-| Nhóm | Mục |
-|---|---|
-| Dạy học | Bài giảng, Ngân hàng câu hỏi, Danh mục kĩ năng, Trang học, Trực tiếp, Đấu trường |
-| Giao & chấm | Giao bài, Báo cáo bài giao, Chấm bài, Bài viết, Đề kiểm tra, Tiêu chí chấm, Nhận xét TT27 |
-| Lớp & học sinh | Lớp học, Hồ sơ học sinh, Kiến thức, Điểm danh, Thi đua, Vườn lớp & huy hiệu |
-| Kết nối | Phụ huynh, Thảo luận |
-| Trường & thiết lập | Báo cáo, Xuất / nhập dữ liệu, (quản trị) Quản lí lớp, Tài khoản, Năm học & kì, Ứng dụng kết nối |
-
-- Máy nhớ nhóm nào thầy/cô thu gọn. Nhóm chứa trang đang xem luôn mở. "Trường & thiết lập" thu gọn sẵn với giáo viên, mở sẵn với quản trị.
-- Số việc hiện cạnh mục: **Chấm bài** (bài viết chờ chấm/duyệt), **Phụ huynh** (tin chưa đọc + mục chờ duyệt gửi), **Điểm danh** (lớp chưa điểm danh hôm nay). Nhóm đang thu gọn hiện tổng số việc bên trong.
-- Màu nhấn đổi sang xanh trời đậm `#1f63cf`, cùng họ màu với app học sinh.
+- Danh sách mục giữ nguyên như cũ (không gom nhóm), vẫn có dòng tiêu đề nhỏ "Đánh giá", "Trường", "Quản trị".
+- **Màu**: thanh bên nền xanh mực; mỗi mục có một ô biểu tượng màu riêng (Bài giảng chàm, Giao bài xanh lá, Trực tiếp đỏ, Đấu trường cam, Phụ huynh hồng, Chấm bài vàng…). Mục đang mở: ô biểu tượng tô đậm, vạch màu bên trái.
+- **Ẩn / hiện thanh bên**: nút "Ẩn thanh bên" ở cuối thanh bên, hoặc phím **Ctrl+\**.
+  - Khi ẩn, thanh bên chỉ còn dải biểu tượng màu (64px), nội dung rộng ra.
+  - Rê chuột vào dải (hoặc Tab bằng bàn phím) thì thanh bên tạm hiện đầy đủ, đè lên nội dung; rời chuột ra thì ẩn lại.
+  - Máy nhớ lựa chọn ẩn / hiện. Trình soạn bài giảng luôn ẩn thanh bên cho rộng chỗ soạn.
+  - Điện thoại: vẫn là ngăn kéo mở bằng nút ☰.
+- Số việc cần làm hiện cạnh mục: **Chấm bài**, **Phụ huynh**, **Điểm danh**.
+- **Đầu trang**: tiêu đề mỗi trang có ô biểu tượng cùng màu với mục trên thanh bên.
+- **Tổng quan**: lời chào trên dải màu trời – ngọc – nắng; các ô số liệu, thao tác nhanh và "Việc hôm nay" mỗi ô một màu.
 
 ## Tìm nhanh — Ctrl+K (⌘K trên Mac)
 
